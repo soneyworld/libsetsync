@@ -1,0 +1,5 @@
+setsync (0.1.0) experimental; urgency=low
+
+  * Created autotools and packaging for the new library 
+
+ -- Till Lorentzen <lorentze@ibr.cs.tu-bs.de>  Thu, 12 Jul 2012 15:00:00 +0100

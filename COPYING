@@ -1,0 +1,20 @@
+Format: http://dep.debian.net/deps/dep5
+Name: setsync
+Upstream-Name: setsync
+Maintainer: Till Lorentzen <lorentze@ibr.cs.tu-bs.de>
+Source: git://git.ibr.cs.tu-bs.de/libsetsync.git
+
+Files: *
+Copyright: 2012 Till Lorentzen <lorentze@ibr.cs.tu-bs.de>
+License: LGPL-2.0
+
+Files: setsync/sha1.h setsync/sha1.c
+Copyright (c) 2006-2010, Brainspark B.V., this files has been part of PolarSSL (http://www.polarssl.org), Lead Maintainer: Paul Bakker <polarssl_maintainer at polarssl.org>
+License: GPLv2
+
+The Debian packaging is:
+
+    Copyright (C) 2012 Till Lorentzen <lorentze@ibr.cs.tu-bs.de>
+
+and is licensed under the GPL version 3,
+see "/usr/share/common-licenses/GPL-3".
