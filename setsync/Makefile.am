@@ -1,8 +1,8 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 
-include_h_sources = set.h
-h_sources = $(include_h_sources) 
-c_sources = set.c
+include_h_sources = set.h bloom.h 
+h_sources = $(include_h_sources)
+c_sources = set.c bloom.c
 
 AM_CFLAGS = $(OPENSSL_CFLAGS)
 AM_LDFLAGS = $(OPENSSL_LIBS)
@@ -18,3 +18,7 @@ library_include_HEADERS = $(include_h_sources)
 lib_LTLIBRARIES = libsetsync.la
 libsetsync_la_SOURCES = $(h_sources) $(c_sources)
 libsetsync_la_LDFLAGS= -version-info $(GENERIC_LIBRARY_VERSION) -release $(GENERIC_RELEASE)
+
+noinst_PROGRAMS=set
+set_SOURCES = main.c
+set_LDADD = libsetsync.la

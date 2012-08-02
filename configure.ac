@@ -59,20 +59,22 @@ AC_PROG_CXX
 AC_PROG_LIBTOOL
 
 # Checks for header files.
-#AC_CHECK_HEADERS([])
+AC_CHECK_HEADERS([math.h])
 
 #AC_FUNC_MALLOC
 #AC_HEADER_STDBOOL
 
 # Checks for typedefs, structures, and compiler characteristics.
 #AC_C_RESTRICT
-#AC_TYPE_SIZE_T
+AC_TYPE_SIZE_T
 #AC_TYPE_UINT16_T
 #AC_TYPE_UINT8_T
 
 # Checks for library functions.
 #AC_FUNC_REALLOC
 #AC_CHECK_FUNCS([])
+
+AC_CHECK_LIB([m], [log])
 
 AC_ARG_WITH([openssl],AS_HELP_STRING([--with-openssl], [build with openssl support instead of own implementation]),[
 # check for openssl
