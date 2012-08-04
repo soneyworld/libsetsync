@@ -16,6 +16,8 @@ int main( int argc, const char* argv[] )
 	size_t k = 0;
 	int result = bloom_calc_parameter(100,0.001,&m,&k);
 	printf("m=%d k=%d\n", (int)m,(int)k);
+	BLOOM *b = bloom_create(m,k);
+	result = bloom_destroy(b);
 	return result;
 }
 
