@@ -1,4 +1,4 @@
-SUBDIRS = setsync
+SUBDIRS = setsync bloom
 DIST_SUBDIRS = setsync
 
 pkgconfigdir = $(libdir)/pkgconfig

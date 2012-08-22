@@ -96,5 +96,6 @@ AM_CONDITIONAL(OPENSSL, test x$use_openssl = xyes)
 
 AC_CONFIG_FILES([Makefile \
 	setsync/Makefile \
+	bloom/Makefile \
 	setsync.pc])
 AC_OUTPUT
