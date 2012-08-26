@@ -54,9 +54,11 @@ dnl -----------------------------------------------
 dnl Checks for programs.
 dnl -----------------------------------------------
 
-AC_PROG_CC
 AC_PROG_CXX
+AC_PROG_CC
 AC_PROG_LIBTOOL
+
+AC_LANG_CPLUSPLUS
 
 # Checks for header files.
 AC_CHECK_HEADERS([math.h])
@@ -92,10 +94,33 @@ AC_ARG_WITH([openssl],AS_HELP_STRING([--with-openssl], [build with openssl suppo
 	use_openssl="no"
 ])
 
+AC_ARG_WITH(sqlite,
+	AS_HELP_STRING([--with-sqlite], [Build with sqlite support
+		@<:@default=no@:>@]),
+	[
+	if test "x$with_sqlite" = "xyes"; then
+		PKG_CHECK_MODULES(SQLITE, sqlite3 >= 3.6, [
+			use_sqlite="yes"
+			AC_SUBST(SQLITE_CFLAGS)
+			AC_SUBST(SQLITE_LIBS)
+			AC_DEFINE(HAVE_SQLITE, [1], ["sqlite library is available"])
+		], [
+			use_sqlite="no"
+			AC_MSG_WARN([sqlite extension requested, but no sqlite library is found.])
+		])
+	else
+		use_sqlite="no"
+	fi
+	],[
+	use_sqlite="no"
+])
+
 AM_CONDITIONAL(OPENSSL, test x$use_openssl = xyes)
+AM_CONDITIONAL(SQLITE, test x$use_sqlite = xyes)
 
 AC_CONFIG_FILES([Makefile \
 	setsync/Makefile \
-	bloom/Makefile \
+	setsync/bloom/Makefile \
+	setsync/trie/Makefile \
 	setsync.pc])
 AC_OUTPUT

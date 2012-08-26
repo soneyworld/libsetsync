@@ -6,7 +6,7 @@
  */
 
 #include "set.h"
-#include "bloom.h"
+#include "bloom/bloom.h"
 
 #include <stdio.h>
 
@@ -18,6 +18,9 @@ int main( int argc, const char* argv[] )
 	printf("m=%d k=%d\n", (int)m,(int)k);
 	BLOOM *b = bloom_create(m,k);
 	result = bloom_destroy(b);
+	SET s;
+	set_init(&s);
+	set_free(&s);
 	return result;
 }
 

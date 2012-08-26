@@ -1,0 +1,43 @@
+/*
+ * Trie.h
+ *
+ *      Author: Till Lorentzen
+ */
+
+#ifndef TRIE_H_
+#define TRIE_H_
+
+#include <cstring>
+
+namespace trie {
+
+class Trie {
+private:
+	size_t size;
+public:
+	Trie();
+	size_t getSize();
+	virtual ~Trie();
+};
+
+class FSTrie: public Trie {
+public:
+	FSTrie();
+	virtual ~FSTrie();
+};
+
+class MemTrie: public Trie {
+public:
+	MemTrie();
+	virtual ~MemTrie();
+};
+
+class SQLiteTrie: public Trie {
+public:
+	SQLiteTrie();
+	virtual ~SQLiteTrie();
+};
+
+}
+
+#endif /* TRIE_H_ */
