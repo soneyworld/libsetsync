@@ -26,12 +26,6 @@ public:
 	virtual ~FSTrie();
 };
 
-class SQLiteTrie: public Trie {
-public:
-	SQLiteTrie();
-	virtual ~SQLiteTrie();
-};
-
 }
 
 #endif /* TRIE_H_ */
