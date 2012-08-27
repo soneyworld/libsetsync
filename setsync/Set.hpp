@@ -7,6 +7,7 @@
 
 #ifndef SET_HPP_
 #define SET_HPP_
+#include "set.h"
 namespace setsync {
 
 class Set {
@@ -33,17 +34,6 @@ public:
 	virtual ~Set();
 
 };
-
-class MemSet : public Set {
-public:
-	MemSet();
-	virtual ~MemSet();
-	void clear();
-	bool insert(const char * key);
-	bool erase(const char * key);
-	bool find(const char * key);
-};
-
 }
 
 #endif /* SET_HPP_ */

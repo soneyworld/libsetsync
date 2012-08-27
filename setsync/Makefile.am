@@ -6,9 +6,9 @@ SUBDIRS = bloom trie
 AM_CFLAGS = @CFLAGS@ 
 AM_LDFLAGS = @LIBS@
 
-include_h_sources = set.h Set.hpp 
-h_sources = $(include_h_sources)
-c_sources = set.c Set.cpp
+include_h_sources = set.h Set.hpp
+h_sources = $(include_h_sources) MemSet.hpp
+c_sources = set.c Set.cpp MemSet.cpp
 
 if OPENSSL
 AM_CFLAGS += $(OPENSSL_CFLAGS)

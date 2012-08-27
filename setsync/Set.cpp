@@ -4,8 +4,9 @@
  *  Created on: 12.07.2012
  *      Author: Till Lorentzen
  */
-#include "set.h"
+
 #include "Set.hpp"
+#include "MemSet.hpp"
 #include <iostream>
 
 namespace setsync {
@@ -37,33 +38,6 @@ void Set::setSize(const size_t s) {
 }
 void Set::setMaximumSize(const size_t s){
 	this->maxSize = s;
-}
-
-MemSet::MemSet() {
-
-}
-
-MemSet::~MemSet() {
-
-}
-
-void MemSet::clear() {
-
-}
-
-bool MemSet::find(const char * key) {
-	//TODO implement
-	return false;
-}
-
-bool MemSet::insert(const char * key) {
-	//TODO implement
-	return false;
-}
-
-bool MemSet::erase(const char * key) {
-	//TODO implement
-	return false;
 }
 
 }
