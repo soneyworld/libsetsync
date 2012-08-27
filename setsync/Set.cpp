@@ -13,12 +13,15 @@ namespace setsync {
 
 Set::Set() {
 	this->size = 0;
+	//TODO must be configurable
 	this->maxSize = 1000;
+	//TODO should be deleted
 	std::cout << "Set contructed" << std::endl;
 
 }
 
 Set::~Set() {
+	//TODO should be deleted
 	std::cout << "Set deleted" << std::endl;
 }
 

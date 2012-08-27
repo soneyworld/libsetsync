@@ -26,12 +26,6 @@ public:
 	virtual ~FSTrie();
 };
 
-class MemTrie: public Trie {
-public:
-	MemTrie();
-	virtual ~MemTrie();
-};
-
 class SQLiteTrie: public Trie {
 public:
 	SQLiteTrie();
