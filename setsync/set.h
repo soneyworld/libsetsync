@@ -28,11 +28,11 @@ size_t set_size(SET *set);
 size_t set_max_size(SET *set);
 
 // Lookup
-int find(SET *set, char * key);
+int find(SET *set, const char * key);
 
 // Modifiers
-int set_insert(SET *set, char * key);
-int set_erase(SET *set, char * key);
+int set_insert(SET *set, const char * key);
+int set_erase(SET *set, const char * key);
 //int set_swap(SET *set);
 int set_clear(SET *set);
 

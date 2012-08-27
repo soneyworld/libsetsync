@@ -10,9 +10,9 @@
 
 namespace setsync {
 
-
-
 Set::Set() {
+	this->size = 0;
+	this->maxSize = 1000;
 	std::cout << "Set contructed" << std::endl;
 
 }
@@ -21,14 +21,85 @@ Set::~Set() {
 	std::cout << "Set deleted" << std::endl;
 }
 
+bool Set::isEmpty() const {
+	return (this->size == 0) ? true : false;
+}
+
+size_t Set::getSize() const {
+	return this->size;
+}
+size_t Set::getMaximumSize() const {
+	return this->maxSize;
+}
+
+void Set::setSize(const size_t s) {
+	this->size = s;
+}
+void Set::setMaximumSize(const size_t s){
+	this->maxSize = s;
+}
+
+MemSet::MemSet() {
+
+}
+
+MemSet::~MemSet() {
+
+}
+
+void MemSet::clear() {
+
+}
+
+bool MemSet::find(const char * key) {
+	//TODO implement
+	return false;
+}
+
+bool MemSet::insert(const char * key) {
+	//TODO implement
+	return false;
+}
+
+bool MemSet::erase(const char * key) {
+	//TODO implement
+	return false;
+}
+
 }
 
 
-int set_init(SET *set){
-	setsync::Set * cppset = new setsync::Set();
+
+int set_init(SET *set) {
+	setsync::Set * cppset = new setsync::MemSet();
 	set->set = (void *) cppset;
 }
-int set_free(SET *set){
-	setsync::Set * cppset = static_cast<setsync::Set*>( set->set);
+
+int set_free(SET *set) {
+	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
 	delete cppset;
+}
+
+// Lookup
+int find(SET *set, const char * key) {
+	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
+	return cppset->find(key);
+}
+
+// Modifiers
+int set_insert(SET *set, const char * key){
+	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
+	return cppset->insert(key);
+}
+
+int set_erase(SET *set, const char * key){
+	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
+	return cppset->erase(key);
+}
+
+int set_clear(SET *set){
+	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
+	cppset->clear();
+	return 0;
+
 }
