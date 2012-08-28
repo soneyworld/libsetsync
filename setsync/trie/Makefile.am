@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 
-h_sources = Trie.h MemTrie.h
-cpp_sources = Trie.cpp MemTrie.cpp
+h_sources = Trie.h MemTrie.h FSTrie.h
+cpp_sources = Trie.cpp MemTrie.cpp FSTrie.cpp
 
 if SQLITE
 AM_CFLAGS = @SQLITE_CFLAGS@
