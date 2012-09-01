@@ -1,8 +1,7 @@
 /*
  * MemTrie.cpp
  *
- *  Created on: 27.08.2012
- *      Author: till
+ *      Author: Till Lorentzen
  */
 
 #include "MemTrie.h"

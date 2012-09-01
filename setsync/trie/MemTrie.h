@@ -1,8 +1,7 @@
 /*
  * MemTrie.h
  *
- *  Created on: 27.08.2012
- *      Author: till
+ *      Author: Till Lorentzen
  */
 
 #ifndef MEMTRIE_H_

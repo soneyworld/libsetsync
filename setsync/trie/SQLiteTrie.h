@@ -1,7 +1,6 @@
 /*
  * SQLiteTrie.h
  *
- *  Created on: 27.08.2012
  *      Author: Till Lorentzen
  */
 
