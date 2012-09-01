@@ -17,6 +17,7 @@ AC_CONFIG_SRCDIR([setsync/set.h])
 AC_CONFIG_HEADERS([config.h])
 LT_INIT
 
+
 dnl --------------------------------
 dnl library version number
 dnl --------------------------------
@@ -78,6 +79,18 @@ AC_TYPE_SIZE_T
 
 AC_CHECK_LIB([m], [log])
 
+# For CppUnit testing
+AC_ARG_ENABLE(cppunit,
+  [AS_HELP_STRING([--enable-cppunit], [enable unit testing with cppunit (default: no)])],
+  [], [])
+AC_MSG_RESULT($enable_cppunit)
+AM_CONDITIONAL(CPPUNIT, test "$enable_cppunit" = yes)
+if test "$enable_cppunit" = yes; then
+  AM_PATH_CPPUNIT(1.10.2,
+          [AM_CONDITIONAL(CPPUNIT, true)],
+          [AM_CONDITIONAL(CPPUNIT, false)])
+fi
+
 AC_ARG_WITH([openssl],AS_HELP_STRING([--with-openssl], [build with openssl support instead of own implementation]),[
 # check for openssl
 	PKG_CHECK_MODULES(OPENSSL, [openssl],[
@@ -122,5 +135,7 @@ AC_CONFIG_FILES([Makefile \
 	setsync/Makefile \
 	setsync/bloom/Makefile \
 	setsync/trie/Makefile \
+	setsync/tests/Makefile \
+	setsync/tests/unittests/Makefile \
 	setsync.pc])
 AC_OUTPUT
