@@ -30,6 +30,7 @@ public:
 	virtual bool insert(const unsigned char * hash, bool performhash) = 0;
 	virtual bool erase(const unsigned char * hash) = 0;
 	virtual bool erase(const unsigned char * hash, bool performhash) = 0;
+	virtual void clear(void) = 0;
 	virtual ~Trie();
 };
 
