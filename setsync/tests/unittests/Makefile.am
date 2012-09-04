@@ -1,12 +1,14 @@
 
 noinst_HEADERS = \
 	MemSetTest.h \
-	MemTrieTest.h
+	MemTrieTest.h \
+	FSTrieTest.h
 
 unittest_SOURCES = \
 	Main.cpp \
 	MemSetTest.cpp \
-	MemTrieTest.cpp
+	MemTrieTest.cpp \
+	FSTrieTest.cpp
 
 # what flags you want to pass to the C compiler & linker
 AM_CPPFLAGS = @CPPUNIT_CFLAGS@ -Wall

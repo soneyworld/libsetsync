@@ -8,7 +8,7 @@
 #define MEMSETTEST_H_
 #include <cppunit/extensions/HelperMacros.h>
 #include "setsync/Set.hpp"
-#include "setsync/MemSet.hpp"
+#include "setsync/MemSet.h"
 
 
 class MemSetTest : public CPPUNIT_NS::TestCase{

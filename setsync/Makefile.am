@@ -7,8 +7,9 @@ AM_CFLAGS = @CFLAGS@
 AM_LDFLAGS = @LIBS@
 
 include_h_sources = set.h Set.hpp
-h_sources = $(include_h_sources) MemSet.hpp
-c_sources = set.c Set.cpp MemSet.cpp
+h_sources = $(include_h_sources) MemSet.h
+c_sources = set.c
+cpp_sources = Set.cpp MemSet.cpp
 
 if OPENSSL
 AM_CFLAGS += $(OPENSSL_CFLAGS)
@@ -29,7 +30,7 @@ library_includedir=$(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/
 library_include_HEADERS = $(include_h_sources)
 
 lib_LTLIBRARIES = libsetsync.la
-libsetsync_la_SOURCES = $(h_sources) $(c_sources)
+libsetsync_la_SOURCES = $(h_sources) $(c_sources) $(cpp_sources)
 libsetsync_la_LDFLAGS = -version-info $(GENERIC_LIBRARY_VERSION) -release $(GENERIC_RELEASE)
 libsetsync_la_LIBADD = bloom/libbloom.la trie/libtrie.la
 

@@ -1,10 +1,9 @@
 /*
  * MemSet.cpp
  *
- *  Created on: 27.08.2012
- *      Author: till
+ *      Author: Till Lorentzen
  */
-#include "MemSet.hpp"
+#include "MemSet.h"
 
 namespace setsync {
 
@@ -18,7 +17,7 @@ MemSet::~MemSet() {
 }
 
 void MemSet::clear() {
-
+	//TODO implement
 }
 
 bool MemSet::find(const char * key) {

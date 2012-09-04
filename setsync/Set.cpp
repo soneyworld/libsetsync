@@ -6,7 +6,7 @@
  */
 
 #include "Set.hpp"
-#include "MemSet.hpp"
+#include "MemSet.h"
 #include <iostream>
 
 namespace setsync {
@@ -15,14 +15,11 @@ Set::Set() {
 	this->size = 0;
 	//TODO must be configurable
 	this->maxSize = 1000;
-	//TODO should be deleted
-	std::cout << "Set contructed" << std::endl;
 
 }
 
 Set::~Set() {
-	//TODO should be deleted
-	std::cout << "Set deleted" << std::endl;
+
 }
 
 bool Set::isEmpty() const {
