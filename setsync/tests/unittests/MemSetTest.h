@@ -1,11 +1,11 @@
 /*
- * LocalSetTest.h
+ * MemSetTest.h
  *
  *      Author: Till Lorentzen
  */
 
-#ifndef LOCALSETTEST_H_
-#define LOCALSETTEST_H_
+#ifndef MEMSETTEST_H_
+#define MEMSETTEST_H_
 #include <cppunit/extensions/HelperMacros.h>
 #include "setsync/Set.hpp"
 #include "setsync/MemSet.hpp"
@@ -15,6 +15,7 @@ class MemSetTest : public CPPUNIT_NS::TestCase{
 
 CPPUNIT_TEST_SUITE(MemSetTest);
 CPPUNIT_TEST(testAddingAndErasingElements);
+CPPUNIT_TEST(testAddingAndCleaningElements);
 CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -26,7 +27,8 @@ private:
 
 protected:
 	void testAddingAndErasingElements();
+	void testAddingAndCleaningElements();
 
 };
 CPPUNIT_TEST_SUITE_REGISTRATION(MemSetTest);
-#endif /* LOCALSETTEST_H_ */
+#endif /* MEMSETTEST_H_ */

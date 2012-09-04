@@ -23,7 +23,11 @@ void MemSetTest::testAddingAndErasingElements() {
 	CPPUNIT_ASSERT(memset->getSize() == 1);
 	memset->erase(key_1);
 	CPPUNIT_ASSERT(memset->getSize() == 0);
-	memset->clear();
+	memset->insert(key_1);
+	CPPUNIT_ASSERT(memset->getSize() == 1);
+}
+
+void MemSetTest::testAddingAndCleaningElements() {
 	CPPUNIT_ASSERT(memset->getSize() == 0);
 	memset->insert(key_1);
 	CPPUNIT_ASSERT(memset->getSize() == 1);
