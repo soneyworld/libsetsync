@@ -14,6 +14,7 @@ private:
 	 sqlite3 * db;
 public:
 	SQLiteIndex();
+	SQLiteIndex(const char * filename);
 	virtual ~SQLiteIndex();
 };
 }

@@ -19,8 +19,8 @@ AM_LDFLAGS = @CPPUNIT_LIBS@
 if SQLITE
 AM_CPPFLAGS += @SQLITE_CFLAGS@
 AM_LDFLAGS += @SQLITE_LIBS@
-unittest_SOURCES += SQLiteTrieTest.cpp
-noinst_HEADERS += SQLiteTrieTest.h
+unittest_SOURCES += SQLiteTrieTest.cpp SQLiteIndexTest.cpp
+noinst_HEADERS += SQLiteTrieTest.h SQLiteIndexTest.h
 endif
 
 INCLUDES = -I@top_srcdir@ -I@top_srcdir@/setsync/tests/unittests
