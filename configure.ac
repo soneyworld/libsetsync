@@ -135,6 +135,7 @@ AC_CONFIG_FILES([Makefile \
 	setsync/Makefile \
 	setsync/bloom/Makefile \
 	setsync/trie/Makefile \
+	setsync/index/Makefile \
 	setsync/tests/Makefile \
 	setsync/tests/unittests/Makefile \
 	setsync.pc])

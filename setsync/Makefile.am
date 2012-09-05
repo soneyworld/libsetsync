@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = bloom trie tests
+SUBDIRS = bloom trie tests index
 
 # what flags you want to pass to the C compiler & linker
 AM_CFLAGS = @CFLAGS@ 
@@ -32,7 +32,7 @@ library_include_HEADERS = $(include_h_sources)
 lib_LTLIBRARIES = libsetsync.la
 libsetsync_la_SOURCES = $(h_sources) $(c_sources) $(cpp_sources)
 libsetsync_la_LDFLAGS = -version-info $(GENERIC_LIBRARY_VERSION) -release $(GENERIC_RELEASE)
-libsetsync_la_LIBADD = bloom/libbloom.la trie/libtrie.la
+libsetsync_la_LIBADD = bloom/libbloom.la trie/libtrie.la index/libindex.la
 
 noinst_PROGRAMS=set
 set_SOURCES = main.c
