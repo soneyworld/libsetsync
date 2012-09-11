@@ -5,7 +5,7 @@ generator_SOURCES = \
 	SHA1Generator.cpp
 
 # what flags you want to pass to the C compiler & linker
-AM_CPPFLAGS = 
+AM_CPPFLAGS = -fopenmp
 AM_LDFLAGS = 
 
 if OPENSSL
@@ -19,6 +19,7 @@ AM_LDFLAGS += @SQLITE_LIBS@
 generator_SOURCES += SQLiteDatabase.h
 generator_SOURCES += SQLiteDatabase.cpp
 endif
+
 
 noinst_PROGRAMS=generator
 generator_CXXFLAGS = ${AM_CPPFLAGS}

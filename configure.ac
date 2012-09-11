@@ -76,6 +76,7 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 #AC_FUNC_REALLOC
 #AC_CHECK_FUNCS([])
+AC_OPENMP
 
 AC_CHECK_LIB([m], [log])
 
