@@ -25,3 +25,4 @@ setsync-*.tar.gz
 .deps/
 .cproject
 .project
+/doxygen

@@ -7,9 +7,9 @@ AM_CFLAGS = @CFLAGS@
 AM_LDFLAGS = @LIBS@
 
 include_h_sources = set.h Set.hpp
-h_sources = $(include_h_sources) MemSet.h
+h_sources = $(include_h_sources) MemSet.h Config.h
 c_sources = set.c
-cpp_sources = Set.cpp MemSet.cpp
+cpp_sources = Set.cpp MemSet.cpp Config.cpp
 
 if OPENSSL
 AM_CFLAGS += $(OPENSSL_CFLAGS)

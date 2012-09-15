@@ -13,6 +13,7 @@ namespace bloom {
 class CountingBloomFilter: public BloomFilter {
 public:
 	CountingBloomFilter();
+	CountingBloomFilter(const CountingBloomFilter& filter);
 	virtual ~CountingBloomFilter();
 };
 

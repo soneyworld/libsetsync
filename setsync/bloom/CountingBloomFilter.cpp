@@ -13,6 +13,11 @@ CountingBloomFilter::CountingBloomFilter() {
 
 }
 
+CountingBloomFilter::CountingBloomFilter(const CountingBloomFilter& filter) {
+	// TODO Auto-generated constructor stub
+
+}
+
 CountingBloomFilter::~CountingBloomFilter() {
 	// TODO Auto-generated destructor stub
 }
