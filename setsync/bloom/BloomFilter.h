@@ -13,6 +13,8 @@
 #define BLOOMFILTER_H_
 #include <cstddef>
 #include <stdint.h>
+#include <iostream>
+///Contains all variations of bloom filter
 namespace bloom {
 
 /**
@@ -22,15 +24,18 @@ namespace bloom {
 class BloomFilter {
 public:
 	/**
-	 * \param maxNumberOfElements which should be represented by the bloom filter (default value = 10000)
+	 * \param maxNumberOfElements which should be represented by the bloom filter
 	 * \param hardMaximum ensures that the the maximum of storable entries will never be exceeded
 	 * \param falsePositiveRate can be set to any value ]0,1[.
+	 * \param hashsize sets the size of the inserted keys. 20 bytes for SHA1 for example.
 	 */
 	BloomFilter(const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
-			const float falsePositiveRate = 0.001);
+			const float falsePositiveRate = 0.001,
+			const std::size_t hashsize = 20);
 	/**
 	 * Simple copy constructor
+	 * \param filter the BloomFilter instance, which should be copied
 	 */
 	BloomFilter(const BloomFilter& filter);
 	virtual ~BloomFilter();
@@ -38,7 +43,7 @@ public:
 	/**
 	 * Loads a given array as bloom filter into the internal storage
 	 */
-	void load(const unsigned char* data, size_t len);
+	virtual void load(std::istream &in);
 
 	BloomFilter& operator=(const BloomFilter& filter);
 
@@ -48,29 +53,50 @@ public:
 	 */
 	virtual void clear();
 	/**
-	 * Returns the size of the bloom filter in bytes
+	 * \return the size of the bloom filter in bytes
 	 */
 	virtual std::size_t size() const;
 	/**
 	 * Checks, if both BloomFilter have got exact the same bit array
+	 * \return true if the bloom filter bit array is the same
 	 */
 	virtual bool operator ==(const BloomFilter& filter);
 	/**
 	 * Checks, if there is a difference between the bit arrays
+	 * \return true if there is minimal 1 bit difference between the bit arrays
 	 */
 	virtual bool operator !=(const BloomFilter& filter);
 	/**
-	 * Returns the intersection between both bloom filter
+	 * \return the intersection between both bloom filter
 	 */
 	virtual BloomFilter& operator &=(const BloomFilter& filter);
 	/**
-	 * Returns the union of both bloom filter
+	 * \return the union of both bloom filter
 	 */
 	virtual BloomFilter& operator |=(const BloomFilter& filter);
 	/**
-	 * Returns the difference between the both bloom filter
+	 * \return the difference between the both bloom filter
 	 */
 	virtual BloomFilter& operator ^=(const BloomFilter& filter);
+	/**
+	 * Adds a given hash key to the bloom filter
+	 * \param key which should be added
+	 * \throws an Exception, if the maximum is reached and hardMaximum has been set
+	 */
+	virtual void add(const unsigned char *key);
+	/**
+	 * \param key a simple pointer to the stored key, which should be checked
+	 * \return true if the given key seems to have been inserted in past
+	 */
+	virtual bool contains(const unsigned char *key) const;
+	/**
+	 * \param keys a simple array of keys, which should be checked, if they are represented by the bloom filter
+	 * \param count the length of the keys array
+	 * \return the given count on containing all keys, otherwise the first failed position in the given key array
+	 */
+	virtual std::size_t containsAll(const unsigned char *keys, const std::size_t count) const;
+
+//	virtual bool isEmpty();
 protected:
 	/// Exact size of the filter in bits
 	std::size_t filterSize_;
@@ -86,6 +112,10 @@ protected:
 	 *  If more elements are inserted, the false positive rate cannot be guaranteed.
 	 */
 	bool hardMaximum_;
+	/// The hard limit of elements, if hardMaximum is set
+	uint64_t maxElements_;
+	/// Size of the given hash keys
+	std::size_t hashsize_;
 };
 
 }
