@@ -53,19 +53,23 @@ public:
 	 */
 	virtual void clear();
 	/**
-	 * \return the size of the bloom filter in bytes
+	 * \return the size of the bloom filter in bytes (rounded up, if last byte is not full)
 	 */
 	virtual std::size_t size() const;
+	/**
+	 * \return the size of the bloom filter in bits
+	 */
+	virtual uint64_t exactBitSize() const;
 	/**
 	 * Checks, if both BloomFilter have got exact the same bit array
 	 * \return true if the bloom filter bit array is the same
 	 */
-	virtual bool operator ==(const BloomFilter& filter);
+	virtual bool operator ==(const BloomFilter& filter) const;
 	/**
 	 * Checks, if there is a difference between the bit arrays
 	 * \return true if there is minimal 1 bit difference between the bit arrays
 	 */
-	virtual bool operator !=(const BloomFilter& filter);
+	virtual bool operator !=(const BloomFilter& filter) const;
 	/**
 	 * \return the intersection between both bloom filter
 	 */
@@ -99,7 +103,7 @@ public:
 //	virtual bool isEmpty();
 protected:
 	/// Exact size of the filter in bits
-	std::size_t filterSize_;
+	uint64_t filterSize_;
 	/// The bloom filter memory storage
 	unsigned char * bitArray_;
 	/// A simple counter of the inserted elements
