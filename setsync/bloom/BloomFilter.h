@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include <iostream>
 #include "HashFunction.h"
+#include <setsync/sha1.h>
 #ifndef BYTESIZE
 #define BYTESIZE 8
 #endif
@@ -38,7 +39,7 @@ public:
 	BloomFilter(const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
 			const float falsePositiveRate = 0.001,
-			const std::size_t hashsize = 20);
+			const std::size_t hashsize = SHA_DIGEST_LENGTH);
 	/**
 	 * \param hashFunction is the Function which should be used by the BloomFilter
 	 * \param maxNumberOfElements which should be represented by the bloom filter
@@ -50,7 +51,7 @@ public:
 			const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
 			const float falsePositiveRate = 0.001,
-			const std::size_t hashsize = 20);
+			const std::size_t hashsize = SHA_DIGEST_LENGTH);
 	/**
 	 * Simple copy constructor
 	 * \param filter the BloomFilter instance, which should be copied

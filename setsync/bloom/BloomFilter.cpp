@@ -166,7 +166,7 @@ void BloomFilter::add(const unsigned char *key) {
 	std::size_t bit_index = 0;
 	std::size_t bit = 0;
 	for (int i = 0; i < this->functionCount_; i++) {
-		uint64_t pos = this->hashFunction_->hash(key, 20, i);
+		uint64_t pos = this->hashFunction_->hash(key, SHA_DIGEST_LENGTH, i);
 		compute_indices(pos, bit_index, bit);
 		this->bitArray_[bit_index / BYTESIZE] |= bit_mask[bit];
 	}
@@ -175,7 +175,7 @@ void BloomFilter::add(const unsigned char *key) {
 }
 
 void BloomFilter::add(const std::string& key) {
-	unsigned char c[20];
+	unsigned char c[SHA_DIGEST_LENGTH];
 	SHA1((unsigned char*) key.c_str(), key.size(), c);
 	add(c);
 }
@@ -190,7 +190,7 @@ bool BloomFilter::contains(const unsigned char *key) const {
 	std::size_t bit = 0;
 
 	for (int i = 0; i < this->functionCount_; i++) {
-		uint64_t pos = this->hashFunction_->hash(key, 20, i);
+		uint64_t pos = this->hashFunction_->hash(key, SHA_DIGEST_LENGTH, i);
 		compute_indices(pos, bit_index, bit);
 		if ((this->bitArray_[bit_index / BYTESIZE] & bit_mask[bit])
 				!= bit_mask[bit]) {
@@ -201,7 +201,7 @@ bool BloomFilter::contains(const unsigned char *key) const {
 }
 
 bool BloomFilter::contains(const std::string& key) const {
-	unsigned char c[20];
+	unsigned char c[SHA_DIGEST_LENGTH];
 	SHA1((unsigned char*) key.c_str(), key.size(), c);
 	return contains(c);
 }
