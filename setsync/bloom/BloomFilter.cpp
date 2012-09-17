@@ -15,10 +15,17 @@
 #include <string.h>
 #include <limits>
 
-#define BYTESIZE 8
-
 namespace bloom {
 
+const unsigned char BloomFilter::bit_mask[BYTESIZE] = { 0x01, //00000001
+		0x02, //00000010
+		0x04, //00000100
+		0x08, //00001000
+		0x10, //00010000
+		0x20, //00100000
+		0x40, //01000000
+		0x80 //10000000
+		};
 BloomFilter::BloomFilter(const BloomFilter& filter) :
 	filterSize_(filter.filterSize_), itemCount_(filter.itemCount_),
 			maxElements_(filter.maxElements_),
@@ -28,36 +35,6 @@ BloomFilter::BloomFilter(const BloomFilter& filter) :
 			(this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE);
 	memcpy(this->bitArray_, filter.bitArray_,
 			(this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE);
-}
-
-void BloomFilter::init(const float falsePositiveRate, const bool hardMaximum,
-		const uint64_t numberOfElements) {
-	this->bitArray_ = NULL;
-	if (falsePositiveRate >= 1 || falsePositiveRate <= 0)
-		throw "";
-
-	this->hardMaximum_ = hardMaximum;
-	if (this->hardMaximum_)
-		this->maxElements_ = numberOfElements;
-
-	this->filterSize_ = ceil(
-			(numberOfElements * log(falsePositiveRate)) / log(
-					1.0 / (pow(2.0, log(2.0)))));
-	// Calculating the number of hash functions necessary to reach the given
-	this->functionCount_ = round(
-			log(2.0) * this->filterSize_ / numberOfElements);
-	// Minimal count of hash functions has to be 1
-	if (this->functionCount_ < 1)
-		this->functionCount_ = 1;
-
-	this->bitArray_ = (unsigned char *) malloc(
-			(this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE);
-	if (this->bitArray_ == NULL) {
-		throw "MALLOC failed!";
-	}
-	memset(this->bitArray_, 0x00,
-			(this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE);
-	this->itemCount_ = 0;
 }
 
 BloomFilter::BloomFilter(const uint64_t maxNumberOfElements,
@@ -187,8 +164,11 @@ void BloomFilter::add(const unsigned char *key) {
 		throw "Maximum of Elements reached, adding failed";
 	std::size_t bit_index = 0;
 	std::size_t bit = 0;
-	//TODO
-	throw "MUST BE IMPLEMENTED";
+	for (int i = 0; i < this->functionCount_; i++) {
+		uint64_t pos = this->hashFunction_->hash(key, 20, i);
+		compute_indices(pos, bit_index, bit);
+		this->bitArray_[bit_index / BYTESIZE] |= bit_mask[bit];
+	}
 	if (this->itemCount_ < std::numeric_limits<uint64_t>::max())
 		this->itemCount_++;
 }
@@ -199,8 +179,18 @@ void BloomFilter::load(std::istream &in) {
 }
 
 bool BloomFilter::contains(const unsigned char *key) const {
-	//TODO
-	throw "MUST BE IMPLEMENTED";
+	std::size_t bit_index = 0;
+	std::size_t bit = 0;
+
+	for (int i = 0; i < this->functionCount_; i++) {
+		uint64_t pos = this->hashFunction_->hash(key, 20, i);
+		compute_indices(pos, bit_index, bit);
+		if ((this->bitArray_[bit_index / BYTESIZE] & bit_mask[bit])
+				!= bit_mask[bit]) {
+			return false;
+		}
+	}
+	return true;
 }
 
 std::size_t BloomFilter::containsAll(const unsigned char *keys,
@@ -213,4 +203,40 @@ std::size_t BloomFilter::containsAll(const unsigned char *keys,
 	}
 	return count;
 }
+void BloomFilter::compute_indices(const uint64_t hash, std::size_t& bit_index,
+		std::size_t& bit) const {
+	bit_index = hash % this->filterSize_;
+	bit = bit_index % BYTESIZE;
+}
+
+void BloomFilter::init(const float falsePositiveRate, const bool hardMaximum,
+		const uint64_t numberOfElements) {
+	this->bitArray_ = NULL;
+	if (falsePositiveRate >= 1 || falsePositiveRate <= 0)
+		throw "";
+
+	this->hardMaximum_ = hardMaximum;
+	if (this->hardMaximum_)
+		this->maxElements_ = numberOfElements;
+
+	this->filterSize_ = ceil(
+			(numberOfElements * log(falsePositiveRate)) / log(
+					1.0 / (pow(2.0, log(2.0)))));
+	// Calculating the number of hash functions necessary to reach the given
+	this->functionCount_ = round(
+			log(2.0) * this->filterSize_ / numberOfElements);
+	// Minimal count of hash functions has to be 1
+	if (this->functionCount_ < 1)
+		this->functionCount_ = 1;
+
+	this->bitArray_ = (unsigned char *) malloc(
+			(this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE);
+	if (this->bitArray_ == NULL) {
+		throw "MALLOC failed!";
+	}
+	memset(this->bitArray_, 0x00,
+			(this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE);
+	this->itemCount_ = 0;
+}
+
 }

@@ -15,6 +15,9 @@
 #include <stdint.h>
 #include <iostream>
 #include "HashFunction.h"
+#ifndef BYTESIZE
+#define BYTESIZE 8
+#endif
 ///Contains all variations of bloom filter
 namespace bloom {
 
@@ -23,6 +26,8 @@ namespace bloom {
  *
  */
 class BloomFilter {
+protected:
+	static const unsigned char bit_mask[BYTESIZE];
 public:
 	/**
 	 * \param maxNumberOfElements which should be represented by the bloom filter
@@ -41,7 +46,8 @@ public:
 	 * \param falsePositiveRate can be set to any value ]0,1[.
 	 * \param hashsize sets the size of the inserted keys. 20 bytes for SHA1 for example.
 	 */
-	BloomFilter(HashFunction* hashFunction, const uint64_t maxNumberOfElements = 10000,
+	BloomFilter(HashFunction* hashFunction,
+			const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
 			const float falsePositiveRate = 0.001,
 			const std::size_t hashsize = 20);
@@ -110,9 +116,10 @@ public:
 	 * \param count the length of the keys array
 	 * \return the given count on containing all keys, otherwise the first failed position in the given key array
 	 */
-	virtual std::size_t containsAll(const unsigned char *keys, const std::size_t count) const;
+	virtual std::size_t containsAll(const unsigned char *keys,
+			const std::size_t count) const;
 
-//	virtual bool isEmpty();
+	//	virtual bool isEmpty();
 protected:
 	/// Exact size of the filter in bits
 	uint64_t filterSize_;
@@ -133,8 +140,11 @@ protected:
 	/// Size of the given hash keys
 	std::size_t hashsize_;
 	HashFunction* hashFunction_;
+	void compute_indices(const uint64_t hash, std::size_t& bit_index,
+			std::size_t& bit) const;
 private:
-	void init(const float falsePositiveRate, const bool hardMaximum, const uint64_t numberOfElements);
+	void init(const float falsePositiveRate, const bool hardMaximum,
+			const uint64_t numberOfElements);
 };
 
 }
