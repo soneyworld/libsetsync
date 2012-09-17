@@ -2,14 +2,16 @@
 noinst_HEADERS = \
 	MemSetTest.h \
 	MemTrieTest.h \
-	FSTrieTest.h
+	FSTrieTest.h \
+	BloomFilterTest.h
 	
 
 unittest_SOURCES = \
 	Main.cpp \
 	MemSetTest.cpp \
 	MemTrieTest.cpp \
-	FSTrieTest.cpp
+	FSTrieTest.cpp \
+	BloomFilterTest.cpp
 	
 
 # what flags you want to pass to the C compiler & linker

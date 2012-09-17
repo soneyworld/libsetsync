@@ -99,7 +99,7 @@ AC_ARG_WITH([openssl],AS_HELP_STRING([--with-openssl], [build with openssl suppo
     	AC_SUBST(OPENSSL_CFLAGS)
     	AC_SUBST(OPENSSL_LIBS)
     	AC_DEFINE(HAVE_OPENSSL, [1], ["openssl library is available"])
-    	AC_CHECK_HEADERS([openssl/sha.h],[], [AC_MSG_ERROR([openssl extension requested, but no header files found. ssl extensions are disabled.])]) 
+    	AC_CHECK_HEADERS([openssl/sha.h],[AC_DEFINE(HAVE_OPENSSL_SHA, [1], ["sha.h is available"])], [AC_MSG_ERROR([openssl extension requested, but no header files found. ssl extensions are disabled.])]) 
     	], [
     	use_openssl="no"
     	AC_MSG_WARN([openssl extension requested, but no openssl library is found. ssl extensions are disabled.])

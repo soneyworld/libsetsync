@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits>
+#include "setsync/sha1.h"
 
 namespace bloom {
 
@@ -173,6 +174,12 @@ void BloomFilter::add(const unsigned char *key) {
 		this->itemCount_++;
 }
 
+void BloomFilter::add(const std::string& key) {
+	unsigned char c[20];
+	SHA1((unsigned char*) key.c_str(), key.size(), c);
+	add(c);
+}
+
 void BloomFilter::load(std::istream &in) {
 	//TODO
 	throw "MUST BE IMPLEMENTED";
@@ -191,6 +198,12 @@ bool BloomFilter::contains(const unsigned char *key) const {
 		}
 	}
 	return true;
+}
+
+bool BloomFilter::contains(const std::string& key) const {
+	unsigned char c[20];
+	SHA1((unsigned char*) key.c_str(), key.size(), c);
+	return contains(c);
 }
 
 std::size_t BloomFilter::containsAll(const unsigned char *keys,
