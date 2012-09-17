@@ -14,6 +14,7 @@
 #include <cstddef>
 #include <stdint.h>
 #include <iostream>
+#include "HashFunction.h"
 ///Contains all variations of bloom filter
 namespace bloom {
 
@@ -30,6 +31,17 @@ public:
 	 * \param hashsize sets the size of the inserted keys. 20 bytes for SHA1 for example.
 	 */
 	BloomFilter(const uint64_t maxNumberOfElements = 10000,
+			const bool hardMaximum = false,
+			const float falsePositiveRate = 0.001,
+			const std::size_t hashsize = 20);
+	/**
+	 * \param hashFunction is the Function which should be used by the BloomFilter
+	 * \param maxNumberOfElements which should be represented by the bloom filter
+	 * \param hardMaximum ensures that the the maximum of storable entries will never be exceeded
+	 * \param falsePositiveRate can be set to any value ]0,1[.
+	 * \param hashsize sets the size of the inserted keys. 20 bytes for SHA1 for example.
+	 */
+	BloomFilter(HashFunction* hashFunction, const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
 			const float falsePositiveRate = 0.001,
 			const std::size_t hashsize = 20);
@@ -120,6 +132,9 @@ protected:
 	uint64_t maxElements_;
 	/// Size of the given hash keys
 	std::size_t hashsize_;
+	HashFunction* hashFunction_;
+private:
+	void init(const float falsePositiveRate, const bool hardMaximum, const uint64_t numberOfElements);
 };
 
 }

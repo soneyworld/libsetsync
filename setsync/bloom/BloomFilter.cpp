@@ -30,15 +30,16 @@ BloomFilter::BloomFilter(const BloomFilter& filter) :
 			(this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE);
 }
 
-BloomFilter::BloomFilter(const uint64_t numberOfElements,
-		const bool hardMaximum, const float falsePositiveRate,
-		const std::size_t hashsize) {
+void BloomFilter::init(const float falsePositiveRate, const bool hardMaximum,
+		const uint64_t numberOfElements) {
 	this->bitArray_ = NULL;
 	if (falsePositiveRate >= 1 || falsePositiveRate <= 0)
 		throw "";
+
 	this->hardMaximum_ = hardMaximum;
 	if (this->hardMaximum_)
 		this->maxElements_ = numberOfElements;
+
 	this->filterSize_ = ceil(
 			(numberOfElements * log(falsePositiveRate)) / log(
 					1.0 / (pow(2.0, log(2.0)))));
@@ -48,6 +49,7 @@ BloomFilter::BloomFilter(const uint64_t numberOfElements,
 	// Minimal count of hash functions has to be 1
 	if (this->functionCount_ < 1)
 		this->functionCount_ = 1;
+
 	this->bitArray_ = (unsigned char *) malloc(
 			(this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE);
 	if (this->bitArray_ == NULL) {
@@ -56,6 +58,20 @@ BloomFilter::BloomFilter(const uint64_t numberOfElements,
 	memset(this->bitArray_, 0x00,
 			(this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE);
 	this->itemCount_ = 0;
+}
+
+BloomFilter::BloomFilter(const uint64_t maxNumberOfElements,
+		const bool hardMaximum, const float falsePositiveRate,
+		const std::size_t hashsize) {
+	init(falsePositiveRate, hardMaximum, maxNumberOfElements);
+	this->hashFunction_ = new SaltedHashFunction(this->functionCount_);
+}
+
+BloomFilter::BloomFilter(HashFunction* hashFunction,
+		const uint64_t maxNumberOfElements, const bool hardMaximum,
+		const float falsePositiveRate, const std::size_t hashsize) {
+	init(falsePositiveRate, hardMaximum, maxNumberOfElements);
+	this->hashFunction_ = hashFunction;
 }
 
 BloomFilter::~BloomFilter() {
