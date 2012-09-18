@@ -107,12 +107,19 @@ public:
 	 * \throws an Exception, if the maximum is reached and hardMaximum has been set
 	 */
 	virtual void add(const unsigned char *key);
+	/**
+	 * \param key will be hashed and the hash will be added to bloom filter
+	 * \throws an Exception, if the maximum is reached and hardMaximum has been set
+	 */
 	void add(const std::string& key);
 	/**
 	 * \param key a simple pointer to the stored key, which should be checked
 	 * \return true if the given key seems to have been inserted in past
 	 */
 	virtual bool contains(const unsigned char *key) const;
+	/**
+	 * \param key will be hashed and the hash will be checked on the bloom filter
+	 */
 	bool contains(const std::string& key) const;
 	/**
 	 * \param keys a simple array of keys, which should be checked, if they are represented by the bloom filter
