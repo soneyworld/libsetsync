@@ -55,8 +55,44 @@ uint64_t SaltedHashFunction::hash(const unsigned char * input,
 
 uint64_t SaltedHashFunction::hash(const unsigned char * input,
 		const std::size_t length, const std::size_t function) const {
-	//TODO
-	throw "MUST BE IMPLEMENTED";
+	const unsigned char* itr = input;
+	unsigned int remaining_length = length;
+	uint64_t hash = this->_salt[function];
+	unsigned int loop = 0;
+	while (remaining_length >= 8) {
+		const unsigned int& i1 = *(reinterpret_cast<const unsigned int*> (itr));
+		itr += sizeof(unsigned int);
+		const unsigned int& i2 = *(reinterpret_cast<const unsigned int*> (itr));
+		itr += sizeof(unsigned int);
+		hash ^= (hash << 7) ^ i1 * (hash >> 3) ^ (~((hash << 11) + (i2 ^ (hash
+				>> 5))));
+		remaining_length -= 8;
+	}
+	while (remaining_length >= 4) {
+		const unsigned int& i = *(reinterpret_cast<const unsigned int*> (itr));
+		if (loop & 0x01)
+			hash ^= (hash << 7) ^ i * (hash >> 3);
+		else
+			hash ^= (~((hash << 11) + (i ^ (hash >> 5))));
+		++loop;
+		remaining_length -= 4;
+		itr += sizeof(unsigned int);
+	}
+	while (remaining_length >= 2) {
+		const unsigned short& i =
+				*(reinterpret_cast<const unsigned short*> (itr));
+		if (loop & 0x01)
+			hash ^= (hash << 7) ^ i * (hash >> 3);
+		else
+			hash ^= (~((hash << 11) + (i ^ (hash >> 5))));
+		++loop;
+		remaining_length -= 2;
+		itr += sizeof(unsigned short);
+	}
+	if (remaining_length) {
+		hash += ((*itr) ^ (hash * 0xA5A5A5A5)) + loop;
+	}
+	return hash;
 }
 
 void SaltedHashFunction::generate_salt() {
