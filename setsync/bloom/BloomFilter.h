@@ -47,7 +47,7 @@ public:
 	 * \param falsePositiveRate can be set to any value ]0,1[.
 	 * \param hashsize sets the size of the inserted keys. 20 bytes for SHA1 for example.
 	 */
-	BloomFilter(HashFunction* hashFunction,
+	BloomFilter(const std::string hashFunction,
 			const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
 			const float falsePositiveRate = 0.001,
@@ -60,9 +60,16 @@ public:
 	virtual ~BloomFilter();
 
 	/**
-	 * Loads a given array as bloom filter into the internal storage
+	 * Loads a given bitarray from an input stream as bloom filter into the internal storage
+	 * \param in source stream
+	 * \param numberOfElements The count of Elements, which has been save in the stream
 	 */
-	virtual void load(std::istream &in);
+	virtual void load(std::istream &in, const uint64_t numberOfElements);
+	/**
+	 * Writes the bloom filter bitarray into the given out stream
+	 * \param out the target stream
+	 */
+	virtual uint64_t save(std::ostream &out);
 
 	BloomFilter& operator=(const BloomFilter& filter);
 
@@ -79,6 +86,10 @@ public:
 	 * \return the size of the bloom filter in bits
 	 */
 	virtual uint64_t exactBitSize() const;
+	/**
+	 * \return the number of saved items
+	 */
+	virtual uint64_t numberOfElements() const;
 	/**
 	 * Checks, if both BloomFilter have got exact the same bit array
 	 * \return true if the bloom filter bit array is the same
@@ -128,8 +139,10 @@ public:
 	 */
 	virtual std::size_t containsAll(const unsigned char *keys,
 			const std::size_t count) const;
-
-	//	virtual bool isEmpty();
+	/**
+	 * \return a string containing the filter as a sequence of zeros and ones
+	 */
+	virtual std::string toString();
 protected:
 	/// Exact size of the filter in bits
 	uint64_t filterSize_;
@@ -149,7 +162,9 @@ protected:
 	uint64_t maxElements_;
 	/// Size of the given hash keys
 	std::size_t hashsize_;
+	/// Pointer to the used hash Function of the filter
 	HashFunction* hashFunction_;
+	/// Help function to get the right positions inside the byte array of the bloom filter
 	void compute_indices(const uint64_t hash, std::size_t& bit_index,
 			std::size_t& bit) const;
 private:

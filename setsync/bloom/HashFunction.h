@@ -9,7 +9,7 @@
 #include <cstddef>
 #include <stdint.h>
 #include <vector>
-
+#include <string>
 namespace bloom {
 
 class HashFunction {
@@ -19,6 +19,17 @@ public:
 	virtual uint64_t hash(const unsigned char * input,
 			const std::size_t length, const std::size_t function) const = 0;
 	virtual size_t count() const = 0;
+};
+
+class HashFunctionFactory {
+private:
+	HashFunctionFactory(){};
+	HashFunctionFactory(const HashFunctionFactory&){};
+	HashFunctionFactory& operator=(const HashFunctionFactory&){return *this;}
+	~HashFunctionFactory(){};
+public:
+	static HashFunctionFactory& getInstance();
+	HashFunction * createHashFunction(std::string function);
 };
 
 class SplittingMDHashFunction: public HashFunction {

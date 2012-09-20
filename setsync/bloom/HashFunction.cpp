@@ -8,6 +8,15 @@
 
 namespace bloom {
 
+HashFunctionFactory& HashFunctionFactory::getInstance() {
+	static HashFunctionFactory instance;
+	return instance;
+}
+
+HashFunction * HashFunctionFactory::createHashFunction(std::string function) {
+	return new SaltedHashFunction(64);
+}
+
 SplittingMDHashFunction::SplittingMDHashFunction(
 		const std::size_t outputLength, const std::size_t hashSize) :
 	hashSize_(hashSize), outputLength_(outputLength) {

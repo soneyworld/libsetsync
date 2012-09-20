@@ -15,7 +15,7 @@
 #include <string.h>
 #include <limits>
 #include "setsync/sha1.h"
-
+#include <sstream>
 namespace bloom {
 
 const unsigned char BloomFilter::bit_mask[BYTESIZE] = { 0x01, //00000001
@@ -45,16 +45,19 @@ BloomFilter::BloomFilter(const uint64_t maxNumberOfElements,
 	this->hashFunction_ = new SaltedHashFunction(this->functionCount_);
 }
 
-BloomFilter::BloomFilter(HashFunction* hashFunction,
+BloomFilter::BloomFilter(const std::string hashFunction,
 		const uint64_t maxNumberOfElements, const bool hardMaximum,
 		const float falsePositiveRate, const std::size_t hashsize) {
 	init(falsePositiveRate, hardMaximum, maxNumberOfElements);
-	this->hashFunction_ = hashFunction;
+	this->hashFunction_
+			= HashFunctionFactory::getInstance().createHashFunction(
+					hashFunction);
 }
 
 BloomFilter::~BloomFilter() {
 	if (this->bitArray_ != NULL)
 		free(this->bitArray_);
+	delete this->hashFunction_;
 }
 
 std::size_t BloomFilter::size() const {
@@ -63,6 +66,10 @@ std::size_t BloomFilter::size() const {
 
 uint64_t BloomFilter::exactBitSize() const {
 	return this->filterSize_;
+}
+
+uint64_t BloomFilter::numberOfElements() const {
+	return this->itemCount_;
 }
 
 BloomFilter& BloomFilter::operator=(const BloomFilter& filter) {
@@ -180,9 +187,21 @@ void BloomFilter::add(const std::string& key) {
 	add(c);
 }
 
-void BloomFilter::load(std::istream &in) {
-	//TODO
-	throw "MUST BE IMPLEMENTED";
+void BloomFilter::load(std::istream &in, const uint64_t numberOfElements) {
+	if (this->itemCount_ == 0) {
+		// Adding exception, if end of input stream reached
+		in.exceptions(in.exceptions() | std::istream::eofbit);
+		// read data as a block:
+		in.read((char*) this->bitArray_, (this->filterSize_ + 7) / BYTESIZE);
+		this->itemCount_ = numberOfElements;
+	} else {
+		throw "This bloom filter already has got elements";
+	}
+}
+
+uint64_t BloomFilter::save(std::ostream &out) {
+	out.write((char*) this->bitArray_, (this->filterSize_ + 7) / BYTESIZE);
+	return this->itemCount_;
 }
 
 bool BloomFilter::contains(const unsigned char *key) const {
@@ -250,6 +269,20 @@ void BloomFilter::init(const float falsePositiveRate, const bool hardMaximum,
 	memset(this->bitArray_, 0x00,
 			(this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE);
 	this->itemCount_ = 0;
+}
+
+std::string BloomFilter::toString() {
+	std::stringstream ss;
+	for (int i = 0; i < (this->filterSize_ + 7) / BYTESIZE; i++) {
+		unsigned char byte = this->bitArray_[i];
+		for (int j = 7; j >= 0; j--) {
+			if (byte & (1 << j))
+				ss << "1";
+			else
+				ss << "0";
+		}
+	}
+	return ss.str();
 }
 
 }

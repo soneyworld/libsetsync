@@ -61,12 +61,23 @@ void BloomFilterTest::testHash() {
 
 /*=== BEGIN tests for class 'BloomFilter' ===*/
 void BloomFilterTest::testLoad() {
-	throw "not yet implemented";
+	bloom::BloomFilter Filter1(10, false, 0.01);
+	bloom::BloomFilter Filter2(10, false, 0.01);
+	string s1 = "hello";
+	string s2 = "byebye";
+	Filter1.add(s1);
+	CPPUNIT_ASSERT_EQUAL(true, Filter1.contains(s1));
+	CPPUNIT_ASSERT_EQUAL(false, Filter2.contains(s1));
+	std::stringstream buf;
+	Filter1.save(buf);
+	Filter2.load(buf, Filter1.numberOfElements());
+	CPPUNIT_ASSERT_EQUAL(true, Filter2.contains(s1));
+	CPPUNIT_ASSERT_EQUAL(Filter1.numberOfElements(), Filter2.numberOfElements());
 
 }
 
 void BloomFilterTest::testInsert() {
-	bloom::BloomFilter Filter1(8196);
+	bloom::BloomFilter Filter1(10, false, 0.01);
 
 	//	 test signature (const unsigned char* key)
 
@@ -81,6 +92,7 @@ void BloomFilterTest::testInsert() {
 	strin = "hello";
 	Filter1.add(strin);
 	CPPUNIT_ASSERT_EQUAL(true, Filter1.contains(strin));
+//	std::cout << Filter1.toString() << std::endl;
 
 }
 
@@ -117,7 +129,6 @@ void BloomFilterTest::testContainsAll() {
 	}
 	Filter2.containsAll(hashes, 100);
 	CPPUNIT_ASSERT(Filter2.containsAll(hashes, 100));
-
 }
 
 void BloomFilterTest::testOperatorAndAndAssign() {
