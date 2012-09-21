@@ -51,6 +51,7 @@ void SQLiteIndex::insert(const uint64_t hash, const unsigned char * key,
 	rc = sqlite3_bind_blob(this->insertStatement_, 2, key, keylength,
 			SQLITE_STATIC);
 	rc = sqlite3_step(this->insertStatement_);
+	sqlite3_reset(this->insertStatement_);
 }
 
 SQLiteIndex::~SQLiteIndex() {

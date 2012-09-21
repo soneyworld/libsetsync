@@ -30,15 +30,17 @@ int main(int ac, char **av) {
 		//for (int j = 0; j < stepsize; j++) {
 		//	bf.add(generator.array + (j * 20));
 		//}
-		omp_set_lock(&lock);
+
 		//all|=bf;
-		for (int j = 0; j < function.count(); j++) {
-			for (int k = 0; k < stepsize; k++) {
+		for (uint64_t k = 0; k < stepsize; k++) {
+			for (unsigned int j = 0; j < function.count(); j++) {
 				uint64_t hash = function.hash(generator.array + (k * 20), 20, j);
+				omp_set_lock(&lock);
 				index.insert(hash,generator.array + (k * 20), 20);
+				omp_unset_lock(&lock);
 			}
 		}
-		omp_unset_lock(&lock);
+
 		//		std::cout << "Thread number: " << omp_get_thread_num() << std::endl;
 
 	}
