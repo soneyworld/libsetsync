@@ -20,11 +20,14 @@ private:
 	sqlite::SQLiteIndex * index;
 	bool tempDatabase;
 public:
-	SQLiteBloomFilter(sqlite::SQLiteDatabase * db, const std::string hashFunction, const uint64_t maxNumberOfElements = 10000,
+	SQLiteBloomFilter(sqlite::SQLiteDatabase * db,
+			const std::string hashFunction,
+			const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
 			const float falsePositiveRate = 0.001,
 			const std::size_t hashsize = SHA_DIGEST_LENGTH);
-	SQLiteBloomFilter( const std::string hashFunction, const uint64_t maxNumberOfElements = 10000,
+	SQLiteBloomFilter(const std::string hashFunction,
+			const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
 			const float falsePositiveRate = 0.001,
 			const std::size_t hashsize = SHA_DIGEST_LENGTH);

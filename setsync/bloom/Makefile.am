@@ -10,8 +10,8 @@ cpp_sources = BloomFilter.cpp CountingBloomFilter.cpp bloom.c HashFunction.cpp
 if SQLITE
 AM_CPPFLAGS += @SQLITE_CFLAGS@
 AM_LDFLAGS += @SQLITE_LIBS@
-h_sources += SQLiteBloomFilter.h
-cpp_sources += SQLiteBloomFilter.cpp
+h_sources += 
+cpp_sources +=
 endif
 
 noinst_LTLIBRARIES = libbloom.la

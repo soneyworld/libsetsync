@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = bloom trie tests index
+SUBDIRS = bloom trie index tests
 
 # what flags you want to pass to the C compiler & linker
 AM_CFLAGS = @CFLAGS@ 

@@ -43,10 +43,10 @@ SQLiteIndex::SQLiteIndex(SQLiteDatabase * db, const std::string tablename) {
 
 }
 
-void SQLiteIndex::insert(const uint64_t hash, unsigned char * key,
+void SQLiteIndex::insert(const uint64_t hash, const unsigned char * key,
 		const size_t keylength) {
 	int rc;
-	sqlite3_uint64 sqlitehash = hash;
+	const sqlite3_uint64 sqlitehash = hash;
 	rc = sqlite3_bind_int64(this->insertStatement_, 1, sqlitehash);
 	rc = sqlite3_bind_blob(this->insertStatement_, 2, key, keylength,
 			SQLITE_STATIC);
