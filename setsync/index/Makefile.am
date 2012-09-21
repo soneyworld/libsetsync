@@ -6,8 +6,8 @@ cpp_sources =
 if SQLITE
 AM_CFLAGS = @SQLITE_CFLAGS@
 AM_LDFLAGS = @SQLITE_LIBS@
-h_sources += SQLiteIndex.h SQLiteException.h
-cpp_sources += SQLiteIndex.cpp SQLiteException.cpp
+h_sources += SQLiteIndex.h SQLiteException.h SQLiteDatabase.h
+cpp_sources += SQLiteIndex.cpp SQLiteException.cpp SQLiteDatabase.cpp
 endif
 
 noinst_LTLIBRARIES = libindex.la

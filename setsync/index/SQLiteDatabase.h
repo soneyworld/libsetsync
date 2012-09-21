@@ -8,14 +8,15 @@
 #define SQLITEDATABASE_H_
 #include <sqlite3.h>
 #include <string>
-
+namespace sqlite{
 class SQLiteDatabase {
 private:
 	 sqlite3 * db;
 public:
 	SQLiteDatabase();
-	unsigned int getMaximum(std::string hashname);
+	SQLiteDatabase(const std::string filename);
+	sqlite3 * getConnection();
 	virtual ~SQLiteDatabase();
 };
-
+}
 #endif /* SQLITEDATABASE_H_ */

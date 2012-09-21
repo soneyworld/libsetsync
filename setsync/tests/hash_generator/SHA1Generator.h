@@ -12,10 +12,10 @@ class SHA1Generator {
 private:
 	uint64_t start;
 	uint64_t end;
-	unsigned char * array;
 public:
 	SHA1Generator(int start, int end);
 	void run();
+	unsigned char * array;
 	virtual ~SHA1Generator();
 };
 

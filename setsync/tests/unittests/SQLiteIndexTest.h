@@ -16,7 +16,9 @@ class SQLiteIndexTest: public CPPUNIT_NS::TestCase {
 	CPPUNIT_TEST( testAddingAndFindingElements);
 	CPPUNIT_TEST_SUITE_END();
 private:
-	index::SQLiteIndex * index;
+	sqlite::SQLiteDatabase * db;
+	sqlite::SQLiteIndex * index;
+
 public:
 	void setUp(void);
 	void tearDown(void);

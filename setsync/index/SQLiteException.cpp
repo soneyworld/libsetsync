@@ -6,7 +6,7 @@
 
 #include "SQLiteException.h"
 
-namespace index {
+namespace sqlite {
 
 SQLiteException::SQLiteException(sqlite3 * db) {
 	this->msg = sqlite3_errmsg(db);

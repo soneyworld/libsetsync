@@ -6,31 +6,54 @@
 
 #include "SQLiteIndex.h"
 #include "SQLiteException.h"
-namespace index {
+namespace sqlite {
 
-SQLiteIndex::SQLiteIndex() {
-	int rc = sqlite3_open_v2(":memory:", &db,
-			SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI,
-			"unix-none");
+SQLiteIndex::SQLiteIndex(SQLiteDatabase * db, const std::string tablename) {
+	this->db_ = db->getConnection();
+	/*	sqlite3_stmt *statement;
+
+	 if (sqlite3_prepare_v2(this->db_, "CREATE TABLE IF NOT EXISTS rindex (hash INTEGER, md BLOB);",
+	 -1, &statement, 0) == SQLITE_OK) {
+	 int cols = sqlite3_column_count(statement);
+	 int result = 0;
+	 while (true) {
+	 result = sqlite3_step(statement);
+
+	 if (result == SQLITE_ROW) {
+	 for (int col = 0; col < cols; col++) {
+	 std::string s = (char*) sqlite3_column_text(statement, col);
+	 //do something with it
+	 }
+	 } else {
+	 break;
+	 }
+	 }
+
+	 sqlite3_finalize(statement);
+	 }*/
+	int rc = sqlite3_exec(this->db_,
+			"CREATE TABLE IF NOT EXISTS revindex (hash INTEGER,md BLOB);",
+			NULL, NULL, NULL);
 	if (rc) {
-		SQLiteException e = SQLiteException(db);
-		sqlite3_close(db);
+		SQLiteException e = SQLiteException(this->db_);
 		throw e;
 	}
+	rc = sqlite3_prepare_v2(this->db_, "INSERT INTO revindex VALUES (?,?);",
+			-1, &insertStatement_, 0);
+
 }
 
-SQLiteIndex::SQLiteIndex(const char * filename) {
-	int rc = sqlite3_open_v2(filename, &db,
-			SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_URI,
-			"unix-dotfile");
-	if (rc) {
-		SQLiteException e = SQLiteException(db);
-		sqlite3_close(db);
-		throw e;
-	}
+void SQLiteIndex::insert(const uint64_t hash, unsigned char * key,
+		const size_t keylength) {
+	int rc;
+	sqlite3_uint64 sqlitehash = hash;
+	rc = sqlite3_bind_int64(this->insertStatement_, 1, sqlitehash);
+	rc = sqlite3_bind_blob(this->insertStatement_, 2, key, keylength,
+			SQLITE_STATIC);
+	rc = sqlite3_step(this->insertStatement_);
 }
 
 SQLiteIndex::~SQLiteIndex() {
-	sqlite3_close(db);
+	sqlite3_finalize(this->insertStatement_);
 }
 }

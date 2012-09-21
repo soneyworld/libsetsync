@@ -16,12 +16,13 @@ endif
 if SQLITE
 AM_CPPFLAGS += @SQLITE_CFLAGS@
 AM_LDFLAGS += @SQLITE_LIBS@
-generator_SOURCES += SQLiteDatabase.h
-generator_SOURCES += SQLiteDatabase.cpp
+generator_SOURCES += 
+generator_SOURCES += 
 endif
 
 
 noinst_PROGRAMS=generator
 generator_CXXFLAGS = ${AM_CPPFLAGS}
 generator_LDFLAGS = ${AM_LDFLAGS}
+generator_LDADD = @top_srcdir@/setsync/libsetsync.la
 INCLUDES = -I@top_srcdir@/setsync

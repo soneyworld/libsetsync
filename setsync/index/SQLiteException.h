@@ -8,7 +8,7 @@
 #define SQLITEEXCEPTION_H_
 #include <exception>
 #include <sqlite3.h>
-namespace index {
+namespace sqlite {
 
 class SQLiteException: std::exception {
 private:
