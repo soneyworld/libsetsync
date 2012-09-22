@@ -6,15 +6,20 @@
 
 #include "MemTrie.h"
 #include <string.h>
+#include <stdlib.h>
 
-#define CHAR_BIT 8
+//=============================================================
+//http://c-faq.com/misc/bitsets.html
+#define BITS_PER_CHAR 8
 
-#define BITMASK(b) (1 << ((b) % CHAR_BIT))
-#define BITSLOT(b) ((b) / CHAR_BIT)
+#define BITMASK(b) (1 << ((b) % BITS_PER_CHAR))
+#define BITSLOT(b) ((b) / BITS_PER_CHAR)
 #define BITSET(a, b) ((a)[BITSLOT(b)] |= BITMASK(b))
 #define BITCLEAR(a, b) ((a)[BITSLOT(b)] &= ~BITMASK(b))
 #define BITTEST(a, b) ((a)[BITSLOT(b)] & BITMASK(b))
-#define BITNSLOTS(nb) ((nb + CHAR_BIT - 1) / CHAR_BIT)
+#define BITNSLOTS(nb) ((nb + BITS_PER_CHAR - 1) / BITS_PER_CHAR)
+//=============================================================
+
 
 namespace trie {
 
@@ -22,13 +27,13 @@ MemTrieNode::MemTrieNode(MemTrieNode * parent, Trie * trie) :
 	parent_(parent), trie_(trie) {
 	this->larger_ = NULL;
 	this->smaller_ = NULL;
-	this->hash_ = new unsigned char[trie_->getHashSize()];
-	this->prefix_ = new unsigned char[trie_->getHashSize()];
-	this->prefix_mask_ = trie_->getHashSize() * CHAR_BIT;
+	this->hash_ = (unsigned char*) malloc(trie_->getHashSize());
+	this->prefix_ = (unsigned char*) malloc(trie_->getHashSize());
+	this->prefix_mask_ = trie_->getHashSize() * BITS_PER_CHAR;
 }
 MemTrieNode::~MemTrieNode() {
-	delete this->hash_;
-	delete this->prefix_;
+	free(this->hash_);
+	free(this->prefix_);
 }
 
 uint8_t MemTrieNode::commonPrefixSize(MemTrieNode * node) {
