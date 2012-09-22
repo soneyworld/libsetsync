@@ -17,19 +17,21 @@ private:
 	size_t hashsize;
 	bool needsHashPerforming;
 protected:
-	void setHashSize(size_t size);
-	void setSize(size_t size);
+	void setHashSize(const size_t size);
+	void setSize(const size_t size);
 	void incSize();
 	void decSize();
 	bool isHashPerformingNedded();
 	void setHashingPerformed();
 public:
 	Trie();
-	size_t getSize();
-	virtual bool insert(const unsigned char * hash) = 0;
-	virtual bool insert(const unsigned char * hash, bool performhash) = 0;
-	virtual bool erase(const unsigned char * hash) = 0;
-	virtual bool erase(const unsigned char * hash, bool performhash) = 0;
+	size_t getSize() const;
+	size_t getHashSize() const;
+	unsigned char * hashscratch;
+	virtual bool add(const unsigned char * hash) = 0;
+	virtual bool add(const unsigned char * hash, bool performhash) = 0;
+	virtual bool remove(const unsigned char * hash) = 0;
+	virtual bool remove(const unsigned char * hash, bool performhash) = 0;
 	virtual void clear(void) = 0;
 	virtual ~Trie();
 };

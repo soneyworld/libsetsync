@@ -17,20 +17,25 @@ namespace trie {
 Trie::Trie() {
 	this->size = 0;
 	this->hashsize = SHA_DIGEST_LENGTH;
+	this->hashscratch = new unsigned char[this->hashsize*2];
 }
 
 Trie::~Trie() {
 }
 
-size_t Trie::getSize(){
+size_t Trie::getSize() const{
 	return this->size;
 }
 
-void Trie::setHashSize(size_t size){
+void Trie::setHashSize(const size_t size){
 	this->hashsize = size;
 }
 
-void Trie::setSize(size_t size){
+size_t Trie::getHashSize() const{
+	return this->hashsize;
+}
+
+void Trie::setSize(const size_t size){
 	this->size = size;
 }
 

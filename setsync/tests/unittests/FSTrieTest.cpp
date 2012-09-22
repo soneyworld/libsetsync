@@ -18,17 +18,17 @@ void FSTrieTest::tearDown(void) {
 
 void FSTrieTest::testAddingAndErasingElements() {
 	CPPUNIT_ASSERT(fstrie->getSize() == 0);
-	fstrie->insert(key_1);
+	fstrie->add(key_1);
 	CPPUNIT_ASSERT(fstrie->getSize() == 1);
-	fstrie->erase(key_1);
+	fstrie->remove(key_1);
 	CPPUNIT_ASSERT(fstrie->getSize() == 0);
-	fstrie->insert(key_1);
+	fstrie->add(key_1);
 	CPPUNIT_ASSERT(fstrie->getSize() == 1);
 }
 
 void FSTrieTest::testAddingAndCleaningElements() {
 	CPPUNIT_ASSERT(fstrie->getSize() == 0);
-	fstrie->insert(key_1);
+	fstrie->add(key_1);
 	CPPUNIT_ASSERT(fstrie->getSize() == 1);
 	fstrie->clear();
 	CPPUNIT_ASSERT(fstrie->getSize() == 0);

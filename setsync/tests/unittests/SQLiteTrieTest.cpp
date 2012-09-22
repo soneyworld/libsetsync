@@ -18,17 +18,17 @@ void SQLiteTrieTest::tearDown(void) {
 
 void SQLiteTrieTest::testAddingAndErasingElements() {
 	CPPUNIT_ASSERT(sqltrie->getSize() == 0);
-	sqltrie->insert(key_1);
+	sqltrie->add(key_1);
 	CPPUNIT_ASSERT(sqltrie->getSize() == 1);
-	sqltrie->erase(key_1);
+	sqltrie->remove(key_1);
 	CPPUNIT_ASSERT(sqltrie->getSize() == 0);
-	sqltrie->insert(key_1);
+	sqltrie->add(key_1);
 	CPPUNIT_ASSERT(sqltrie->getSize() == 1);
 }
 
 void SQLiteTrieTest::testAddingAndCleaningElements() {
 	CPPUNIT_ASSERT(sqltrie->getSize() == 0);
-	sqltrie->insert(key_1);
+	sqltrie->add(key_1);
 	CPPUNIT_ASSERT(sqltrie->getSize() == 1);
 	sqltrie->clear();
 	CPPUNIT_ASSERT(sqltrie->getSize() == 0);
