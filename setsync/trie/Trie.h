@@ -8,13 +8,14 @@
 #define TRIE_H_
 
 #include <cstring>
+#include <setsync/sha1.h>
 
 namespace trie {
 
 class Trie {
 private:
 	size_t size;
-	size_t hashsize;
+	size_t hashsize_;
 	bool needsHashPerforming;
 protected:
 	void setHashSize(const size_t size);
@@ -24,7 +25,7 @@ protected:
 	bool isHashPerformingNedded();
 	void setHashingPerformed();
 public:
-	Trie();
+	Trie(const size_t hashsize = SHA_DIGEST_LENGTH);
 	size_t getSize() const;
 	size_t getHashSize() const;
 	unsigned char * hashscratch;
