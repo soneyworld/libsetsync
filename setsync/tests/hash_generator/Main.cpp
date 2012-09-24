@@ -18,17 +18,19 @@ int main(int ac, char **av) {
 	//	bloom::BloomFilter all(100000000);
 	std::string s = "dfg";
 	std::string dbname = "generated.db";
-	sqlite::SQLiteDatabase * db = new sqlite::SQLiteDatabase(dbname);
-//	sqlite::SQLiteDatabase * db = new sqlite::SQLiteDatabase();
+//	sqlite::SQLiteDatabase * db = new sqlite::SQLiteDatabase(dbname);
+	sqlite::SQLiteDatabase * db = new sqlite::SQLiteDatabase();
 	sqlite::SQLiteIndex index(db, s);
 	//	omp_set_num_threads(1);
 	omp_lock_t lock;
 	omp_init_lock(&lock);
 	unsigned int counter = 0;
+	unsigned int icounter = 0;
 	int thread_id;
 	time_t seconds;
 	seconds = time(NULL);
 	time_t duration = 0;
+	time_t iduration = 0;
 #pragma omp parallel for schedule(static) private(thread_id)
 	for (int i = 0; i < 1000; i++) {
 		thread_id = omp_get_thread_num();
@@ -49,6 +51,7 @@ int main(int ac, char **av) {
 				omp_set_lock(&lock);
 				index.insert(hash, generator.array + (k * 20), 20);
 				counter++;
+				icounter++;
 				omp_unset_lock(&lock);
 			}
 			if (thread_id == 0) {
@@ -57,8 +60,9 @@ int main(int ac, char **av) {
 					index.commit();
 					omp_unset_lock(&lock);
 					duration += time(NULL) - seconds;
-					printf("%d inserts after %ld sec (%ld per sec)\n", counter, duration, counter/duration);
-
+					iduration = time(NULL) - seconds;
+					printf("%d inserts after %ld sec (%ld per sec) (%ld per sec in last interval)\n", counter, duration, counter/duration, icounter/iduration);
+					icounter = 0;
 					seconds = time(NULL);
 				}
 			}
