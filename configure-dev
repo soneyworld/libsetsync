@@ -1,0 +1,5 @@
+#!/bin/bash
+#
+
+CONF_PARAMS="--with-openssl --with-sqlite --enable-cppunit --enable-hashgenerator"
+	./configure $CONF_PARAMS $@
