@@ -15,9 +15,11 @@ class SQLiteIndex {
 private:
 	sqlite3 * db_;
 	sqlite3_stmt *insertStatement_;
+	bool openedTransaction_;
 public:
 	SQLiteIndex(SQLiteDatabase *db, const std::string tablename);
 	void insert(const uint64_t hash, const unsigned char * key, const size_t keylength);
+	void commit();
 	virtual ~SQLiteIndex();
 };
 }

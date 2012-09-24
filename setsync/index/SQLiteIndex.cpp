@@ -8,7 +8,8 @@
 #include "SQLiteException.h"
 namespace sqlite {
 
-SQLiteIndex::SQLiteIndex(SQLiteDatabase * db, const std::string tablename) {
+SQLiteIndex::SQLiteIndex(SQLiteDatabase * db, const std::string tablename) :
+	openedTransaction_(false) {
 	this->db_ = db->getConnection();
 	/*	sqlite3_stmt *statement;
 
@@ -45,6 +46,10 @@ SQLiteIndex::SQLiteIndex(SQLiteDatabase * db, const std::string tablename) {
 
 void SQLiteIndex::insert(const uint64_t hash, const unsigned char * key,
 		const size_t keylength) {
+	if ( !this->openedTransaction_) {
+		sqlite3_exec(this->db_, "BEGIN", 0, 0, 0);
+		this->openedTransaction_ = true;
+	}
 	int rc;
 	const sqlite3_uint64 sqlitehash = hash;
 	rc = sqlite3_bind_int64(this->insertStatement_, 1, sqlitehash);
@@ -55,6 +60,14 @@ void SQLiteIndex::insert(const uint64_t hash, const unsigned char * key,
 }
 
 SQLiteIndex::~SQLiteIndex() {
+	this->commit();
 	sqlite3_finalize(this->insertStatement_);
+}
+
+void SQLiteIndex::commit() {
+	if(this->openedTransaction_){
+		sqlite3_exec(this->db_, "COMMIT", 0, 0, 0);
+		this->openedTransaction_ = false;
+	}
 }
 }
