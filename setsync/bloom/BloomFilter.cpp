@@ -18,7 +18,32 @@
 #include <sstream>
 namespace bloom {
 
-const unsigned char BloomFilter::bit_mask[BYTESIZE] = { 0x01, //00000001
+uint64_t AbstractBloomFilter::numberOfElements() const {
+	return this->itemCount_;
+}
+
+std::size_t AbstractBloomFilter::size() const {
+	return (this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE;
+}
+
+uint64_t AbstractBloomFilter::exactBitSize() const {
+	return this->filterSize_;
+}
+
+void AbstractBloomFilter::add(const std::string& key) {
+	unsigned char c[SHA_DIGEST_LENGTH];
+	SHA1((unsigned char*) key.c_str(), key.size(), c);
+	add(c);
+}
+
+bool AbstractBloomFilter::contains(const std::string& key) const {
+	unsigned char c[SHA_DIGEST_LENGTH];
+	SHA1((unsigned char*) key.c_str(), key.size(), c);
+	return contains(c);
+}
+
+
+const unsigned char AbstractBloomFilter::bit_mask[BYTESIZE] = { 0x01, //00000001
 		0x02, //00000010
 		0x04, //00000100
 		0x08, //00001000
@@ -27,11 +52,14 @@ const unsigned char BloomFilter::bit_mask[BYTESIZE] = { 0x01, //00000001
 		0x40, //01000000
 		0x80 //10000000
 		};
-BloomFilter::BloomFilter(const BloomFilter& filter) :
-	filterSize_(filter.filterSize_), itemCount_(filter.itemCount_),
-			maxElements_(filter.maxElements_),
-			hardMaximum_(filter.hardMaximum_),
-			functionCount_(filter.functionCount_) {
+
+
+BloomFilter::BloomFilter(const BloomFilter& filter)  {
+	this->itemCount_ = filter.itemCount_;
+	this->maxElements_ = filter.maxElements_;
+	this->filterSize_ = filter.filterSize_;
+	this->hardMaximum_ = filter.hardMaximum_;
+	this->functionCount_ = filter.functionCount_;
 	this->bitArray_ = (unsigned char *) malloc(
 			(this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE);
 	memcpy(this->bitArray_, filter.bitArray_,
@@ -58,18 +86,6 @@ BloomFilter::~BloomFilter() {
 	if (this->bitArray_ != NULL)
 		free(this->bitArray_);
 	delete this->hashFunction_;
-}
-
-std::size_t BloomFilter::size() const {
-	return (this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE;
-}
-
-uint64_t BloomFilter::exactBitSize() const {
-	return this->filterSize_;
-}
-
-uint64_t BloomFilter::numberOfElements() const {
-	return this->itemCount_;
 }
 
 BloomFilter& BloomFilter::operator=(const BloomFilter& filter) {
@@ -181,12 +197,6 @@ void BloomFilter::add(const unsigned char *key) {
 		this->itemCount_++;
 }
 
-void BloomFilter::add(const std::string& key) {
-	unsigned char c[SHA_DIGEST_LENGTH];
-	SHA1((unsigned char*) key.c_str(), key.size(), c);
-	add(c);
-}
-
 void BloomFilter::load(std::istream &in, const uint64_t numberOfElements) {
 	if (this->itemCount_ == 0) {
 		// Adding exception, if end of input stream reached
@@ -217,12 +227,6 @@ bool BloomFilter::contains(const unsigned char *key) const {
 		}
 	}
 	return true;
-}
-
-bool BloomFilter::contains(const std::string& key) const {
-	unsigned char c[SHA_DIGEST_LENGTH];
-	SHA1((unsigned char*) key.c_str(), key.size(), c);
-	return contains(c);
 }
 
 std::size_t BloomFilter::containsAll(const unsigned char *keys,
