@@ -65,13 +65,13 @@ void BloomFilterTest::testLoad() {
 	bloom::BloomFilter Filter2(10, false, 0.01);
 	string s1 = "hello";
 	string s2 = "byebye";
-	Filter1.add(s1);
-	CPPUNIT_ASSERT_EQUAL(true, Filter1.contains(s1));
-	CPPUNIT_ASSERT_EQUAL(false, Filter2.contains(s1));
+	Filter1.AbstractBloomFilter::add(s1);
+	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains(s1));
+	CPPUNIT_ASSERT_EQUAL(false, Filter2.AbstractBloomFilter::contains(s1));
 	std::stringstream buf;
 	Filter1.save(buf);
 	Filter2.load(buf, Filter1.numberOfElements());
-	CPPUNIT_ASSERT_EQUAL(true, Filter2.contains(s1));
+	CPPUNIT_ASSERT_EQUAL(true, Filter2.AbstractBloomFilter::contains(s1));
 	CPPUNIT_ASSERT_EQUAL(Filter1.numberOfElements(), Filter2.numberOfElements());
 
 }
@@ -90,8 +90,8 @@ void BloomFilterTest::testInsert() {
 
 	string strin;
 	strin = "hello";
-	Filter1.add(strin);
-	CPPUNIT_ASSERT_EQUAL(true, Filter1.contains(strin));
+	Filter1.AbstractBloomFilter::add(strin);
+	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains(strin));
 //	std::cout << Filter1.toString() << std::endl;
 
 }
@@ -106,11 +106,11 @@ void BloomFilterTest::testContains() {
 		for (int i = 0; i <= 7; i++) {
 			word[i] = 33 + rand() % (126 - 23);
 		}
-		Filter1.add(word);
-		CPPUNIT_ASSERT_EQUAL(true, Filter1.contains(word));
+		Filter1.AbstractBloomFilter::add(word);
+		CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains(word));
 	}
 	Filter1.clear();
-	CPPUNIT_ASSERT_EQUAL(false, Filter1.contains(word));
+	CPPUNIT_ASSERT_EQUAL(false, Filter1.AbstractBloomFilter::contains(word));
 
 }
 
@@ -140,23 +140,23 @@ void BloomFilterTest::testOperatorAndAndAssign() {
 	string strin1, strin2, strin3, strin4;
 	strin1 = "hello";
 	strin2 = "byebye";
-	FilterA.add(strin1);
-	FilterA.add(strin2);
-	CPPUNIT_ASSERT_EQUAL(true, FilterA.contains(strin1));
-	CPPUNIT_ASSERT_EQUAL(true, FilterA.contains(strin2));
+	FilterA.AbstractBloomFilter::add(strin1);
+	FilterA.AbstractBloomFilter::add(strin2);
+	CPPUNIT_ASSERT_EQUAL(true, FilterA.AbstractBloomFilter::contains(strin1));
+	CPPUNIT_ASSERT_EQUAL(true, FilterA.AbstractBloomFilter::contains(strin2));
 
 	strin3 = "hola";
 	strin4 = "byebye";
-	FilterB.add(strin3);
-	FilterB.add(strin4);
-	CPPUNIT_ASSERT_EQUAL(true, FilterB.contains(strin3));
-	CPPUNIT_ASSERT_EQUAL(true, FilterB.contains(strin4));
+	FilterB.AbstractBloomFilter::add(strin3);
+	FilterB.AbstractBloomFilter::add(strin4);
+	CPPUNIT_ASSERT_EQUAL(true, FilterB.AbstractBloomFilter::contains(strin3));
+	CPPUNIT_ASSERT_EQUAL(true, FilterB.AbstractBloomFilter::contains(strin4));
 
 	FilterA.operator &=(FilterB);
-	CPPUNIT_ASSERT_EQUAL(false, FilterA.contains(strin1));
-	CPPUNIT_ASSERT_EQUAL(true, FilterA.contains(strin2));
-	CPPUNIT_ASSERT_EQUAL(false, FilterA.contains(strin3));
-	CPPUNIT_ASSERT_EQUAL(true, FilterA.contains(strin4));
+	CPPUNIT_ASSERT_EQUAL(false, FilterA.AbstractBloomFilter::contains(strin1));
+	CPPUNIT_ASSERT_EQUAL(true, FilterA.AbstractBloomFilter::contains(strin2));
+	CPPUNIT_ASSERT_EQUAL(false, FilterA.AbstractBloomFilter::contains(strin3));
+	CPPUNIT_ASSERT_EQUAL(true, FilterA.AbstractBloomFilter::contains(strin4));
 
 }
 
@@ -168,23 +168,23 @@ void BloomFilterTest::testOperatorInclusiveOrAndAssign() {
 	string strin1, strin2, strin3, strin4;
 	strin1 = "hello";
 	strin2 = "byebye";
-	FilterA.add(strin1);
-	FilterA.add(strin2);
-	CPPUNIT_ASSERT_EQUAL(true, FilterA.contains(strin1));
-	CPPUNIT_ASSERT_EQUAL(true, FilterA.contains(strin2));
+	FilterA.AbstractBloomFilter::add(strin1);
+	FilterA.AbstractBloomFilter::add(strin2);
+	CPPUNIT_ASSERT_EQUAL(true, FilterA.AbstractBloomFilter::contains(strin1));
+	CPPUNIT_ASSERT_EQUAL(true, FilterA.AbstractBloomFilter::contains(strin2));
 
 	strin3 = "hola";
 	strin4 = "chau";
-	FilterB.add(strin3);
-	FilterB.add(strin4);
-	CPPUNIT_ASSERT_EQUAL(true, FilterB.contains(strin3));
-	CPPUNIT_ASSERT_EQUAL(true, FilterB.contains(strin4));
+	FilterB.AbstractBloomFilter::add(strin3);
+	FilterB.AbstractBloomFilter::add(strin4);
+	CPPUNIT_ASSERT_EQUAL(true, FilterB.AbstractBloomFilter::contains(strin3));
+	CPPUNIT_ASSERT_EQUAL(true, FilterB.AbstractBloomFilter::contains(strin4));
 
 	FilterA.operator |=(FilterB);
-	CPPUNIT_ASSERT_EQUAL(true, FilterA.contains(strin1));
-	CPPUNIT_ASSERT_EQUAL(true, FilterA.contains(strin2));
-	CPPUNIT_ASSERT_EQUAL(true, FilterA.contains(strin3));
-	CPPUNIT_ASSERT_EQUAL(true, FilterA.contains(strin4));
+	CPPUNIT_ASSERT_EQUAL(true, FilterA.AbstractBloomFilter::contains(strin1));
+	CPPUNIT_ASSERT_EQUAL(true, FilterA.AbstractBloomFilter::contains(strin2));
+	CPPUNIT_ASSERT_EQUAL(true, FilterA.AbstractBloomFilter::contains(strin3));
+	CPPUNIT_ASSERT_EQUAL(true, FilterA.AbstractBloomFilter::contains(strin4));
 
 }
 
@@ -197,23 +197,23 @@ void BloomFilterTest::testOperatorXorAndAssign() {
 	string strin1, strin2, strin3, strin4;
 	strin1 = "hello";
 	strin2 = "byebye";
-	FilterA.add(strin1);
-	FilterA.add(strin2);
-	CPPUNIT_ASSERT_EQUAL(true, FilterA.contains(strin1));
-	CPPUNIT_ASSERT_EQUAL(true, FilterA.contains(strin2));
+	FilterA.AbstractBloomFilter::add(strin1);
+	FilterA.AbstractBloomFilter::add(strin2);
+	CPPUNIT_ASSERT_EQUAL(true, FilterA.AbstractBloomFilter::contains(strin1));
+	CPPUNIT_ASSERT_EQUAL(true, FilterA.AbstractBloomFilter::contains(strin2));
 
 	strin3 = "hola";
 	strin4 = "byebye";
-	FilterB.add(strin3);
-	FilterB.add(strin4);
-	CPPUNIT_ASSERT_EQUAL(true, FilterB.contains(strin3));
-	CPPUNIT_ASSERT_EQUAL(true, FilterB.contains(strin4));
+	FilterB.AbstractBloomFilter::add(strin3);
+	FilterB.AbstractBloomFilter::add(strin4);
+	CPPUNIT_ASSERT_EQUAL(true, FilterB.AbstractBloomFilter::contains(strin3));
+	CPPUNIT_ASSERT_EQUAL(true, FilterB.AbstractBloomFilter::contains(strin4));
 
 	FilterA.operator ^=(FilterB);
-	CPPUNIT_ASSERT_EQUAL(true, FilterA.contains(strin1));
-	CPPUNIT_ASSERT_EQUAL(false, FilterA.contains(strin2));
-	CPPUNIT_ASSERT_EQUAL(true, FilterA.contains(strin3));
-	CPPUNIT_ASSERT_EQUAL(false, FilterA.contains(strin4));
+	CPPUNIT_ASSERT_EQUAL(true, FilterA.AbstractBloomFilter::contains(strin1));
+	CPPUNIT_ASSERT_EQUAL(false, FilterA.AbstractBloomFilter::contains(strin2));
+	CPPUNIT_ASSERT_EQUAL(true, FilterA.AbstractBloomFilter::contains(strin3));
+	CPPUNIT_ASSERT_EQUAL(false, FilterA.AbstractBloomFilter::contains(strin4));
 
 }
 

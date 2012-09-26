@@ -36,12 +36,23 @@ void AbstractBloomFilter::add(const std::string& key) {
 	add(c);
 }
 
+void AbstractBloomFilter::add(const char *string) {
+	unsigned char c[SHA_DIGEST_LENGTH];
+	SHA1((unsigned char*) string, strlen(string), c);
+	add(c);
+}
+
 bool AbstractBloomFilter::contains(const std::string& key) const {
 	unsigned char c[SHA_DIGEST_LENGTH];
 	SHA1((unsigned char*) key.c_str(), key.size(), c);
 	return contains(c);
 }
 
+bool AbstractBloomFilter::contains(const char * string) const {
+	unsigned char c[SHA_DIGEST_LENGTH];
+	SHA1((unsigned char*) string, strlen(string), c);
+	return contains(c);
+}
 
 const unsigned char AbstractBloomFilter::bit_mask[BYTESIZE] = { 0x01, //00000001
 		0x02, //00000010
@@ -53,8 +64,7 @@ const unsigned char AbstractBloomFilter::bit_mask[BYTESIZE] = { 0x01, //00000001
 		0x80 //10000000
 		};
 
-
-BloomFilter::BloomFilter(const BloomFilter& filter)  {
+BloomFilter::BloomFilter(const BloomFilter& filter) {
 	this->itemCount_ = filter.itemCount_;
 	this->maxElements_ = filter.maxElements_;
 	this->filterSize_ = filter.filterSize_;

@@ -39,7 +39,21 @@ public:
 	virtual void load(std::istream &in, const uint64_t numberOfElements);
 	virtual uint64_t save(std::ostream &out);
 	virtual void clear();
+	/**
+	 * Adds a given hash key to the bloom filter
+	 * \param key which should be added
+	 * \throws an Exception, if the maximum is reached and hardMaximum has been set
+	 */
+	virtual void add(const unsigned char *key);
+	/**
+	 * \param key a simple pointer to the stored key, which should be checked
+	 * \return true if the given key seems to have been inserted in past
+	 */
+	virtual bool contains(const unsigned char *key) const;
 private:
+	/// Help function to get the right positions inside the byte array of the bloom filter
+	void compute_indices(const uint64_t hash, std::size_t& bit_index,
+			std::size_t& bit) const;
 	/// The bloom filter memory mapped storage
 	unsigned char * bitArray_;
 };

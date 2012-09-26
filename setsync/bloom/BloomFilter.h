@@ -51,7 +51,11 @@ public:
 	 * \return the number of saved items
 	 */
 	virtual uint64_t numberOfElements() const;
-
+	/**
+	 * \param string will be hashed and the hash will be added to bloom filter
+	 * \throws an Exception, if the maximum is reached and hardMaximum has been set
+	 */
+	virtual void add(const char *string);
 	/**
 	 * Adds a given hash key to the bloom filter
 	 * \param key which should be added
@@ -67,6 +71,11 @@ public:
 	 * \param key will be hashed and the hash will be checked on the bloom filter
 	 */
 	virtual bool contains(const std::string& key) const;
+	/**
+	 * \param key will be hashed and the hash will be checked on the bloom filter
+	 */
+	virtual bool contains(const char * string) const;
+
 	/**
 	 * \param key a simple pointer to the stored key, which should be checked
 	 * \return true if the given key seems to have been inserted in past

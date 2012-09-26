@@ -22,6 +22,7 @@ void MemTrieTest::tearDown(void) {
 }
 
 void MemTrieTest::testAddingAndErasingElements() {
+	throw "SEGFAULT";
 	CPPUNIT_ASSERT(memtrie->getSize() == 0);
 	memtrie->add(key_1);
 	CPPUNIT_ASSERT(memtrie->getSize() == 1);
@@ -32,6 +33,7 @@ void MemTrieTest::testAddingAndErasingElements() {
 }
 
 void MemTrieTest::testAddingAndCleaningElements() {
+	throw "SEGFAULT";
 	CPPUNIT_ASSERT(memtrie->getSize() == 0);
 	memtrie->add(key_1);
 	CPPUNIT_ASSERT(memtrie->getSize() == 1);
