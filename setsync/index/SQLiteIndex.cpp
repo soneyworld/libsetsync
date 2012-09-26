@@ -41,12 +41,16 @@ SQLiteIndex::SQLiteIndex(SQLiteDatabase * db, const std::string tablename) :
 	}
 	rc = sqlite3_prepare_v2(this->db_, "INSERT INTO revindex VALUES (?,?);",
 			-1, &insertStatement_, 0);
-
+	/*
+	sqlite3_exec(this->db_,
+			"CREATE INDEX IF NOT EXISTS hashIndex ON revindex (hash ASC);",
+			NULL, NULL, NULL);
+	*/
 }
 
 void SQLiteIndex::insert(const uint64_t hash, const unsigned char * key,
 		const size_t keylength) {
-	if ( !this->openedTransaction_) {
+	if (!this->openedTransaction_) {
 		sqlite3_exec(this->db_, "BEGIN", 0, 0, 0);
 		this->openedTransaction_ = true;
 	}
@@ -65,7 +69,7 @@ SQLiteIndex::~SQLiteIndex() {
 }
 
 void SQLiteIndex::commit() {
-	if(this->openedTransaction_){
+	if (this->openedTransaction_) {
 		sqlite3_exec(this->db_, "COMMIT", 0, 0, 0);
 		this->openedTransaction_ = false;
 	}
