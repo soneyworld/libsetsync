@@ -23,6 +23,7 @@ public:
 	virtual ~MemTrieNode();
 	uint8_t commonPrefixSize(MemTrieNode * node);
 	bool add(const unsigned char* hash, bool performhash);
+	bool remove(const unsigned char* hash, bool performhash);
 	void updateHash();
 	MemTrieNode * parent_;
 	MemTrieNode * smaller_;

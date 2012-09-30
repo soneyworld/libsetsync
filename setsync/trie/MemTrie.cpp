@@ -50,6 +50,10 @@ bool MemTrieNode::add(const unsigned char* hash, bool performhash) {
 	return false;
 }
 
+bool MemTrieNode::remove(const unsigned char* hash, bool performhash){
+	return false;
+}
+
 void MemTrieNode::updateHash() {
 	if (this->larger_ == NULL && this->smaller_ == NULL) {
 		if (this->parent_ != NULL)
@@ -99,6 +103,11 @@ bool MemTrie::remove(const unsigned char * hash) {
 	return remove(hash, true);
 }
 bool MemTrie::remove(const unsigned char * hash, bool performhash) {
+	if(this->root_== NULL){
+		return false;
+	}else{
+		this->root_->remove(hash, performhash);
+	}
 	decSize();
 	return false;
 }
