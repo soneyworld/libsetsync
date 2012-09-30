@@ -50,12 +50,45 @@ public:
 	 * \return true if the given key seems to have been inserted in past
 	 */
 	virtual bool contains(const unsigned char *key) const;
+	/**
+	 * \param keys a simple array of keys, which should be checked, if they are represented by the bloom filter
+	 * \param count the length of the keys array
+	 * \return the given count on containing all keys, otherwise 0
+	 */
+	virtual std::size_t containsAll(const unsigned char *keys,
+			const std::size_t count) const;
+	/**
+	 * Checks, if both BloomFilter have got exact the same bit array
+	 * \return true if the bloom filter bit array is the same
+	 */
+	virtual bool operator ==(const AbstractBloomFilter& filter) const;
+	/**
+	 * Checks, if there is a difference between the bit arrays
+	 * \return true if there is minimal 1 bit difference between the bit arrays
+	 */
+	virtual bool operator !=(const AbstractBloomFilter& filter) const;
+	/**
+	 * \return the intersection between both bloom filter
+	 */
+	virtual AbstractBloomFilter& operator &=(const AbstractBloomFilter& filter);
+	/**
+	 * \return the union of both bloom filter
+	 */
+	virtual AbstractBloomFilter& operator |=(const AbstractBloomFilter& filter);
+	/**
+	 * \return the difference between the both bloom filter
+	 */
+	virtual AbstractBloomFilter& operator ^=(const AbstractBloomFilter& filter);
 private:
 	/// Help function to get the right positions inside the byte array of the bloom filter
 	void compute_indices(const uint64_t hash, std::size_t& bit_index,
 			std::size_t& bit) const;
 	/// The bloom filter memory mapped storage
 	unsigned char * bitArray_;
+	void init(const float falsePositiveRate, const bool hardMaximum,
+			const uint64_t numberOfElements);
+	FILE * filehandler_;
+	unsigned int mmapLength_;
 };
 
 }

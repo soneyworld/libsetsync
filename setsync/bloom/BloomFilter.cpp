@@ -16,6 +16,7 @@
 #include <limits>
 #include "setsync/sha1.h"
 #include <sstream>
+#include <typeinfo>
 namespace bloom {
 
 uint64_t AbstractBloomFilter::numberOfElements() const {
@@ -114,73 +115,87 @@ BloomFilter& BloomFilter::operator=(const BloomFilter& filter) {
 	return *this;
 }
 
-BloomFilter& BloomFilter::operator &=(const BloomFilter& filter) {
+AbstractBloomFilter& BloomFilter::operator &=(const AbstractBloomFilter& filter) {
 	/* intersection */
-	if (this->filterSize_ == filter.filterSize_) {
+	const BloomFilter& filter_ = dynamic_cast<const BloomFilter&> (filter);
+	if (this->filterSize_ == filter_.filterSize_) {
 		for (std::size_t i = 0; i < ((this->filterSize_ + (BYTESIZE - 1))
 				/ BYTESIZE); ++i) {
-			this->bitArray_[i] &= filter.bitArray_[i];
+			this->bitArray_[i] &= filter_.bitArray_[i];
 		}
 	}
 	return *this;
 }
 
-BloomFilter& BloomFilter::operator |=(const BloomFilter& filter) {
+AbstractBloomFilter& BloomFilter::operator |=(const AbstractBloomFilter& filter) {
 	/* union */
-	if (this->filterSize_ == filter.filterSize_) {
+	const BloomFilter& filter_ = dynamic_cast<const BloomFilter&> (filter);
+	if (this->filterSize_ == filter_.filterSize_) {
 		for (std::size_t i = 0; i < ((this->filterSize_ + (BYTESIZE - 1))
 				/ BYTESIZE); ++i) {
-			this->bitArray_[i] |= filter.bitArray_[i];
+			this->bitArray_[i] |= filter_.bitArray_[i];
 		}
 	}
 	return *this;
 }
 
-BloomFilter& BloomFilter::operator ^=(const BloomFilter& filter) {
+AbstractBloomFilter& BloomFilter::operator ^=(const AbstractBloomFilter& filter) {
 	/* difference */
-	if (this->filterSize_ == filter.filterSize_) {
+	const BloomFilter& filter_ = dynamic_cast<const BloomFilter&> (filter);
+	if (this->filterSize_ == filter_.filterSize_) {
 		for (std::size_t i = 0; i < ((this->filterSize_ + (BYTESIZE - 1))
 				/ BYTESIZE); ++i) {
-			this->bitArray_[i] ^= filter.bitArray_[i];
+			this->bitArray_[i] ^= filter_.bitArray_[i];
 		}
 	}
 	return *this;
 }
 
-bool BloomFilter::operator ==(const BloomFilter& filter) const {
+bool BloomFilter::operator ==(const AbstractBloomFilter& filter) const {
 	/* equals */
-	if (this->filterSize_ != filter.filterSize_)
+	try {
+		const BloomFilter& filter_ = dynamic_cast<const BloomFilter&> (filter);
+		if (this->filterSize_ != filter_.filterSize_)
+			return false;
+		int n = memcmp(this->bitArray_, filter_.bitArray_,
+				this->filterSize_ / BYTESIZE);
+		if (n != 0)
+			return false;
+		int remainder = this->filterSize_ % BYTESIZE;
+		if (remainder == 0)
+			return true;
+		unsigned char c1 = this->bitArray_[this->filterSize_ / BYTESIZE];
+		unsigned char c2 = filter_.bitArray_[this->filterSize_ / BYTESIZE];
+		c1 >> BYTESIZE - remainder;
+		c2 >> BYTESIZE - remainder;
+		return c1 == c2;
+	} catch (const std::bad_cast& e) {
 		return false;
-	int n = memcmp(this->bitArray_, filter.bitArray_,
-			this->filterSize_ / BYTESIZE);
-	if (n != 0)
-		return false;
-	int remainder = this->filterSize_ % BYTESIZE;
-	if (remainder == 0)
-		return true;
-	unsigned char c1 = this->bitArray_[this->filterSize_ / BYTESIZE];
-	unsigned char c2 = filter.bitArray_[this->filterSize_ / BYTESIZE];
-	c1 >> BYTESIZE - remainder;
-	c2 >> BYTESIZE - remainder;
-	return c1 == c2;
+	}
 }
 
-bool BloomFilter::operator !=(const BloomFilter& filter) const {
+bool BloomFilter::operator !=(const AbstractBloomFilter& filter) const {
 	/* diffs */
-	if (this->filterSize_ != filter.filterSize_)
-		return true;
-	int n = memcmp(this->bitArray_, filter.bitArray_,
-			this->filterSize_ / BYTESIZE);
-	if (n != 0)
-		return true;
-	int remainder = this->filterSize_ % BYTESIZE;
-	if (remainder == 0)
+	try {
+		const BloomFilter& filter_ = dynamic_cast<const BloomFilter&> (filter);
+
+		if (this->filterSize_ != filter_.filterSize_)
+			return true;
+		int n = memcmp(this->bitArray_, filter_.bitArray_,
+				this->filterSize_ / BYTESIZE);
+		if (n != 0)
+			return true;
+		int remainder = this->filterSize_ % BYTESIZE;
+		if (remainder == 0)
+			return false;
+		unsigned char c1 = this->bitArray_[this->filterSize_ / BYTESIZE];
+		unsigned char c2 = filter_.bitArray_[this->filterSize_ / BYTESIZE];
+		c1 >> BYTESIZE - remainder;
+		c2 >> BYTESIZE - remainder;
+		return c1 != c2;
+	} catch (const std::bad_cast& e) {
 		return false;
-	unsigned char c1 = this->bitArray_[this->filterSize_ / BYTESIZE];
-	unsigned char c2 = filter.bitArray_[this->filterSize_ / BYTESIZE];
-	c1 >> BYTESIZE - remainder;
-	c2 >> BYTESIZE - remainder;
-	return c1 != c2;
+	}
 }
 
 bool BloomFilter::operator!() const {

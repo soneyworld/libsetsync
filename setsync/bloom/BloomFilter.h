@@ -81,6 +81,35 @@ public:
 	 * \return true if the given key seems to have been inserted in past
 	 */
 	virtual bool contains(const unsigned char *key) const = 0;
+	/**
+	 * \param keys a simple array of keys, which should be checked, if they are represented by the bloom filter
+	 * \param count the length of the keys array
+	 * \return the given count on containing all keys, otherwise less then count
+	 */
+	virtual std::size_t containsAll(const unsigned char *keys,
+			const std::size_t count) const = 0;
+	/**
+	 * Checks, if both BloomFilter have got exact the same bit array
+	 * \return true if the bloom filter bit array is the same
+	 */
+	virtual bool operator ==(const AbstractBloomFilter& filter) const = 0;
+	/**
+	 * Checks, if there is a difference between the bit arrays
+	 * \return true if there is minimal 1 bit difference between the bit arrays
+	 */
+	virtual bool operator !=(const AbstractBloomFilter& filter) const = 0;
+	/**
+	 * \return the intersection between both bloom filter
+	 */
+	virtual AbstractBloomFilter& operator &=(const AbstractBloomFilter& filter) = 0;
+	/**
+	 * \return the union of both bloom filter
+	 */
+	virtual AbstractBloomFilter& operator |=(const AbstractBloomFilter& filter) = 0;
+	/**
+	 * \return the difference between the both bloom filter
+	 */
+	virtual AbstractBloomFilter& operator ^=(const AbstractBloomFilter& filter) = 0;
 
 protected:
 	static const unsigned char bit_mask[BYTESIZE];
@@ -156,31 +185,32 @@ public:
 
 	virtual bool operator!() const;
 	/**
-	 * Resets the bloom filter
-	 */
-	virtual void clear();
-	/**
 	 * Checks, if both BloomFilter have got exact the same bit array
 	 * \return true if the bloom filter bit array is the same
 	 */
-	virtual bool operator ==(const BloomFilter& filter) const;
+	virtual bool operator ==(const AbstractBloomFilter& filter) const;
 	/**
 	 * Checks, if there is a difference between the bit arrays
 	 * \return true if there is minimal 1 bit difference between the bit arrays
 	 */
-	virtual bool operator !=(const BloomFilter& filter) const;
+	virtual bool operator !=(const AbstractBloomFilter& filter) const;
 	/**
 	 * \return the intersection between both bloom filter
 	 */
-	virtual BloomFilter& operator &=(const BloomFilter& filter);
+	virtual AbstractBloomFilter& operator &=(const AbstractBloomFilter& filter);
 	/**
 	 * \return the union of both bloom filter
 	 */
-	virtual BloomFilter& operator |=(const BloomFilter& filter);
+	virtual AbstractBloomFilter& operator |=(const AbstractBloomFilter& filter);
 	/**
 	 * \return the difference between the both bloom filter
 	 */
-	virtual BloomFilter& operator ^=(const BloomFilter& filter);
+	virtual AbstractBloomFilter& operator ^=(const AbstractBloomFilter& filter);
+
+	/**
+	 * Resets the bloom filter
+	 */
+	virtual void clear();
 	/**
 	 * Adds a given hash key to the bloom filter
 	 * \param key which should be added

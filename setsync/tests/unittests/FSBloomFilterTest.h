@@ -7,17 +7,12 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#ifndef BLOOMFILTERTEST_HH
-#define BLOOMFILTERTEST_HH
-class BloomFilterTest : public CppUnit::TestFixture {
+#ifndef FSBLOOMFILTERTEST_H
+#define FSBLOOMFILTERTEST_H
+class FSBloomFilterTest : public CppUnit::TestFixture {
 	private:
 	public:
-		/*=== BEGIN tests for class 'DefaultHashProvider' ===*/
-		void testCount();
-		void testHash();
-		/*=== END   tests for class 'DefaultHashProvider' ===*/
-
-		/*=== BEGIN tests for class 'BloomFilter' ===*/
+		/*=== BEGIN tests for class 'FSBloomFilter' ===*/
 		void testLoad();
 		void testInsert();
 		void testContains();
@@ -25,15 +20,13 @@ class BloomFilterTest : public CppUnit::TestFixture {
 		void testOperatorAndAndAssign();
 		void testOperatorInclusiveOrAndAssign();
 		void testOperatorXorAndAssign();
-		/*=== END   tests for class 'BloomFilter' ===*/
+		/*=== END   tests for class 'FSBloomFilter' ===*/
 
 		void setUp();
 		void tearDown();
 
 
-		CPPUNIT_TEST_SUITE(BloomFilterTest);
-			CPPUNIT_TEST(testCount);
-			CPPUNIT_TEST(testHash);
+		CPPUNIT_TEST_SUITE(FSBloomFilterTest);
 			CPPUNIT_TEST(testLoad);
 			CPPUNIT_TEST(testInsert);
 			CPPUNIT_TEST(testContains);
