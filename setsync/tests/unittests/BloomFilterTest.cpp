@@ -119,7 +119,7 @@ void BloomFilterTest::testContainsAll() {
 	unsigned char hashes[100 * SHA_DIGEST_LENGTH];
 	for (int j = 0; j < 100; j++) {
 		unsigned char word[8];
-		for (int i = 0; i <= 7; i++) {
+		for (int i = 0; i < 8; i++) {
 			word[i] = 33 + rand() % (126 - 23);
 		}
 		SHA1(word, 8, hashes + SHA_DIGEST_LENGTH * j);
