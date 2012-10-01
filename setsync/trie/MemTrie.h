@@ -19,10 +19,9 @@ class MemTrieNode {
 private:
 	Trie * trie_;
 public:
-	MemTrieNode(MemTrieNode * parent , Trie * trie);
+	MemTrieNode(Trie * trie);
 	virtual ~MemTrieNode();
 	uint8_t commonPrefixSize(MemTrieNode * node);
-	bool add(const unsigned char* hash, bool performhash);
 	bool remove(const unsigned char* hash, bool performhash);
 	void updateHash();
 	MemTrieNode * parent_;
@@ -31,6 +30,7 @@ public:
 	unsigned char * hash_;
 	unsigned char * prefix_;
 	uint8_t prefix_mask_;
+	bool similar(unsigned char *a);
 };
 
 class MemTrie: public trie::Trie {

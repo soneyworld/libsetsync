@@ -23,17 +23,18 @@
 
 namespace trie {
 
-MemTrieNode::MemTrieNode(MemTrieNode * parent, Trie * trie) :
-	parent_(parent), trie_(trie) {
+MemTrieNode::MemTrieNode(Trie * trie) :
+	trie_(trie) {
+	this->parent_ = NULL;
 	this->larger_ = NULL;
 	this->smaller_ = NULL;
-	this->hash_ = (unsigned char*) malloc(trie_->getHashSize());
-	this->prefix_ = (unsigned char*) malloc(trie_->getHashSize());
+	this->hash_ = new unsigned char[trie->getHashSize()];
+	this->prefix_ = new unsigned char[trie->getHashSize()];
 	this->prefix_mask_ = trie_->getHashSize() * BITS_PER_CHAR;
 }
 MemTrieNode::~MemTrieNode() {
-	free(this->hash_);
-	free(this->prefix_);
+	delete this->hash_;
+	delete this->prefix_;
 }
 
 uint8_t MemTrieNode::commonPrefixSize(MemTrieNode * node) {
@@ -46,11 +47,16 @@ uint8_t MemTrieNode::commonPrefixSize(MemTrieNode * node) {
 	return common;
 }
 
-bool MemTrieNode::add(const unsigned char* hash, bool performhash) {
-	return false;
+bool MemTrieNode::similar(unsigned char *a) {
+	for (uint8_t i = 0; i < this->prefix_mask_; i++) {
+		if (BITTEST(a, i) != BITTEST(this->prefix_,i)) {
+			return false;
+		}
+	}
+	return true;
 }
 
-bool MemTrieNode::remove(const unsigned char* hash, bool performhash){
+bool MemTrieNode::remove(const unsigned char* hash, bool performhash) {
 	return false;
 }
 
@@ -84,18 +90,69 @@ bool MemTrie::add(const unsigned char * hash) {
 	return add(hash, true);
 }
 bool MemTrie::add(const unsigned char * hash, bool performhash) {
+	MemTrieNode * newnode = new MemTrieNode(this);
 	if (this->root_ == NULL) {
-		this->root_ = new MemTrieNode(NULL, this);
+		this->root_ = newnode;
 		memcpy(this->root_->hash_, hash, this->getHashSize());
 		memcpy(this->root_->prefix_, hash, this->getHashSize());
 		incSize();
 		return true;
 	} else {
-		if (this->root_->add(hash, performhash)) {
-			incSize();
-			return true;
-		} else {
-			return false;
+		MemTrieNode * currentnode = this->root_;
+		while (true) {
+			bool thesame = currentnode->similar(newnode->prefix_);
+			if (thesame) {
+				MemTrieNode * next;
+				bool
+						larger = BITTEST( (unsigned char *)(newnode->prefix_) ,currentnode->prefix_mask_);
+				if (larger)
+					next = currentnode->larger_;
+				else
+					next = currentnode->smaller_;
+				if (next == NULL) {
+					if (currentnode->prefix_mask_ == getHashSize()
+							* BITS_PER_CHAR) {
+						//ignore
+						return false;
+					}
+					throw "missing child!";
+				}
+				currentnode = next;
+			} else {
+				// Split
+				uint8_t common=currentnode->commonPrefixSize(newnode);
+				MemTrieNode * intermediate = new MemTrieNode(this);
+				intermediate->parent_ = currentnode->parent_;
+				bool rootReplaced = false;
+				if(currentnode->parent_ == NULL){
+					this->root_ = intermediate;
+					rootReplaced = true;
+				}
+				if(!rootReplaced){
+					if(currentnode->parent_->larger_ == currentnode){
+						currentnode->parent_->larger_ = intermediate;
+					} else {
+						currentnode->parent_->smaller_ = intermediate;
+					}
+				}
+
+				intermediate->prefix_mask_ = common;
+				memcpy(intermediate->prefix_, currentnode->prefix_, getHashSize());
+				newnode->parent_ = intermediate;
+				currentnode->parent_ = intermediate;
+				bool larger = BITTEST( (unsigned char *)(newnode->prefix_) ,common);
+				if(larger){
+					intermediate->larger_= newnode;
+					intermediate->smaller_=currentnode;
+				}else{
+					intermediate->larger_=currentnode;
+					intermediate->smaller_=newnode;
+				}
+				if(performhash)
+					currentnode->updateHash();
+				incSize();
+				return true;
+			}
 		}
 	}
 }
@@ -103,20 +160,25 @@ bool MemTrie::remove(const unsigned char * hash) {
 	return remove(hash, true);
 }
 bool MemTrie::remove(const unsigned char * hash, bool performhash) {
-	if(this->root_== NULL){
+	if (this->root_ == NULL) {
 		return false;
-	}else{
-		this->root_->remove(hash, performhash);
+	} else {
+		bool result = this->root_->remove(hash, performhash);
+		if (result) {
+			decSize();
+		}
+		return result;
 	}
-	decSize();
-	return false;
 }
 void MemTrie::clear(MemTrieNode * node) {
 	if (node->larger_ != NULL) {
 		clear(node->larger_);
 		clear(node->smaller_);
+		delete node->larger_;
+		node->larger_ = NULL;
+		delete node->smaller_;
+		node->smaller_ = NULL;
 	}
-	delete node;
 }
 
 void MemTrie::clear(void) {

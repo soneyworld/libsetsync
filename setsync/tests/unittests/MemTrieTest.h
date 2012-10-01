@@ -22,6 +22,7 @@ public:
 private:
 	trie::MemTrie * memtrie;
 	unsigned char * key_1;
+	unsigned char * key_2;
 protected:
 	void testAddingAndErasingElements();
 	void testAddingAndCleaningElements();
