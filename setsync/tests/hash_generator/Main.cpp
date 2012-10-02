@@ -8,16 +8,17 @@
 #include "SHA1Generator.h"
 #include <time.h>
 #include <stdio.h>
+#include <setsync/bloom/BloomFilter.h>
 #include <setsync/bloom/FSBloomFilter.h>
 #include <setsync/index/SQLiteDatabase.h>
 #include <setsync/index/SQLiteIndex.h>
 #include <setsync/bloom/HashFunction.h>
 
 int main(int ac, char **av) {
-	long pagesize = sysconf(_SC_PAGE_SIZE);
-	std::cout << "PAGESIZE: " << pagesize << std::endl;
+//	long pagesize = sysconf(_SC_PAGE_SIZE);
+//	std::cout << "PAGESIZE: " << pagesize << std::endl;
 	uint64_t stepsize = 100000;
-	bloom::FSBloomFilter all(100000000);
+	bloom::FSBloomFilter all(1000000000);
 	std::string s = "dfg";
 	std::string dbname = "generated.db";
 //	sqlite::SQLiteDatabase * db = new sqlite::SQLiteDatabase(dbname);
@@ -33,21 +34,21 @@ int main(int ac, char **av) {
 	seconds = time(NULL);
 	time_t duration = 0;
 	time_t iduration = 0;
-#pragma omp parallel for schedule(static) private(thread_id)
+//#pragma omp parallel for schedule(static) private(thread_id)
 	for (int i = 0; i < 1000; i++) {
-		thread_id = omp_get_thread_num();
-		bloom::SaltedHashFunction function(10);
+/*		thread_id = omp_get_thread_num();
+		bloom::SaltedHashFunction function(10);*/
 		SHA1Generator generator(i * stepsize, i * stepsize + stepsize);
 		generator.run();
 
-//		bloom::FSBloomFilter bf(100000000);
-		for (int j = 0; j < stepsize; j++) {
-			omp_set_lock(&lock);
-			all.add(generator.array + (j * 20));
-			omp_unset_lock(&lock);
-		}
-
-
+		bloom::FSBloomFilter bf(1000000000);
+//		omp_set_lock(&lock);
+		bf.addAll(generator.array, stepsize);
+//		omp_unset_lock(&lock);
+		omp_set_lock(&lock);
+		all|=bf;
+		omp_unset_lock(&lock);
+/*
 		for (uint64_t k = 0; k < stepsize; k++) {
 			for (unsigned int j = 0; j < function.count(); j++) {
 				uint64_t hash =
@@ -73,8 +74,9 @@ int main(int ac, char **av) {
 		}
 
 		//		std::cout << "Thread number: " << omp_get_thread_num() << std::endl;
-
-	}
+*/
+	}/*
 	index.commit();
 	printf("%d inserts after %ld sec (%ld per sec)\n", counter, duration, counter/duration);
+	*/
 }
