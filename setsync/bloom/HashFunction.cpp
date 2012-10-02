@@ -64,7 +64,7 @@ uint64_t SaltedHashFunction::hash(const unsigned char * input,
 		const std::size_t length, const std::size_t function) const {
 	const unsigned char* itr = input;
 	std::size_t remaining_length = length;
-	uint64_t hash = this->_salt[function];
+	uint32_t hash = this->_salt[function];
 	uint64_t loop = 0;
 	while (remaining_length >= 8) {
 		const uint32_t& i1 = *(reinterpret_cast<const uint32_t*> (itr));
