@@ -17,6 +17,7 @@
 #include "setsync/sha1.h"
 #include <sstream>
 #include <typeinfo>
+#include <algorithm>
 namespace bloom {
 
 uint64_t AbstractBloomFilter::numberOfElements() const {
@@ -71,6 +72,7 @@ BloomFilter::BloomFilter(const BloomFilter& filter) {
 	this->filterSize_ = filter.filterSize_;
 	this->hardMaximum_ = filter.hardMaximum_;
 	this->functionCount_ = filter.functionCount_;
+	this->hashsize_ = filter.hashsize_;
 	this->bitArray_ = (unsigned char *) malloc(
 			(this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE);
 	memcpy(this->bitArray_, filter.bitArray_,
@@ -80,6 +82,7 @@ BloomFilter::BloomFilter(const BloomFilter& filter) {
 BloomFilter::BloomFilter(const uint64_t maxNumberOfElements,
 		const bool hardMaximum, const float falsePositiveRate,
 		const std::size_t hashsize) {
+	this->hashsize_ = hashsize;
 	init(falsePositiveRate, hardMaximum, maxNumberOfElements);
 	this->hashFunction_ = new SaltedHashFunction(this->functionCount_);
 }
@@ -87,6 +90,7 @@ BloomFilter::BloomFilter(const uint64_t maxNumberOfElements,
 BloomFilter::BloomFilter(const std::string hashFunction,
 		const uint64_t maxNumberOfElements, const bool hardMaximum,
 		const float falsePositiveRate, const std::size_t hashsize) {
+	this->hashsize_ = hashsize;
 	init(falsePositiveRate, hardMaximum, maxNumberOfElements);
 	this->hashFunction_
 			= HashFunctionFactory::getInstance().createHashFunction(
@@ -214,12 +218,36 @@ void BloomFilter::add(const unsigned char *key) {
 	std::size_t bit_index = 0;
 	std::size_t bit = 0;
 	for (int i = 0; i < this->functionCount_; i++) {
-		uint64_t pos = this->hashFunction_->hash(key, SHA_DIGEST_LENGTH, i);
+		uint64_t pos = this->hashFunction_->hash(key, this->hashsize_, i);
 		compute_indices(pos, bit_index, bit);
 		this->bitArray_[bit_index / BYTESIZE] |= bit_mask[bit];
 	}
 	if (this->itemCount_ < std::numeric_limits<uint64_t>::max())
 		this->itemCount_++;
+}
+
+void BloomFilter::addAll(const unsigned char *keys, const std::size_t count) {
+	if (this->hardMaximum_ && this->itemCount_ + count > maxElements_)
+		throw "Maximum of Elements reached, adding failed";
+	uint64_t hashes[count * this->functionCount_];
+	for (int i = 0; i < count; i++) {
+		for (int j = 0; j < this->functionCount_; j++) {
+			hashes[i * this->functionCount_ + j] = this->hashFunction_->hash(
+					keys + (this->hashsize_ * i), this->hashsize_, j);
+		}
+	}
+	std::sort(hashes, hashes + (count * this->functionCount_));
+	std::size_t bit_index = 0;
+	std::size_t bit = 0;
+	for (int i = 0; i < count * this->functionCount_; i++) {
+		compute_indices(hashes[i], bit_index, bit);
+		this->bitArray_[bit_index / BYTESIZE] |= bit_mask[bit];
+	}
+	if (this->itemCount_ + count < std::numeric_limits<uint64_t>::max()) {
+		this->itemCount_ += count;
+	} else {
+		this->itemCount_ = std::numeric_limits<uint64_t>::max();
+	}
 }
 
 void BloomFilter::load(std::istream &in, const uint64_t numberOfElements) {

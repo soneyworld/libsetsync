@@ -46,6 +46,12 @@ public:
 	 */
 	virtual void add(const unsigned char *key);
 	/**
+	 * \param keys to be added to the BloomFilter
+	 * \param count number of keys in the array
+	 * \throws an Exception, if the maximum is reached and hardMaximum has been set
+	 */
+	virtual void addAll(const unsigned char *keys, const std::size_t count);
+	/**
 	 * \param key a simple pointer to the stored key, which should be checked
 	 * \return true if the given key seems to have been inserted in past
 	 */

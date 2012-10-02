@@ -67,6 +67,13 @@ public:
 	 * \throws an Exception, if the maximum is reached and hardMaximum has been set
 	 */
 	virtual void add(const std::string& key);
+
+	/**
+	 * \param keys to be added to the BloomFilter
+	 * \param count number of keys in the array
+	 * \throws an Exception, if the maximum is reached and hardMaximum has been set
+	 */
+	virtual void addAll(const unsigned char *keys, const std::size_t count) = 0;
 	/**
 	 * \param key will be hashed and the hash will be checked on the bloom filter
 	 */
@@ -101,15 +108,18 @@ public:
 	/**
 	 * \return the intersection between both bloom filter
 	 */
-	virtual AbstractBloomFilter& operator &=(const AbstractBloomFilter& filter) = 0;
+	virtual AbstractBloomFilter
+			& operator &=(const AbstractBloomFilter& filter) = 0;
 	/**
 	 * \return the union of both bloom filter
 	 */
-	virtual AbstractBloomFilter& operator |=(const AbstractBloomFilter& filter) = 0;
+	virtual AbstractBloomFilter
+			& operator |=(const AbstractBloomFilter& filter) = 0;
 	/**
 	 * \return the difference between the both bloom filter
 	 */
-	virtual AbstractBloomFilter& operator ^=(const AbstractBloomFilter& filter) = 0;
+	virtual AbstractBloomFilter
+			& operator ^=(const AbstractBloomFilter& filter) = 0;
 
 protected:
 	static const unsigned char bit_mask[BYTESIZE];
@@ -217,6 +227,12 @@ public:
 	 * \throws an Exception, if the maximum is reached and hardMaximum has been set
 	 */
 	virtual void add(const unsigned char *key);
+	/**
+	 * \param keys to be added to the BloomFilter
+	 * \param count number of keys in the array
+	 * \throws an Exception, if the maximum is reached and hardMaximum has been set
+	 */
+	virtual void addAll(const unsigned char *keys, const std::size_t count);
 	/**
 	 * \param key a simple pointer to the stored key, which should be checked
 	 * \return true if the given key seems to have been inserted in past

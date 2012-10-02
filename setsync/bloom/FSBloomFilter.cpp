@@ -12,6 +12,7 @@
 #include <sys/mman.h>
 #include <stdio.h>
 #include <typeinfo>
+#include <algorithm>
 
 #ifndef BYTESIZE
 #define BYTESIZE 8
@@ -23,6 +24,7 @@ FSBloomFilter::FSBloomFilter(const uint64_t maxNumberOfElements,
 		const bool hardMaximum, const float falsePositiveRate,
 		const std::size_t hashsize) :
 	filehandler_(NULL) {
+	this->hashsize_ = hashsize;
 	init(falsePositiveRate, hardMaximum, maxNumberOfElements);
 	this->hashFunction_ = new SaltedHashFunction(this->functionCount_);
 }
@@ -31,6 +33,7 @@ FSBloomFilter::FSBloomFilter(const std::string hashFunction,
 		const uint64_t maxNumberOfElements, const bool hardMaximum,
 		const float falsePositiveRate, const std::size_t hashsize) :
 	filehandler_(NULL) {
+	this->hashsize_ = hashsize;
 	init(falsePositiveRate, hardMaximum, maxNumberOfElements);
 	this->hashFunction_
 			= HashFunctionFactory::getInstance().createHashFunction(
@@ -61,17 +64,17 @@ void FSBloomFilter::init(const float falsePositiveRate, const bool hardMaximum,
 	this->mmapLength_ = (this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE;
 	if (this->filehandler_ == NULL)
 		this->filehandler_ = tmpfile64();
-	if (this->filehandler_ == NULL){
+	if (this->filehandler_ == NULL) {
 		std::cout << "TEMP File fail!" << std::endl;
 		throw "TEMP File fail!";
 	}
 	int fd = fileno(this->filehandler_);
-	lseek(fd, this->mmapLength_-1, SEEK_SET);
+	lseek(fd, this->mmapLength_ - 1, SEEK_SET);
 	write(fd, "", 1);
 	this->bitArray_ = (unsigned char *) mmap(NULL, this->mmapLength_,
 			PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if (this->bitArray_ == NULL) {
-		std::cout <<"MMAP failed!" << std::endl;
+		std::cout << "MMAP failed!" << std::endl;
 		throw "MMAP failed!";
 	}
 	//	madvise(this->bitArray_, this->mmapLength_, MADV_SEQUENTIAL);
@@ -118,6 +121,30 @@ void FSBloomFilter::add(const unsigned char *key) {
 		this->itemCount_++;
 }
 
+void FSBloomFilter::addAll(const unsigned char* keys, const std::size_t count) {
+	if (this->hardMaximum_ && this->itemCount_ + count > maxElements_)
+		throw "Maximum of Elements reached, adding failed";
+	uint64_t hashes[count * this->functionCount_];
+	for (int i = 0; i < count; i++) {
+		for (int j = 0; j < this->functionCount_; j++) {
+			hashes[i * this->functionCount_ + j] = this->hashFunction_->hash(
+					keys + (this->hashsize_ * i), this->hashsize_, j);
+		}
+	}
+	std::sort(hashes, hashes + (count * this->functionCount_));
+	std::size_t bit_index = 0;
+	std::size_t bit = 0;
+	for (int i = 0; i < count * this->functionCount_; i++) {
+		compute_indices(hashes[i], bit_index, bit);
+		this->bitArray_[bit_index / BYTESIZE] |= bit_mask[bit];
+	}
+	if (this->itemCount_ + count < std::numeric_limits<uint64_t>::max()) {
+		this->itemCount_ += count;
+	} else {
+		this->itemCount_ = std::numeric_limits<uint64_t>::max();
+	}
+}
+
 bool FSBloomFilter::contains(const unsigned char *key) const {
 	std::size_t bit_index = 0;
 	std::size_t bit = 0;
@@ -135,14 +162,25 @@ bool FSBloomFilter::contains(const unsigned char *key) const {
 
 std::size_t FSBloomFilter::containsAll(const unsigned char *keys,
 		const std::size_t count) const {
-	std::size_t i;
-	for (i = 0; i < count; i++) {
-		if (!this->contains(keys + (this->hashsize_ * i))) {
-			return i;
+	uint64_t hashes[count * this->functionCount_];
+	for (int i = 0; i < count; i++) {
+		for (int j = 0; j < this->functionCount_; j++) {
+			hashes[i * this->functionCount_ + j] = this->hashFunction_->hash(
+					keys + (this->hashsize_ * i), this->hashsize_, j);
 		}
 	}
-	return count;
+	std::sort(hashes, hashes + (count * this->functionCount_));
+	std::size_t bit_index = 0;
+	std::size_t bit = 0;
+	for (int i = 0; i < count * this->functionCount_; i++) {
+		compute_indices(hashes[i], bit_index, bit);
+		if ((this->bitArray_[bit_index / BYTESIZE] & bit_mask[bit])
+				!= bit_mask[bit]) {
+			return i==0?1:i;
+		}
+	}
 }
+
 void FSBloomFilter::compute_indices(const uint64_t hash,
 		std::size_t& bit_index, std::size_t& bit) const {
 	bit_index = hash % this->filterSize_;
