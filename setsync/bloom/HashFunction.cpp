@@ -33,8 +33,7 @@ size_t SplittingMDHashFunction::count() const {
 
 uint64_t SplittingMDHashFunction::hash(const unsigned char * input,
 		const std::size_t length) const {
-	//TODO
-	throw "MUST BE IMPLEMENTED";
+	return hash(input,length,0);
 }
 
 uint64_t SplittingMDHashFunction::hash(const unsigned char * input,
@@ -58,45 +57,43 @@ size_t SaltedHashFunction::count() const {
 
 uint64_t SaltedHashFunction::hash(const unsigned char * input,
 		const std::size_t length) const {
-	//TODO
-	throw "MUST BE IMPLEMENTED";
+	return hash(input, length, 0);
 }
 
 uint64_t SaltedHashFunction::hash(const unsigned char * input,
 		const std::size_t length, const std::size_t function) const {
 	const unsigned char* itr = input;
-	unsigned int remaining_length = length;
+	std::size_t remaining_length = length;
 	uint64_t hash = this->_salt[function];
-	unsigned int loop = 0;
+	uint64_t loop = 0;
 	while (remaining_length >= 8) {
-		const unsigned int& i1 = *(reinterpret_cast<const unsigned int*> (itr));
-		itr += sizeof(unsigned int);
-		const unsigned int& i2 = *(reinterpret_cast<const unsigned int*> (itr));
-		itr += sizeof(unsigned int);
+		const uint32_t& i1 = *(reinterpret_cast<const uint32_t*> (itr));
+		itr += sizeof(uint32_t);
+		const uint32_t& i2 = *(reinterpret_cast<const uint32_t*> (itr));
+		itr += sizeof(uint32_t);
 		hash ^= (hash << 7) ^ i1 * (hash >> 3) ^ (~((hash << 11) + (i2 ^ (hash
 				>> 5))));
 		remaining_length -= 8;
 	}
 	while (remaining_length >= 4) {
-		const unsigned int& i = *(reinterpret_cast<const unsigned int*> (itr));
+		const uint32_t& i = *(reinterpret_cast<const uint32_t*> (itr));
 		if (loop & 0x01)
 			hash ^= (hash << 7) ^ i * (hash >> 3);
 		else
 			hash ^= (~((hash << 11) + (i ^ (hash >> 5))));
 		++loop;
 		remaining_length -= 4;
-		itr += sizeof(unsigned int);
+		itr += sizeof(uint32_t);
 	}
 	while (remaining_length >= 2) {
-		const unsigned short& i =
-				*(reinterpret_cast<const unsigned short*> (itr));
+		const uint16_t& i = *(reinterpret_cast<const uint16_t*> (itr));
 		if (loop & 0x01)
 			hash ^= (hash << 7) ^ i * (hash >> 3);
 		else
 			hash ^= (~((hash << 11) + (i ^ (hash >> 5))));
 		++loop;
 		remaining_length -= 2;
-		itr += sizeof(unsigned short);
+		itr += sizeof(uint16_t);
 	}
 	if (remaining_length) {
 		hash += ((*itr) ^ (hash * 0xA5A5A5A5)) + loop;
@@ -105,7 +102,7 @@ uint64_t SaltedHashFunction::hash(const unsigned char * input,
 }
 
 void SaltedHashFunction::generate_salt() {
-	const unsigned int predef_salt_count = 64;
+	const uint32_t predef_salt_count = 64;
 	static const int predef_salt[predef_salt_count] = { 0xAAAAAAAA, 0x55555555,
 			0x33333333, 0xCCCCCCCC, 0x66666666, 0x99999999, 0xB5B5B5B5,
 			0x4B4B4B4B, 0xAA55AA55, 0x55335533, 0x33CC33CC, 0xCC66CC66,
