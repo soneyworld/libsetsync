@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <vector>
 #include <string>
+#include "setsync/sha1.h"
 namespace bloom {
 
 class HashFunction {
@@ -35,7 +36,7 @@ public:
 class SplittingMDHashFunction: public HashFunction {
 public:
 	SplittingMDHashFunction(const std::size_t outputLength,
-			const std::size_t hashSize = 20);
+			const std::size_t hashSize = SHA_DIGEST_LENGTH);
 	virtual ~SplittingMDHashFunction();
 	virtual size_t count() const;
 	virtual uint64_t
