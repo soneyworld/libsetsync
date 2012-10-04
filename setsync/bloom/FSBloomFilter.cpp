@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <typeinfo>
 #include <algorithm>
+#include "DoubleHashingScheme.h"
 
 #ifndef BYTESIZE
 #define BYTESIZE 8
@@ -26,7 +27,7 @@ FSBloomFilter::FSBloomFilter(const uint64_t maxNumberOfElements,
 	filehandler_(NULL) {
 	this->hashsize_ = hashsize;
 	init(falsePositiveRate, hardMaximum, maxNumberOfElements);
-	this->hashFunction_ = new SaltedHashFunction(this->functionCount_);
+	this->hashFunction_ = new DoubleHashingScheme(this->hashsize_);
 }
 
 FSBloomFilter::FSBloomFilter(const std::string hashFunction,

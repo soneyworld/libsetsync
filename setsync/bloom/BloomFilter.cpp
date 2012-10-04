@@ -18,6 +18,7 @@
 #include <sstream>
 #include <typeinfo>
 #include <algorithm>
+#include "DoubleHashingScheme.h"
 namespace bloom {
 
 uint64_t AbstractBloomFilter::numberOfElements() const {
@@ -84,7 +85,7 @@ BloomFilter::BloomFilter(const uint64_t maxNumberOfElements,
 		const std::size_t hashsize) {
 	this->hashsize_ = hashsize;
 	init(falsePositiveRate, hardMaximum, maxNumberOfElements);
-	this->hashFunction_ = new SaltedHashFunction(this->functionCount_);
+	this->hashFunction_ = new DoubleHashingScheme(this->hashsize_);
 }
 
 BloomFilter::BloomFilter(const std::string hashFunction,
