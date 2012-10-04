@@ -4,7 +4,8 @@ noinst_HEADERS = \
 	MemTrieTest.h \
 	FSTrieTest.h \
 	BloomFilterTest.h \
-	FSBloomFilterTest.h
+	FSBloomFilterTest.h \
+	DoubleHashingSchemeTest.h
 	
 
 unittest_SOURCES = \
@@ -13,7 +14,8 @@ unittest_SOURCES = \
 	MemTrieTest.cpp \
 	FSTrieTest.cpp \
 	BloomFilterTest.cpp \
-	FSBloomFilterTest.cpp
+	FSBloomFilterTest.cpp \
+	DoubleHashingSchemeTest.cpp
 	
 
 # what flags you want to pass to the C compiler & linker

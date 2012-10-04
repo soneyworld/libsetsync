@@ -5,8 +5,18 @@ if OPENSSL
 AM_CPPFLAGS += @OPENSSL_CFLAGS@
 AM_LDFLAGS += @OPENSSL_LIBS@
 endif
-h_sources = BloomFilter.h CountingBloomFilter.h bloom.h HashFunction.h FSBloomFilter.h
-cpp_sources = BloomFilter.cpp CountingBloomFilter.cpp bloom.c HashFunction.cpp FSBloomFilter.cpp
+h_sources = BloomFilter.h \
+			CountingBloomFilter.h \
+			bloom.h \
+			HashFunction.h \
+			FSBloomFilter.h \
+			DoubleHashingScheme.h
+cpp_sources = BloomFilter.cpp \
+			CountingBloomFilter.cpp \
+			bloom.c \
+			HashFunction.cpp \
+			FSBloomFilter.cpp \
+			DoubleHashingScheme.cpp
 if SQLITE
 AM_CPPFLAGS += @SQLITE_CFLAGS@
 AM_LDFLAGS += @SQLITE_LIBS@
