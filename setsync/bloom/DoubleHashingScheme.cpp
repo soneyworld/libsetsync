@@ -9,10 +9,17 @@
 
 namespace bloom {
 
-DoubleHashingScheme::DoubleHashingScheme() {}
-DoubleHashingScheme::~DoubleHashingScheme() {}
-ExtendedDoubleHashingScheme::ExtendedDoubleHashingScheme() {}
-ExtendedDoubleHashingScheme::~ExtendedDoubleHashingScheme() {}
+DoubleHashingScheme::DoubleHashingScheme(const std::size_t hashsize) :
+	hashsize_(hashsize) {
+}
+DoubleHashingScheme::~DoubleHashingScheme() {
+}
+ExtendedDoubleHashingScheme::ExtendedDoubleHashingScheme(
+		const std::size_t hashsize) :
+	DoubleHashingScheme(hashsize) {
+}
+ExtendedDoubleHashingScheme::~ExtendedDoubleHashingScheme() {
+}
 
 uint64_t DoubleHashingScheme::hash(const unsigned char * input,
 		const std::size_t length) const {
@@ -20,13 +27,13 @@ uint64_t DoubleHashingScheme::hash(const unsigned char * input,
 }
 uint64_t DoubleHashingScheme::hash(const unsigned char * input,
 		const std::size_t length, const std::size_t function) const {
-	if(length!=20)
+	if (hashsize_ < sizeof(uint64_t) * 2 || this->hashsize_ != length)
 		throw "Must be implemented";
 	uint64_t f1 = 0;
 	uint64_t f2 = 0;
-	for(int i = 0;i< sizeof(uint64_t); i++){
-		f1 = f1 | *(input+i);
-		f2 = f2 | *(input+i+sizeof(uint64_t));
+	for (int i = 0; i < sizeof(uint64_t); i++) {
+		f1 = f1 | *(input + i);
+		f2 = f2 | *(input + i + sizeof(uint64_t));
 		f1 = f1 << 8;
 		f2 = f2 << 8;
 	}
@@ -37,23 +44,25 @@ size_t DoubleHashingScheme::count() const {
 }
 
 uint64_t ExtendedDoubleHashingScheme::hash(const unsigned char * input,
-		const std::size_t length, const std::size_t function) const{
-	if(length!=20)
-		throw "Must be implemented";
-	uint64_t f1 = 0;
-	uint64_t f2 = 0;
-	for(int i = 0;i< sizeof(uint64_t); i++){
-		f1 = f1 | *(input+i);
-		f2 = f2 | *(input+i+sizeof(uint64_t));
-		f1 = f1 << 8;
-		f2 = f2 << 8;
-	}
-	return f1 + function * f2 + extendedHash(function);
+		const std::size_t length, const std::size_t function) const {
+	return DoubleHashingScheme::hash(input, length, function) + extendedHash(
+			input + 2 * sizeof(uint64_t), length - 2 * sizeof(uint64_t),
+			function);
 }
 
-uint64_t ExtendedDoubleHashingScheme::extendedHash(const std::size_t i) const{
-	//TODO Hash function should be added, otherwise
-	return i;
+uint64_t ExtendedDoubleHashingScheme::extendedHash(const unsigned char * input,
+		const std::size_t remaining, const std::size_t function) const {
+	//Use third part of hash as hash function 3, otherwise, simply return function
+	if (remaining > 0) {
+		uint64_t f3 = 0;
+		for (int j = 0; j < sizeof(uint64_t) && j < remaining; j++) {
+			f3 = f3 | *(input + j);
+			f3 = f3 << 8;
+		}
+		return f3 * function;
+	} else {
+		return function;
+	}
 }
 
 }
