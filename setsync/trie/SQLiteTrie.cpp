@@ -28,8 +28,10 @@ bool SQLiteTrie::remove(const unsigned char * hash){
 bool SQLiteTrie::remove(const unsigned char * hash, bool performhash){
 
 }
+bool SQLiteTrie::contains(const unsigned char * hash) const{
+	return false;
+}
 void SQLiteTrie::clear(void){
 
 }
-
 }

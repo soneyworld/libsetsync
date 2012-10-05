@@ -170,6 +170,11 @@ bool MemTrie::remove(const unsigned char * hash, bool performhash) {
 		return result;
 	}
 }
+
+bool MemTrie::contains(const unsigned char * hash) const {
+	return false;
+}
+
 void MemTrie::clear(MemTrieNode * node) {
 	if (node->larger_ != NULL) {
 		clear(node->larger_);

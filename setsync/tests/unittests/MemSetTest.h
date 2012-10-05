@@ -23,7 +23,7 @@ public:
 	void tearDown(void);
 private:
 	setsync::MemSet * memset;
-	char * key_1;
+	unsigned char * key_1;
 
 protected:
 	void testAddingAndErasingElements();

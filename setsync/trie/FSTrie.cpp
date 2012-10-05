@@ -28,6 +28,10 @@ bool FSTrie::remove(const unsigned char * hash){
 bool FSTrie::remove(const unsigned char * hash, bool performhash){
 	return false;
 }
+
+bool FSTrie::contains(const unsigned char * hash) const{
+	return false;
+}
 void FSTrie::clear(void){
 
 }

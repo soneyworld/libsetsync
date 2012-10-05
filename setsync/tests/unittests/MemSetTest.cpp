@@ -8,7 +8,7 @@
 
 void MemSetTest::setUp(void) {
 	this->memset = new setsync::MemSet();
-	this->key_1 = new char[20];
+	this->key_1 = new unsigned char[20];
 
 }
 

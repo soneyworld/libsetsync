@@ -1,35 +1,48 @@
 /*
  * Set.hpp
  *
- *  Created on: 12.07.2012
  *      Author: Till Lorentzen
  */
 
 #ifndef SET_HPP_
 #define SET_HPP_
 #include "set.h"
+#include <stdint.h>
+#include "setsync/bloom/BloomFilter.h"
+#include "setsync/trie/Trie.h"
+#include "setsync/sha1.h"
 namespace setsync {
 
 class Set {
 private:
-	size_t size;
-	size_t maxSize;
+	size_t size_;
+	size_t maxSize_;
+	size_t hashSize_;
+	bool hardMaximum_;
 protected:
 	void setSize(const size_t s);
-	void setMaximumSize(const size_t s);
+	bloom::BloomFilter * bf_;
+	trie::Trie * trie_;
 public:
-	Set();
+	Set(const uint64_t maxSize = 1000, const bool hardMaximum = false,
+			const std::size_t hashsize = SHA_DIGEST_LENGTH);
 	bool isEmpty() const;
 	size_t getSize() const;
 	size_t getMaximumSize() const;
 
 	// Lookup
-	virtual bool find(const char * key) = 0;
+	virtual bool find(const unsigned char * key);
+	virtual bool find(const char * key);
+	virtual bool find(const std::string key);
 
 	// Modifiers
-	virtual bool insert( const char * key)  = 0;
-	virtual bool erase( const char * key) = 0;
-	virtual void clear() = 0;
+	virtual bool insert(const unsigned char * key);
+	virtual bool insert(const char * key);
+	virtual bool insert(const std::string key);
+	virtual bool erase(const unsigned char * key);
+	virtual bool erase(const char * key);
+	virtual bool erase(const std::string key);
+	virtual void clear();
 
 	virtual ~Set();
 

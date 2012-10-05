@@ -33,6 +33,7 @@ public:
 	virtual bool add(const unsigned char * hash, bool performhash) = 0;
 	virtual bool remove(const unsigned char * hash) = 0;
 	virtual bool remove(const unsigned char * hash, bool performhash) = 0;
+	virtual bool contains(const unsigned char * hash) const = 0;
 	virtual void clear(void) = 0;
 	virtual ~Trie();
 };
