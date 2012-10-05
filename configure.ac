@@ -80,6 +80,23 @@ AC_OPENMP
 
 AC_CHECK_LIB([m], [log])
 
+# BerkeleyDB c++
+AC_ARG_WITH(bdb,
+	AS_HELP_STRING([--with-bdb],[build in BerkeleyDB backend support (default is yes)]),
+    [with_bdb=$withval],
+    [with_bdb=yes])
+if test "$with_bdb" != "no"; then
+	AC_CHECK_LIB(db_cxx, [open], [],[
+		AC_MSG_WARN([You should install db_cxx; please install libraries and development files])
+		with_bdb = "no"
+		])
+	AC_CHECK_HEADERS([db_cxx.h],,[
+    	AC_MSG_WARN([db_cxx.h is missing; please add db_cxx development files])
+		with_bdb = "no"
+	])
+fi
+AM_CONDITIONAL(BERKELEY_DB, test "$with_bdb" = yes)
+
 # For CppUnit testing
 AC_ARG_ENABLE(cppunit,
   [AS_HELP_STRING([--enable-cppunit], [enable unit testing with cppunit (default: no)])],

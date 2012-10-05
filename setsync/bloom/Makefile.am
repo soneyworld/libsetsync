@@ -24,5 +24,10 @@ h_sources +=
 cpp_sources +=
 endif
 
+if BERKELEY_DB
+h_sources += DBBloomFilter.h
+cpp_sources += DBBloomFilter.cpp
+endif
+
 noinst_LTLIBRARIES = libbloom.la
 libbloom_la_SOURCES= $(h_sources) $(cpp_sources)
