@@ -36,7 +36,7 @@
 #define SHA1_Init( CTX ) \
         sha1_starts( (CTX) )
 #define SHA1( BUF, LEN, OUT) \
-		sha1((BUF), (unsigned char *)(LEN), (OUT))
+		sha1((unsigned char *)(BUF), (LEN), (OUT))
 #define SHA1_Update(  CTX, BUF, LEN ) \
         sha1_update( (CTX), (unsigned char *)(BUF), (LEN) )
 #define SHA1_Final( OUT, CTX ) \
