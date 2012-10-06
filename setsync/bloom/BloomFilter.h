@@ -148,7 +148,7 @@ protected:
  * Basic BlommFilter class
  *
  */
-class BloomFilter: public AbstractBloomFilter {
+class BloomFilter: public virtual AbstractBloomFilter {
 public:
 	/**
 	 * \param maxNumberOfElements which should be represented by the bloom filter

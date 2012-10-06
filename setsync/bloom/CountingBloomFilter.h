@@ -10,7 +10,7 @@
 
 namespace bloom {
 
-class CountingBloomFilter: public BloomFilter {
+class CountingBloomFilter: public virtual AbstractBloomFilter {
 public:
 	CountingBloomFilter();
 	CountingBloomFilter(const CountingBloomFilter& filter);
