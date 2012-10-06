@@ -11,7 +11,7 @@
 
 namespace bloom {
 
-class FSBloomFilter: public bloom::AbstractBloomFilter {
+class FSBloomFilter: public virtual bloom::AbstractBloomFilter {
 public:
 	/**
 	 * \param maxNumberOfElements which should be represented by the bloom filter
@@ -85,6 +85,10 @@ public:
 	 * \return the difference between the both bloom filter
 	 */
 	virtual AbstractBloomFilter& operator ^=(const AbstractBloomFilter& filter);
+	/**
+	 * \return a string containing the filter as a sequence of zeros and ones
+	 */
+	virtual std::string toString();
 private:
 	/// Help function to get the right positions inside the byte array of the bloom filter
 	void compute_indices(const uint64_t hash, std::size_t& bit_index,

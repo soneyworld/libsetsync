@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <typeinfo>
 #include <algorithm>
+#include <sstream>
 #include "DoubleHashingScheme.h"
 
 #ifndef BYTESIZE
@@ -116,7 +117,7 @@ void FSBloomFilter::add(const unsigned char *key) {
 	for (int i = 0; i < this->functionCount_; i++) {
 		uint64_t pos = this->hashFunction_->hash(key, SHA_DIGEST_LENGTH, i);
 		compute_indices(pos, bit_index, bit);
-		this->bitArray_[bit_index / BYTESIZE] |= bit_mask[bit];
+		this->bitArray_[bit_index] |= bit_mask[bit];
 	}
 	if (this->itemCount_ < std::numeric_limits<uint64_t>::max())
 		this->itemCount_++;
@@ -137,7 +138,7 @@ void FSBloomFilter::addAll(const unsigned char* keys, const std::size_t count) {
 	std::size_t bit = 0;
 	for (int i = 0; i < count * this->functionCount_; i++) {
 		compute_indices(hashes[i], bit_index, bit);
-		this->bitArray_[bit_index / BYTESIZE] |= bit_mask[bit];
+		this->bitArray_[bit_index] |= bit_mask[bit];
 	}
 	if (this->itemCount_ + count < std::numeric_limits<uint64_t>::max()) {
 		this->itemCount_ += count;
@@ -153,7 +154,7 @@ bool FSBloomFilter::contains(const unsigned char *key) const {
 	for (int i = 0; i < this->functionCount_; i++) {
 		uint64_t pos = this->hashFunction_->hash(key, SHA_DIGEST_LENGTH, i);
 		compute_indices(pos, bit_index, bit);
-		if ((this->bitArray_[bit_index / BYTESIZE] & bit_mask[bit])
+		if ((this->bitArray_[bit_index] & bit_mask[bit])
 				!= bit_mask[bit]) {
 			return false;
 		}
@@ -175,7 +176,7 @@ std::size_t FSBloomFilter::containsAll(const unsigned char *keys,
 	std::size_t bit = 0;
 	for (int i = 0; i < count * this->functionCount_; i++) {
 		compute_indices(hashes[i], bit_index, bit);
-		if ((this->bitArray_[bit_index / BYTESIZE] & bit_mask[bit])
+		if ((this->bitArray_[bit_index] & bit_mask[bit])
 				!= bit_mask[bit]) {
 			return i==0?1:i;
 		}
@@ -184,8 +185,8 @@ std::size_t FSBloomFilter::containsAll(const unsigned char *keys,
 
 void FSBloomFilter::compute_indices(const uint64_t hash,
 		std::size_t& bit_index, std::size_t& bit) const {
-	bit_index = hash % this->filterSize_;
-	bit = bit_index % BYTESIZE;
+	bit_index = ((hash % this->filterSize_)+7)/BYTESIZE;
+	bit = hash % BYTESIZE;
 }
 
 AbstractBloomFilter& FSBloomFilter::operator &=(
@@ -193,8 +194,7 @@ AbstractBloomFilter& FSBloomFilter::operator &=(
 	/* intersection */
 	const FSBloomFilter& filter_ = dynamic_cast<const FSBloomFilter&> (filter);
 	if (this->filterSize_ == filter_.filterSize_) {
-		for (std::size_t i = 0; i < ((this->filterSize_ + (BYTESIZE - 1))
-				/ BYTESIZE); ++i) {
+		for (std::size_t i = 0; i < this->mmapLength_; ++i) {
 			this->bitArray_[i] &= filter_.bitArray_[i];
 		}
 	}
@@ -206,8 +206,7 @@ AbstractBloomFilter& FSBloomFilter::operator |=(
 	/* union */
 	const FSBloomFilter& filter_ = dynamic_cast<const FSBloomFilter&> (filter);
 	if (this->filterSize_ == filter_.filterSize_) {
-		for (std::size_t i = 0; i < ((this->filterSize_ + (BYTESIZE - 1))
-				/ BYTESIZE); ++i) {
+		for (std::size_t i = 0; i < this->mmapLength_; ++i) {
 			this->bitArray_[i] |= filter_.bitArray_[i];
 		}
 	}
@@ -219,8 +218,7 @@ AbstractBloomFilter& FSBloomFilter::operator ^=(
 	/* difference */
 	const FSBloomFilter& filter_ = dynamic_cast<const FSBloomFilter&> (filter);
 	if (this->filterSize_ == filter_.filterSize_) {
-		for (std::size_t i = 0; i < ((this->filterSize_ + (BYTESIZE - 1))
-				/ BYTESIZE); ++i) {
+		for (std::size_t i = 0; i < this->mmapLength_; ++i) {
 			this->bitArray_[i] ^= filter_.bitArray_[i];
 		}
 	}
@@ -274,5 +272,19 @@ bool FSBloomFilter::operator !=(const AbstractBloomFilter& filter) const {
 	} catch (const std::bad_cast& e) {
 		return false;
 	}
+}
+
+std::string FSBloomFilter::toString() {
+	std::stringstream ss;
+	for (int i = 0; i < this->mmapLength_; i++) {
+		unsigned char byte = this->bitArray_[i];
+		for (int j = 7; j >= 0; j--) {
+			if (byte & (1 << j))
+				ss << "1";
+			else
+				ss << "0";
+		}
+	}
+	return ss.str();
 }
 }
