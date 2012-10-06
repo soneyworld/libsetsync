@@ -32,10 +32,10 @@ uint64_t DoubleHashingScheme::hash(const unsigned char * input,
 	uint64_t f1 = 0;
 	uint64_t f2 = 0;
 	for (int i = 0; i < sizeof(uint64_t); i++) {
-		f1 = f1 | *(input + i);
-		f2 = f2 | *(input + i + sizeof(uint64_t));
 		f1 = f1 << 8;
 		f2 = f2 << 8;
+		f1 = f1 | *(input + i);
+		f2 = f2 | *(input + i + sizeof(uint64_t));
 	}
 	return f1 + function * f2;
 }
