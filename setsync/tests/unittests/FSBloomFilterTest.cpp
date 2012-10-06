@@ -49,12 +49,14 @@ void FSBloomFilterTest::testInsert() {
 	CPPUNIT_ASSERT_EQUAL(true, Filter1.contains(cad1));
 
 	//	 test signature (const std::string& key)
+	Filter1.AbstractBloomFilter::add(string("hello"));
+	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains(string("hello")));
 
-	string strin;
-	strin = "hello";
-	Filter1.AbstractBloomFilter::add(strin);
-	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains(strin));
-//	std::cout << Filter1.toString() << std::endl;
+	//	 test signature (const char* key)
+
+	Filter1.AbstractBloomFilter::add("bye");
+	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains("bye"));
+	//std::cout << std::endl << Filter1.toString() << std::endl;
 
 }
 
