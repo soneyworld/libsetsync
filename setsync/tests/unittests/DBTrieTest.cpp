@@ -13,7 +13,8 @@ void DBTrieTest::tearDown(void) {
 }
 
 void DBTrieTest::testAdding() {
-	trie::DBTrie trie;
+	Db db(NULL,0);
+	trie::DBTrie trie(&db);
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie.getSize() == 1);
@@ -24,7 +25,8 @@ void DBTrieTest::testAdding() {
 }
 
 void DBTrieTest::testAddingAndErasingElements() {
-	trie::DBTrie trie;
+	Db db(NULL,0);
+	trie::DBTrie trie(&db);
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie.getSize() == 1);
@@ -45,7 +47,8 @@ void DBTrieTest::testAddingAndErasingElements() {
 }
 
 void DBTrieTest::testAddingAndCleaningElements() {
-	trie::DBTrie trie;
+	Db db(NULL,0);
+	trie::DBTrie trie(&db);
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie.getSize() == 1);

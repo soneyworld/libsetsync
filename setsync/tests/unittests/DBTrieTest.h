@@ -22,7 +22,6 @@ public:
 	void setUp(void);
 	void tearDown(void);
 private:
-
 protected:
 	void testAdding();
 	void testAddingAndErasingElements();
