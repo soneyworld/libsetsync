@@ -7,6 +7,7 @@
 #include "Set.hpp"
 #include "MemSet.h"
 #include "setsync/bloom/CountingBloomFilter.h"
+#include "setsync/trie/DBTrie.h"
 #include <typeinfo>
 #include <string.h>
 #include <iostream>
@@ -19,7 +20,6 @@ Set::Set(const uint64_t maxSize, const bool hardMaximum,
 }
 
 Set::~Set() {
-
 }
 
 bool Set::isEmpty() const {
