@@ -9,6 +9,7 @@
 
 #include <cstring>
 #include <setsync/sha1.h>
+#include <string>
 
 namespace trie {
 
@@ -29,8 +30,12 @@ public:
 	size_t getSize() const;
 	size_t getHashSize() const;
 	unsigned char * hashscratch;
+	virtual bool add(const char * str);
+	virtual bool add(const std::string& str);
 	virtual bool add(const unsigned char * hash);
 	virtual bool add(const unsigned char * hash, bool performhash) = 0;
+	virtual bool remove(const char * str);
+	virtual bool remove(const std::string& str);
 	virtual bool remove(const unsigned char * hash);
 	virtual bool remove(const unsigned char * hash, bool performhash) = 0;
 	virtual bool contains(const unsigned char * hash) const = 0;
