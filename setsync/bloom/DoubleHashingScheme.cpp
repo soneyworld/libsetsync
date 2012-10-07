@@ -37,7 +37,7 @@ uint64_t DoubleHashingScheme::hash(const unsigned char * input,
 		f1 = f1 | *(input + i);
 		f2 = f2 | *(input + i + sizeof(uint64_t));
 	}
-	return f1 + function * f2;
+	return f1 + (function + 1) * f2;
 }
 size_t DoubleHashingScheme::count() const {
 	return std::numeric_limits<size_t>::max();
