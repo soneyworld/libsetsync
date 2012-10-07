@@ -31,6 +31,11 @@ unittest_SOURCES += SQLiteTrieTest.cpp SQLiteIndexTest.cpp
 noinst_HEADERS += SQLiteTrieTest.h SQLiteIndexTest.h
 endif
 
+if BERKELEY_DB
+unittest_SOURCES += DBTrieTest.cpp
+noinst_HEADERS += DBTrieTest.h
+endif
+
 INCLUDES = -I@top_srcdir@ -I@top_srcdir@/setsync/tests/unittests
 
 check_PROGRAMS = unittest

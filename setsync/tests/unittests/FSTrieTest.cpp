@@ -16,6 +16,17 @@ void FSTrieTest::tearDown(void) {
 	delete this->key_1;
 }
 
+void FSTrieTest::testAdding(){
+	trie::FSTrie trie;
+	CPPUNIT_ASSERT(trie.getSize() == 0);
+	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
+	CPPUNIT_ASSERT(trie.getSize() == 1);
+	CPPUNIT_ASSERT(!trie.Trie::add("bla1"));
+	CPPUNIT_ASSERT(trie.getSize() == 1);
+	CPPUNIT_ASSERT(trie.Trie::add("bla2"));
+	CPPUNIT_ASSERT(trie.getSize() == 2);
+}
+
 void FSTrieTest::testAddingAndErasingElements() {
 	CPPUNIT_ASSERT(fstrie->getSize() == 0);
 	fstrie->add(key_1);
