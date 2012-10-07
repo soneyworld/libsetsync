@@ -12,6 +12,7 @@
 namespace bloom {
 
 class FSBloomFilter: public virtual bloom::AbstractBloomFilter {
+	friend class FSBloomFilterTest;
 public:
 	/**
 	 * \param maxNumberOfElements which should be represented by the bloom filter

@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <sstream>
 #include "DoubleHashingScheme.h"
+#include <stdexcept>
 
 #ifndef BYTESIZE
 #define BYTESIZE 8
@@ -47,7 +48,7 @@ void FSBloomFilter::init(const float falsePositiveRate, const bool hardMaximum,
 	this->bitArray_ = NULL;
 	if (falsePositiveRate >= 1 || falsePositiveRate <= 0) {
 		std::cout << "Wrong false positive rate" << std::endl;
-		throw "";
+		throw std::runtime_error("Wrong false positive rate");
 	}
 
 	this->hardMaximum_ = hardMaximum;
@@ -68,7 +69,7 @@ void FSBloomFilter::init(const float falsePositiveRate, const bool hardMaximum,
 		this->filehandler_ = tmpfile64();
 	if (this->filehandler_ == NULL) {
 		std::cout << "TEMP File fail!" << std::endl;
-		throw "TEMP File fail!";
+		throw std::runtime_error("TEMP File fail!");
 	}
 	int fd = fileno(this->filehandler_);
 	lseek(fd, this->mmapLength_ - 1, SEEK_SET);
@@ -77,7 +78,7 @@ void FSBloomFilter::init(const float falsePositiveRate, const bool hardMaximum,
 			PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if (this->bitArray_ == NULL) {
 		std::cout << "MMAP failed!" << std::endl;
-		throw "MMAP failed!";
+		throw std::runtime_error("MMAP failed!");
 	}
 	//	madvise(this->bitArray_, this->mmapLength_, MADV_SEQUENTIAL);
 	memset(this->bitArray_, 0x00, this->mmapLength_);
@@ -97,7 +98,7 @@ void FSBloomFilter::load(std::istream &in, const uint64_t numberOfElements) {
 		in.read((char*) this->bitArray_, this->mmapLength_);
 		this->itemCount_ = numberOfElements;
 	} else {
-		throw "This bloom filter already has got elements";
+		throw std::runtime_error("This bloom filter already has got elements");
 	}
 }
 uint64_t FSBloomFilter::save(std::ostream &out) {
@@ -111,7 +112,7 @@ void FSBloomFilter::clear() {
 
 void FSBloomFilter::add(const unsigned char *key) {
 	if (this->hardMaximum_ && this->itemCount_ >= maxElements_)
-		throw "Maximum of Elements reached, adding failed";
+		throw std::runtime_error( "Maximum of Elements reached, adding failed");
 	std::size_t bit_index = 0;
 	std::size_t bit = 0;
 	for (int i = 0; i < this->functionCount_; i++) {
@@ -125,7 +126,7 @@ void FSBloomFilter::add(const unsigned char *key) {
 
 void FSBloomFilter::addAll(const unsigned char* keys, const std::size_t count) {
 	if (this->hardMaximum_ && this->itemCount_ + count > maxElements_)
-		throw "Maximum of Elements reached, adding failed";
+		throw std::runtime_error( "Maximum of Elements reached, adding failed");
 	uint64_t hashes[count * this->functionCount_];
 	for (int i = 0; i < count; i++) {
 		for (int j = 0; j < this->functionCount_; j++) {
