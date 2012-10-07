@@ -25,17 +25,17 @@ CPPUNIT_TEST_SUITE_REGISTRATION( FSBloomFilterTest);
 void FSBloomFilterTest::testLoad() {
 	bloom::FSBloomFilter Filter1(10, false, 0.01);
 	bloom::FSBloomFilter Filter2(10, false, 0.01);
-	string s1 = "hello";
-	string s2 = "byebye";
-	Filter1.AbstractBloomFilter::add(s1);
-	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains(s1));
-	CPPUNIT_ASSERT_EQUAL(false, Filter2.AbstractBloomFilter::contains(s1));
+	Filter1.AbstractBloomFilter::add("hello");
+	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains("hello"));
+	CPPUNIT_ASSERT_EQUAL(false, Filter2.AbstractBloomFilter::contains("hello"));
 	std::stringstream buf;
 	Filter1.save(buf);
 	Filter2.load(buf, Filter1.numberOfElements());
-	CPPUNIT_ASSERT_EQUAL(true, Filter2.AbstractBloomFilter::contains(s1));
 	CPPUNIT_ASSERT_EQUAL(Filter1.numberOfElements(), Filter2.numberOfElements());
-
+//	std::cout << std::endl << Filter1.toString() << std::endl;
+//	std::cout << std::endl << Filter2.toString() << std::endl;
+	CPPUNIT_ASSERT(Filter1 == Filter2);
+	CPPUNIT_ASSERT(Filter2.AbstractBloomFilter::contains("hello"));
 }
 
 void FSBloomFilterTest::testInsert() {
