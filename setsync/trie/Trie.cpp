@@ -54,4 +54,11 @@ void Trie::setHashingPerformed(){
 	this->needsHashPerforming = false;
 }
 
+bool Trie::add(const unsigned char * hash){
+	return add(hash, true);
+}
+
+bool Trie::remove(const unsigned char * hash){
+	return remove(hash, true);
+}
 }

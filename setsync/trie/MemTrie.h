@@ -41,9 +41,7 @@ private:
 public:
 	MemTrie(const size_t hashsize = SHA_DIGEST_LENGTH);
 	virtual ~MemTrie();
-	bool add(const unsigned char * hash);
 	bool add(const unsigned char * hash, bool performhash);
-	bool remove(const unsigned char * hash);
 	bool remove(const unsigned char * hash, bool performhash);
 	bool contains(const unsigned char * hash) const;
 	void clear(void);

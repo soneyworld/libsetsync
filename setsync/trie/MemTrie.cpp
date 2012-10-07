@@ -86,9 +86,7 @@ MemTrie::MemTrie(const size_t hashsize) {
 MemTrie::~MemTrie() {
 	this->clear();
 }
-bool MemTrie::add(const unsigned char * hash) {
-	return add(hash, true);
-}
+
 bool MemTrie::add(const unsigned char * hash, bool performhash) {
 	MemTrieNode * newnode = new MemTrieNode(this);
 	if (this->root_ == NULL) {
@@ -156,9 +154,7 @@ bool MemTrie::add(const unsigned char * hash, bool performhash) {
 		}
 	}
 }
-bool MemTrie::remove(const unsigned char * hash) {
-	return remove(hash, true);
-}
+
 bool MemTrie::remove(const unsigned char * hash, bool performhash) {
 	if (this->root_ == NULL) {
 		return false;

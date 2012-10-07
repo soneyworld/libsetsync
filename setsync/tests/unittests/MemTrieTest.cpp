@@ -26,24 +26,24 @@ void MemTrieTest::tearDown(void) {
 
 void MemTrieTest::testAddingAndErasingElements() {
 	CPPUNIT_ASSERT(memtrie->getSize() == 0);
-	memtrie->add(key_1);
+	memtrie->Trie::add(key_1);
 	CPPUNIT_ASSERT(memtrie->getSize() == 1);
-	memtrie->remove(key_1);
+	memtrie->Trie::remove(key_1);
 	CPPUNIT_ASSERT(memtrie->getSize() == 0);
-	memtrie->add(key_1);
+	memtrie->Trie::add(key_1);
 	CPPUNIT_ASSERT(memtrie->getSize() == 1);
 }
 
 void MemTrieTest::testAddingAndCleaningElements() {
 	CPPUNIT_ASSERT(memtrie->getSize() == 0);
-	bool result = memtrie->add(key_1);
+	bool result = memtrie->Trie::add(key_1);
 	CPPUNIT_ASSERT(memtrie->getSize() == 1);
 	CPPUNIT_ASSERT(result == true);
 	// Add it again
-	result = memtrie->add(key_1);
+	result = memtrie->Trie::add(key_1);
 	CPPUNIT_ASSERT(memtrie->getSize() == 1);
 	CPPUNIT_ASSERT(result == false);
-	result = memtrie->add(key_2);
+	result = memtrie->Trie::add(key_2);
 	CPPUNIT_ASSERT(memtrie->getSize() == 2);
 	CPPUNIT_ASSERT(result == true);
 	memtrie->clear();

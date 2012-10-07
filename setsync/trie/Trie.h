@@ -29,9 +29,9 @@ public:
 	size_t getSize() const;
 	size_t getHashSize() const;
 	unsigned char * hashscratch;
-	virtual bool add(const unsigned char * hash) = 0;
+	virtual bool add(const unsigned char * hash);
 	virtual bool add(const unsigned char * hash, bool performhash) = 0;
-	virtual bool remove(const unsigned char * hash) = 0;
+	virtual bool remove(const unsigned char * hash);
 	virtual bool remove(const unsigned char * hash, bool performhash) = 0;
 	virtual bool contains(const unsigned char * hash) const = 0;
 	virtual void clear(void) = 0;
