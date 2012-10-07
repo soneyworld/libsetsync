@@ -10,6 +10,7 @@
 #include "setsync/Set.hpp"
 class SetTest: public CPPUNIT_NS::TestCase {
 
+
 CPPUNIT_TEST_SUITE( SetTest);
 	CPPUNIT_TEST( testInsert);
 	CPPUNIT_TEST( testErase);
@@ -28,5 +29,5 @@ protected:
 	void testFind();
 	void testMaximum();
 };
-CPPUNIT_TEST_SUITE_REGISTRATION( SetTest);
+//CPPUNIT_TEST_SUITE_REGISTRATION( SetTest);
 #endif /* SETTEST_H_ */
