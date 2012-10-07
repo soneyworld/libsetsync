@@ -10,5 +10,10 @@ h_sources += SQLiteTrie.h
 cpp_sources += SQLiteTrie.cpp
 endif
 
+if BERKELEY_DB
+h_sources += DBTrie.h
+cpp_sources += DBTrie.cpp
+endif
+
 noinst_LTLIBRARIES = libtrie.la
 libtrie_la_SOURCES= $(h_sources) $(cpp_sources)
