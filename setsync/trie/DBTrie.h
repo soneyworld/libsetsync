@@ -15,18 +15,27 @@
 
 namespace trie {
 
-typedef struct trienode {
+class DBValue{
+public:
 	unsigned char parent[MAXFIELD];
 	unsigned char smaller[MAXFIELD];
 	unsigned char larger[MAXFIELD];
-	unsigned char hash[MAXFIELD];
 	unsigned char prefix[MAXFIELD];
 	uint8_t prefix_mask;
-} TRIENODE;
+};
+
+class DBNode{
+public:
+	DBValue value;
+	unsigned char hash[MAXFIELD];
+};
 
 class DBTrie: public trie::Trie {
 private:
 	Db * db_;
+	DBNode * root_;
+	void getRootFromDB();
+	void putRootToDB();
 public:
 	DBTrie(Db * db, const size_t hashsize = SHA_DIGEST_LENGTH);
 	virtual ~DBTrie();

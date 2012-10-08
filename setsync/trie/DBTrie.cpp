@@ -5,11 +5,11 @@
  */
 
 #include "DBTrie.h"
-
+#define ROOT_NAME "root"
 namespace trie {
 
 DBTrie::DBTrie(Db * db, const size_t hashsize) :
-	Trie(hashsize) {
+	Trie(hashsize) , root_(NULL){
 	// Instantiate the Db object
 	this->db_ = db;
 	// Open flags;
@@ -33,10 +33,16 @@ DBTrie::DBTrie(Db * db, const size_t hashsize) :
 		this->db_ = NULL;
 		throw e;
 	}
-
+	// Loading root, if available
+	getRootFromDB();
 }
 
 DBTrie::~DBTrie() {
+	if(root_!=NULL && this->db_!=NULL){
+		putRootToDB();
+		delete root_;
+		root_ = NULL;
+	}
 	try {
 		this->db_->close(0);
 //		this->db_->remove(NULL, "trie", 0);
@@ -51,6 +57,12 @@ DBTrie::~DBTrie() {
 }
 
 bool DBTrie::add(const unsigned char * hash, bool performhash) {
+	if(this->root_==NULL){
+		this->root_ = new DBNode;
+		memcpy(this->root_->hash,hash,this->getHashSize());
+		memcpy(this->root_->value.prefix,hash,this->getHashSize());
+		this->root_->value.prefix_mask = 8 * this->getHashSize();
+	}
 	unsigned char sha[this->getHashSize()];
 	memcpy(sha, hash, this->getHashSize());
 	Dbt key(sha, this->getHashSize());
@@ -95,6 +107,30 @@ void DBTrie::clear(void) {
 	u_int32_t count;
 	this->db_->truncate(NULL, &count, 0);
 	this->setSize(0);
+	if(root_!=NULL){
+		delete root_;
+		root_ = NULL;
+	}
+
+}
+
+void DBTrie::getRootFromDB(){
+	char rootname[] = {ROOT_NAME};
+	DBNode root_node;
+	Dbt key(rootname, strlen(rootname));
+	Dbt data(&root_node,sizeof(DBNode));
+	int ret = this->db_->get(NULL,&key,&data,0);
+	if(ret != DB_NOTFOUND){
+		this->root_ = new DBNode();
+		memcpy(this->root_,&root_node, sizeof(DBNode));
+	}
+}
+void DBTrie::putRootToDB(){
+	char rootname[] = {ROOT_NAME};
+	DBNode root_node;
+	Dbt key(rootname, strlen(rootname));
+	Dbt data(&root_node,sizeof(DBNode));
+	this->db_->put(NULL,&key,&data,0);
 }
 
 }
