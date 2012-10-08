@@ -10,13 +10,17 @@
 #include "SHA1Generator.h"
 #include <setsync/bloom/BloomFilter.h>
 #include <setsync/bloom/FSBloomFilter.h>
-#include <setsync/index/SQLiteDatabase.h>
-#include <setsync/index/SQLiteIndex.h>
+#include <setsync/bloom/DBBloomFilter.h>
 #include <setsync/bloom/HashFunction.h>
 #include <db_cxx.h>
 
 
 class BFTest : public Test{
+private:
+	void runBF(bloom::AbstractBloomFilter * bf);
+	void runMemBF();
+	void runFSBF();
+	void runDBBF();
 public:
 	BFTest();
 	void run();
