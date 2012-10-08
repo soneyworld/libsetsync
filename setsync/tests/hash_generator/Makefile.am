@@ -2,7 +2,12 @@
 generator_SOURCES = \
 	Main.cpp \
 	SHA1Generator.h	\
-	SHA1Generator.cpp
+	SHA1Generator.cpp \
+	BFTest.h \
+	BFTest.cpp \
+	DBTest.h \
+	DBTest.cpp \
+	Test.h
 
 # what flags you want to pass to the C compiler & linker
 AM_CPPFLAGS = -fopenmp
@@ -16,8 +21,8 @@ endif
 if SQLITE
 AM_CPPFLAGS += @SQLITE_CFLAGS@
 AM_LDFLAGS += @SQLITE_LIBS@
-generator_SOURCES += 
-generator_SOURCES += 
+generator_SOURCES += SQLiteTest.h
+generator_SOURCES += SQLiteTest.cpp
 endif
 
 

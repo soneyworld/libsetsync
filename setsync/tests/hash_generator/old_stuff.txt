@@ -1,0 +1,72 @@
+	//	long pagesize = sysconf(_SC_PAGE_SIZE);
+	//	std::cout << "PAGESIZE: " << pagesize << std::endl;
+		uint64_t stepsize = 100000;
+		bloom::BloomFilter all(1000000000);
+		std::string s = "dfg";
+		std::string dbname = "generated.db";
+	//	sqlite::SQLiteDatabase * db = new sqlite::SQLiteDatabase(dbname);
+	#ifdef SQLITE
+		sqlite::SQLiteDatabase * db = new sqlite::SQLiteDatabase();
+		sqlite::SQLiteIndex index(db, s);
+	#else
+		Db bdb(NULL,0);
+		bdb.open(NULL,NULL,"temp",DB_BTREE,DB_CREATE,0);
+	#endif
+		//	omp_set_num_threads(1);
+	//	omp_lock_t lock;
+	//	omp_init_lock(&lock);
+	//	unsigned int counter = 0;
+	//	unsigned int icounter = 0;
+	//	int thread_id;
+	//	time_t seconds;
+	//	seconds = time(NULL);
+	//	time_t duration = 0;
+	//	time_t iduration = 0;
+	//#pragma omp parallel for schedule(static) private(thread_id)
+		for (int i = 0; i < 1000; i++) {
+	/*		thread_id = omp_get_thread_num();
+			bloom::SaltedHashFunction function(10);*/
+			SHA1Generator generator(i * stepsize, i * stepsize + stepsize);
+			generator.run();
+
+	//		bloom::BloomFilter bf(10000000);
+	//		omp_set_lock(&lock);
+			all.addAll(generator.array, stepsize);
+	//		omp_unset_lock(&lock);
+	//		omp_set_lock(&lock);
+	//		all|=bf;
+	//		omp_unset_lock(&lock);
+	/*
+			for (uint64_t k = 0; k < stepsize; k++) {
+				for (unsigned int j = 0; j < function.count(); j++) {
+					uint64_t hash =
+							function.hash(generator.array + (k * 20), 20, j);
+					omp_set_lock(&lock);
+					index.insert(hash, generator.array + (k * 20), 20);
+					counter++;
+					icounter++;
+					omp_unset_lock(&lock);
+				}
+				if (thread_id == 0) {
+					if (seconds + 10 < time(NULL)) {
+						omp_set_lock(&lock);
+						index.commit();
+						omp_unset_lock(&lock);
+						duration += time(NULL) - seconds;
+						iduration = time(NULL) - seconds;
+						printf("%d inserts after %ld sec (%ld per sec) (%ld per sec in last interval)\n", counter, duration, counter/duration, icounter/iduration);
+						icounter = 0;
+						seconds = time(NULL);
+					}
+				}
+			}
+
+			//		std::cout << "Thread number: " << omp_get_thread_num() << std::endl;
+	*/
+		}/*
+		index.commit();
+		printf("%d inserts after %ld sec (%ld per sec)\n", counter, duration, counter/duration);
+		*/
+	#ifndef SQLITE
+		bdb.close(0);
+	#endif
