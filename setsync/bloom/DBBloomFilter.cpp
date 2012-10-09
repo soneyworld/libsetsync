@@ -36,7 +36,10 @@ void DBBloomFilter::add(const unsigned char * key) {
 	Dbt value(v, this->hashsize_);
 	for (int i = 0; i < this->functionCount_; i++) {
 		uint64_t pos = this->hashFunction_->hash(key, this->hashsize_, i);
-		Dbt db_key(&pos, sizeof(uint64_t));
+		Dbt db_key;
+		db_key.set_data(&pos);
+		db_key.set_ulen(sizeof(uint64_t));
+		db_key.set_flags(DB_DBT_USERMEM);
 		int ret = this->db_->put(NULL, &db_key, &value, DB_NODUPDATA|DB_MULTIPLE);
 		if (ret == DB_KEYEXIST) {
 			return;
