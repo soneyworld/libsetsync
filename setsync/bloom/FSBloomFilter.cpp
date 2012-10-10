@@ -66,7 +66,7 @@ void FSBloomFilter::init(const float falsePositiveRate, const bool hardMaximum,
 		this->functionCount_ = 1;
 	this->mmapLength_ = (this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE;
 	if (this->filehandler_ == NULL)
-		this->filehandler_ = tmpfile64();
+		this->filehandler_ = tmpfile();
 	if (this->filehandler_ == NULL) {
 		std::cout << "TEMP File fail!" << std::endl;
 		throw std::runtime_error("TEMP File fail!");
