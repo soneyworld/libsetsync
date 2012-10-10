@@ -10,6 +10,6 @@ cp COPYING debian/copyright
 if [ ! -d "m4" ]; then
 	mkdir "m4"
 fi
-aclocal
+aclocal -I m4
 automake --add-missing
 autoreconf --force --install

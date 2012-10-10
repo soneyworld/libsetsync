@@ -15,7 +15,6 @@ install-sh
 setsync.pc
 config.guess
 config.sub
-m4/
 version.m4
 depcomp
 libtool

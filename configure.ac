@@ -8,6 +8,7 @@ m4_include([version.m4])
 dnl --------------------------------
 dnl Initialization macros.
 dnl --------------------------------
+ACLOCAL_AMFLAGS = -I m4 --install
 
 AC_PREREQ([2.68])
 AC_INIT([setsync], [PKG_FULL_VERSION], [lorentze@ibr.cs.tu-bs.de])
@@ -63,39 +64,51 @@ AC_LANG_CPLUSPLUS
 
 # Checks for header files.
 AC_CHECK_HEADERS([math.h])
+AC_CHECK_HEADERS([limits.h])
 
-#AC_FUNC_MALLOC
-#AC_HEADER_STDBOOL
+AC_HEADER_STDBOOL
 
 # Checks for typedefs, structures, and compiler characteristics.
-#AC_C_RESTRICT
 AC_TYPE_SIZE_T
-#AC_TYPE_UINT16_T
-#AC_TYPE_UINT8_T
+AC_TYPE_UINT8_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
+AC_TYPE_UINT64_T
 
 # Checks for library functions.
-#AC_FUNC_REALLOC
-#AC_CHECK_FUNCS([])
+AC_FUNC_MALLOC
+AC_FUNC_MMAP
+AC_CHECK_FUNCS([memset])
+AC_CHECK_FUNCS([munmap])
+AC_CHECK_FUNCS([pow])
+
 AC_OPENMP
 
 AC_CHECK_LIB([m], [log])
 
 # BerkeleyDB c++
+AM_CONDITIONAL(BERKELEY_DB, true)
 AC_ARG_WITH(bdb,
 	AS_HELP_STRING([--with-bdb],[build in BerkeleyDB backend support (default is yes)]),
-    [with_bdb=$withval],
-    [with_bdb=yes])
-if test "$with_bdb" != "no"; then
+    [
+    	use_bdb = $withval
+    ],[])
+if test "x$use_bdb" != "xno"; then
+#	AX_PATH_BDB([4],[
+#		LIBS="$BDB_LIBS $LIBS"
+#		LDFLAGS="$BDB_LDFLAGS $LDFLAGS"
+#		CPPFLAGS="$CPPFLAGS $BDB_CPPFLAGS"
+#	])
 	AC_CHECK_LIB(db_cxx, [open], [],[
 		AC_MSG_WARN([You should install db_cxx; please install libraries and development files])
-		with_bdb = "no"
-		])
+		AM_CONDITIONAL(BERKELEY_DB, false)
+	])
 	AC_CHECK_HEADERS([db_cxx.h],,[
     	AC_MSG_WARN([db_cxx.h is missing; please add db_cxx development files])
-		with_bdb = "no"
+		AM_CONDITIONAL(BERKELEY_DB, false)
 	])
 fi
-AM_CONDITIONAL(BERKELEY_DB, test "$with_bdb" = yes)
+
 
 # For CppUnit testing
 AC_ARG_ENABLE(cppunit,
