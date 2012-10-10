@@ -21,6 +21,7 @@ public:
 			const float falsePositiveRate = 0.001,
 			const std::size_t hashsize = SHA_DIGEST_LENGTH);
 	void virtual add(const unsigned char * key);
+	virtual bool remove(const unsigned char * key);
 	virtual ~DBBloomFilter();
 };
 

@@ -17,6 +17,8 @@ namespace trie {
 
 class DBValue{
 public:
+	DBValue();
+	virtual ~DBValue(){}
 	unsigned char parent[MAXFIELD];
 	unsigned char smaller[MAXFIELD];
 	unsigned char larger[MAXFIELD];

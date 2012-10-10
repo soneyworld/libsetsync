@@ -90,16 +90,17 @@ public:
 	 * \return a string containing the filter as a sequence of zeros and ones
 	 */
 	virtual std::string toString();
-private:
+protected:
 	/// Help function to get the right positions inside the byte array of the bloom filter
 	void compute_indices(const uint64_t hash, std::size_t& bit_index,
 			std::size_t& bit) const;
 	/// The bloom filter memory mapped storage
 	unsigned char * bitArray_;
-	void init(const float falsePositiveRate, const bool hardMaximum,
-			const uint64_t numberOfElements);
 	FILE * filehandler_;
 	unsigned int mmapLength_;
+private:
+	void init(const float falsePositiveRate, const bool hardMaximum,
+			const uint64_t numberOfElements);
 };
 
 }

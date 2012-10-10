@@ -19,7 +19,7 @@ DBBloomFilter::DBBloomFilter(Db * db, const uint64_t maxNumberOfElements,
 	u_int32_t oFlags = DB_CREATE; // Open flags;
 	try {
 		// Open the database
-		this->db_->open(NULL, "bloom.db", "bloom", DB_QUEUE, oFlags, 0);
+		this->db_->open(NULL, NULL, "bloom", DB_HASH, oFlags, 0);
 	} catch (DbException &e) {
 		this->db_ = NULL;
 		// Error handling code goes here
@@ -27,6 +27,34 @@ DBBloomFilter::DBBloomFilter(Db * db, const uint64_t maxNumberOfElements,
 		this->db_ = NULL;
 		// Error handling code goes here
 	}
+	Dbc *cursorp;
+	this->db_->cursor(NULL, &cursorp, 0);
+	uint64_t pos;
+	unsigned char hash[this->hashsize_];
+	Dbt key, data;
+	key.set_data(&pos);
+	key.set_size(sizeof(uint64_t));
+	data.set_data(hash);
+	data.set_ulen(this->hashsize_);
+	data.set_flags(DB_DBT_USERMEM);
+	int ret;
+	// Iterate over the database, retrieving each record in turn.
+	key.set_size(sizeof(uint64_t));
+	while ((ret = cursorp->get(&key, &data, DB_NEXT_NODUP)) == 0) {
+		// Do interesting things with the Dbts here.
+		std::size_t bit_index = 0;
+		std::size_t bit = 0;
+		compute_indices(pos, bit_index, bit);
+		this->bitArray_[bit_index] |= bit_mask[bit];
+	}
+	if (ret != DB_NOTFOUND) {
+		// ret should be DB_NOTFOUND upon exiting the loop.
+		// Dbc::get() will by default throw an exception if any
+		// significant errors occur, so by default this if block
+		// can never be reached.
+	}
+
+	cursorp->close();
 }
 
 void DBBloomFilter::add(const unsigned char * key) {
@@ -40,26 +68,55 @@ void DBBloomFilter::add(const unsigned char * key) {
 		db_key.set_data(&pos);
 		db_key.set_ulen(sizeof(uint64_t));
 		db_key.set_flags(DB_DBT_USERMEM);
-		int ret = this->db_->put(NULL, &db_key, &value, DB_NODUPDATA|DB_MULTIPLE);
+		int ret = this->db_->put(NULL, &db_key, &value, 0);
 		if (ret == DB_KEYEXIST) {
 			return;
 		}
 	}
 }
 
+bool DBBloomFilter::remove(const unsigned char * key) {
+	Dbc *cursorp;
+	this->db_->cursor(NULL, &cursorp, 0);
+	unsigned char hash[this->hashsize_];
+	uint64_t pos;
+	Dbt db_key, data;
+	db_key.set_data(&pos);
+	db_key.set_size(sizeof(uint64_t));
+	data.set_data(hash);
+	data.set_ulen(this->hashsize_);
+	data.set_flags(DB_DBT_USERMEM);
+	int ret;
+	// Iterate over the database, retrieving each record in turn.
+	db_key.set_size(sizeof(uint64_t));
+	while ((ret = cursorp->get(&db_key, &data, DB_NEXT_NODUP)) == 0) {
+		// Do interesting things with the Dbts here.
+		std::size_t bit_index = 0;
+		std::size_t bit = 0;
+		compute_indices(pos, bit_index, bit);
+		this->bitArray_[bit_index] |= bit_mask[bit];
+	}
+	if (ret != DB_NOTFOUND) {
+		// ret should be DB_NOTFOUND upon exiting the loop.
+		// Dbc::get() will by default throw an exception if any
+		// significant errors occur, so by default this if block
+		// can never be reached.
+	}
+	cursorp->close();
+	//TODO
+	return false;
+}
+
 DBBloomFilter::~DBBloomFilter() {
 	try {
 		if (this->db_ != NULL) {
 			this->db_->close(0);
-			this->db_->remove("bloom.db", "bloom", 0);
+			//			this->db_->remove("bloom.db", "bloom", 0);
 		}
 	} catch (DbException &e) {
 		// Error handling code goes here
 	} catch (std::exception &e) {
 		// Error handling code goes here
-	}
-	if (this->db_ != NULL) {
-		delete this->db_;
 	}
 }
 
