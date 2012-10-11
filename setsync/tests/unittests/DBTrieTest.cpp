@@ -60,3 +60,16 @@ void DBTrieTest::testAddingAndCleaningElements() {
 	trie.clear();
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 }
+
+void DBTrieTest::testContains() {
+	trie::DBTrie trie(db);
+	CPPUNIT_ASSERT(!trie.Trie::contains("bla1"));
+	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
+	CPPUNIT_ASSERT(trie.Trie::contains("bla1"));
+	CPPUNIT_ASSERT(!trie.Trie::contains("bla2"));
+	CPPUNIT_ASSERT(trie.Trie::add("bla2"));
+	CPPUNIT_ASSERT(trie.Trie::contains("bla1"));
+	CPPUNIT_ASSERT(trie.Trie::contains("bla2"));
+	CPPUNIT_ASSERT(trie.Trie::remove("bla1"));
+	CPPUNIT_ASSERT(!trie.Trie::contains("bla1"));
+}

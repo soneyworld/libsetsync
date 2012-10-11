@@ -86,4 +86,16 @@ bool Trie::add(const std::string& str){
 	return add(c, true);
 }
 
+bool Trie::contains(const char * str) const{
+	unsigned char c[SHA_DIGEST_LENGTH];
+	SHA1((unsigned char*) str, strlen(str), c);
+	return contains(c);
+}
+
+bool Trie::contains(const std::string& str) const{
+	unsigned char c[SHA_DIGEST_LENGTH];
+	SHA1((unsigned char*) str.c_str(), str.size(), c);
+	return contains(c);
+}
+
 }

@@ -38,6 +38,8 @@ public:
 	virtual bool remove(const std::string& str);
 	virtual bool remove(const unsigned char * hash);
 	virtual bool remove(const unsigned char * hash, bool performhash) = 0;
+	virtual bool contains(const char * str) const;
+	virtual bool contains(const std::string& str) const;
 	virtual bool contains(const unsigned char * hash) const = 0;
 	virtual void clear(void) = 0;
 	virtual ~Trie();
