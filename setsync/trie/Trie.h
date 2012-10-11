@@ -48,6 +48,13 @@ public:
 	 * \return true if the trie instances have got same root
 	 */
 	virtual bool operator ==(const Trie& other) const = 0;
+	/**
+	 * Checks, if both Trie have got a different hash key as root
+	 * \return true if the trie instances have got different root
+	 */
+	virtual bool operator !=(const Trie& other) const {
+		return ! this->operator ==(other);
+	}
 };
 
 }
