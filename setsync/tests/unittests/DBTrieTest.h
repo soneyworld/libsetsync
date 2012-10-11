@@ -17,6 +17,7 @@ class DBTrieTest: public CPPUNIT_NS::TestCase {
 	CPPUNIT_TEST( testAddingAndCleaningElements);
 	CPPUNIT_TEST( testAdding);
 	CPPUNIT_TEST( testContains);
+	CPPUNIT_TEST( testSize);
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -29,6 +30,7 @@ protected:
 	void testAddingAndErasingElements();
 	void testAddingAndCleaningElements();
 	void testContains();
+	void testSize();
 
 };
 CPPUNIT_TEST_SUITE_REGISTRATION(DBTrieTest);

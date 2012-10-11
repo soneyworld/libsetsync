@@ -5,6 +5,9 @@
  */
 
 #include "DBTrieTest.h"
+#include <sstream>
+
+using namespace std;
 
 void DBTrieTest::setUp(void) {
 	this->db = new Db(NULL, 0);
@@ -16,7 +19,7 @@ void DBTrieTest::tearDown(void) {
 	db->close(0);
 	delete this->db;
 	this->db = new Db(NULL, 0);
-	this->db->remove("trie.db",NULL,0);
+	this->db->remove("trie.db", NULL, 0);
 	delete this->db;
 }
 
@@ -26,6 +29,7 @@ void DBTrieTest::testAdding() {
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie.getSize() == 1);
 	CPPUNIT_ASSERT(!trie.Trie::add("bla1"));
+	CPPUNIT_ASSERT(!trie.Trie::add(std::string("bla1")));
 	CPPUNIT_ASSERT(trie.getSize() == 1);
 	CPPUNIT_ASSERT(trie.Trie::add("bla2"));
 	CPPUNIT_ASSERT(trie.getSize() == 2);
@@ -72,4 +76,41 @@ void DBTrieTest::testContains() {
 	CPPUNIT_ASSERT(trie.Trie::contains("bla2"));
 	CPPUNIT_ASSERT(trie.Trie::remove("bla1"));
 	CPPUNIT_ASSERT(!trie.Trie::contains("bla1"));
+}
+
+void DBTrieTest::testSize() {
+	trie::DBTrie trie(db);
+	CPPUNIT_ASSERT(trie.getSize() == 0);
+	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
+	CPPUNIT_ASSERT(trie.getSize() == 1);
+	CPPUNIT_ASSERT(trie.Trie::remove("bla1"));
+	CPPUNIT_ASSERT(trie.getSize() == 0);
+	CPPUNIT_ASSERT(!trie.Trie::remove("bla1"));
+	CPPUNIT_ASSERT(trie.getSize() == 0);
+	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
+	CPPUNIT_ASSERT(trie.Trie::add("bla2"));
+	CPPUNIT_ASSERT(trie.getSize() == 2);
+	CPPUNIT_ASSERT(trie.Trie::remove("bla1"));
+	CPPUNIT_ASSERT(!trie.Trie::remove("bla1"));
+	CPPUNIT_ASSERT(trie.getSize() == 1);
+	CPPUNIT_ASSERT(trie.Trie::remove("bla2"));
+	CPPUNIT_ASSERT(trie.getSize() == 0);
+	CPPUNIT_ASSERT(!trie.Trie::remove("bla2"));
+	CPPUNIT_ASSERT(trie.getSize() == 0);
+
+	for (unsigned int i = 1; i <= 100; i++) {
+		stringstream ss;
+		ss << "bla" << i;
+		CPPUNIT_ASSERT(trie.getSize()==i-1);
+		CPPUNIT_ASSERT(trie.Trie::add(ss.str()));
+		CPPUNIT_ASSERT(trie.getSize()==i);
+	}
+
+	for (unsigned int i = 100; i >= 1; i--) {
+		stringstream ss;
+		ss << "bla" << i;
+		CPPUNIT_ASSERT(trie.getSize()==i);
+		CPPUNIT_ASSERT(trie.Trie::remove(ss.str()));
+		CPPUNIT_ASSERT(trie.getSize()==i-1);
+	}
 }
