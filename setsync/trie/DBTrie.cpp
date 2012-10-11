@@ -22,9 +22,7 @@ DBValue::DBValue() {
 }
 
 DBTrie::DBTrie(Db * db, const size_t hashsize) :
-	Trie(hashsize), root_(NULL) {
-	// Instantiate the Db object
-	this->db_ = db;
+	Trie(hashsize), root_(NULL), db_(db) {
 	// Loading root, if available
 	getRootFromDB();
 }
@@ -39,7 +37,7 @@ DBTrie::~DBTrie() {
 
 bool DBTrie::add(const unsigned char * hash, bool performhash) {
 	if (this->root_ == NULL) {
-		this->root_ = new DBNode;
+		this->root_ = new DbInnerNode;
 		memcpy(this->root_->hash, hash, this->getHashSize());
 		memcpy(this->root_->value.prefix, hash, this->getHashSize());
 		this->root_->value.prefix_mask = 8 * this->getHashSize();
@@ -103,20 +101,20 @@ void DBTrie::clear(void) {
 
 void DBTrie::getRootFromDB() {
 	char rootname[] = { ROOT_NAME };
-	DBNode root_node;
+	DbInnerNode root_node;
 	Dbt key(rootname, strlen(rootname));
-	Dbt data(&root_node, sizeof(DBNode));
+	Dbt data(&root_node, sizeof(DbInnerNode));
 	int ret = this->db_->get(NULL, &key, &data, 0);
 	if (ret != DB_NOTFOUND) {
-		this->root_ = new DBNode();
-		memcpy(this->root_, &root_node, sizeof(DBNode));
+		this->root_ = new DbInnerNode();
+		memcpy(this->root_, &root_node, sizeof(DbInnerNode));
 	}
 }
 void DBTrie::putRootToDB() {
 	char rootname[] = { ROOT_NAME };
-	DBNode root_node;
+	DbInnerNode root_node;
 	Dbt key(rootname, strlen(rootname));
-	Dbt data(&root_node, sizeof(DBNode));
+	Dbt data(&root_node, sizeof(DbInnerNode));
 	this->db_->put(NULL, &key, &data, 0);
 }
 

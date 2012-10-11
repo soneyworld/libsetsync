@@ -26,7 +26,7 @@ public:
 	uint8_t prefix_mask;
 };
 
-class DBNode {
+class DbInnerNode {
 public:
 	DBValue value;
 	unsigned char hash[MAXFIELD];
@@ -36,7 +36,7 @@ class DBTrie: public trie::Trie,
 		public virtual berkeley::BerkeleyDBTableUserInferface {
 private:
 	Db * db_;
-	DBNode * root_;
+	DbInnerNode * root_;
 	void getRootFromDB();
 	void putRootToDB();
 public:
