@@ -34,7 +34,7 @@ library_includedir=$(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/
 library_include_HEADERS = $(include_h_sources)
 
 lib_LTLIBRARIES = libsetsync.la
-libsetsync_la_SOURCES = $(h_sources) $(c_sources) $(cpp_sources)
+libsetsync_la_SOURCES = $(h_sources) $(cpp_sources) $(c_sources)
 libsetsync_la_LDFLAGS = -version-info $(GENERIC_LIBRARY_VERSION) -release $(GENERIC_RELEASE)
 libsetsync_la_LIBADD = bloom/libbloom.la trie/libtrie.la index/libindex.la
 
