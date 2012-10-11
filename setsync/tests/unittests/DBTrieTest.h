@@ -19,6 +19,7 @@ class DBTrieTest: public CPPUNIT_NS::TestCase {
 	CPPUNIT_TEST( testContains);
 	CPPUNIT_TEST( testSize);
 	CPPUNIT_TEST( testEquals);
+	CPPUNIT_TEST( testSavingAndLoading);
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -34,6 +35,7 @@ protected:
 	void testContains();
 	void testSize();
 	void testEquals();
+	void testSavingAndLoading();
 
 };
 CPPUNIT_TEST_SUITE_REGISTRATION(DBTrieTest);

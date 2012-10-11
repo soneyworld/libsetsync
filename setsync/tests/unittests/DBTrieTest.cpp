@@ -137,3 +137,27 @@ void DBTrieTest::testEquals() {
 	CPPUNIT_ASSERT(trie2.Trie::add("bla2"));
 	CPPUNIT_ASSERT(trie1==trie2);
 }
+
+
+void DBTrieTest::testSavingAndLoading(){
+	Db * dbcopy = new Db(NULL, 0);
+	dbcopy->open(NULL, "trieCopy.db", trie::DBTrie::getLogicalDatabaseName(),
+			trie::DBTrie::getTableType(), DB_CREATE, 0);
+	trie::DBTrie * trie = new trie::DBTrie(dbcopy);
+	CPPUNIT_ASSERT(trie->Trie::add("bla1"));
+	CPPUNIT_ASSERT(trie->Trie::add("bla2"));
+	delete trie;
+	dbcopy->close(0);
+	delete dbcopy;
+	dbcopy = new Db(NULL, 0);
+	dbcopy->open(NULL, "trieCopy.db", trie::DBTrie::getLogicalDatabaseName(),
+				trie::DBTrie::getTableType(), DB_CREATE, 0);
+	trie = new trie::DBTrie(dbcopy);
+	CPPUNIT_ASSERT(trie->Trie::contains("bla1"));
+	CPPUNIT_ASSERT(trie->Trie::contains("bla2"));
+	delete trie;
+	dbcopy->close(0);
+	delete dbcopy;
+	dbcopy = new Db(NULL, 0);
+	dbcopy->remove("trieCopy.db", NULL, 0);
+}
