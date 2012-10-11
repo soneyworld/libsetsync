@@ -99,10 +99,10 @@ if test "x$use_bdb" != "xno"; then
 		LDFLAGS="$BDB_LDFLAGS $LDFLAGS"
 		CPPFLAGS="$CPPFLAGS $BDB_CPPFLAGS"
 	])
-#	AC_CHECK_LIB(db_cxx, [open], [],[
-#		AC_MSG_WARN([You should install db_cxx; please install libraries and development files])
-#		AM_CONDITIONAL(BERKELEY_DB, false)
-#	])
+	AC_CHECK_LIB(db_cxx, [open], [],[
+		AC_MSG_WARN([You should install db_cxx; please install libraries and development files])
+		AM_CONDITIONAL(BERKELEY_DB, false)
+	])
 	AC_CHECK_HEADERS([db_cxx.h],,[
     	AC_MSG_WARN([db_cxx.h is missing; please add db_cxx development files])
 		AM_CONDITIONAL(BERKELEY_DB, false)

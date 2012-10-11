@@ -11,6 +11,10 @@ h_sources = $(include_h_sources) MemSet.h Config.h
 c_sources = set.c
 cpp_sources = Set.cpp MemSet.cpp Config.cpp
 
+if BERKELEY_DB
+h_sources += BerkeleyDBTableUserInterface.h
+endif
+
 if OPENSSL
 AM_CFLAGS += $(OPENSSL_CFLAGS)
 AM_LDFLAGS += $(OPENSSL_LIBS)
