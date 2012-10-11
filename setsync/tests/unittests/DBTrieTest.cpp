@@ -29,7 +29,7 @@ void DBTrieTest::tearDown(void) {
 	this->db = new Db(NULL, 0);
 	this->db->remove("trie2.db", NULL, 0);
 	delete this->db;
-
+	remove("trieCopy.db");
 }
 
 void DBTrieTest::testAdding() {
