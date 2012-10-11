@@ -9,10 +9,13 @@
 #include <db_cxx.h>
 #include "CountingBloomFilter.h"
 #include "FSBloomFilter.h"
+#include <setsync/BerkeleyDBTableUserInterface.h>
 
 namespace bloom {
 
-class DBBloomFilter: public CountingBloomFilter , public FSBloomFilter {
+class DBBloomFilter: public CountingBloomFilter,
+		public FSBloomFilter,
+		public berkeley::BerkeleyDBTableUserInferface {
 private:
 	Db * db_;
 public:
@@ -23,6 +26,12 @@ public:
 	void virtual add(const unsigned char * key);
 	virtual bool remove(const unsigned char * key);
 	virtual ~DBBloomFilter();
+	static const char * getLogicalDatabaseName(){
+		return "bloom";
+	}
+	static const DBTYPE getTableType(){
+		return DB_HASH;
+	}
 };
 
 }

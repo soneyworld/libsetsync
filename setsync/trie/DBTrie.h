@@ -8,17 +8,17 @@
 #define DBTRIE_H_
 #define MAXFIELD 20
 
-
 #include "Trie.h"
 #include <db_cxx.h>
-
+#include <setsync/BerkeleyDBTableUserInterface.h>
 
 namespace trie {
 
-class DBValue{
+class DBValue {
 public:
 	DBValue();
-	virtual ~DBValue(){}
+	virtual ~DBValue() {
+	}
 	unsigned char parent[MAXFIELD];
 	unsigned char smaller[MAXFIELD];
 	unsigned char larger[MAXFIELD];
@@ -26,13 +26,14 @@ public:
 	uint8_t prefix_mask;
 };
 
-class DBNode{
+class DBNode {
 public:
 	DBValue value;
 	unsigned char hash[MAXFIELD];
 };
 
-class DBTrie: public trie::Trie {
+class DBTrie: public trie::Trie,
+		public virtual berkeley::BerkeleyDBTableUserInferface {
 private:
 	Db * db_;
 	DBNode * root_;
@@ -45,6 +46,8 @@ public:
 	virtual bool remove(const unsigned char * hash, bool performhash);
 	virtual bool contains(const unsigned char * hash) const;
 	virtual void clear(void);
+	static const char * getLogicalDatabaseName();
+	static const DBTYPE getTableType();
 };
 
 }

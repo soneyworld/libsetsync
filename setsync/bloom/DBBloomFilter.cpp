@@ -16,17 +16,6 @@ DBBloomFilter::DBBloomFilter(Db * db, const uint64_t maxNumberOfElements,
 			FSBloomFilter(maxNumberOfElements, hardMaximum, falsePositiveRate,
 					hashsize) {
 	this->db_ = db;
-	u_int32_t oFlags = DB_CREATE; // Open flags;
-	try {
-		// Open the database
-		this->db_->open(NULL, NULL, "bloom", DB_HASH, oFlags, 0);
-	} catch (DbException &e) {
-		this->db_ = NULL;
-		// Error handling code goes here
-	} catch (std::exception &e) {
-		this->db_ = NULL;
-		// Error handling code goes here
-	}
 	Dbc *cursorp;
 	this->db_->cursor(NULL, &cursorp, 0);
 	uint64_t pos;
@@ -107,17 +96,6 @@ bool DBBloomFilter::remove(const unsigned char * key) {
 	return false;
 }
 
-DBBloomFilter::~DBBloomFilter() {
-	try {
-		if (this->db_ != NULL) {
-			this->db_->close(0);
-			//			this->db_->remove("bloom.db", "bloom", 0);
-		}
-	} catch (DbException &e) {
-		// Error handling code goes here
-	} catch (std::exception &e) {
-		// Error handling code goes here
-	}
-}
+DBBloomFilter::~DBBloomFilter() {}
 
 }

@@ -16,17 +16,14 @@
 #include <stdlib.h>
 
 using namespace std;
-
 CPPUNIT_TEST_SUITE_REGISTRATION( DBBloomFilterTest);
 
 /*========================== tests below ==========================*/
 
 /*=== BEGIN tests for class 'DBBloomFilter' ===*/
 void DBBloomFilterTest::testLoad() {
-	Db db1(NULL,0);
-	Db db2(NULL,0);
-	bloom::DBBloomFilter Filter1(&db1,10, false, 0.01);
-	bloom::DBBloomFilter Filter2(&db2,10, false, 0.01);
+	bloom::DBBloomFilter Filter1(db1, 10, false, 0.01);
+	bloom::DBBloomFilter Filter2(db2, 10, false, 0.01);
 	Filter1.AbstractBloomFilter::add("hello");
 	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains("hello"));
 	CPPUNIT_ASSERT_EQUAL(false, Filter2.AbstractBloomFilter::contains("hello"));
@@ -34,15 +31,14 @@ void DBBloomFilterTest::testLoad() {
 	Filter1.save(buf);
 	Filter2.load(buf, Filter1.numberOfElements());
 	CPPUNIT_ASSERT_EQUAL(Filter1.numberOfElements(), Filter2.numberOfElements());
-//	std::cout << std::endl << Filter1.toString() << std::endl;
-//	std::cout << std::endl << Filter2.toString() << std::endl;
+	//	std::cout << std::endl << Filter1.toString() << std::endl;
+	//	std::cout << std::endl << Filter2.toString() << std::endl;
 	CPPUNIT_ASSERT(Filter1 == Filter2);
 	CPPUNIT_ASSERT(Filter2.AbstractBloomFilter::contains("hello"));
 }
 
 void DBBloomFilterTest::testInsert() {
-	Db db1(NULL,0);
-	bloom::DBBloomFilter Filter1(&db1,10, false, 0.01);
+	bloom::DBBloomFilter Filter1(db1, 10, false, 0.01);
 
 	//	 test signature (const unsigned char* key)
 
@@ -66,8 +62,7 @@ void DBBloomFilterTest::testInsert() {
 void DBBloomFilterTest::testContains() {
 	/* test signature (const std::string& key) const */
 	/* test signature (const char* data, const std::size_t& length) const */
-	Db db1(NULL,0);
-	bloom::DBBloomFilter Filter1(&db1,8196);
+	bloom::DBBloomFilter Filter1(db1, 8196);
 	char word[8];
 	for (int j = 0; j <= 127; j++) {
 		for (int i = 0; i <= 7; i++) {
@@ -82,8 +77,7 @@ void DBBloomFilterTest::testContains() {
 }
 
 void DBBloomFilterTest::testContainsAll() {
-	Db db1(NULL,0);
-	bloom::DBBloomFilter Filter2(&db1,8196);
+	bloom::DBBloomFilter Filter2(db1, 8196);
 	unsigned char hashes[100 * SHA_DIGEST_LENGTH];
 	for (int j = 0; j < 100; j++) {
 		unsigned char word[8];
@@ -101,11 +95,8 @@ void DBBloomFilterTest::testContainsAll() {
 
 void DBBloomFilterTest::testOperatorAndAndAssign() {
 	/* test signature (const BloomFilter& filter) */
-	Db db1(NULL,0);
-	Db db2(NULL,0);
-
-	bloom::DBBloomFilter FilterA(&db1,8196);
-	bloom::DBBloomFilter FilterB(&db2,8196);
+	bloom::DBBloomFilter FilterA(db1, 8196);
+	bloom::DBBloomFilter FilterB(db2, 8196);
 
 	string strin1, strin2, strin3, strin4;
 	strin1 = "hello";
@@ -131,12 +122,9 @@ void DBBloomFilterTest::testOperatorAndAndAssign() {
 }
 
 void DBBloomFilterTest::testOperatorInclusiveOrAndAssign() {
-	Db db1(NULL,0);
-	Db db2(NULL,0);
-
 	/* test signature (const BloomFilter& filter) */
-	bloom::DBBloomFilter FilterA(&db1,8196);
-	bloom::DBBloomFilter FilterB(&db2,8196);
+	bloom::DBBloomFilter FilterA(db1, 8196);
+	bloom::DBBloomFilter FilterB(db2, 8196);
 
 	string strin1, strin2, strin3, strin4;
 	strin1 = "hello";
@@ -163,11 +151,8 @@ void DBBloomFilterTest::testOperatorInclusiveOrAndAssign() {
 
 void DBBloomFilterTest::testOperatorXorAndAssign() {
 	/* test signature (const BloomFilter& filter) */
-	Db db1(NULL,0);
-	Db db2(NULL,0);
-
-	bloom::DBBloomFilter FilterA(&db1,8196);
-	bloom::DBBloomFilter FilterB(&db2,8196);
+	bloom::DBBloomFilter FilterA(db1, 8196);
+	bloom::DBBloomFilter FilterB(db2, 8196);
 
 	string strin1, strin2, strin3, strin4;
 	strin1 = "hello";
@@ -195,8 +180,41 @@ void DBBloomFilterTest::testOperatorXorAndAssign() {
 /*=== END   tests for class 'DBBloomFilter' ===*/
 
 void DBBloomFilterTest::setUp() {
+	this->db1 = new Db(NULL, 0);
+	this->db2 = new Db(NULL, 0);
+	db1->open(NULL, "table1.db",
+			bloom::DBBloomFilter::getLogicalDatabaseName(),
+			bloom::DBBloomFilter::getTableType(), DB_CREATE, 0);
+	db2->open(NULL, "table2.db",
+			bloom::DBBloomFilter::getLogicalDatabaseName(),
+			bloom::DBBloomFilter::getTableType(), DB_CREATE, 0);
 }
 
 void DBBloomFilterTest::tearDown() {
+	try {
+		this->db1->close(0);
+		this->db2->close(0);
+		delete this->db1;
+		delete this->db2;
+		this->db1 = new Db(NULL, 0);
+		this->db2 = new Db(NULL, 0);
+		db1->remove("table1.db",
+				NULL, 0);
+		db2->remove("table2.db",
+				NULL, 0);
+	}
+	// Must catch both DbException and std::exception
+	catch (DbException &e) {
+		db1->err(e.get_errno(), "Database1 close failed ");
+		db2->err(e.get_errno(), "Database2 close failed ");
+		throw e;
+	} catch (std::exception &e) {
+		// No DB error number available, so use errx
+		db1->errx("Error closing database: %s", e.what());
+		throw e;
+	}
+	delete this->db1;
+	delete this->db2;
+
 }
 

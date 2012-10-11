@@ -20,27 +20,6 @@ DBTrie::DBTrie(Db * db, const size_t hashsize) :
 	Trie(hashsize), root_(NULL) {
 	// Instantiate the Db object
 	this->db_ = db;
-	// Open flags;
-	u_int32_t oFlags = DB_CREATE;
-	try {
-		// Open the database
-		db_->open(NULL, //		Transaction pointer
-				NULL, //	Database file name
-				"trie", //		Optional logical database name
-				DB_BTREE, //	Database access method
-				oFlags, //		Open flags
-				0); //			File mode (using defaults)
-		// DbException is not subclassed from std::exception, so
-		// need to catch both of these.
-	} catch (DbException &e) {
-		// Error handling code goes here
-		this->db_ = NULL;
-		throw e;
-	} catch (std::exception &e) {
-		// Error handling code goes here
-		this->db_ = NULL;
-		throw e;
-	}
 	// Loading root, if available
 	getRootFromDB();
 }
@@ -50,17 +29,6 @@ DBTrie::~DBTrie() {
 		putRootToDB();
 		delete root_;
 		root_ = NULL;
-	}
-	try {
-		this->db_->close(0);
-		//		this->db_->remove(NULL, "trie", 0);
-		//		this->db_->remove(NULL, NULL, 0);
-	} catch (DbException &e) {
-		// Error handling code goes here
-		throw e;
-	} catch (std::exception &e) {
-		// Error handling code goes here
-		throw e;
 	}
 }
 
@@ -139,6 +107,14 @@ void DBTrie::putRootToDB() {
 	Dbt key(rootname, strlen(rootname));
 	Dbt data(&root_node, sizeof(DBNode));
 	this->db_->put(NULL, &key, &data, 0);
+}
+
+const char * DBTrie::getLogicalDatabaseName() {
+	return "trie";
+}
+
+const DBTYPE DBTrie::getTableType(){
+	return DB_BTREE;
 }
 
 }

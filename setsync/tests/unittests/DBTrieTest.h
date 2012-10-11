@@ -22,6 +22,7 @@ public:
 	void setUp(void);
 	void tearDown(void);
 private:
+	Db * db;
 protected:
 	void testAdding();
 	void testAddingAndErasingElements();
