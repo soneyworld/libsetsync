@@ -173,6 +173,7 @@ AC_CONFIG_FILES([Makefile \
 	setsync/bloom/Makefile \
 	setsync/trie/Makefile \
 	setsync/index/Makefile \
+	setsync/utils/Makefile \
 	setsync/tests/Makefile \
 	setsync/tests/unittests/Makefile \
 	setsync/tests/hash_generator/Makefile \
