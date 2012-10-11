@@ -48,6 +48,7 @@ public:
 	virtual void clear(void);
 	static const char * getLogicalDatabaseName();
 	static const DBTYPE getTableType();
+	virtual bool operator ==(const Trie& other) const;
 };
 
 }

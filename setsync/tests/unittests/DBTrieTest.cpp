@@ -13,14 +13,23 @@ void DBTrieTest::setUp(void) {
 	this->db = new Db(NULL, 0);
 	db->open(NULL, "trie.db", trie::DBTrie::getLogicalDatabaseName(),
 			trie::DBTrie::getTableType(), DB_CREATE, 0);
+	this->db2 = new Db(NULL, 0);
+	db2->open(NULL, "trie2.db", trie::DBTrie::getLogicalDatabaseName(),
+			trie::DBTrie::getTableType(), DB_CREATE, 0);
 }
 
 void DBTrieTest::tearDown(void) {
 	db->close(0);
+	db2->close(0);
 	delete this->db;
+	delete this->db2;
 	this->db = new Db(NULL, 0);
 	this->db->remove("trie.db", NULL, 0);
 	delete this->db;
+	this->db = new Db(NULL, 0);
+	this->db->remove("trie2.db", NULL, 0);
+	delete this->db;
+
 }
 
 void DBTrieTest::testAdding() {
@@ -113,4 +122,18 @@ void DBTrieTest::testSize() {
 		CPPUNIT_ASSERT(trie.Trie::remove(ss.str()));
 		CPPUNIT_ASSERT(trie.getSize()==i-1);
 	}
+}
+
+void DBTrieTest::testEquals() {
+	trie::DBTrie trie1(db);
+	trie::DBTrie trie2(db2);
+	CPPUNIT_ASSERT(trie1==trie2);
+	CPPUNIT_ASSERT(trie1.Trie::add("bla1"));
+	CPPUNIT_ASSERT(!(trie1==trie2));
+	CPPUNIT_ASSERT(trie2.Trie::add("bla1"));
+	CPPUNIT_ASSERT(trie1==trie2);
+	CPPUNIT_ASSERT(trie1.Trie::add("bla2"));
+	CPPUNIT_ASSERT(!(trie1==trie2));
+	CPPUNIT_ASSERT(trie2.Trie::add("bla2"));
+	CPPUNIT_ASSERT(trie1==trie2);
 }

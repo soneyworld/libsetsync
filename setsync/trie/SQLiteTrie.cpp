@@ -34,4 +34,9 @@ bool SQLiteTrie::contains(const unsigned char * hash) const{
 void SQLiteTrie::clear(void){
 
 }
+
+bool SQLiteTrie::operator ==(const Trie& other) const{
+	//TODO
+	return false;
+}
 }

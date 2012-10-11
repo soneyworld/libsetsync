@@ -195,4 +195,9 @@ void MemTrie::performHash() {
 
 }
 
+bool MemTrie::operator ==(const Trie& other) const{
+	//TODO
+	return false;
+}
+
 }

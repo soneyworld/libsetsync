@@ -5,7 +5,12 @@
  */
 
 #include "DBTrie.h"
+#include <stdexcept>
+#include <typeinfo>
+
+
 #define ROOT_NAME "root"
+
 namespace trie {
 
 DBValue::DBValue() {
@@ -52,6 +57,7 @@ bool DBTrie::add(const unsigned char * hash, bool performhash) {
 	}
 	return false;
 }
+
 bool DBTrie::remove(const unsigned char * hash, bool performhash) {
 	unsigned char sha[this->getHashSize()];
 	memcpy(sha, hash, this->getHashSize());
@@ -62,10 +68,14 @@ bool DBTrie::remove(const unsigned char * hash, bool performhash) {
 		return false;
 	} else if (ret == 0) {
 		this->decSize();
+		if(this->getSize()==0){
+			this->clear();
+		}
 		return true;
 	}
 	return false;
 }
+
 bool DBTrie::contains(const unsigned char * hash) const {
 	unsigned char sha[this->getHashSize()];
 	memcpy(sha, hash, this->getHashSize());
@@ -79,6 +89,7 @@ bool DBTrie::contains(const unsigned char * hash) const {
 	}
 	return false;
 }
+
 void DBTrie::clear(void) {
 	u_int32_t count;
 	this->db_->truncate(NULL, &count, 0);
@@ -113,8 +124,24 @@ const char * DBTrie::getLogicalDatabaseName() {
 	return "trie";
 }
 
-const DBTYPE DBTrie::getTableType(){
+const DBTYPE DBTrie::getTableType() {
 	return DB_BTREE;
 }
 
+bool DBTrie::operator ==(const Trie& other) const {
+	try {
+		const DBTrie& other_ =
+				dynamic_cast<const DBTrie&> (other);
+		if (this->root_ != other_.root_)
+			return false;
+		if (this->root_ == NULL)
+			return true;
+		int n = memcmp(this->root_->hash, other_.root_->hash,
+				this->getHashSize());
+		if (n != 0)
+			return false;
+	} catch (const std::bad_cast& e) {
+		return false;
+	}
+}
 }

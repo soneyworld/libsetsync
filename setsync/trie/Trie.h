@@ -43,6 +43,11 @@ public:
 	virtual bool contains(const unsigned char * hash) const = 0;
 	virtual void clear(void) = 0;
 	virtual ~Trie();
+	/**
+	 * Checks, if both Trie have got exact the same hash key as root
+	 * \return true if the trie instances have got same root
+	 */
+	virtual bool operator ==(const Trie& other) const = 0;
 };
 
 }

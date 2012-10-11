@@ -45,6 +45,7 @@ public:
 	bool remove(const unsigned char * hash, bool performhash);
 	bool contains(const unsigned char * hash) const;
 	void clear(void);
+	virtual bool operator ==(const Trie& other) const;
 };
 
 

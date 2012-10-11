@@ -35,4 +35,8 @@ bool FSTrie::contains(const unsigned char * hash) const{
 void FSTrie::clear(void){
 
 }
+bool FSTrie::operator ==(const Trie& other) const{
+	//TODO
+	return false;
+}
 }
