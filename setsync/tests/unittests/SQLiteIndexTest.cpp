@@ -17,6 +17,7 @@ void SQLiteIndexTest::setUp(void) {
 void SQLiteIndexTest::tearDown(void) {
 	delete this->index;
 	delete this->db;
+	remove("test.db");
 }
 void SQLiteIndexTest::testAddingAndErasingElements() {
 
