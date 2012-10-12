@@ -9,61 +9,118 @@
 #include <stdexcept>
 #include <typeinfo>
 
-#define ROOT_NAME "root"
-
 namespace trie {
 
-DBValue::DBValue() {
-	memset(this->larger, 0x0, MAXFIELD);
-	memset(this->smaller, 0x0, MAXFIELD);
-	memset(this->prefix, 0x0, MAXFIELD);
-	memset(this->parent, 0x0, MAXFIELD);
+const uint8_t DBValue::HAS_PARENT = 0x01;
+const uint8_t DBValue::HAS_CHILDREN = 0x02;
+const uint8_t DBValue::DIRTY = 0x04;
+
+DBValue::DBValue(const uint8_t flags) {
+	memset(this->larger, 0x0, HASHSIZE);
+	memset(this->smaller, 0x0, HASHSIZE);
+	memset(this->prefix, 0x0, HASHSIZE);
+	memset(this->parent, 0x0, HASHSIZE);
 	this->prefix_mask = 0;
+	this->flags = flags;
 }
 
-unsigned char DbNode::hashscratch[MAXFIELD * 2];
-unsigned char DbNode::nullarray[MAXFIELD];
-char DbNode::root_name[] = "root";
-
-DbNode::DbNode(Db * db) :
-	db_(db), hasParent_(false) {
-	memset(nullarray,0x0,MAXFIELD);
-	DbInnerNode root_node;
-	Dbt key(root_name, strlen(root_name));
-	Dbt data(&root_node, sizeof(DbInnerNode));
-	int ret = this->db_->get(NULL, &key, &data, 0);
-	if (ret == 0) {
-		memcpy(this->hash,root_node.hash, MAXFIELD);
-		memset(this->parent,0x0, MAXFIELD);
-		memcpy(this->smaller, root_node.value.smaller,MAXFIELD);
-		memcpy(this->larger, root_node.value.larger,MAXFIELD);
-		int n = memcmp(this->smaller, nullarray,MAXFIELD);
-		if(n==0){
-			this->hasChildren_ = false;
-		}
-	} else if(ret == DB_NOTFOUND) {
-
-	}
+DBValue::DBValue(const DbNode& toSave) :
+	flags(0) {
+	if (toSave.hasChildren())
+		flags = HAS_CHILDREN;
+	if (toSave.hasParent())
+		flags = flags | HAS_PARENT;
+	if (toSave.isDirty())
+		flags = flags | DIRTY;
+	memcpy(this->smaller, toSave.smaller, HASHSIZE);
+	memcpy(this->larger, toSave.larger, HASHSIZE);
+	memcpy(this->prefix, toSave.prefix, HASHSIZE);
+	memcpy(this->parent, toSave.parent, HASHSIZE);
+	this->prefix_mask = toSave.prefix_mask;
 }
 
-DbNode::DbNode(Db * db, const unsigned char * hash) :
+bool DBValue::isDirty() const {
+	return this->flags & DIRTY == DIRTY;
+}
+bool DBValue::hasChildren() const {
+	return this->flags & HAS_CHILDREN == HAS_CHILDREN;
+}
+bool DBValue::hasParent() const {
+	return this->flags & HAS_PARENT == HAS_PARENT;
+}
+
+unsigned char DbNode::hashscratch[HASHSIZE * 2];
+unsigned char DbNode::nullarray[HASHSIZE];
+const char DbRootNode::root_name[] = "root";
+
+DbRootNode::DbRootNode(Db * db) :
 	db_(db) {
-	DBValue result;
-	memcpy(this->hash, hash, MAXFIELD);
-	Dbt key(this->hash, MAXFIELD);
-	Dbt data(&result, sizeof(DBValue));
+	Dbt key(const_cast<char *> (root_name), strlen(root_name));
+	Dbt data(this->hash, HASHSIZE);
 	int ret = this->db_->get(NULL, &key, &data, 0);
-	if (ret == 0) {
-		memcpy(this->parent,result.parent,MAXFIELD);
-		memcpy(this->smaller,result.smaller,MAXFIELD);
-		memcpy(this->larger,result.larger,MAXFIELD);
+	if (ret != DB_NOTFOUND) {
+
 	} else {
-		throw "Node nicht gefunden";
+		throw "No Root found";
 	}
 }
 
-DbNode DbNode::getNode(const unsigned char * hash){
+DbRootNode::DbRootNode(Db * db, const unsigned char * hash) :
+	db_(db) {
+	memcpy(this->hash, hash, HASHSIZE);
+	saveToDB();
+}
 
+DbNode DbRootNode::getRootNode() {
+	return DbNode(this->db_, hash);
+}
+
+void DbRootNode::saveToDB(void) {
+	Dbt key(const_cast<char*> (root_name), strlen(root_name));
+	Dbt data(this->hash, HASHSIZE);
+	this->db_->put(NULL, &key, &data, 0);
+}
+
+DbNode::DbNode(Db * db, const unsigned char * hash, bool newone) :
+	db_(db) {
+	memcpy(this->hash, hash, HASHSIZE);
+	if (newone) {
+		this->hasChildren_ = false;
+		this->hasParent_ = false;
+		memcpy(this->prefix, hash, HASHSIZE);
+		this->prefix_mask = 8 * HASHSIZE;
+	} else {
+		DBValue result;
+		Dbt key(this->hash, HASHSIZE);
+		Dbt data(&result, sizeof(DBValue));
+		int ret = this->db_->get(NULL, &key, &data, 0);
+		if (ret == 0) {
+			memcpy(this->parent, result.parent, HASHSIZE);
+			memcpy(this->smaller, result.smaller, HASHSIZE);
+			memcpy(this->larger, result.larger, HASHSIZE);
+			memcpy(this->prefix, result.prefix, HASHSIZE);
+			this->dirty_ = result.isDirty();
+			this->hasChildren_ = result.hasChildren();
+			this->hasParent_ = result.hasParent();
+			this->prefix_mask = result.prefix_mask;
+		} else if (ret == DB_NOTFOUND) {
+			this->hasChildren_ = false;
+			this->hasParent_ = false;
+			this->dirty_ = true;
+			memcpy(this->prefix, hash, HASHSIZE);
+			this->prefix_mask = 8 * HASHSIZE;
+		} else {
+			throw "DB FAIL";
+		}
+	}
+}
+
+bool DbNode::toDb() {
+	DBValue result(*this);
+	Dbt key(this->hash, HASHSIZE);
+	Dbt data(&result, sizeof(DBValue));
+	int ret = this->db_->put(NULL, &key, &data, 0);
+	return ret == 0;
 }
 
 bool DbNode::similar(const DbNode& node) const {
@@ -73,6 +130,16 @@ bool DbNode::similar(const DbNode& node) const {
 		}
 	}
 	return true;
+}
+
+uint8_t DbNode::commonPrefixSize(DbNode& other) const {
+	uint8_t common = 0;
+	for (uint8_t i = 0; i < 8 * HASHSIZE; i++) {
+		if (BITTEST(this->prefix, i) != BITTEST(other.prefix, i))
+			break;
+		common++;
+	}
+	return common;
 }
 
 bool DbNode::insert(DbNode& node) {
@@ -89,8 +156,55 @@ bool DbNode::erase(DbNode& node, bool performHash) {
 }
 
 bool DbNode::insert(DbNode& node, bool performHash) {
-	//TODO
-	return false;
+	bool thesame = similar(node);
+	if (thesame) {
+		if (node > *this) {
+			return this->getLarger().insert(node, performHash);
+		} else if (node < *this) {
+			return this->getSmaller().insert(node, performHash);
+		} else {
+			if (this->prefix_mask == 8 * HASHSIZE) {
+				// Duplicated key
+				return false;
+			} else {
+				throw "Missing Child!";
+			}
+		}
+	}
+
+	/** Not the same: Need to split */
+	// My new common prefix
+	uint8_t common = this->commonPrefixSize(node);
+	// Copy myself as the new children of myself
+	DbNode newchildcopy = DbNode(*this);
+	if (node > newchildcopy) {
+		memcpy(this->larger, node.hash, HASHSIZE);
+		memcpy(this->smaller, newchildcopy.hash, HASHSIZE);
+	} else {
+		memcpy(this->smaller, node.hash, HASHSIZE);
+		memcpy(this->larger, newchildcopy.hash, HASHSIZE);
+	}
+	this->updateHash();
+	memcpy(node.parent, this->hash, HASHSIZE);
+	node.toDb();
+	this->prefix_mask = common;
+	this->toDb();
+	DbNode child = newchildcopy;
+	DbNode root = child;
+	while (child.hasParent_) {
+		DbNode parent = this->getParent();
+		int n = memcmp(parent.larger, child.hash, HASHSIZE);
+		if (n == 0) {
+			memcpy(parent.larger, this->hash, HASHSIZE);
+		} else {
+			memcpy(parent.smaller, this->hash, HASHSIZE);
+		}
+		child = parent;
+		parent.updateHash();
+		parent.toDb();
+	}
+	DbRootNode(this->db_, child.hash);
+	return true;
 }
 
 bool DbNode::erase(DbNode& node) {
@@ -110,19 +224,19 @@ bool DbNode::operator ==(const DbNode& other) const {
 		return false;
 	if (this->hasParent_ != other.hasParent_)
 		return false;
-	int n = memcmp(this->hash, other.hash, MAXFIELD);
+	int n = memcmp(this->hash, other.hash, HASHSIZE);
 	if (n != 0)
 		return false;
 	if (this->hasParent_) {
-		n = memcmp(this->parent, other.parent, MAXFIELD);
+		n = memcmp(this->parent, other.parent, HASHSIZE);
 		if (n != 0)
 			return false;
 	}
 	if (this->dirty_) {
-		n = memcmp(this->smaller, other.smaller, MAXFIELD);
+		n = memcmp(this->smaller, other.smaller, HASHSIZE);
 		if (n != 0)
 			return false;
-		n = memcmp(this->larger, other.larger, MAXFIELD);
+		n = memcmp(this->larger, other.larger, HASHSIZE);
 		if (n != 0)
 			return false;
 	}
@@ -145,11 +259,11 @@ DbNode::DbNode(const DbNode& other) :
 	dirty_(other.dirty_), hasChildren_(other.hasChildren_),
 			hasParent_(other.hasParent_), prefix_mask(other.prefix_mask),
 			db_(other.db_) {
-	memcpy(this->hash, other.hash, MAXFIELD);
-	memcpy(this->parent, other.parent, MAXFIELD);
-	memcpy(this->prefix, other.prefix, MAXFIELD);
-	memcpy(this->smaller, other.smaller, MAXFIELD);
-	memcpy(this->larger, other.larger, MAXFIELD);
+	memcpy(this->hash, other.hash, HASHSIZE);
+	memcpy(this->parent, other.parent, HASHSIZE);
+	memcpy(this->prefix, other.prefix, HASHSIZE);
+	memcpy(this->smaller, other.smaller, HASHSIZE);
+	memcpy(this->larger, other.larger, HASHSIZE);
 }
 
 DbNode& DbNode::operator=(const DbNode& rhs) {
@@ -158,11 +272,11 @@ DbNode& DbNode::operator=(const DbNode& rhs) {
 	this->hasChildren_ = rhs.hasChildren_;
 	this->hasParent_ = rhs.hasParent_;
 	this->prefix_mask = rhs.prefix_mask;
-	memcpy(this->hash, rhs.hash, MAXFIELD);
-	memcpy(this->parent, rhs.parent, MAXFIELD);
-	memcpy(this->prefix, rhs.prefix, MAXFIELD);
-	memcpy(this->smaller, rhs.smaller, MAXFIELD);
-	memcpy(this->larger, rhs.larger, MAXFIELD);
+	memcpy(this->hash, rhs.hash, HASHSIZE);
+	memcpy(this->parent, rhs.parent, HASHSIZE);
+	memcpy(this->prefix, rhs.prefix, HASHSIZE);
+	memcpy(this->smaller, rhs.smaller, HASHSIZE);
+	memcpy(this->larger, rhs.larger, HASHSIZE);
 	return *this;
 }
 
@@ -170,24 +284,30 @@ DbNode DbNode::getSmaller() {
 	if (hasChildren_) {
 		DbNode result = DbNode(this->db_, this->smaller);
 		return result;
+	} else {
+		throw "THERE ARE NO CHILDREN";
 	}
 }
 DbNode DbNode::getLarger() {
 	if (hasChildren_) {
 		DbNode result = DbNode(this->db_, this->larger);
 		return result;
+	} else {
+		throw "THERE ARE NO CHILDREN";
 	}
 }
 DbNode DbNode::getParent() {
 	if (hasParent_) {
 		DbNode result = DbNode(this->db_, this->parent);
 		return result;
+	} else {
+		throw "THERE IS NO PARENT";
 	}
 }
 
 bool DbNode::insert(const unsigned char * hash, bool performHash) {
-	//TODO
-	return false;
+	DbNode newnode = DbNode(this->db_, hash, true);
+	return this->insert(newnode, performHash);
 }
 
 bool DbNode::erase(const unsigned char * hash, bool performHash) {
@@ -197,10 +317,22 @@ bool DbNode::erase(const unsigned char * hash, bool performHash) {
 
 void DbNode::updateHash(void) {
 	if (hasChildren_) {
-		memcpy(DbNode::hashscratch, this->smaller, MAXFIELD);
-		memcpy(DbNode::hashscratch + MAXFIELD, this->larger, MAXFIELD);
-		SHA1(DbNode::hashscratch, 2 * MAXFIELD, this->hash);
+		memcpy(DbNode::hashscratch, this->smaller, HASHSIZE);
+		memcpy(DbNode::hashscratch + HASHSIZE, this->larger, HASHSIZE);
+		SHA1(DbNode::hashscratch, 2 * HASHSIZE, this->hash);
 	}
+}
+
+bool DbNode::hasParent() const {
+	return this->hasParent_;
+}
+
+bool DbNode::hasChildren() const {
+	return this->hasChildren_;
+}
+
+bool DbNode::isDirty() const {
+	return this->dirty_;
 }
 
 DBTrie::DBTrie(Db * db, const size_t hashsize) :
@@ -217,82 +349,52 @@ DBTrie::~DBTrie() {
 	}
 }
 
-bool DBTrie::insertHash(const unsigned char * hash) {
-	if (this->root_ == NULL) {
-		this->root_ = new DbInnerNode;
-		memcpy(this->root_->hash, hash, this->getHashSize());
-		memcpy(this->root_->value.prefix, hash, this->getHashSize());
-		this->root_->value.prefix_mask = 8 * this->getHashSize();
-		putRootToDB();
-		return true;
-	} else {
-		DbInnerNode newnode;
-		memcpy(newnode.hash, hash, this->getHashSize());
-		memcpy(newnode.value.prefix, hash, this->getHashSize());
-		newnode.value.prefix_mask = 8 * this->getHashSize();
-		return insertAtNode(hash, this->root_, &newnode);
-	}
-}
-
-bool DBTrie::insertAtNode(const unsigned char * hash,
-		DbInnerNode * currentnode, DbInnerNode * newnode) {
-	bool thesame = similar(newnode->value.prefix, currentnode->value.prefix,
-			currentnode->value.prefix_mask);
-	if (thesame) {
-		DbInnerNode next;
-		bool
-				larger =
-						BITTEST( (unsigned char *)(newnode->value.prefix) ,currentnode->value.prefix_mask);
-		if (larger)
-			if (!loadNode(&next, currentnode->value.larger))
-				throw "";
-			else if (!loadNode(&next, currentnode->value.smaller))
-				throw "";
-
-	}
-	return false;
-}
-
-bool DBTrie::similar(unsigned char *a, unsigned char *b, uint8_t count) {
-	for (uint8_t i = 0; i < count; i++) {
-		if (BITTEST(a, i) != BITTEST(b,i)) {
-			return false;
-		}
-	}
-	return true;
-}
-
-bool DBTrie::loadNode(DbInnerNode * target, const unsigned char * hash) {
-	unsigned char sha[this->getHashSize()];
-	memcpy(sha, hash, this->getHashSize());
-	memcpy(target->hash, hash, this->getHashSize());
-	Dbt key(sha, this->getHashSize());
-	Dbt data(&target->value, sizeof(DBValue));
-	int ret = this->db_->get(NULL, &key, &data, 0);
-	if (ret == DB_NOTFOUND) {
-		return false;
-	} else if (ret == 0) {
-		return true;
-	}
-}
+/*bool DBTrie::insertHash(const unsigned char * hash, bool performhash) {
+ if (this->root_ == NULL) {
+ this->root_ = new DbRootNode(this->db_, hash);
+ DbNode rootnode = this->root_->getRootNode();
+ return rootnode.toDb();
+ } else {
+ DbNode root = this->root_->getRootNode();
+ return root.insert(hash, performhash);
+ }
+ }*/
 
 bool DBTrie::add(const unsigned char * hash, bool performhash) {
-	unsigned char sha[this->getHashSize()];
-	memcpy(sha, hash, this->getHashSize());
-	Dbt key(sha, this->getHashSize());
-	Dbt data(NULL, 0);
-	int ret = this->db_->put(NULL, &key, &data, DB_NOOVERWRITE);
-	if (ret == DB_KEYEXIST) {
-		return false;
-	} else if (ret == 0) {
-		if (insertHash(hash)) {
+	if (this->root_ == NULL) {
+		this->root_ = new DbRootNode(this->db_, hash);
+		DbNode rootnode = this->root_->getRootNode();
+		if(rootnode.toDb()){
 			this->incSize();
 			return true;
 		} else {
 			return false;
 		}
+	} else {
+		DbNode root = this->root_->getRootNode();
+		if (root.insert(hash, performhash)) {
+			this->getRootFromDB();
+			this->incSize();
+		} else {
+			return false;
+		}
 	}
-	return false;
+	/*	unsigned char sha[this->getHashSize()];
+	 memcpy(sha, hash, this->getHashSize());
+	 Dbt key(sha, this->getHashSize());
+	 Dbt data(NULL, 0);
+	 int ret = this->db_->put(NULL, &key, &data, DB_NOOVERWRITE);
+	 if (ret == DB_KEYEXIST) {
+	 return false;
+	 } else if (ret == 0) {
+	 if (insertHash(hash, performhash)) {
+	 this->incSize();
+	 return true;
+	 } else {
+	 return false;
+	 }
+	 }
+	 return false;*/
 }
 
 bool DBTrie::remove(const unsigned char * hash, bool performhash) {
@@ -339,22 +441,18 @@ void DBTrie::clear(void) {
 }
 
 void DBTrie::getRootFromDB() {
-	char rootname[] = { ROOT_NAME };
-	DbInnerNode root_node;
-	Dbt key(rootname, strlen(rootname));
-	Dbt data(&root_node, sizeof(DbInnerNode));
-	int ret = this->db_->get(NULL, &key, &data, 0);
-	if (ret != DB_NOTFOUND) {
-		this->root_ = new DbInnerNode();
-		memcpy(this->root_, &root_node, sizeof(DbInnerNode));
+	try {
+		if (this->root_ != NULL)
+			delete this->root_;
+		this->root_ = NULL;
+		this->root_ = new DbRootNode(this->db_);
+	} catch (...) {
+
 	}
 }
+
 void DBTrie::putRootToDB() {
-	char rootname[] = { ROOT_NAME };
-	DbInnerNode root_node;
-	Dbt key(rootname, strlen(rootname));
-	Dbt data(&root_node, sizeof(DbInnerNode));
-	this->db_->put(NULL, &key, &data, 0);
+	this->root_->saveToDB();
 }
 
 const char * DBTrie::getLogicalDatabaseName() {
@@ -372,10 +470,7 @@ bool DBTrie::operator ==(const Trie& other) const {
 			return false;
 		if (this->root_ == NULL)
 			return true;
-		int n = memcmp(this->root_->hash, other_.root_->hash,
-				this->getHashSize());
-		if (n != 0)
-			return false;
+		return this->root_->getRootNode() == other_.root_->getRootNode();
 	} catch (const std::bad_cast& e) {
 		return false;
 	}

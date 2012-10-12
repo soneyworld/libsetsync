@@ -6,7 +6,7 @@
 
 #ifndef DBTRIE_H_
 #define DBTRIE_H_
-#define MAXFIELD 20
+#define HASHSIZE 20
 
 #include "Trie.h"
 #include <db_cxx.h>
@@ -14,42 +14,54 @@
 
 namespace trie {
 
+class DbRootNode;
+class DbNode;
+
 class DBValue {
 public:
-	DBValue();
+	DBValue(const DbNode& toSave);
+	static const uint8_t HAS_PARENT;
+	static const uint8_t HAS_CHILDREN;
+	static const uint8_t DIRTY;
+	bool isDirty() const;
+	bool hasChildren() const;
+	bool hasParent() const;
+	DBValue(const uint8_t flags = 0);
 	virtual ~DBValue() {
 	}
-	unsigned char parent[MAXFIELD];
-	unsigned char smaller[MAXFIELD];
-	unsigned char larger[MAXFIELD];
-	unsigned char prefix[MAXFIELD];
+	unsigned char parent[HASHSIZE];
+	unsigned char smaller[HASHSIZE];
+	unsigned char larger[HASHSIZE];
+	unsigned char prefix[HASHSIZE];
 	uint8_t prefix_mask;
+	uint8_t flags;
 };
 
 class DbInnerNode {
 public:
 	DBValue value;
-	unsigned char hash[MAXFIELD];
+	unsigned char hash[HASHSIZE];
 };
 
 class DbNode {
+	friend class DbRootNode;
+	friend class DBValue;
 private:
-	static unsigned char hashscratch[MAXFIELD * 2];
-	static unsigned char nullarray[MAXFIELD];
-	static char root_name[];
+	static unsigned char hashscratch[HASHSIZE * 2];
+	static unsigned char nullarray[HASHSIZE];
 	Db * db_;
 	bool similar(const DbNode& node) const;
 	uint8_t commonPrefixSize(DbNode& other) const;
 	bool hasParent_;
 	bool hasChildren_;
 	bool dirty_;
-	unsigned char hash[MAXFIELD];
-	unsigned char parent[MAXFIELD];
-	unsigned char smaller[MAXFIELD];
-	unsigned char larger[MAXFIELD];
-	unsigned char prefix[MAXFIELD];
+	unsigned char hash[HASHSIZE];
+	unsigned char parent[HASHSIZE];
+	unsigned char smaller[HASHSIZE];
+	unsigned char larger[HASHSIZE];
+	unsigned char prefix[HASHSIZE];
 	uint8_t prefix_mask;
-	DbNode(Db * db, const unsigned char * hash);
+	DbNode(Db * db, const unsigned char * hash, bool newone = false);
 	void setParent(DbNode& parent);
 	void setSmaller(DbNode& smaller);
 	void setLarger(DbNode& larger);
@@ -58,12 +70,11 @@ private:
 	bool erase(DbNode& node);
 	bool erase(DbNode& node, bool performHash);
 	void updateHash();
-	DbNode getNode(const unsigned char * hash);
 public:
-	DbNode(Db * db);
 	DbNode(const DbNode& other);
-	bool hasChildren();
-	bool hasParent();
+	bool hasChildren() const;
+	bool hasParent() const;
+	bool isDirty() const;
 	DbNode getSmaller();
 	DbNode getLarger();
 	DbNode getParent();
@@ -75,21 +86,30 @@ public:
 	bool operator !=(const DbNode& other) const;
 	bool operator >(const DbNode& other) const;
 	bool operator <(const DbNode& other) const;
-	DbNode& operator=( const DbNode& rhs );
+	DbNode& operator=(const DbNode& rhs);
+	bool toDb();
+};
+
+class DbRootNode {
+private:
+	Db * db_;
+	static const char root_name[];
+	unsigned char hash[HASHSIZE];
+public:
+	DbRootNode(Db * db);
+	DbRootNode(Db * db, const unsigned char * hash);
+	void saveToDB();
+	DbNode getRootNode();
 };
 
 class DBTrie: public trie::Trie,
 		public virtual berkeley::BerkeleyDBTableUserInferface {
 private:
 	Db * db_;
-	DbInnerNode * root_;
+	DbRootNode * root_;
 	void getRootFromDB();
 	void putRootToDB();
-	bool insertHash(const unsigned char * hash);
-	bool insertAtNode(const unsigned char * hash, DbInnerNode * currentnode,
-			DbInnerNode * newnode);
-	bool similar(unsigned char *a, unsigned char *b, uint8_t count);
-	bool loadNode(DbInnerNode * target, const unsigned char * hash);
+	//	bool insertHash(const unsigned char * hash, bool performhash);
 public:
 	DBTrie(Db * db, const size_t hashsize = SHA_DIGEST_LENGTH);
 	virtual ~DBTrie();
