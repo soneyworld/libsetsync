@@ -4,7 +4,7 @@
  *      Author: Till Lorentzen
  */
 
-#include "Config.h"
+#include "Configuration.h"
 
 namespace setsync {
 

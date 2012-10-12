@@ -7,9 +7,9 @@ AM_CFLAGS = @CFLAGS@
 AM_LDFLAGS = @LIBS@
 
 include_h_sources = set.h Set.hpp
-h_sources = $(include_h_sources) MemSet.h Config.h
+h_sources = $(include_h_sources) MemSet.h Configuration.h
 c_sources = set.c
-cpp_sources = Set.cpp MemSet.cpp Config.cpp
+cpp_sources = Set.cpp MemSet.cpp Configuration.cpp
 
 if BERKELEY_DB
 h_sources += BerkeleyDBTableUserInterface.h

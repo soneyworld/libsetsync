@@ -12,9 +12,9 @@
 
 namespace setsync {
 
-class Config {
+class Configuration {
 public:
-	Config(const uint64_t maxNumberOfElements = 10000,
+	Configuration(const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
 			const float falsePositiveRate = 0.001,
 			const std::size_t hashsize = SHA_DIGEST_LENGTH):bloomFilterHardMaximum(hardMaximum), hashSize(hashsize){}
