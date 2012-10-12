@@ -4,7 +4,7 @@
  *      Author: Till Lorentzen
  */
 
-#include <openssl/sha.h>
+#include <setsync/sha1.h>
 
 #include "SHA1Generator.h"
 #include <stdlib.h>
