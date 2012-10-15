@@ -17,9 +17,7 @@
 
 using namespace std;
 
-CPPUNIT_TEST_SUITE_REGISTRATION( FSBloomFilterTest);
-
-/*========================== tests below ==========================*/
+namespace bloom {
 
 /*=== BEGIN tests for class 'FSBloomFilter' ===*/
 void FSBloomFilterTest::testLoad() {
@@ -189,3 +187,4 @@ void FSBloomFilterTest::setUp() {
 void FSBloomFilterTest::tearDown() {
 }
 
+};

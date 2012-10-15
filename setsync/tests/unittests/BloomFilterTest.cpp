@@ -16,7 +16,7 @@
 #include <stdlib.h>
 
 using namespace std;
-
+namespace bloom {
 CPPUNIT_TEST_SUITE_REGISTRATION( BloomFilterTest);
 
 /*========================== tests below ==========================*/
@@ -224,4 +224,4 @@ void BloomFilterTest::setUp() {
 
 void BloomFilterTest::tearDown() {
 }
-
+};

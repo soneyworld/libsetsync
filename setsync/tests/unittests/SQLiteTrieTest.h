@@ -9,6 +9,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "setsync/trie/SQLiteTrie.h"
 
+namespace trie {
 class SQLiteTrieTest: public CPPUNIT_NS::TestCase {
 	CPPUNIT_TEST_SUITE( SQLiteTrieTest);
 	CPPUNIT_TEST( testAddingAndErasingElements);
@@ -25,5 +26,6 @@ protected:
 	void testAddingAndErasingElements();
 	void testAddingAndCleaningElements();
 };
-CPPUNIT_TEST_SUITE_REGISTRATION( SQLiteTrieTest);
+//CPPUNIT_TEST_SUITE_REGISTRATION( SQLiteTrieTest);
+};
 #endif /* SQLITETRIETEST_H_ */

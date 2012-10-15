@@ -9,7 +9,7 @@
 #include <iostream>
 
 using namespace std;
-
+namespace setsync {
 void MemTrieTest::setUp(void) {
 	this->memtrie = new trie::MemTrie();
 	this->key_1 = new unsigned char[20];
@@ -49,4 +49,4 @@ void MemTrieTest::testAddingAndCleaningElements() {
 	memtrie->clear();
 	CPPUNIT_ASSERT(memtrie->getSize() == 0);
 }
-
+};

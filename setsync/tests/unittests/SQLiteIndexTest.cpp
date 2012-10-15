@@ -7,7 +7,7 @@
 #include "SQLiteIndexTest.h"
 #include "setsync/index/SQLiteDatabase.h"
 #include "setsync/sha1.h"
-
+namespace sqlite{
 void SQLiteIndexTest::setUp(void) {
 	std::string filename = "test.db";
 	std::string tablename = "revindex";
@@ -33,3 +33,4 @@ void SQLiteIndexTest::testAddingAndCleaningElements() {
 void SQLiteIndexTest::testAddingAndFindingElements() {
 
 }
+};

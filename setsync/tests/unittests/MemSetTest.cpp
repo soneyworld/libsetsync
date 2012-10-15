@@ -5,7 +5,7 @@
  */
 
 #include "MemSetTest.h"
-
+namespace setsync {
 void MemSetTest::setUp(void) {
 	this->memset = new setsync::MemSet();
 	this->key_1 = new unsigned char[20];
@@ -33,4 +33,5 @@ void MemSetTest::testAddingAndCleaningElements() {
 	CPPUNIT_ASSERT(memset->getSize() == 1);
 	memset->clear();
 	CPPUNIT_ASSERT(memset->getSize() == 0);
+}
 }

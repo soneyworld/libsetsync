@@ -5,7 +5,7 @@
  */
 
 #include "SQLiteTrieTest.h"
-
+namespace trie {
 void SQLiteTrieTest::setUp(void) {
 	this->sqltrie = new trie::SQLiteTrie();
 	this->key_1 = new unsigned char[20];
@@ -33,3 +33,4 @@ void SQLiteTrieTest::testAddingAndCleaningElements() {
 	sqltrie->clear();
 	CPPUNIT_ASSERT(sqltrie->getSize() == 0);
 }
+};

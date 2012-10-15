@@ -17,10 +17,7 @@
 #include <limits>
 
 using namespace std;
-
-CPPUNIT_TEST_SUITE_REGISTRATION(DoubleHashingSchemeTest);
-
-/*========================== tests below ==========================*/
+namespace bloom {
 
 /*=== BEGIN tests for class 'DoubleHashingScheme' ===*/
 
@@ -95,4 +92,4 @@ void DoubleHashingSchemeTest::setUp() {
 
 void DoubleHashingSchemeTest::tearDown() {
 }
-
+};

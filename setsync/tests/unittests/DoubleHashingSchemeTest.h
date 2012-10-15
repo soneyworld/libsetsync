@@ -9,6 +9,7 @@
 
 #ifndef DOUBLEFILTERSCHEMETEST_H
 #define DOUBLEFILTERSCHEMETEST_H
+namespace bloom {
 class DoubleHashingSchemeTest: public CppUnit::TestFixture {
 private:
 public:
@@ -31,5 +32,7 @@ public:
 		CPPUNIT_TEST( testExtendedCount);
 		CPPUNIT_TEST( testExtendedHash);
 	CPPUNIT_TEST_SUITE_END();
+};
+CPPUNIT_TEST_SUITE_REGISTRATION(DoubleHashingSchemeTest);
 };
 #endif /* DOUBLEFILTERSCHEMETEST_H */

@@ -16,9 +16,7 @@
 #include <stdlib.h>
 
 using namespace std;
-CPPUNIT_TEST_SUITE_REGISTRATION( DBBloomFilterTest);
-
-/*========================== tests below ==========================*/
+namespace bloom {
 
 /*=== BEGIN tests for class 'DBBloomFilter' ===*/
 void DBBloomFilterTest::testLoad() {
@@ -217,4 +215,4 @@ void DBBloomFilterTest::tearDown() {
 	delete this->db2;
 
 }
-
+};

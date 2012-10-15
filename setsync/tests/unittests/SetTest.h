@@ -8,6 +8,8 @@
 #define SETTEST_H_
 #include <cppunit/extensions/HelperMacros.h>
 #include "setsync/Set.hpp"
+
+namespace setsync {
 class SetTest: public CPPUNIT_NS::TestCase {
 
 
@@ -30,4 +32,5 @@ protected:
 	void testMaximum();
 };
 //CPPUNIT_TEST_SUITE_REGISTRATION( SetTest);
+};
 #endif /* SETTEST_H_ */

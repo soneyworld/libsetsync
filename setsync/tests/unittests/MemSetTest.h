@@ -10,7 +10,7 @@
 #include "setsync/Set.hpp"
 #include "setsync/MemSet.h"
 
-
+namespace setsync {
 class MemSetTest : public CPPUNIT_NS::TestCase{
 
 CPPUNIT_TEST_SUITE(MemSetTest);
@@ -31,4 +31,5 @@ protected:
 
 };
 CPPUNIT_TEST_SUITE_REGISTRATION(MemSetTest);
+};
 #endif /* MEMSETTEST_H_ */

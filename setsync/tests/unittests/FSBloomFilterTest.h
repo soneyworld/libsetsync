@@ -9,6 +9,7 @@
 
 #ifndef FSBLOOMFILTERTEST_H
 #define FSBLOOMFILTERTEST_H
+namespace bloom {
 class FSBloomFilterTest : public CppUnit::TestFixture {
 	private:
 	public:
@@ -35,5 +36,7 @@ class FSBloomFilterTest : public CppUnit::TestFixture {
 			CPPUNIT_TEST(testOperatorInclusiveOrAndAssign);
 			CPPUNIT_TEST(testOperatorXorAndAssign);
 		CPPUNIT_TEST_SUITE_END();
+};
+CPPUNIT_TEST_SUITE_REGISTRATION( FSBloomFilterTest);
 };
 #endif /* BLOOMFILTERTEST_HH */

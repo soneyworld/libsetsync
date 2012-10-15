@@ -8,7 +8,7 @@
 #define MEMTRIETEST_H_
 #include <cppunit/extensions/HelperMacros.h>
 #include "setsync/trie/MemTrie.h"
-
+namespace setsync {
 class MemTrieTest: public CPPUNIT_NS::TestCase {
 
 	CPPUNIT_TEST_SUITE( MemTrieTest);
@@ -28,4 +28,5 @@ protected:
 	void testAddingAndCleaningElements();
 };
 CPPUNIT_TEST_SUITE_REGISTRATION(MemTrieTest);
+};
 #endif /* MEMTRIETEST_H_ */

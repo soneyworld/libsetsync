@@ -5,7 +5,7 @@
  */
 
 #include "SetTest.h"
-
+namespace setsync {
 void SetTest::testInsert() {
 	setsync::Set set;
 	CPPUNIT_ASSERT(set.getSize() == 0);
@@ -71,3 +71,4 @@ void SetTest::setUp() {
 void SetTest::tearDown() {
 
 }
+};

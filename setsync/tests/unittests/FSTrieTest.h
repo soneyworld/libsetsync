@@ -9,7 +9,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "setsync/trie/FSTrie.h"
 
-
+namespace trie {
 class FSTrieTest: public CPPUNIT_NS::TestCase {
 
 	CPPUNIT_TEST_SUITE( FSTrieTest);
@@ -32,4 +32,5 @@ protected:
 
 };
 CPPUNIT_TEST_SUITE_REGISTRATION(FSTrieTest);
+}
 #endif /* FSTRIETEST_H_ */

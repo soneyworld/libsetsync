@@ -5,7 +5,7 @@
  */
 
 #include "FSTrieTest.h"
-
+namespace trie {
 void FSTrieTest::setUp(void) {
 	this->fstrie = new trie::FSTrie();
 	this->key_1 = new unsigned char[20];
@@ -16,7 +16,7 @@ void FSTrieTest::tearDown(void) {
 	delete this->key_1;
 }
 
-void FSTrieTest::testAdding(){
+void FSTrieTest::testAdding() {
 	trie::FSTrie trie;
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
@@ -43,4 +43,5 @@ void FSTrieTest::testAddingAndCleaningElements() {
 	CPPUNIT_ASSERT(fstrie->getSize() == 1);
 	fstrie->clear();
 	CPPUNIT_ASSERT(fstrie->getSize() == 0);
+}
 }
