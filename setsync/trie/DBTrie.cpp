@@ -14,6 +14,19 @@ namespace trie {
 const uint8_t DBValue::HAS_PARENT = 0x01;
 const uint8_t DBValue::HAS_CHILDREN = 0x02;
 const uint8_t DBValue::DIRTY = 0x04;
+const std::size_t DBValue::getBufferSize() {
+	return 4 * HASHSIZE + 2 * sizeof(uint8_t);
+}
+
+void DBValue::marshall(void * target, const DBValue& toBeMarshalled) {
+	unsigned char * t = (unsigned char*) target;
+	memcpy(t, toBeMarshalled.parent, HASHSIZE);
+	memcpy(t + HASHSIZE, toBeMarshalled.smaller, HASHSIZE);
+	memcpy(t + 2 * HASHSIZE, toBeMarshalled.larger, HASHSIZE);
+	memcpy(t + 3 * HASHSIZE, toBeMarshalled.prefix, HASHSIZE);
+	memset(t + 4 * HASHSIZE, toBeMarshalled.prefix_mask, 1);
+	memset(t + 4 * HASHSIZE + 1, toBeMarshalled.flags, 1);
+}
 
 DBValue::DBValue(const uint8_t flags) {
 	memset(this->larger, 0x0, HASHSIZE);
@@ -37,6 +50,16 @@ DBValue::DBValue(const DbNode& toSave) :
 	memcpy(this->prefix, toSave.prefix, HASHSIZE);
 	memcpy(this->parent, toSave.parent, HASHSIZE);
 	this->prefix_mask = toSave.prefix_mask;
+}
+
+DBValue::DBValue(void * toLoad) {
+	unsigned char * load = (unsigned char*) toLoad;
+	memcpy(this->parent, load, HASHSIZE);
+	memcpy(this->smaller, load + HASHSIZE, HASHSIZE);
+	memcpy(this->larger, load + 2 * HASHSIZE, HASHSIZE);
+	memcpy(this->prefix, load + 3 * HASHSIZE, HASHSIZE);
+	this->prefix_mask = (uint8_t) *(load + 4 * HASHSIZE);
+	this->flags = (uint8_t) *(load + 4 * HASHSIZE + 1);
 }
 
 bool DBValue::isDirty() const {
@@ -95,22 +118,23 @@ DbNode::DbNode(Db * db, const unsigned char * hash, bool newone) :
 		this->prefix_mask = 8 * HASHSIZE;
 		this->dirty_ = false;
 	} else {
-		DBValue result;
+		unsigned char result[DBValue::getBufferSize()];
 		Dbt key(this->hash, HASHSIZE);
 		Dbt data;
 		data.set_data(&result);
 		data.set_flags(DB_DBT_USERMEM);
-		data.set_ulen(sizeof(DBValue));
+		data.set_ulen(DBValue::getBufferSize());
 		int ret = this->db_->get(NULL, &key, &data, 0);
 		if (ret == 0) {
-			memcpy(this->parent, result.parent, HASHSIZE);
-			memcpy(this->smaller, result.smaller, HASHSIZE);
-			memcpy(this->larger, result.larger, HASHSIZE);
-			memcpy(this->prefix, result.prefix, HASHSIZE);
-			this->dirty_ = result.isDirty();
-			this->hasChildren_ = result.hasChildren();
-			this->hasParent_ = result.hasParent();
-			this->prefix_mask = result.prefix_mask;
+			DBValue values(data.get_data());
+			memcpy(this->parent, values.parent, HASHSIZE);
+			memcpy(this->smaller, values.smaller, HASHSIZE);
+			memcpy(this->larger, values.larger, HASHSIZE);
+			memcpy(this->prefix, values.prefix, HASHSIZE);
+			this->dirty_ = values.isDirty();
+			this->hasChildren_ = values.hasChildren();
+			this->hasParent_ = values.hasParent();
+			this->prefix_mask = values.prefix_mask;
 		} else {
 			throw DbTrieException("DB FAIL");
 		}
@@ -118,12 +142,11 @@ DbNode::DbNode(Db * db, const unsigned char * hash, bool newone) :
 }
 
 bool DbNode::toDb() {
-	DBValue result(*this);
+	unsigned char buffer[DBValue::getBufferSize()];
+	DBValue toSave(*this);
+	DBValue::marshall(buffer, toSave);
 	Dbt key(this->hash, HASHSIZE);
-	Dbt data;
-	data.set_data(&result);
-	data.set_ulen(sizeof(DBValue));
-	data.set_flags(DB_DBT_USERMEM);
+	Dbt data(buffer, DBValue::getBufferSize());
 	int ret = this->db_->put(NULL, &key, &data, 0);
 	return ret == 0;
 }
@@ -278,14 +301,14 @@ bool DbNode::operator !=(const DbNode& other) const {
 }
 
 bool DbNode::operator <(const DbNode& other) const {
-	if(this->prefix_mask == 8 * HASHSIZE){
+	if (this->prefix_mask == 8 * HASHSIZE) {
 		return false;
 	}
 	return BITTEST(other.prefix ,this->prefix_mask);
 }
 
 bool DbNode::operator >(const DbNode& other) const {
-	if(this->prefix_mask == 8 * HASHSIZE){
+	if (this->prefix_mask == 8 * HASHSIZE) {
 		return false;
 	}
 	return !BITTEST( other.prefix ,this->prefix_mask);

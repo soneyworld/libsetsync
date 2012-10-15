@@ -212,6 +212,7 @@ void DbNodeTest::testConstructor() {
 
 void DbNodeTest::testEquals() {
 	DbNode node1(this->db, key1, true);
+	node1.toDb();
 	CPPUNIT_ASSERT(node1==node1);
 	DbNode node2(this->db, key1, true);
 	CPPUNIT_ASSERT(node1==node2);

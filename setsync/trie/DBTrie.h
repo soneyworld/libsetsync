@@ -35,9 +35,12 @@ public:
 class DBValue {
 public:
 	DBValue(const DbNode& toSave);
+	DBValue(void * toLoad);
 	static const uint8_t HAS_PARENT;
 	static const uint8_t HAS_CHILDREN;
 	static const uint8_t DIRTY;
+	static const std::size_t getBufferSize();
+	static void marshall(void * target, const DBValue& toBeMarshalled);
 	bool isDirty() const;
 	bool hasChildren() const;
 	bool hasParent() const;
