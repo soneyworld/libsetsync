@@ -258,6 +258,10 @@ void DbNodeTest::testUpdateHash() {
 void DbNodeTest::testInsert() {
 	DbNode node1(this->db, key1, true);
 	node1.toDb();
+	CPPUNIT_ASSERT(node1.hasChildren_ == false);
+	CPPUNIT_ASSERT(node1.hasChildren() == false);
+	CPPUNIT_ASSERT(node1.hasParent_ == false);
+	CPPUNIT_ASSERT(node1.hasParent() == false);
 	DbNode node2(this->db, key2, true);
 	CPPUNIT_ASSERT(node1.insert(node2));
 }

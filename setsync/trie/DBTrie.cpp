@@ -174,6 +174,7 @@ void DbNode::setChildren(const DbNode& smaller, const DbNode& larger) {
 	this->hasChildren_ = true;
 	memcpy(this->smaller, smaller.hash, HASHSIZE);
 	memcpy(this->larger, larger.hash, HASHSIZE);
+	this->dirty_ = true;
 }
 
 void DbNode::setParent(const DbNode& parent) {
@@ -185,12 +186,14 @@ void DbNode::setSmaller(const DbNode& smaller) {
 	if (!this->hasChildren_)
 		throw DbTrieException("ERROR this node does not have any children");
 	memcpy(this->smaller, smaller.hash, HASHSIZE);
+	this->dirty_ = true;
 }
 
 void DbNode::setLarger(const DbNode& larger) {
 	if (!this->hasChildren_)
 		throw DbTrieException("ERROR this node does not have any children");
 	memcpy(this->larger, larger.hash, HASHSIZE);
+	this->dirty_ = true;
 }
 
 bool DbNode::insert(DbNode& node) {
@@ -228,35 +231,49 @@ bool DbNode::insert(DbNode& node, bool performHash) {
 	uint8_t common = this->commonPrefixSize(node);
 	// Copy myself as the new children of myself
 	DbNode newchildcopy = DbNode(*this);
+	DbNode backup = DbNode(*this);
 	if (node > newchildcopy) {
-		memcpy(this->larger, node.hash, HASHSIZE);
-		memcpy(this->smaller, newchildcopy.hash, HASHSIZE);
+		this->setChildren(newchildcopy,node);
 	} else {
-		memcpy(this->smaller, node.hash, HASHSIZE);
-		memcpy(this->larger, newchildcopy.hash, HASHSIZE);
+		this->setChildren(node,newchildcopy);
 	}
-	this->hasChildren_ = true;
 	this->updateHash();
-	memcpy(node.parent, this->hash, HASHSIZE);
-	memcpy(newchildcopy.parent, this->hash, HASHSIZE);
+	node.setParent(*this);
+	newchildcopy.setParent(*this);
+	newchildcopy.toDb();
 	node.toDb();
 	this->prefix_mask = common;
 	this->toDb();
-	DbNode child = newchildcopy;
-	DbNode root = child;
-	while (child.hasParent_) {
-		DbNode parent = child.getParent();
-		int n = memcmp(parent.larger, child.hash, HASHSIZE);
-		if (n == 0) {
-			memcpy(parent.larger, this->hash, HASHSIZE);
-		} else {
-			memcpy(parent.smaller, this->hash, HASHSIZE);
+	if (performHash) {
+		DbNode child = backup;
+		while (child.hasParent_) {
+			DbNode parent = child.getParent();
+			int n = memcmp(parent.larger, child.hash, HASHSIZE);
+			if (n == 0) {
+				memcpy(parent.larger, child.hash, HASHSIZE);
+			} else if(memcmp(parent.smaller, child.hash, HASHSIZE)==0){
+				memcpy(parent.smaller, child.hash, HASHSIZE);
+			} else {
+				throw DbTrieException("father lost!");
+			}
+			child = parent;
+			parent.updateHash();
+			parent.toDb();
 		}
-		child = parent;
-		parent.updateHash();
-		parent.toDb();
+		DbRootNode(this->db_, child.hash);
+	} else {
+		if(this->hasParent_){
+			DbNode parent = this->getParent();
+			parent.dirty_ = true;
+			int n = memcmp(parent.larger, newchildcopy.hash, HASHSIZE);
+			if (n == 0) {
+				memcpy(parent.larger, this->hash, HASHSIZE);
+			} else {
+				memcpy(parent.smaller, this->hash, HASHSIZE);
+			}
+			parent.toDb();
+		}
 	}
-	DbRootNode(this->db_, child.hash);
 	return true;
 }
 
@@ -379,6 +396,7 @@ void DbNode::updateHash(void) {
 		memcpy(DbNode::hashscratch, this->smaller, HASHSIZE);
 		memcpy(DbNode::hashscratch + HASHSIZE, this->larger, HASHSIZE);
 		SHA1(DbNode::hashscratch, 2 * HASHSIZE, this->hash);
+		this->dirty_ = false;
 	}
 }
 
