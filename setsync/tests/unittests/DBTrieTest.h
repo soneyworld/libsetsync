@@ -41,11 +41,17 @@ protected:
 };
 CPPUNIT_TEST_SUITE_REGISTRATION(DbTrieTest);
 
-class DbTrieNodeTest: public CPPUNIT_NS::TestCase {
+class DbNodeTest: public CPPUNIT_NS::TestCase {
 
-CPPUNIT_TEST_SUITE( DbTrieNodeTest);
+CPPUNIT_TEST_SUITE( DbNodeTest);
 		CPPUNIT_TEST( testConstructor);
 		CPPUNIT_TEST( testEquals);
+		CPPUNIT_TEST( testLarger);
+		CPPUNIT_TEST( testUpdateHash);
+		CPPUNIT_TEST( testInsert);
+		CPPUNIT_TEST( testErase);
+		CPPUNIT_TEST( testCommon);
+		CPPUNIT_TEST( testToDb);
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -58,12 +64,44 @@ private:
 	unsigned char key2[HASHSIZE];
 	unsigned char key3[HASHSIZE];
 	unsigned char key4[HASHSIZE];
+	unsigned char smaller[HASHSIZE];
+	unsigned char larger[HASHSIZE];
+	unsigned char hash[HASHSIZE];
 protected:
 	void testConstructor();
 	void testEquals();
-
+	void testLarger();
+	void testUpdateHash();
+	void testInsert();
+	void testErase();
+	void testCommon();
+	void testToDb();
 };
-CPPUNIT_TEST_SUITE_REGISTRATION(DbTrieNodeTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(DbNodeTest);
+
+class DbRootNodeTest: public CPPUNIT_NS::TestCase {
+
+CPPUNIT_TEST_SUITE( DbRootNodeTest);
+		CPPUNIT_TEST( testConstructor);
+		CPPUNIT_TEST( testToDb);
+	CPPUNIT_TEST_SUITE_END();
+
+public:
+	void setUp(void);
+	void tearDown(void);
+private:
+	Db * db;
+	Db * db2;
+	unsigned char key1[HASHSIZE];
+	unsigned char key2[HASHSIZE];
+	unsigned char key3[HASHSIZE];
+	unsigned char key4[HASHSIZE];
+	unsigned char hash[HASHSIZE];
+protected:
+	void testConstructor();
+	void testToDb();
+};
+CPPUNIT_TEST_SUITE_REGISTRATION(DbRootNodeTest);
 
 }//end namespace trie
 #endif /* FSTRIETEST_H_ */

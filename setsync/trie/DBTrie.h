@@ -61,7 +61,7 @@ public:
 class DbNode {
 	friend class DbRootNode;
 	friend class DBValue;
-	friend class DbTrieNodeTest;
+	friend class DbNodeTest;
 private:
 	static unsigned char hashscratch[HASHSIZE * 2];
 	static unsigned char nullarray[HASHSIZE];
@@ -107,6 +107,7 @@ public:
 };
 
 class DbRootNode {
+	friend class DbRootNodeTest;
 private:
 	Db * db_;
 	static const char root_name[];

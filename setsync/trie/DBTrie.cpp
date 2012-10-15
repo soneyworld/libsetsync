@@ -93,7 +93,10 @@ DbNode::DbNode(Db * db, const unsigned char * hash, bool newone) :
 	} else {
 		DBValue result;
 		Dbt key(this->hash, HASHSIZE);
-		Dbt data(&result, sizeof(DBValue));
+		Dbt data;
+		data.set_data(&result);
+		data.set_flags(DB_DBT_USERMEM);
+		data.set_ulen(sizeof(DBValue));
 		int ret = this->db_->get(NULL, &key, &data, 0);
 		if (ret == 0) {
 			memcpy(this->parent, result.parent, HASHSIZE);
@@ -119,7 +122,10 @@ DbNode::DbNode(Db * db, const unsigned char * hash, bool newone) :
 bool DbNode::toDb() {
 	DBValue result(*this);
 	Dbt key(this->hash, HASHSIZE);
-	Dbt data(&result, sizeof(DBValue));
+	Dbt data;
+	data.set_data(&result);
+	data.set_ulen(sizeof(DBValue));
+	data.set_flags(DB_DBT_USERMEM);
 	int ret = this->db_->put(NULL, &key, &data, 0);
 	return ret == 0;
 }
