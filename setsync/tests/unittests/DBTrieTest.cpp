@@ -176,8 +176,8 @@ void DbNodeTest::setUp(void) {
 	SHA1((unsigned char*) "bla2", 4, this->key2);
 	SHA1((unsigned char*) "bla3", 4, this->key3);
 	SHA1((unsigned char*) "bla4", 4, this->key4);
-	memset(this->smaller, 0x0, HASHSIZE);
-	memset(this->larger, 0x1, HASHSIZE);
+	memset(this->smaller, 0, HASHSIZE);
+	memset(this->larger, 0xFF, HASHSIZE);
 }
 
 void DbNodeTest::tearDown(void) {
@@ -205,32 +205,53 @@ void DbNodeTest::testConstructor() {
 	DbNode node3(this->db, key1);
 	CPPUNIT_ASSERT(node2==node3);
 	DbNode node4 = node1;
+	CPPUNIT_ASSERT(node1==node4);
 	DbNode node5(node1);
+	CPPUNIT_ASSERT(node1==node5);
 }
 
 void DbNodeTest::testEquals() {
 	DbNode node1(this->db, key1, true);
 	CPPUNIT_ASSERT(node1==node1);
-	DbNode node2(this->db2, key1, true);
+	DbNode node2(this->db, key1, true);
 	CPPUNIT_ASSERT(node1==node2);
+	DbNode node3(this->db, key1);
+	CPPUNIT_ASSERT(node1==node3);
+	CPPUNIT_ASSERT(node2==node3);
+}
+
+void DbNodeTest::testNotEquals() {
+	DbNode node1(this->db, key1, true);
+	DbNode node2(this->db, key2, true);
+	DbNode node3(this->db, key1, true);
+	CPPUNIT_ASSERT(node1!=node2);
+	CPPUNIT_ASSERT(node2!=node3);
+	CPPUNIT_ASSERT(!(node1!=node1));
+	CPPUNIT_ASSERT(!(node1!=node3));
 }
 
 void DbNodeTest::testLarger() {
 	DbNode node1(this->db, smaller, true);
+	node1.prefix_mask = 10;
 	DbNode node2(this->db, larger, true);
-	CPPUNIT_ASSERT(node1 > node2);
+	node2.prefix_mask = 10;
+	CPPUNIT_ASSERT(node2 > node1);
+	CPPUNIT_ASSERT(!(node1 > node2));
+	CPPUNIT_ASSERT(node1 < node2);
+	CPPUNIT_ASSERT(!(node2 < node1));
 }
 
 void DbNodeTest::testUpdateHash() {
 	DbNode node1(this->db, key1, true);
 	memcpy(node1.smaller, smaller, HASHSIZE);
 	memcpy(node1.larger, larger, HASHSIZE);
+	node1.hasChildren_ = true;
 	node1.updateHash();
 	unsigned char scratch[HASHSIZE * 2];
 	memcpy(scratch, smaller, HASHSIZE);
 	memcpy(scratch + HASHSIZE, larger, HASHSIZE);
 	SHA1(scratch, HASHSIZE * 2, this->hash);
-	CPPUNIT_ASSERT_EQUAL(memcmp(scratch, this->hash, HASHSIZE), 0);
+	CPPUNIT_ASSERT_EQUAL(memcmp(node1.hash, this->hash, HASHSIZE), 0);
 }
 
 void DbNodeTest::testInsert() {
@@ -256,7 +277,14 @@ void DbNodeTest::testCommon() {
 }
 
 void DbNodeTest::testToDb() {
-	throw "";
+	DbNode node1(this->db, key1, true);
+	DbNode node2(this->db, key1, true);
+	DbNode node3(this->db, key3, true);
+	CPPUNIT_ASSERT(node1.toDb());
+	CPPUNIT_ASSERT(node2.toDb());
+	CPPUNIT_ASSERT(node3.toDb());
+	DbNode node4(this->db, key1);
+	CPPUNIT_ASSERT(node4 == node1);
 }
 
 void DbRootNodeTest::setUp(void) {
@@ -285,12 +313,13 @@ void DbRootNodeTest::tearDown(void) {
 	delete this->db;
 }
 
-
 void DbRootNodeTest::testToDb() {
-	throw "";
+
 }
 
 void DbRootNodeTest::testConstructor() {
-	throw "";
+	DbRootNode root(this->db, key1);
+	DbRootNode root2(this->db);
+	CPPUNIT_ASSERT(memcmp(root.hash,root2.hash,HASHSIZE)==0);
 }
 }

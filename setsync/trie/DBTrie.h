@@ -78,9 +78,10 @@ private:
 	unsigned char prefix[HASHSIZE];
 	uint8_t prefix_mask;
 	DbNode(Db * db, const unsigned char * hash, bool newone = false);
-	void setParent(DbNode& parent);
-	void setSmaller(DbNode& smaller);
-	void setLarger(DbNode& larger);
+	void setParent(const DbNode& parent);
+	void setSmaller(const DbNode& smaller);
+	void setLarger(const DbNode& larger);
+	void setChildren(const DbNode& smaller, const DbNode& larger);
 	bool insert(DbNode& node);
 	bool insert(DbNode& node, bool performHash);
 	bool erase(DbNode& node);

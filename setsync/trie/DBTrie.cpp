@@ -58,13 +58,13 @@ DbRootNode::DbRootNode(Db * db) :
 	Dbt key(const_cast<char *> (root_name), strlen(root_name));
 	Dbt data(this->hash, HASHSIZE);
 	int ret = this->db_->get(NULL, &key, &data, 0);
-	if (ret != DB_NOTFOUND) {
-
-	} else {
+	if (ret == DB_NOTFOUND) {
 		throw DbTrieException("No Root found");
+	} else if (ret != 0) {
+		throw DbTrieException("ERROR on loading root");
 	}
+	memcpy(this->hash, data.get_data(), HASHSIZE);
 }
-
 
 DbRootNode::DbRootNode(Db * db, const unsigned char * hash) :
 	db_(db) {
@@ -79,7 +79,10 @@ DbNode DbRootNode::getRootNode() {
 void DbRootNode::saveToDB(void) {
 	Dbt key(const_cast<char*> (root_name), strlen(root_name));
 	Dbt data(this->hash, HASHSIZE);
-	this->db_->put(NULL, &key, &data, 0);
+	int ret = this->db_->put(NULL, &key, &data, 0);
+	if (ret != 0) {
+		throw DbTrieException("Error on putting root to db");
+	}
 }
 
 DbNode::DbNode(Db * db, const unsigned char * hash, bool newone) :
@@ -90,6 +93,7 @@ DbNode::DbNode(Db * db, const unsigned char * hash, bool newone) :
 		this->hasParent_ = false;
 		memcpy(this->prefix, hash, HASHSIZE);
 		this->prefix_mask = 8 * HASHSIZE;
+		this->dirty_ = false;
 	} else {
 		DBValue result;
 		Dbt key(this->hash, HASHSIZE);
@@ -107,12 +111,6 @@ DbNode::DbNode(Db * db, const unsigned char * hash, bool newone) :
 			this->hasChildren_ = result.hasChildren();
 			this->hasParent_ = result.hasParent();
 			this->prefix_mask = result.prefix_mask;
-		} else if (ret == DB_NOTFOUND) {
-			this->hasChildren_ = false;
-			this->hasParent_ = false;
-			this->dirty_ = true;
-			memcpy(this->prefix, hash, HASHSIZE);
-			this->prefix_mask = 8 * HASHSIZE;
 		} else {
 			throw DbTrieException("DB FAIL");
 		}
@@ -147,6 +145,29 @@ uint8_t DbNode::commonPrefixSize(DbNode& other) const {
 		common++;
 	}
 	return common;
+}
+
+void DbNode::setChildren(const DbNode& smaller, const DbNode& larger) {
+	this->hasChildren_ = true;
+	memcpy(this->smaller, smaller.hash, HASHSIZE);
+	memcpy(this->larger, larger.hash, HASHSIZE);
+}
+
+void DbNode::setParent(const DbNode& parent) {
+	this->hasParent_ = true;
+	memcpy(this->parent, parent.hash, HASHSIZE);
+}
+
+void DbNode::setSmaller(const DbNode& smaller) {
+	if (!this->hasChildren_)
+		throw DbTrieException("ERROR this node does not have any children");
+	memcpy(this->smaller, smaller.hash, HASHSIZE);
+}
+
+void DbNode::setLarger(const DbNode& larger) {
+	if (!this->hasChildren_)
+		throw DbTrieException("ERROR this node does not have any children");
+	memcpy(this->larger, larger.hash, HASHSIZE);
 }
 
 bool DbNode::insert(DbNode& node) {
@@ -257,11 +278,17 @@ bool DbNode::operator !=(const DbNode& other) const {
 }
 
 bool DbNode::operator <(const DbNode& other) const {
-	return !BITTEST(other.prefix ,this->prefix_mask);
+	if(this->prefix_mask == 8 * HASHSIZE){
+		return false;
+	}
+	return BITTEST(other.prefix ,this->prefix_mask);
 }
 
 bool DbNode::operator >(const DbNode& other) const {
-	return BITTEST( other.prefix ,this->prefix_mask);
+	if(this->prefix_mask == 8 * HASHSIZE){
+		return false;
+	}
+	return !BITTEST( other.prefix ,this->prefix_mask);
 }
 
 DbNode::DbNode(const DbNode& other) :

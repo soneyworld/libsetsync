@@ -46,6 +46,7 @@ class DbNodeTest: public CPPUNIT_NS::TestCase {
 CPPUNIT_TEST_SUITE( DbNodeTest);
 		CPPUNIT_TEST( testConstructor);
 		CPPUNIT_TEST( testEquals);
+		CPPUNIT_TEST( testNotEquals);
 		CPPUNIT_TEST( testLarger);
 		CPPUNIT_TEST( testUpdateHash);
 		CPPUNIT_TEST( testInsert);
@@ -70,6 +71,7 @@ private:
 protected:
 	void testConstructor();
 	void testEquals();
+	void testNotEquals();
 	void testLarger();
 	void testUpdateHash();
 	void testInsert();
