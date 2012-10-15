@@ -61,9 +61,10 @@ DbRootNode::DbRootNode(Db * db) :
 	if (ret != DB_NOTFOUND) {
 
 	} else {
-		throw "No Root found";
+		throw DbTrieException("No Root found");
 	}
 }
+
 
 DbRootNode::DbRootNode(Db * db, const unsigned char * hash) :
 	db_(db) {
@@ -110,7 +111,7 @@ DbNode::DbNode(Db * db, const unsigned char * hash, bool newone) :
 			memcpy(this->prefix, hash, HASHSIZE);
 			this->prefix_mask = 8 * HASHSIZE;
 		} else {
-			throw "DB FAIL";
+			throw DbTrieException("DB FAIL");
 		}
 	}
 }
@@ -167,7 +168,7 @@ bool DbNode::insert(DbNode& node, bool performHash) {
 				// Duplicated key
 				return false;
 			} else {
-				throw "Missing Child!";
+				throw DbTrieException("Missing Child!");
 			}
 		}
 	}
@@ -184,15 +185,17 @@ bool DbNode::insert(DbNode& node, bool performHash) {
 		memcpy(this->smaller, node.hash, HASHSIZE);
 		memcpy(this->larger, newchildcopy.hash, HASHSIZE);
 	}
+	this->hasChildren_ = true;
 	this->updateHash();
 	memcpy(node.parent, this->hash, HASHSIZE);
+	memcpy(newchildcopy.parent, this->hash, HASHSIZE);
 	node.toDb();
 	this->prefix_mask = common;
 	this->toDb();
 	DbNode child = newchildcopy;
 	DbNode root = child;
 	while (child.hasParent_) {
-		DbNode parent = this->getParent();
+		DbNode parent = child.getParent();
 		int n = memcmp(parent.larger, child.hash, HASHSIZE);
 		if (n == 0) {
 			memcpy(parent.larger, this->hash, HASHSIZE);
@@ -248,11 +251,11 @@ bool DbNode::operator !=(const DbNode& other) const {
 }
 
 bool DbNode::operator <(const DbNode& other) const {
-	return BITTEST( (unsigned char *)(other.prefix) ,this->prefix_mask);
+	return !BITTEST(other.prefix ,this->prefix_mask);
 }
 
 bool DbNode::operator >(const DbNode& other) const {
-	return BITTEST( (unsigned char *)(other.prefix) ,this->prefix_mask);
+	return BITTEST( other.prefix ,this->prefix_mask);
 }
 
 DbNode::DbNode(const DbNode& other) :
@@ -285,7 +288,7 @@ DbNode DbNode::getSmaller() {
 		DbNode result = DbNode(this->db_, this->smaller);
 		return result;
 	} else {
-		throw "THERE ARE NO CHILDREN";
+		throw DbTrieException("THERE ARE NO CHILDREN");
 	}
 }
 DbNode DbNode::getLarger() {
@@ -293,7 +296,7 @@ DbNode DbNode::getLarger() {
 		DbNode result = DbNode(this->db_, this->larger);
 		return result;
 	} else {
-		throw "THERE ARE NO CHILDREN";
+		throw DbTrieException("THERE ARE NO CHILDREN");
 	}
 }
 DbNode DbNode::getParent() {
@@ -301,7 +304,7 @@ DbNode DbNode::getParent() {
 		DbNode result = DbNode(this->db_, this->parent);
 		return result;
 	} else {
-		throw "THERE IS NO PARENT";
+		throw DbTrieException("THERE IS NO PARENT");
 	}
 }
 
@@ -364,7 +367,7 @@ bool DBTrie::add(const unsigned char * hash, bool performhash) {
 	if (this->root_ == NULL) {
 		this->root_ = new DbRootNode(this->db_, hash);
 		DbNode rootnode = this->root_->getRootNode();
-		if(rootnode.toDb()){
+		if (rootnode.toDb()) {
 			this->incSize();
 			return true;
 		} else {

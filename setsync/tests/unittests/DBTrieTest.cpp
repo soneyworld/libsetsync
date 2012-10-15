@@ -7,9 +7,12 @@
 #include "DBTrieTest.h"
 #include <sstream>
 
+
 using namespace std;
 
-void DBTrieTest::setUp(void) {
+namespace trie{
+
+void DbTrieTest::setUp(void) {
 	this->db = new Db(NULL, 0);
 	db->open(NULL, "trie.db", trie::DBTrie::getLogicalDatabaseName(),
 			trie::DBTrie::getTableType(), DB_CREATE, 0);
@@ -18,7 +21,7 @@ void DBTrieTest::setUp(void) {
 			trie::DBTrie::getTableType(), DB_CREATE, 0);
 }
 
-void DBTrieTest::tearDown(void) {
+void DbTrieTest::tearDown(void) {
 	db->close(0);
 	db2->close(0);
 	delete this->db;
@@ -32,7 +35,7 @@ void DBTrieTest::tearDown(void) {
 	remove("trieCopy.db");
 }
 
-void DBTrieTest::testAdding() {
+void DbTrieTest::testAdding() {
 	trie::DBTrie trie(db);
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
@@ -44,7 +47,7 @@ void DBTrieTest::testAdding() {
 	CPPUNIT_ASSERT(trie.getSize() == 2);
 }
 
-void DBTrieTest::testAddingAndErasingElements() {
+void DbTrieTest::testAddingAndErasingElements() {
 	trie::DBTrie trie(db);
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
@@ -65,16 +68,18 @@ void DBTrieTest::testAddingAndErasingElements() {
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 }
 
-void DBTrieTest::testAddingAndCleaningElements() {
+void DbTrieTest::testAddingAndCleaningElements() {
 	trie::DBTrie trie(db);
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
-	CPPUNIT_ASSERT(trie.getSize() == 1);
+	CPPUNIT_ASSERT(trie.Trie::add("bla2"));
+	CPPUNIT_ASSERT(trie.Trie::add("bla3"));
+	CPPUNIT_ASSERT(trie.getSize() == 3);
 	trie.clear();
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 }
 
-void DBTrieTest::testContains() {
+void DbTrieTest::testContains() {
 	trie::DBTrie trie(db);
 	CPPUNIT_ASSERT(!trie.Trie::contains("bla1"));
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
@@ -87,7 +92,7 @@ void DBTrieTest::testContains() {
 	CPPUNIT_ASSERT(!trie.Trie::contains("bla1"));
 }
 
-void DBTrieTest::testSize() {
+void DbTrieTest::testSize() {
 	trie::DBTrie trie(db);
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
@@ -124,7 +129,7 @@ void DBTrieTest::testSize() {
 	}
 }
 
-void DBTrieTest::testEquals() {
+void DbTrieTest::testEquals() {
 	trie::DBTrie trie1(db);
 	trie::DBTrie trie2(db2);
 	CPPUNIT_ASSERT(trie1==trie2);
@@ -138,8 +143,7 @@ void DBTrieTest::testEquals() {
 	CPPUNIT_ASSERT(trie1==trie2);
 }
 
-
-void DBTrieTest::testSavingAndLoading(){
+void DbTrieTest::testSavingAndLoading() {
 	Db * dbcopy = new Db(NULL, 0);
 	dbcopy->open(NULL, "trieCopy.db", trie::DBTrie::getLogicalDatabaseName(),
 			trie::DBTrie::getTableType(), DB_CREATE, 0);
@@ -151,7 +155,7 @@ void DBTrieTest::testSavingAndLoading(){
 	delete dbcopy;
 	dbcopy = new Db(NULL, 0);
 	dbcopy->open(NULL, "trieCopy.db", trie::DBTrie::getLogicalDatabaseName(),
-				trie::DBTrie::getTableType(), DB_CREATE, 0);
+			trie::DBTrie::getTableType(), DB_CREATE, 0);
 	trie = new trie::DBTrie(dbcopy);
 	CPPUNIT_ASSERT(trie->Trie::contains("bla1"));
 	CPPUNIT_ASSERT(trie->Trie::contains("bla2"));
@@ -161,3 +165,39 @@ void DBTrieTest::testSavingAndLoading(){
 	dbcopy = new Db(NULL, 0);
 	dbcopy->remove("trieCopy.db", NULL, 0);
 }
+
+void DbTrieNodeTest::setUp(void) {
+	this->db = new Db(NULL, 0);
+	db->open(NULL, "trienode1.db", trie::DBTrie::getLogicalDatabaseName(),
+			trie::DBTrie::getTableType(), DB_CREATE, 0);
+	this->db2 = new Db(NULL, 0);
+	db2->open(NULL, "trienode2.db", trie::DBTrie::getLogicalDatabaseName(),
+			trie::DBTrie::getTableType(), DB_CREATE, 0);
+	SHA1((unsigned char*) "bla1", 4, this->key1);
+	SHA1((unsigned char*) "bla2", 4, this->key2);
+	SHA1((unsigned char*) "bla3", 4, this->key3);
+	SHA1((unsigned char*) "bla4", 4, this->key4);
+}
+
+void DbTrieNodeTest::tearDown(void) {
+	db->close(0);
+	db2->close(0);
+	delete this->db;
+	delete this->db2;
+	this->db = new Db(NULL, 0);
+	this->db->remove("trienode1.db", NULL, 0);
+	delete this->db;
+	this->db = new Db(NULL, 0);
+	this->db->remove("trienode2.db", NULL, 0);
+	delete this->db;
+}
+
+void DbTrieNodeTest::testConstructor() {
+	trie::DbNode node(this->db, key1, true);
+
+}
+
+void DbTrieNodeTest::testEquals() {
+	throw "";
+}
+};

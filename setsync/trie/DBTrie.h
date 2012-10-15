@@ -11,11 +11,26 @@
 #include "Trie.h"
 #include <db_cxx.h>
 #include <setsync/BerkeleyDBTableUserInterface.h>
+#include <exception>
 
 namespace trie {
 
 class DbRootNode;
 class DbNode;
+
+class DbTrieException: public std::exception {
+private:
+	std::string what_;
+public:
+	DbTrieException(const char * message) throw () {
+		what_ = std::string(message);
+	}
+	virtual ~DbTrieException() throw () {
+	}
+	virtual const char* what() {
+		return what_.c_str();
+	}
+};
 
 class DBValue {
 public:
@@ -46,6 +61,7 @@ public:
 class DbNode {
 	friend class DbRootNode;
 	friend class DBValue;
+	friend class DbTrieNodeTest;
 private:
 	static unsigned char hashscratch[HASHSIZE * 2];
 	static unsigned char nullarray[HASHSIZE];
@@ -98,6 +114,8 @@ private:
 public:
 	DbRootNode(Db * db);
 	DbRootNode(Db * db, const unsigned char * hash);
+	DbRootNode(Db * db, const char * key);
+	DbRootNode(Db * db, const std::string& key);
 	void saveToDB();
 	DbNode getRootNode();
 };
