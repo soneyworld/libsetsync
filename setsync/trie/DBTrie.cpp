@@ -153,7 +153,7 @@ bool DbNode::toDb() {
 
 bool DbNode::similar(const DbNode& node) const {
 	for (uint8_t i = 0; i < this->prefix_mask; i++) {
-		if (BITTEST(this->prefix, i) != BITTEST(this->prefix,i)) {
+		if (BITTEST(this->prefix, i) != BITTEST(node.prefix,i)) {
 			return false;
 		}
 	}
