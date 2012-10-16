@@ -90,6 +90,7 @@ private:
 	bool erase(DbNode& node);
 	bool erase(DbNode& node, bool performHash);
 	void updateHash();
+	bool deleteFromDb();
 public:
 	DbNode(const DbNode& other);
 	bool hasChildren() const;
@@ -107,8 +108,8 @@ public:
 	bool operator >(const DbNode& other) const;
 	bool operator <(const DbNode& other) const;
 	DbNode& operator=(const DbNode& rhs);
-	bool toDb();
 	virtual std::string toString() const;
+	bool toDb();
 };
 
 class DbRootNode {

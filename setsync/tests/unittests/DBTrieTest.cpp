@@ -264,6 +264,8 @@ void DbNodeTest::testInsert() {
 	CPPUNIT_ASSERT(node1.hasParent() == false);
 	DbNode node2(this->db, key2, true);
 	CPPUNIT_ASSERT(node1.insert(node2));
+	node1 = DbRootNode(this->db).getRootNode();
+	CPPUNIT_ASSERT(!node1.insert(node2));
 }
 
 void DbNodeTest::testErase() {

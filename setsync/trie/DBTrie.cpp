@@ -227,40 +227,43 @@ bool DbNode::insert(DbNode& node, bool performHash) {
 			}
 		}
 	}
-
 	/** Not the same: Need to split */
-	// My new common prefix
-	uint8_t common = this->commonPrefixSize(node);
-	// Copy myself as the new children of myself
+	DbNode intermediate = DbNode(*this);
+	// The intermediate common prefix
+	intermediate.prefix_mask = intermediate.commonPrefixSize(node);
+	// Copy myself as the new children of intermediate
 	DbNode newchildcopy = DbNode(*this);
-	DbNode backup = DbNode(*this);
 	if (node > newchildcopy) {
-		this->setChildren(newchildcopy, node);
+		intermediate.setChildren(newchildcopy, node);
 	} else {
-		this->setChildren(node, newchildcopy);
+		intermediate.setChildren(node, newchildcopy);
 	}
-	this->updateHash();
-	node.setParent(*this);
-	newchildcopy.setParent(*this);
+	intermediate.updateHash();
+	node.setParent(intermediate);
+	newchildcopy.setParent(intermediate);
 	newchildcopy.toDb();
 	node.toDb();
-	this->prefix_mask = common;
-	this->toDb();
 	if (performHash) {
-		DbNode child = backup;
+		DbNode child = intermediate;
+		unsigned char roothash[HASHSIZE];
+		memcpy(roothash, intermediate.hash, HASHSIZE);
 		while (child.hasParent_) {
 			DbNode parent = child.getParent();
+			DbNode old_parent = parent;
 			int n = memcmp(parent.larger, child.hash, HASHSIZE);
 			if (n == 0) {
-				memcpy(parent.larger, child.hash, HASHSIZE);
+				parent.setLarger(child);
 			} else if (memcmp(parent.smaller, child.hash, HASHSIZE) == 0) {
-				memcpy(parent.smaller, child.hash, HASHSIZE);
+				parent.setSmaller(child);
 			} else {
 				throw DbTrieException("father lost!");
 			}
-			child = parent;
 			parent.updateHash();
+			child.setParent(parent);
+			child.toDb();
+			memcpy(roothash, parent.hash, HASHSIZE);
 			parent.toDb();
+			child = old_parent;
 		}
 		DbRootNode(this->db_, child.hash);
 	} else {
@@ -412,6 +415,11 @@ bool DbNode::hasChildren() const {
 
 bool DbNode::isDirty() const {
 	return this->dirty_;
+}
+
+bool DbNode::deleteFromDb() {
+	Dbt key(this->hash, HASHSIZE);
+	return this->db_->del(NULL, &key, 0) == 0;
 }
 
 std::string DbNode::toString() const {
