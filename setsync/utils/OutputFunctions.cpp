@@ -17,9 +17,10 @@ std::string OutputFunctions::CryptoHashtoString(
 std::string OutputFunctions::CryptoHashtoString(
 		const unsigned char * hash, const std::size_t hashSize) {
 	std::stringstream ss;
+	ss << std::hex << std::uppercase;
 	for(std::size_t i = 0; i < hashSize; i++){
-		unsigned char c = hash[i];
-		ss << std::hex << c;
+		unsigned short c = hash[i];
+		ss << c;
 	}
 	return ss.str();
 }
