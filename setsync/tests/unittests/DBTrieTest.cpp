@@ -293,6 +293,16 @@ void DbNodeTest::testToDb() {
 	CPPUNIT_ASSERT(node4 == node1);
 }
 
+void DbNodeTest::testToString() {
+	DbNode node1(this->db, key1, true);
+	DbNode node2(this->db, key2, true);
+	node1.toDb();
+	node1.insert(node2);
+	DbRootNode root(this->db);
+	DbNode rootnode = root.getRootNode();
+	std::cout << rootnode.toString() << std::endl;
+}
+
 void DbRootNodeTest::setUp(void) {
 	this->db = new Db(NULL, 0);
 	db->open(NULL, "trierootnode1.db", trie::DBTrie::getLogicalDatabaseName(),
@@ -327,5 +337,11 @@ void DbRootNodeTest::testConstructor() {
 	DbRootNode root(this->db, key1);
 	DbRootNode root2(this->db);
 	CPPUNIT_ASSERT(memcmp(root.hash,root2.hash,HASHSIZE)==0);
+}
+
+void DbRootNodeTest::testToString() {
+	DbRootNode root(this->db, key1);
+	root.toString();
+//	std::cout << root.toString() << std::endl;
 }
 }

@@ -95,9 +95,9 @@ public:
 	bool hasChildren() const;
 	bool hasParent() const;
 	bool isDirty() const;
-	DbNode getSmaller();
-	DbNode getLarger();
-	DbNode getParent();
+	DbNode getSmaller() const;
+	DbNode getLarger() const;
+	DbNode getParent() const;
 	bool insert(const unsigned char * hash);
 	bool insert(const unsigned char * hash, bool performHash);
 	bool erase(const unsigned char * hash);
@@ -108,6 +108,7 @@ public:
 	bool operator <(const DbNode& other) const;
 	DbNode& operator=(const DbNode& rhs);
 	bool toDb();
+	virtual std::string toString() const;
 };
 
 class DbRootNode {
@@ -123,6 +124,7 @@ public:
 	DbRootNode(Db * db, const std::string& key);
 	void saveToDB();
 	DbNode getRootNode();
+	virtual std::string toString() const;
 };
 
 class DBTrie: public trie::Trie,
@@ -143,6 +145,7 @@ public:
 	static const char * getLogicalDatabaseName();
 	static const DBTYPE getTableType();
 	virtual bool operator ==(const Trie& other) const;
+	virtual std::string toString() const;
 };
 
 }

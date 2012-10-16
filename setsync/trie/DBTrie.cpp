@@ -5,9 +5,11 @@
  */
 
 #include "DBTrie.h"
-#include "setsync/utils/bitset.h"
+#include <setsync/utils/bitset.h>
+#include <setsync/utils/OutputFunctions.h>
 #include <stdexcept>
 #include <typeinfo>
+#include <sstream>
 
 namespace trie {
 
@@ -233,9 +235,9 @@ bool DbNode::insert(DbNode& node, bool performHash) {
 	DbNode newchildcopy = DbNode(*this);
 	DbNode backup = DbNode(*this);
 	if (node > newchildcopy) {
-		this->setChildren(newchildcopy,node);
+		this->setChildren(newchildcopy, node);
 	} else {
-		this->setChildren(node,newchildcopy);
+		this->setChildren(node, newchildcopy);
 	}
 	this->updateHash();
 	node.setParent(*this);
@@ -251,7 +253,7 @@ bool DbNode::insert(DbNode& node, bool performHash) {
 			int n = memcmp(parent.larger, child.hash, HASHSIZE);
 			if (n == 0) {
 				memcpy(parent.larger, child.hash, HASHSIZE);
-			} else if(memcmp(parent.smaller, child.hash, HASHSIZE)==0){
+			} else if (memcmp(parent.smaller, child.hash, HASHSIZE) == 0) {
 				memcpy(parent.smaller, child.hash, HASHSIZE);
 			} else {
 				throw DbTrieException("father lost!");
@@ -262,7 +264,7 @@ bool DbNode::insert(DbNode& node, bool performHash) {
 		}
 		DbRootNode(this->db_, child.hash);
 	} else {
-		if(this->hasParent_){
+		if (this->hasParent_) {
 			DbNode parent = this->getParent();
 			parent.dirty_ = true;
 			int n = memcmp(parent.larger, newchildcopy.hash, HASHSIZE);
@@ -356,7 +358,7 @@ DbNode& DbNode::operator=(const DbNode& rhs) {
 	return *this;
 }
 
-DbNode DbNode::getSmaller() {
+DbNode DbNode::getSmaller() const {
 	if (hasChildren_) {
 		DbNode result = DbNode(this->db_, this->smaller);
 		return result;
@@ -364,7 +366,7 @@ DbNode DbNode::getSmaller() {
 		throw DbTrieException("THERE ARE NO CHILDREN");
 	}
 }
-DbNode DbNode::getLarger() {
+DbNode DbNode::getLarger() const {
 	if (hasChildren_) {
 		DbNode result = DbNode(this->db_, this->larger);
 		return result;
@@ -372,7 +374,7 @@ DbNode DbNode::getLarger() {
 		throw DbTrieException("THERE ARE NO CHILDREN");
 	}
 }
-DbNode DbNode::getParent() {
+DbNode DbNode::getParent() const {
 	if (hasParent_) {
 		DbNode result = DbNode(this->db_, this->parent);
 		return result;
@@ -410,6 +412,56 @@ bool DbNode::hasChildren() const {
 
 bool DbNode::isDirty() const {
 	return this->dirty_;
+}
+
+std::string DbNode::toString() const {
+	std::stringstream ss;
+	ss << "N" << utils::OutputFunctions::CryptoHashtoString(hash) << " [";
+	ss << "label=\"{";
+	if (hasChildren_)
+		ss << "{";
+	ss << utils::OutputFunctions::CryptoHashtoString(hash, 6);
+	ss << "...}";
+	if (hasChildren_) {
+		ss << "|{";
+		ss << utils::OutputFunctions::CryptoHashtoString(prefix,
+				this->prefix_mask / 8);
+		ss << "}";
+	}
+	ss << "\"";
+	if (hasChildren_) {
+		ss << ", shape=record";
+	}
+	ss << "];" << std::endl;
+	if (hasParent_) {
+		ss << "N" << utils::OutputFunctions::CryptoHashtoString(hash) << " -> "
+				<< "N" << utils::OutputFunctions::CryptoHashtoString(parent);
+		ss << " [style=dotted];" << std::endl;
+	}
+	if (hasChildren_) {
+		ss << "N" << utils::OutputFunctions::CryptoHashtoString(hash) << " -> "
+				<< "N" << utils::OutputFunctions::CryptoHashtoString(smaller)
+				<< " [label=\"smaller\"];" << std::endl;
+		ss << "N" << utils::OutputFunctions::CryptoHashtoString(hash) << " -> "
+				<< "N" << utils::OutputFunctions::CryptoHashtoString(larger)
+				<< " [label=\"larger\"];" << std::endl;
+	}
+
+	if (hasChildren_) {
+		DbNode smaller = this->getSmaller();
+		ss << smaller.toString();
+		DbNode larger = this->getLarger();
+		ss << larger.toString();
+	}
+	return ss.str();
+}
+
+std::string DbRootNode::toString() const {
+	std::stringstream ss;
+	ss << "ROOT -> N" << utils::OutputFunctions::CryptoHashtoString(hash);
+	ss << " [shape=plaintext]";
+	ss << ";" << std::endl;
+	return ss.str();
 }
 
 DBTrie::DBTrie(Db * db, const size_t hashsize) :
@@ -551,5 +603,17 @@ bool DBTrie::operator ==(const Trie& other) const {
 	} catch (const std::bad_cast& e) {
 		return false;
 	}
+}
+
+std::string DBTrie::toString() const {
+	std::stringstream ss;
+	if (this->root_ != NULL) {
+		ss << "digraph trie {" << std::endl;
+		ss << this->root_->toString();
+		DbNode node = this->root_->getRootNode();
+		ss << node.toString();
+		ss << "}" << std::endl;
+	}
+	return ss.str();
 }
 }
