@@ -19,6 +19,21 @@ using namespace std;
 namespace bloom {
 
 /*=== BEGIN tests for class 'DBBloomFilter' ===*/
+void DBBloomFilterTest::testConstructor() {
+	bloom::DBBloomFilter Filter1(db1, 10, false, 0.01);
+	Filter1.AbstractBloomFilter::add("bla1");
+	Filter1.AbstractBloomFilter::add("bla2");
+	Filter1.AbstractBloomFilter::add("bla3");
+	Filter1.AbstractBloomFilter::add("bla4");
+	bloom::DBBloomFilter Filter2(db1, 10, false, 0.01);
+	CPPUNIT_ASSERT(Filter1.AbstractBloomFilter::contains("bla1"));
+	CPPUNIT_ASSERT(Filter2.AbstractBloomFilter::contains("bla1"));
+	CPPUNIT_ASSERT(Filter2.AbstractBloomFilter::contains("bla2"));
+	CPPUNIT_ASSERT(Filter2.AbstractBloomFilter::contains("bla3"));
+	CPPUNIT_ASSERT(Filter2.AbstractBloomFilter::contains("bla4"));
+}
+
+
 void DBBloomFilterTest::testLoad() {
 	bloom::DBBloomFilter Filter1(db1, 10, false, 0.01);
 	bloom::DBBloomFilter Filter2(db2, 10, false, 0.01);
@@ -58,7 +73,6 @@ void DBBloomFilterTest::testInsert() {
 }
 
 void DBBloomFilterTest::testRemove() {
-	std::cout << std::endl;
 	bloom::DBBloomFilter Filter1(db1, 10, false, 0.01);
 
 	//	 test signature (const unsigned char* key)
@@ -74,14 +88,24 @@ void DBBloomFilterTest::testRemove() {
 	CPPUNIT_ASSERT(!Filter1.remove(cad1));
 	//	 test signature (const std::string& key)
 	Filter1.AbstractBloomFilter::add(string("hello"));
+	Filter1.AbstractBloomFilter::add(string("hello"));
 	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains(string("hello")));
-
+	CPPUNIT_ASSERT(Filter1.CountingBloomFilter::remove(string("hello")));
+	CPPUNIT_ASSERT(!Filter1.AbstractBloomFilter::contains(string("hello")));
 	//	 test signature (const char* key)
-
+	CPPUNIT_ASSERT(!Filter1.CountingBloomFilter::remove("bye"));
 	Filter1.AbstractBloomFilter::add("bye");
-	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains("bye"));
+	CPPUNIT_ASSERT(Filter1.AbstractBloomFilter::contains("bye"));
+	CPPUNIT_ASSERT(Filter1.CountingBloomFilter::remove("bye"));
+	CPPUNIT_ASSERT(!Filter1.CountingBloomFilter::remove("bye"));
 	//std::cout << std::endl << Filter1.toString() << std::endl;
-
+	Filter1.AbstractBloomFilter::add("bla1");
+	Filter1.AbstractBloomFilter::add("bla2");
+	Filter1.AbstractBloomFilter::add("bla3");
+	CPPUNIT_ASSERT(Filter1.CountingBloomFilter::remove("bla1"));
+	CPPUNIT_ASSERT(Filter1.CountingBloomFilter::remove("bla2"));
+	CPPUNIT_ASSERT(Filter1.CountingBloomFilter::remove("bla3"));
+	//std::cout << std::endl << Filter1.toString() << std::endl;
 }
 
 void DBBloomFilterTest::testContains() {

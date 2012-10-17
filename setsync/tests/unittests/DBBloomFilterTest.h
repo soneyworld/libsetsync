@@ -11,12 +11,14 @@
 #ifndef DBBLOOMFILTERTEST_H
 #define DBBLOOMFILTERTEST_H
 namespace bloom {
+
 class DBBloomFilterTest: public CppUnit::TestFixture {
 private:
 	Db * db1;
 	Db * db2;
 public:
 	/*=== BEGIN tests for class 'DBBloomFilter' ===*/
+	void testConstructor();
 	void testLoad();
 	void testInsert();
 	void testRemove();
@@ -31,6 +33,7 @@ public:
 	void tearDown();
 
 CPPUNIT_TEST_SUITE(DBBloomFilterTest);
+		CPPUNIT_TEST(testConstructor);
 		CPPUNIT_TEST(testLoad);
 		CPPUNIT_TEST(testInsert);
 		CPPUNIT_TEST(testRemove);
@@ -42,5 +45,6 @@ CPPUNIT_TEST_SUITE(DBBloomFilterTest);
 	CPPUNIT_TEST_SUITE_END();
 };
 CPPUNIT_TEST_SUITE_REGISTRATION( DBBloomFilterTest);
-};
+}
+;
 #endif /* BLOOMFILTERTEST_HH */
