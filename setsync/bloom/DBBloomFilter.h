@@ -32,6 +32,9 @@ public:
 	static const DBTYPE getTableType(){
 		return DB_HASH;
 	}
+	static const u_int32_t getTableFlags() {
+		return DB_DUPSORT;
+	}
 };
 
 }

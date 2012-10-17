@@ -19,6 +19,7 @@ public:
 	/*=== BEGIN tests for class 'DBBloomFilter' ===*/
 	void testLoad();
 	void testInsert();
+	void testRemove();
 	void testContains();
 	void testContainsAll();
 	void testOperatorAndAndAssign();
@@ -32,6 +33,7 @@ public:
 CPPUNIT_TEST_SUITE(DBBloomFilterTest);
 		CPPUNIT_TEST(testLoad);
 		CPPUNIT_TEST(testInsert);
+		CPPUNIT_TEST(testRemove);
 		CPPUNIT_TEST(testContains);
 		CPPUNIT_TEST(testContainsAll);
 		CPPUNIT_TEST(testOperatorAndAndAssign);

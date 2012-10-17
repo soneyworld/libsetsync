@@ -57,6 +57,31 @@ void DBBloomFilterTest::testInsert() {
 
 }
 
+void DBBloomFilterTest::testRemove() {
+	bloom::DBBloomFilter Filter1(db1, 10, false, 0.01);
+
+	//	 test signature (const unsigned char* key)
+
+	unsigned char cad1[SHA_DIGEST_LENGTH];
+	SHA1((const unsigned char*) "ejemplo", 7, cad1);
+	CPPUNIT_ASSERT(!Filter1.remove(cad1));
+	Filter1.add(cad1);
+	CPPUNIT_ASSERT_EQUAL(true, Filter1.contains(cad1));
+	CPPUNIT_ASSERT(Filter1.remove(cad1));
+	CPPUNIT_ASSERT_EQUAL(false, Filter1.contains(cad1));
+	CPPUNIT_ASSERT(!Filter1.remove(cad1));
+	//	 test signature (const std::string& key)
+	Filter1.AbstractBloomFilter::add(string("hello"));
+	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains(string("hello")));
+
+	//	 test signature (const char* key)
+
+	Filter1.AbstractBloomFilter::add("bye");
+	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains("bye"));
+	//std::cout << std::endl << Filter1.toString() << std::endl;
+
+}
+
 void DBBloomFilterTest::testContains() {
 	/* test signature (const std::string& key) const */
 	/* test signature (const char* data, const std::size_t& length) const */
@@ -180,12 +205,15 @@ void DBBloomFilterTest::testOperatorXorAndAssign() {
 void DBBloomFilterTest::setUp() {
 	this->db1 = new Db(NULL, 0);
 	this->db2 = new Db(NULL, 0);
+	db1->set_flags(bloom::DBBloomFilter::getTableFlags());
 	db1->open(NULL, "table1.db",
 			bloom::DBBloomFilter::getLogicalDatabaseName(),
 			bloom::DBBloomFilter::getTableType(), DB_CREATE, 0);
+	db2->set_flags(bloom::DBBloomFilter::getTableFlags());
 	db2->open(NULL, "table2.db",
 			bloom::DBBloomFilter::getLogicalDatabaseName(),
 			bloom::DBBloomFilter::getTableType(), DB_CREATE, 0);
+
 }
 
 void DBBloomFilterTest::tearDown() {
