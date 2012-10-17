@@ -112,11 +112,12 @@ void FSBloomFilter::clear() {
 
 void FSBloomFilter::add(const unsigned char *key) {
 	if (this->hardMaximum_ && this->itemCount_ >= maxElements_)
-		throw std::runtime_error( "Maximum of Elements reached, adding failed");
+		throw std::runtime_error("Maximum of Elements reached, adding failed");
 	std::size_t bit_index = 0;
 	std::size_t bit = 0;
 	for (int i = 0; i < this->functionCount_; i++) {
-		uint64_t pos = this->hashFunction_->hash(key, SHA_DIGEST_LENGTH, i);
+		uint64_t pos = this->hashFunction_->hash(key, SHA_DIGEST_LENGTH, i)
+				% this->filterSize_;
 		compute_indices(pos, bit_index, bit);
 		this->bitArray_[bit_index] |= bit_mask[bit];
 	}
@@ -126,7 +127,7 @@ void FSBloomFilter::add(const unsigned char *key) {
 
 void FSBloomFilter::addAll(const unsigned char* keys, const std::size_t count) {
 	if (this->hardMaximum_ && this->itemCount_ + count > maxElements_)
-		throw std::runtime_error( "Maximum of Elements reached, adding failed");
+		throw std::runtime_error("Maximum of Elements reached, adding failed");
 	uint64_t hashes[count * this->functionCount_];
 	for (int i = 0; i < count; i++) {
 		for (int j = 0; j < this->functionCount_; j++) {
@@ -153,10 +154,10 @@ bool FSBloomFilter::contains(const unsigned char *key) const {
 	std::size_t bit = 0;
 
 	for (int i = 0; i < this->functionCount_; i++) {
-		uint64_t pos = this->hashFunction_->hash(key, SHA_DIGEST_LENGTH, i);
+		uint64_t pos = this->hashFunction_->hash(key, SHA_DIGEST_LENGTH, i)
+				% this->filterSize_;
 		compute_indices(pos, bit_index, bit);
-		if ((this->bitArray_[bit_index] & bit_mask[bit])
-				!= bit_mask[bit]) {
+		if ((this->bitArray_[bit_index] & bit_mask[bit]) != bit_mask[bit]) {
 			return false;
 		}
 	}
@@ -169,7 +170,8 @@ std::size_t FSBloomFilter::containsAll(const unsigned char *keys,
 	for (int i = 0; i < count; i++) {
 		for (int j = 0; j < this->functionCount_; j++) {
 			hashes[i * this->functionCount_ + j] = this->hashFunction_->hash(
-					keys + (this->hashsize_ * i), this->hashsize_, j);
+					keys + (this->hashsize_ * i), this->hashsize_, j)
+					% this->filterSize_;
 		}
 	}
 	std::sort(hashes, hashes + (count * this->functionCount_));
@@ -177,16 +179,15 @@ std::size_t FSBloomFilter::containsAll(const unsigned char *keys,
 	std::size_t bit = 0;
 	for (int i = 0; i < count * this->functionCount_; i++) {
 		compute_indices(hashes[i], bit_index, bit);
-		if ((this->bitArray_[bit_index] & bit_mask[bit])
-				!= bit_mask[bit]) {
-			return i==0?1:i;
+		if ((this->bitArray_[bit_index] & bit_mask[bit]) != bit_mask[bit]) {
+			return i == 0 ? 1 : i;
 		}
 	}
 }
 
 void FSBloomFilter::compute_indices(const uint64_t hash,
 		std::size_t& bit_index, std::size_t& bit) const {
-	bit_index = ((hash % this->filterSize_)+7)/BYTESIZE;
+	bit_index = ((hash % this->filterSize_) + 7) / BYTESIZE;
 	bit = hash % BYTESIZE;
 }
 

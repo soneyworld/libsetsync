@@ -7,6 +7,7 @@
 #include "DBBloomFilter.h"
 #include <db_cxx.h>
 #include <string.h>
+#include <setsync/utils/OutputFunctions.h>
 
 namespace bloom {
 
@@ -48,16 +49,12 @@ DBBloomFilter::DBBloomFilter(Db * db, const uint64_t maxNumberOfElements,
 
 void DBBloomFilter::add(const unsigned char * key) {
 	FSBloomFilter::add(key);
-	unsigned char v[this->hashsize_];
-	memcpy(v, key, this->hashsize_);
-	Dbt value(v, this->hashsize_);
+	Dbt value(const_cast<unsigned char*>(key), this->hashsize_);
 	for (int i = 0; i < this->functionCount_; i++) {
 		uint64_t pos = this->hashFunction_->hash(key, this->hashsize_, i);
-		Dbt db_key;
-		db_key.set_data(&pos);
-		db_key.set_ulen(sizeof(uint64_t));
-		db_key.set_flags(DB_DBT_USERMEM);
-		int ret = this->db_->put(NULL, &db_key, &value, DB_NODUPDATA);
+		pos = pos % this->filterSize_;
+		Dbt db_key(&pos, sizeof(uint64_t));
+		int ret = this->db_->put(NULL, &db_key, &value, DB_OVERWRITE_DUP);
 		if (ret == DB_KEYEXIST) {
 			return;
 		}
@@ -65,40 +62,54 @@ void DBBloomFilter::add(const unsigned char * key) {
 }
 
 bool DBBloomFilter::remove(const unsigned char * key) {
+	if (!contains(key)) {
+		return false;
+	}
 	bool result = false;
 	int ret;
 	Dbc *cursorp;
 	unsigned char hash[this->hashsize_];
 	uint64_t pos;
+	uint64_t temphash;
 	Dbt db_key, db_data;
 	db_data.set_data(hash);
 	db_data.set_ulen(this->hashsize_);
 	db_data.set_flags(DB_DBT_USERMEM);
+	std::cout << "remove " << utils::OutputFunctions::CryptoHashtoString(key)
+			<< std::endl;
 	for (int func = 0; func < functionCount_; func++) {
 		bool hash_found = false;
 		bool other_hash_found = false;
 		this->db_->cursor(NULL, &cursorp, 0);
-		pos = this->hashFunction_->hash(key, this->hashsize_, func);
+		temphash = this->hashFunction_->hash(key, this->hashsize_, func);
+		pos = temphash % this->filterSize_;
 		db_key.set_data(&pos);
 		db_key.set_size(sizeof(uint64_t));
 		ret = cursorp->get(&db_key, &db_data, DB_SET);
+		std::cout << "function " << func << ": " << pos;
 		if (ret == 0) {
-			if (memcmp(key, db_data.get_data(), this->hashsize_) == 0) {
+			std::cout << " " << utils::OutputFunctions::CryptoHashtoString(
+					(const unsigned char*) db_data.get_data());
+			memcpy(hash, db_data.get_data(), this->hashsize_);
+			if (memcmp(key, hash, this->hashsize_) == 0) {
 				hash_found = true;
 			} else {
 				other_hash_found = true;
 			}
-			if (cursorp->count(NULL, 0) > 1 && !hash_found) {
+			db_recno_t counter;
+			int r = cursorp->count(&counter, 0);
+			if (counter > 1 && !hash_found) {
 				while ((ret = cursorp->get(&db_key, &db_data, DB_NEXT_DUP))
 						== 0) {
 					// Do interesting things with the Dbts here.
-					if (memcmp(key, db_data.get_data(), this->hashsize_) == 0) {
+					memcpy(hash, db_data.get_data(), this->hashsize_);
+					if (memcmp(key, hash, this->hashsize_) == 0) {
 						hash_found = true;
 					} else {
 						other_hash_found = true;
 					}
 				}
-			} else if(cursorp->count(NULL, 0) > 1 && hash_found) {
+			} else if (counter > 1 && hash_found) {
 				other_hash_found = true;
 			}
 		}
@@ -110,17 +121,17 @@ bool DBBloomFilter::remove(const unsigned char * key) {
 		}
 		cursorp->close();
 		if (hash_found && !other_hash_found) {
+			std::cout << " bit reset";
 			std::size_t bit_index = 0;
 			std::size_t bit = 0;
-			compute_indices(pos, bit_index, bit);
-			this->bitArray_[bit_index] |= bit_mask[bit];
+			compute_indices(temphash, bit_index, bit);
+			this->bitArray_[bit_index] ^= bit_mask[bit];
 		}
 		if (hash_found) {
+			std::cout << " hash found";
 			result = true;
 		}
-	}
-	if (result) {
-
+		std::cout << std::endl;
 	}
 	return result;
 }

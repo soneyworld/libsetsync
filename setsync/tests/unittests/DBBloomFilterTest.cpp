@@ -58,6 +58,7 @@ void DBBloomFilterTest::testInsert() {
 }
 
 void DBBloomFilterTest::testRemove() {
+	std::cout << std::endl;
 	bloom::DBBloomFilter Filter1(db1, 10, false, 0.01);
 
 	//	 test signature (const unsigned char* key)
@@ -67,7 +68,8 @@ void DBBloomFilterTest::testRemove() {
 	CPPUNIT_ASSERT(!Filter1.remove(cad1));
 	Filter1.add(cad1);
 	CPPUNIT_ASSERT_EQUAL(true, Filter1.contains(cad1));
-	CPPUNIT_ASSERT(Filter1.remove(cad1));
+	bool removed = Filter1.remove(cad1);
+	CPPUNIT_ASSERT(removed);
 	CPPUNIT_ASSERT_EQUAL(false, Filter1.contains(cad1));
 	CPPUNIT_ASSERT(!Filter1.remove(cad1));
 	//	 test signature (const std::string& key)
