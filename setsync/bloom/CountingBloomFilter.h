@@ -9,15 +9,31 @@
 #include "BloomFilter.h"
 
 namespace bloom {
-
+/**
+ * A counting bloom filter extends an abstract bloom filter by adding
+ * a remove functionality. It is also an abstract class, but it adds
+ * helping functions for calling the remove method with strings.
+ */
 class CountingBloomFilter: public virtual AbstractBloomFilter {
 public:
-	CountingBloomFilter();
-	CountingBloomFilter(const CountingBloomFilter& filter);
-	virtual ~CountingBloomFilter();
+	/**
+	 * Remove the given crypto key from the BloomFilter
+	 * \param key to be removed
+	 * \return true on successful remove
+	 */
 	virtual bool remove(const unsigned char * key) = 0;
-	virtual bool remove(const char * key);
-	virtual bool remove(const std::string& key);
+	/**
+	 * Hash the given string and remove the hash from the BloomFilter
+	 * \param string to be hashed and removed
+	 * \return true on successful remove
+	 */
+	virtual bool remove(const char * string);
+	/**
+	 * Hash the given string and remove the hash from the BloomFilter
+	 * \param string to be hashed and removed
+	 * \return true on successful remove
+	 */
+	virtual bool remove(const std::string& string);
 };
 
 }
