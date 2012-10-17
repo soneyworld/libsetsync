@@ -16,6 +16,8 @@ public:
 	CountingBloomFilter(const CountingBloomFilter& filter);
 	virtual ~CountingBloomFilter();
 	virtual bool remove(const unsigned char * key) = 0;
+	virtual bool remove(const char * key);
+	virtual bool remove(const std::string& key);
 };
 
 }
