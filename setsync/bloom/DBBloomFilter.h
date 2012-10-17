@@ -52,6 +52,12 @@ public:
 	 *  \param key to be added
 	 */
 	void virtual add(const unsigned char * key);
+	/**
+	 * \param keys to be added to the BloomFilter
+	 * \param count number of keys in the array
+	 * \throws an Exception, if the maximum is reached and hardMaximum has been set
+	 */
+	virtual void addAll(const unsigned char *keys, const std::size_t count);
 	/*
 	 * Removes the given key from the bloom filter if the filter contains the key
 	 * \param key the key to be deleted

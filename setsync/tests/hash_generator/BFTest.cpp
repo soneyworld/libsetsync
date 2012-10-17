@@ -5,6 +5,7 @@
  */
 
 #include "BFTest.h"
+#include <db_cxx.h>
 using namespace std;
 
 BFTest::BFTest() {
@@ -17,8 +18,8 @@ BFTest::~BFTest() {
 }
 
 void BFTest::run() {
-	runMemBF();
-	runFSBF();
+//	runMemBF();
+//	runFSBF();
 	runDBBF();
 }
 void BFTest::runMemBF() {
@@ -32,9 +33,30 @@ void BFTest::runFSBF() {
 	runBF(&bf);
 }
 void BFTest::runDBBF() {
-	//	cout << "running Berkeley DBBloomFilter test:"<<endl;
-	//	bloom::DBBloomFilter bf(ITERATIONS);
-	//	runBF(&bf);
+/*	cout << "running Berkeley DBBloomFilter(MEMDB) test:" << endl;
+	DbEnv env(0);
+	// Setting Cache to 2 GB
+	env.set_cache_max(2, 0);
+	env.open(NULL,DB_INIT_MPOOL,0);
+	Db db1(&env, 0);
+	db1.set_flags(bloom::DBBloomFilter::getTableFlags());
+	db1.open(NULL, NULL, bloom::DBBloomFilter::getLogicalDatabaseName(),
+			bloom::DBBloomFilter::getTableType(), DB_CREATE, 0);
+	bloom::DBBloomFilter bf(&db1, ITERATIONS);
+	runBF(&bf);
+	db1.close(0);
+	env.close(0);*/
+	cout << "running Berkeley DBBloomFilter(FS) test:" << endl;
+	Db db2(NULL, 0);
+	db2.set_flags(bloom::DBBloomFilter::getTableFlags());
+	db2.open(NULL, "temp-table.db",
+			bloom::DBBloomFilter::getLogicalDatabaseName(),
+			bloom::DBBloomFilter::getTableType(), DB_CREATE, 0);
+
+	bloom::DBBloomFilter bf2(&db2, ITERATIONS);
+	runBF(&bf2);
+	db2.close(0);
+	remove("temp-table.db");
 }
 
 void BFTest::runBF(bloom::AbstractBloomFilter * bf) {
