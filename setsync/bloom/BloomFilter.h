@@ -75,11 +75,11 @@ public:
 	 */
 	virtual void addAll(const unsigned char *keys, const std::size_t count) = 0;
 	/**
-	 * \param key will be hashed and the hash will be checked on the bloom filter
+	 * \param string will be hashed and the hash will be checked on the bloom filter
 	 */
-	virtual bool contains(const std::string& key) const;
+	virtual bool contains(const std::string& string) const;
 	/**
-	 * \param key will be hashed and the hash will be checked on the bloom filter
+	 * \param string will be hashed and the hash will be checked on the bloom filter
 	 */
 	virtual bool contains(const char * string) const;
 
