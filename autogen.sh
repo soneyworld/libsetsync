@@ -12,4 +12,4 @@ if [ ! -d "m4" ]; then
 fi
 aclocal -I m4
 automake --add-missing
-autoreconf --force --install
+autoreconf --install
