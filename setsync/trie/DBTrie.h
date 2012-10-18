@@ -56,12 +56,6 @@ public:
 	uint8_t flags;
 };
 
-class DbInnerNode {
-public:
-	DBValue value;
-	unsigned char hash[HASHSIZE];
-};
-
 class DbNode {
 	friend class DbRootNode;
 	friend class DBValue;

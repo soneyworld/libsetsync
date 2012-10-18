@@ -67,9 +67,11 @@ DBValue::DBValue(void * toLoad) {
 bool DBValue::isDirty() const {
 	return (this->flags & DIRTY) == DIRTY;
 }
+
 bool DBValue::hasChildren() const {
 	return (this->flags & HAS_CHILDREN) == HAS_CHILDREN;
 }
+
 bool DBValue::hasParent() const {
 	return (this->flags & HAS_PARENT) == HAS_PARENT;
 }
@@ -85,7 +87,7 @@ DbRootNode::DbRootNode(Db * db) :
 
 void DbRootNode::set(const unsigned char * hash) {
 	Dbt key(const_cast<char*> (root_name), strlen(root_name));
-	Dbt data(const_cast<unsigned char*>(hash), HASHSIZE);
+	Dbt data(const_cast<unsigned char*> (hash), HASHSIZE);
 	int ret = this->db_->put(NULL, &key, &data, 0);
 	if (ret != 0) {
 		throw DbTrieException("Error on putting root to db");
@@ -239,7 +241,7 @@ bool DbNode::insert(DbNode& node, bool performHash) {
 	node.toDb();
 	oldnode.setParent(intermediate);
 	oldnode.toDb();
-	if(!intermediate.hasParent_){
+	if (!intermediate.hasParent_) {
 		intermediate.toDb();
 	}
 	if (performHash) {
@@ -486,14 +488,14 @@ std::string DbNode::toString() const {
 }
 
 std::string DbRootNode::toString() const {
-	try{
+	try {
 		std::stringstream ss;
 		DbNode n(get());
 		ss << "ROOT -> N" << utils::OutputFunctions::CryptoHashtoString(n.hash);
 		ss << " [shape=plaintext]";
 		ss << ";" << std::endl;
 		return ss.str();
-	}catch (...) {
+	} catch (...) {
 		std::stringstream ss;
 		ss << "ROOT [shape=plaintext];" << std::endl;
 		return ss.str();
@@ -520,15 +522,15 @@ DBTrie::~DBTrie() {
  }*/
 
 bool DBTrie::add(const unsigned char * hash, bool performhash) {
-	try{
+	try {
 		DbNode root = this->root_.get();
-		bool inserted = root.insert(hash,performhash);
-		if(inserted)
+		bool inserted = root.insert(hash, performhash);
+		if (inserted)
 			incSize();
 		return inserted;
-	}catch(...){
+	} catch (...) {
 		// Create a new node
-		DbNode root(this->db_,hash, true);
+		DbNode root(this->db_, hash, true);
 		root.toDb();
 		this->root_.set(hash);
 		incSize();
@@ -537,16 +539,16 @@ bool DBTrie::add(const unsigned char * hash, bool performhash) {
 }
 
 bool DBTrie::remove(const unsigned char * hash, bool performhash) {
-	try{
+	try {
 		DbNode root = this->root_.get();
-		bool removed = root.erase(hash,performhash);
-		if(removed)
+		bool removed = root.erase(hash, performhash);
+		if (removed)
 			decSize();
-		if(getSize()==0){
+		if (getSize() == 0) {
 			this->clear();
 		}
 		return removed;
-	}catch(...){
+	} catch (...) {
 		return false;
 	}
 }
@@ -584,11 +586,11 @@ bool DBTrie::operator ==(const Trie& other) const {
 		const DBTrie& other_ = dynamic_cast<const DBTrie&> (other);
 		try {
 			DbNode mynode = root_.get();
-		}catch(...){
-			try{
+		} catch (...) {
+			try {
 				DbNode othernode = other_.root_.get();
 				return true;
-			}catch(...){
+			} catch (...) {
 				return false;
 			}
 		}
