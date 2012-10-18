@@ -598,16 +598,23 @@ bool DBTrie::operator ==(const Trie& other) const {
 	try {
 		const DBTrie& other_ = dynamic_cast<const DBTrie&> (other);
 		try {
-			DbNode mynode = root_.get();
+			root_.get();
 		} catch (...) {
 			try {
-				DbNode othernode = other_.root_.get();
-				return true;
-			} catch (...) {
+				other_.root_.get();
 				return false;
+			} catch (...) {
+				return true;
 			}
 		}
-		return this->root_.get() == other_.root_.get();
+		try{
+			other_.root_.get();
+		}catch (...) {
+			return false;
+		}
+		DbNode mynode = root_.get();
+		DbNode othernode = other_.root_.get();
+		return mynode == othernode;
 	} catch (const std::bad_cast& e) {
 		return false;
 	}
