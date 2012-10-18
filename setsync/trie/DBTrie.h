@@ -17,6 +17,7 @@ namespace trie {
 
 class DbRootNode;
 class DbNode;
+class DBTrie;
 
 class DbTrieException: public std::exception {
 private:
@@ -65,6 +66,7 @@ class DbNode {
 	friend class DbRootNode;
 	friend class DBValue;
 	friend class DbNodeTest;
+	friend class DBTrie;
 private:
 	static unsigned char hashscratch[HASHSIZE * 2];
 	static unsigned char nullarray[HASHSIZE];
@@ -91,7 +93,10 @@ private:
 	bool erase(DbNode& node, bool performHash);
 	void updateHash();
 	bool deleteFromDb();
+	bool isEqualToSmaller(const DbNode& node) const;
+	bool isEqualToLarger(const DbNode& node) const;
 public:
+	DbNode(Db * db);
 	DbNode(const DbNode& other);
 	bool hasChildren() const;
 	bool hasParent() const;
@@ -117,14 +122,11 @@ class DbRootNode {
 private:
 	Db * db_;
 	static const char root_name[];
-	unsigned char hash[HASHSIZE];
 public:
 	DbRootNode(Db * db);
-	DbRootNode(Db * db, const unsigned char * hash);
-	DbRootNode(Db * db, const char * key);
-	DbRootNode(Db * db, const std::string& key);
-	void saveToDB();
-	DbNode getRootNode();
+	DbNode get() const;
+	void set(const unsigned char * hash);
+	void del();
 	virtual std::string toString() const;
 };
 
@@ -132,10 +134,7 @@ class DBTrie: public trie::Trie,
 		public virtual berkeley::BerkeleyDBTableUserInferface {
 private:
 	Db * db_;
-	DbRootNode * root_;
-	void getRootFromDB();
-	void putRootToDB();
-	//	bool insertHash(const unsigned char * hash, bool performhash);
+	DbRootNode root_;
 public:
 	DBTrie(Db * db, const size_t hashsize = SHA_DIGEST_LENGTH);
 	virtual ~DBTrie();

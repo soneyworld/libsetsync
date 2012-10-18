@@ -1,12 +1,12 @@
 /*
- * FSTrieTest.cpp
+ * DBTrieTest.cpp
  *
  *      Author: Till Lorentzen
  */
 
 #include "DBTrieTest.h"
 #include <sstream>
-
+#include <setsync/utils/OutputFunctions.h>
 using namespace std;
 
 namespace trie {
@@ -258,14 +258,14 @@ void DbNodeTest::testUpdateHash() {
 void DbNodeTest::testInsert() {
 	DbNode node1(this->db, key1, true);
 	node1.toDb();
+	DbRootNode root(this->db);
+	root.set(key1);
 	CPPUNIT_ASSERT(node1.hasChildren_ == false);
 	CPPUNIT_ASSERT(node1.hasChildren() == false);
 	CPPUNIT_ASSERT(node1.hasParent_ == false);
 	CPPUNIT_ASSERT(node1.hasParent() == false);
-	DbNode node2(this->db, key2, true);
-	CPPUNIT_ASSERT(node1.insert(node2));
-	node1 = DbRootNode(this->db).getRootNode();
-	CPPUNIT_ASSERT(!node1.insert(node2));
+	CPPUNIT_ASSERT(root.get().insert(key2));
+	CPPUNIT_ASSERT(!root.get().insert(key2));
 }
 
 void DbNodeTest::testErase() {
@@ -296,13 +296,21 @@ void DbNodeTest::testToDb() {
 }
 
 void DbNodeTest::testToString() {
+//	cout << endl;
+//	cout << "KEY1: " << utils::OutputFunctions::CryptoHashtoString(key1) << endl;
+//	cout << "KEY2: " << utils::OutputFunctions::CryptoHashtoString(key2) << endl;
 	DbNode node1(this->db, key1, true);
-	DbNode node2(this->db, key2, true);
 	node1.toDb();
-	node1.insert(node2);
+//	cout << node1.toString();
 	DbRootNode root(this->db);
-	DbNode rootnode = root.getRootNode();
-	std::cout << rootnode.toString() << std::endl;
+	root.set(key1);
+	node1 = root.get();
+//	cout << node1.toString();
+	node1.insert(key2);
+//	cout << node1.toString();
+	node1 = root.get();
+//	cout << node1.toString();
+//	std::cout << std::endl;
 }
 
 void DbRootNodeTest::setUp(void) {
@@ -336,13 +344,11 @@ void DbRootNodeTest::testToDb() {
 }
 
 void DbRootNodeTest::testConstructor() {
-	DbRootNode root(this->db, key1);
-	DbRootNode root2(this->db);
-	CPPUNIT_ASSERT(memcmp(root.hash,root2.hash,HASHSIZE)==0);
+
 }
 
 void DbRootNodeTest::testToString() {
-	DbRootNode root(this->db, key1);
+	DbRootNode root(this->db);
 	root.toString();
 //	std::cout << root.toString() << std::endl;
 }
