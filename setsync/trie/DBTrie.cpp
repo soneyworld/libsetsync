@@ -65,13 +65,13 @@ DBValue::DBValue(void * toLoad) {
 }
 
 bool DBValue::isDirty() const {
-	return this->flags & DIRTY == DIRTY;
+	return (this->flags & DIRTY) == DIRTY;
 }
 bool DBValue::hasChildren() const {
-	return this->flags & HAS_CHILDREN == HAS_CHILDREN;
+	return (this->flags & HAS_CHILDREN) == HAS_CHILDREN;
 }
 bool DBValue::hasParent() const {
-	return this->flags & HAS_PARENT == HAS_PARENT;
+	return (this->flags & HAS_PARENT) == HAS_PARENT;
 }
 
 unsigned char DbNode::hashscratch[HASHSIZE * 2];
