@@ -98,6 +98,8 @@ public:
 	DbNode getSmaller() const;
 	DbNode getLarger() const;
 	DbNode getParent() const;
+	bool isSmaller(const DbNode& smaller) const;
+	bool isLarger(const DbNode& larger) const;
 	bool insert(const unsigned char * hash);
 	bool insert(const unsigned char * hash, bool performHash);
 	bool erase(const unsigned char * hash);

@@ -237,6 +237,10 @@ void DbNodeTest::testLarger() {
 	DbNode node2(this->db, larger, true);
 	node2.prefix_mask = 10;
 	CPPUNIT_ASSERT(node2 > node1);
+	CPPUNIT_ASSERT(node1.isLarger(node2));
+	CPPUNIT_ASSERT(!node2.isLarger(node1));
+	CPPUNIT_ASSERT(!node1.isSmaller(node2));
+	CPPUNIT_ASSERT(node2.isSmaller(node1));
 	CPPUNIT_ASSERT(!(node1 > node2));
 	CPPUNIT_ASSERT(node1 < node2);
 	CPPUNIT_ASSERT(!(node2 < node1));
@@ -256,16 +260,18 @@ void DbNodeTest::testUpdateHash() {
 }
 
 void DbNodeTest::testInsert() {
-	DbNode node1(this->db, key1, true);
+	DbNode node1(this->db, smaller, true);
 	node1.toDb();
 	DbRootNode root(this->db);
-	root.set(key1);
+	root.set(smaller);
 	CPPUNIT_ASSERT(node1.hasChildren_ == false);
 	CPPUNIT_ASSERT(node1.hasChildren() == false);
 	CPPUNIT_ASSERT(node1.hasParent_ == false);
 	CPPUNIT_ASSERT(node1.hasParent() == false);
-	CPPUNIT_ASSERT(root.get().insert(key2));
-	CPPUNIT_ASSERT(!root.get().insert(key2));
+	node1 = root.get();
+	CPPUNIT_ASSERT(node1.insert(larger));
+	node1 = root.get();
+	CPPUNIT_ASSERT(!node1.insert(larger));
 }
 
 void DbNodeTest::testErase() {

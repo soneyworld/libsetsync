@@ -209,12 +209,25 @@ bool DbNode::erase(DbNode& node, bool performHash) {
 	return false;
 }
 
+bool DbNode::isSmaller(const DbNode& smaller) const {
+	if (this->prefix_mask == 8 * HASHSIZE) {
+		return false;
+	}
+	return !BITTEST(smaller.prefix , this->prefix_mask);
+}
+bool DbNode::isLarger(const DbNode& larger) const {
+	if (this->prefix_mask == 8 * HASHSIZE) {
+		return false;
+	}
+	return BITTEST(larger.prefix , this->prefix_mask);
+}
+
 bool DbNode::insert(DbNode& node, bool performHash) {
 	bool thesame = similar(node);
 	if (thesame) {
-		if (node > *this) {
+		if (isLarger(node)) {
 			return this->getLarger().insert(node, performHash);
-		} else if (node < *this) {
+		} else if (isSmaller(node)) {
 			return this->getSmaller().insert(node, performHash);
 		} else {
 			if (this->prefix_mask == 8 * HASHSIZE) {
@@ -231,7 +244,7 @@ bool DbNode::insert(DbNode& node, bool performHash) {
 	intermediate.prefix_mask = intermediate.commonPrefixSize(node);
 	// Copy myself as the new children of intermediate
 	DbNode oldnode = DbNode(*this);
-	if (node > oldnode) {
+	if (intermediate < node) {
 		intermediate.setChildren(oldnode, node);
 	} else {
 		intermediate.setChildren(node, oldnode);
