@@ -21,7 +21,7 @@ private:
 	bool hardMaximum_;
 protected:
 	void setSize(const size_t s);
-	bloom::BloomFilter * bf_;
+	bloom::AbstractBloomFilter * bf_;
 	trie::Trie * trie_;
 public:
 	Set(const uint64_t maxSize = 1000, const bool hardMaximum = false,

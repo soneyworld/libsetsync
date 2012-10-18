@@ -16,8 +16,10 @@ MemSet::MemSet(const uint64_t maxSize, const bool hardMaximum,
 }
 
 MemSet::~MemSet() {
-	delete this->bf_;
-	delete this->trie_;
+	bloom::BloomFilter& filter_ = dynamic_cast<bloom::BloomFilter&> (*bf_);
+	delete &filter_;
+	trie::MemTrie& memtrie_ = dynamic_cast<trie::MemTrie&> (*trie_);
+	delete &memtrie_;
 }
 
 }

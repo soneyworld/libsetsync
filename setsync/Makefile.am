@@ -13,6 +13,8 @@ cpp_sources = Set.cpp MemSet.cpp Configuration.cpp
 
 if BERKELEY_DB
 h_sources += BerkeleyDBTableUserInterface.h
+h_sources += DbSet.h
+cpp_sources += DbSet.cpp 
 endif
 
 if OPENSSL
