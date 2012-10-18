@@ -7,6 +7,7 @@
 
 #include "OutputFunctions.h"
 #include <sstream>
+#include <iomanip>
 #include <setsync/sha1.h>
 namespace utils {
 
@@ -20,7 +21,7 @@ std::string OutputFunctions::CryptoHashtoString(
 	ss << std::hex << std::uppercase;
 	for(std::size_t i = 0; i < hashSize; i++){
 		unsigned short c = hash[i];
-		ss << c;
+		ss << std::setw(2) << std::setfill('0') << c;
 	}
 	return ss.str();
 }
