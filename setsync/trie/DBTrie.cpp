@@ -100,9 +100,9 @@ DbNode DbRootNode::get() const {
 	Dbt data(hash, HASHSIZE);
 	int ret = this->db_->get(NULL, &key, &data, 0);
 	if (ret == DB_NOTFOUND) {
-		throw DbTrieException("No Root found");
+		throw DbNoRootFoundException();
 	} else if (ret != 0) {
-		throw DbTrieException("ERROR on loading root");
+		throw DbException(ret);
 	}
 	memcpy(hash, data.get_data(), HASHSIZE);
 	return DbNode(this->db_, hash);
@@ -599,17 +599,17 @@ bool DBTrie::operator ==(const Trie& other) const {
 		const DBTrie& other_ = dynamic_cast<const DBTrie&> (other);
 		try {
 			root_.get();
-		} catch (...) {
+		} catch (DbNoRootFoundException e) {
 			try {
 				other_.root_.get();
 				return false;
-			} catch (...) {
+			} catch (DbNoRootFoundException e) {
 				return true;
 			}
 		}
-		try{
+		try {
 			other_.root_.get();
-		}catch (...) {
+		} catch (DbNoRootFoundException e) {
 			return false;
 		}
 		DbNode mynode = root_.get();

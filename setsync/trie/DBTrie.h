@@ -33,6 +33,15 @@ public:
 	}
 };
 
+class DbNoRootFoundException: public DbTrieException {
+public:
+	DbNoRootFoundException() throw () :
+		DbTrieException("No root found") {
+	}
+	virtual ~DbNoRootFoundException() throw () {
+	}
+};
+
 class DBValue {
 public:
 	DBValue(const DbNode& toSave);
