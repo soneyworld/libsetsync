@@ -74,38 +74,8 @@ void DBBloomFilter::add(const unsigned char * key) {
 }
 
 void DBBloomFilter::addAll(const unsigned char* keys, const std::size_t count) {
-	int ret;
-	Dbt mkey, mdata;
-	unsigned char keybuff[sizeof(uint64_t) * count * this->functionCount_ ];
-	mkey.set_ulen(sizeof(uint64_t) * count * this->functionCount_);
-	mkey.set_data(&keybuff);
-	unsigned char databuff[this->hashsize_ * count * this->functionCount_ ];
-	mdata.set_ulen(this->hashsize_ * count * this->functionCount_);
-	mdata.set_data(&databuff);
-	DbMultipleDataBuilder keybuilder(mkey);
-	DbMultipleDataBuilder databuilder(mdata);
-	for (std::size_t i = 0; i < count; i++) {
-		for (int func = 0; func < this->functionCount_; func++) {
-			uint64_t key = this->hashFunction_->hash(
-					keys + i * this->hashsize_, this->hashsize_, func)
-					% this->filterSize_;
-			ret = keybuilder.append(&key, sizeof(uint64_t));
-			if (!ret) {
-				throw DbException(ret);
-			}
-			ret = databuilder.append(
-					const_cast<unsigned char*> (keys + i * this->hashsize_),
-					this->hashsize_);
-			if (!ret) {
-				throw DbException(ret);
-			}
-		}
-	}
-	if ((ret = this->db_->put(NULL, &mkey, &mdata, DB_MULTIPLE)) != 0) {
-		this->db_->err(ret, "Db::put");
-		throw DbException(ret);
-	} else {
-		this->FSBloomFilter::addAll(keys, count);
+	for(std::size_t i = 0; i < count; i++){
+		add(keys+this->hashsize_*i);
 	}
 }
 
