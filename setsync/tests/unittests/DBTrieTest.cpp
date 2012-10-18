@@ -288,21 +288,27 @@ void DbNodeTest::testToDb() {
 	DbNode node1(this->db, key1, true);
 	DbNode node2(this->db, key2, true);
 	DbNode node3(this->db, key3, true);
+	DbNode node4(this->db, key4, true);
 	node1.dirty_ = true;
 	node2.hasChildren_ = true;
 	node3.hasParent_ = true;
+	node4.prefix_mask = 8;
 	CPPUNIT_ASSERT(node1.toDb());
 	CPPUNIT_ASSERT(node2.toDb());
 	CPPUNIT_ASSERT(node3.toDb());
-	DbNode node4(this->db, key1);
-	DbNode node5(this->db, key2);
-	DbNode node6(this->db, key3);
-	CPPUNIT_ASSERT(node1 == node4);
-	CPPUNIT_ASSERT(node2 == node5);
-	CPPUNIT_ASSERT(node3 == node6);
-	CPPUNIT_ASSERT(node2 != node4);
-	CPPUNIT_ASSERT(node3 != node5);
-	CPPUNIT_ASSERT(node1 != node6);
+	CPPUNIT_ASSERT(node4.toDb());
+	DbNode node5(this->db, key1);
+	DbNode node6(this->db, key2);
+	DbNode node7(this->db, key3);
+	DbNode node8(this->db, key4);
+	CPPUNIT_ASSERT(node1 == node5);
+	CPPUNIT_ASSERT(node2 == node6);
+	CPPUNIT_ASSERT(node3 == node7);
+	CPPUNIT_ASSERT(node4 == node8);
+	CPPUNIT_ASSERT(node2 != node5);
+	CPPUNIT_ASSERT(node3 != node6);
+	CPPUNIT_ASSERT(node4 != node7);
+	CPPUNIT_ASSERT(node1 != node8);
 }
 
 void DbNodeTest::testToString() {
