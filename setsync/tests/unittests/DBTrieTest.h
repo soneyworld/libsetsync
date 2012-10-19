@@ -21,6 +21,7 @@ CPPUNIT_TEST_SUITE( DbTrieTest);
 		CPPUNIT_TEST( testSize);
 		CPPUNIT_TEST( testEquals);
 		CPPUNIT_TEST( testSavingAndLoading);
+		CPPUNIT_TEST( testToString);
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -29,6 +30,8 @@ public:
 private:
 	Db * db;
 	Db * db2;
+	unsigned char smaller[HASHSIZE];
+	unsigned char larger[HASHSIZE];
 protected:
 	void testAdding();
 	void testAddingAndErasingElements();
@@ -37,6 +40,7 @@ protected:
 	void testSize();
 	void testEquals();
 	void testSavingAndLoading();
+	void testToString();
 
 };
 CPPUNIT_TEST_SUITE_REGISTRATION(DbTrieTest);
@@ -86,8 +90,8 @@ CPPUNIT_TEST_SUITE_REGISTRATION(DbNodeTest);
 class DbRootNodeTest: public CPPUNIT_NS::TestCase {
 
 CPPUNIT_TEST_SUITE( DbRootNodeTest);
-		CPPUNIT_TEST( testConstructor);
-		CPPUNIT_TEST( testToDb);
+//		CPPUNIT_TEST( testConstructor);
+//		CPPUNIT_TEST( testToDb);
 		CPPUNIT_TEST( testToString);
 	CPPUNIT_TEST_SUITE_END();
 

@@ -18,6 +18,8 @@ void DbTrieTest::setUp(void) {
 	this->db2 = new Db(NULL, 0);
 	db2->open(NULL, "trie2.db", trie::DBTrie::getLogicalDatabaseName(),
 			trie::DBTrie::getTableType(), DB_CREATE, 0);
+	memset(this->smaller, 0, HASHSIZE);
+	memset(this->larger, 0xFF, HASHSIZE);
 }
 
 void DbTrieTest::tearDown(void) {
@@ -165,6 +167,18 @@ void DbTrieTest::testSavingAndLoading() {
 	dbcopy->remove("trieCopy.db", NULL, 0);
 }
 
+void DbTrieTest::testToString() {
+//	cout << endl;
+	trie::DBTrie trie1(db);
+	trie1.Trie::add(smaller);
+	trie1.Trie::add(larger);
+	trie1.Trie::add("bla1");
+//	trie1.Trie::add("bla2");
+//	trie1.Trie::add("bla3");
+//	trie1.Trie::add("bla4");
+//	cout << trie1.toString();
+}
+
 void DbNodeTest::setUp(void) {
 	this->db = new Db(NULL, 0);
 	db->open(NULL, "trienode1.db", trie::DBTrie::getLogicalDatabaseName(),
@@ -260,18 +274,34 @@ void DbNodeTest::testUpdateHash() {
 }
 
 void DbNodeTest::testInsert() {
-	DbNode node1(this->db, smaller, true);
-	node1.toDb();
+	DbNode rootnode(this->db, smaller, true);
+	rootnode.toDb();
 	DbRootNode root(this->db);
 	root.set(smaller);
-	CPPUNIT_ASSERT(node1.hasChildren_ == false);
-	CPPUNIT_ASSERT(node1.hasChildren() == false);
-	CPPUNIT_ASSERT(node1.hasParent_ == false);
-	CPPUNIT_ASSERT(node1.hasParent() == false);
-	node1 = root.get();
-	CPPUNIT_ASSERT(node1.insert(larger));
-	node1 = root.get();
-	CPPUNIT_ASSERT(!node1.insert(larger));
+	CPPUNIT_ASSERT(rootnode.hasChildren_ == false);
+	CPPUNIT_ASSERT(rootnode.hasChildren() == false);
+	CPPUNIT_ASSERT(rootnode.hasParent_ == false);
+	CPPUNIT_ASSERT(rootnode.hasParent() == false);
+	rootnode = root.get();
+	CPPUNIT_ASSERT(rootnode.insert(larger));
+	rootnode = root.get();
+	CPPUNIT_ASSERT(rootnode.hasChildren_ == true);
+	CPPUNIT_ASSERT(rootnode.hasParent_ == false);
+	DbNode smaller = rootnode.getSmaller();
+	DbNode larger = rootnode.getLarger();
+	CPPUNIT_ASSERT(smaller.hasChildren_ == false);
+	CPPUNIT_ASSERT(smaller.hasParent_ == true);
+	CPPUNIT_ASSERT(larger.hasChildren_ == false);
+	CPPUNIT_ASSERT(larger.hasParent_ == true);
+	CPPUNIT_ASSERT(!rootnode.insert(larger));
+	CPPUNIT_ASSERT(rootnode.insert(key1));
+	rootnode = root.get();
+	CPPUNIT_ASSERT(rootnode.hasChildren_ == true);
+	CPPUNIT_ASSERT(rootnode.hasParent_ == false);
+	CPPUNIT_ASSERT(rootnode.insert(key2));
+	rootnode = root.get();
+	CPPUNIT_ASSERT(rootnode.hasChildren_ == true);
+	CPPUNIT_ASSERT(rootnode.hasParent_ == false);
 }
 
 void DbNodeTest::testErase() {
@@ -318,21 +348,21 @@ void DbNodeTest::testToDb() {
 }
 
 void DbNodeTest::testToString() {
-//	cout << endl;
-//	cout << "KEY1: " << utils::OutputFunctions::CryptoHashtoString(key1) << endl;
-//	cout << "KEY2: " << utils::OutputFunctions::CryptoHashtoString(key2) << endl;
-	DbNode node1(this->db, key1, true);
+	//	cout << endl;
+	//	cout << "KEY1: " << utils::OutputFunctions::CryptoHashtoString(key1) << endl;
+	//	cout << "KEY2: " << utils::OutputFunctions::CryptoHashtoString(key2) << endl;
+	DbNode node1(this->db, smaller, true);
 	node1.toDb();
-//	cout << node1.toString();
+	//	cout << node1.toString();
 	DbRootNode root(this->db);
-	root.set(key1);
+	root.set(smaller);
 	node1 = root.get();
-//	cout << node1.toString();
-	node1.insert(key2);
-//	cout << node1.toString();
+	//	cout << node1.toString();
+	node1.insert(larger);
+	//	cout << node1.toString();
 	node1 = root.get();
-//	cout << node1.toString();
-//	std::cout << std::endl;
+	//	cout << node1.toString();
+	//	std::cout << std::endl;
 }
 
 void DbRootNodeTest::setUp(void) {
@@ -372,6 +402,6 @@ void DbRootNodeTest::testConstructor() {
 void DbRootNodeTest::testToString() {
 	DbRootNode root(this->db);
 	root.toString();
-//	std::cout << root.toString() << std::endl;
+	//	std::cout << root.toString() << std::endl;
 }
 }
