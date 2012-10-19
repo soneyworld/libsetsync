@@ -14,6 +14,9 @@ class DBTest: public Test {
 private:
 	void runMemDb();
 	void runFsDb();
+	void runTrie(Db * db);
+	void runMemDbTrie();
+	void runFsDbTrie();
 	void put(Db * db, std::pair<Dbt, Dbt> values);
 	void get(Db * db, Dbt key);
 	void del(Db * db, Dbt key);
