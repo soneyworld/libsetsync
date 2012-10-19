@@ -8,7 +8,7 @@ AM_LDFLAGS = @LIBS@
 
 include_h_sources = set.h Set.hpp
 h_sources = $(include_h_sources) MemSet.h Configuration.h
-c_sources = set.c
+c_sources = 
 cpp_sources = Set.cpp MemSet.cpp Configuration.cpp
 
 if BERKELEY_DB
