@@ -13,9 +13,11 @@ namespace utils {
 class OutputFunctions {
 public:
 	static std::string
-			CryptoHashtoString(const unsigned char * hash);
+	CryptoHashtoString(const unsigned char * hash);
 	static std::string CryptoHashtoString(const unsigned char * hash,
-			std::size_t hashSize);
+			const std::size_t hashSize);
+	static std::string ArrayToBitString(const unsigned char * array,
+			const std::size_t bitcount);
 };
 }
 
