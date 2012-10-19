@@ -461,16 +461,16 @@ bool DbNode::deleteFromDb() {
 std::string DbNode::toString() const {
 	std::stringstream ss;
 	ss << "N" << utils::OutputFunctions::CryptoHashtoString(hash) << " [";
-	ss << "label=\"{";
+	ss << "label=\"";
 	if (hasChildren_)
-		ss << "{";
+		ss << "{{";
 	ss << utils::OutputFunctions::CryptoHashtoString(hash, 6);
-	ss << "...}";
+	ss << "...";
 	if (hasChildren_) {
-		ss << "|{";
-		ss << utils::OutputFunctions::CryptoHashtoString(prefix,
-				this->prefix_mask / 8);
-		ss << "}";
+		ss << "}|{prefix(" << (int) this->prefix_mask << "): ";
+		ss << utils::OutputFunctions::ArrayToBitString(prefix,
+				this->prefix_mask);
+		ss << "}}";
 	}
 	ss << "\"";
 	if (hasChildren_) {
