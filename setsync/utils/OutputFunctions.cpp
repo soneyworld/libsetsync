@@ -29,7 +29,7 @@ std::string OutputFunctions::ArrayToBitString(const unsigned char * array,
 		const std::size_t bitcount) {
 	std::stringstream ss;
 	for (std::size_t i = 0; i < bitcount; i++) {
-		if (BITTEST(array,bitcount)) {
+		if (BITTEST(array,i)) {
 			ss << "1";
 		} else {
 			ss << "0";
