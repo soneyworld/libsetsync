@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <typeinfo>
 #include <sstream>
+#include <vector>
 
 namespace trie {
 
@@ -258,6 +259,7 @@ bool DbNode::insert(DbNode& node, bool performHash) {
 		intermediate.toDb();
 	}
 	if (performHash) {
+		std::vector<DbNode> toBeDeleted;
 		DbNode oldchild = *this;
 		DbNode child = intermediate;
 		unsigned char roothash[HASHSIZE];
@@ -265,22 +267,33 @@ bool DbNode::insert(DbNode& node, bool performHash) {
 		while (oldchild.hasParent_) {
 			DbNode oldparent = oldchild.getParent();
 			DbNode parent = oldparent;
+			DbNode otherchild = oldparent.getLarger();
 			if (oldparent.isEqualToSmaller(oldchild)) {
 				parent.setSmaller(child);
 			} else if (oldparent.isEqualToLarger(oldchild)) {
+				otherchild = oldparent.getSmaller();
 				parent.setLarger(child);
 			} else {
 				throw DbTrieException(
 						"Child hasn't been correct child of parent");
 			}
 			parent.updateHash();
+			otherchild.setParent(parent);
+			otherchild.toDb();
 			child.setParent(parent);
 			child.toDb();
 			memcpy(roothash, parent.hash, HASHSIZE);
 			parent.toDb();
 			oldchild = oldparent;
+			toBeDeleted.push_back(oldparent);
+			//			oldparent.deleteFromDb();
 		}
-		DbRootNode(this->db_).set(child.hash);
+		std::vector<DbNode>::const_iterator iter;
+		for (iter = toBeDeleted.begin(); iter != toBeDeleted.end(); iter++) {
+			DbNode d = *iter;
+			d.deleteFromDb();
+		}
+		DbRootNode(this->db_).set(roothash);
 	} else {
 		if (intermediate.hasParent_) {
 			DbNode parent = intermediate.getParent();
@@ -293,6 +306,8 @@ bool DbNode::insert(DbNode& node, bool performHash) {
 				throw DbTrieException("Old Node hasn't been correct child");
 			}
 			parent.toDb();
+		} else {
+			DbRootNode(this->db_).set(intermediate.hash);
 		}
 		intermediate.toDb();
 	}
@@ -464,7 +479,7 @@ std::string DbNode::toString() const {
 	ss << "label=\"";
 	if (hasChildren_)
 		ss << "{{";
-	ss << utils::OutputFunctions::CryptoHashtoString(hash, 6);
+	ss << utils::OutputFunctions::CryptoHashtoString(hash, 3);
 	ss << "...";
 	if (hasChildren_) {
 		ss << "}|{prefix(" << (int) this->prefix_mask << "): ";
@@ -475,6 +490,9 @@ std::string DbNode::toString() const {
 	ss << "\"";
 	if (hasChildren_) {
 		ss << ", shape=record";
+	}
+	if (dirty_){
+		ss << ", color=red";
 	}
 	ss << "];" << std::endl;
 	if (hasParent_) {
