@@ -90,6 +90,7 @@ private:
 	void setSmaller(const DbNode& smaller);
 	void setLarger(const DbNode& larger);
 	void setChildren(const DbNode& smaller, const DbNode& larger);
+//	void updateChild(const DbNode& oldchild, const DbNode& newchild);
 	bool insert(DbNode& node);
 	bool insert(DbNode& node, bool performHash);
 	bool erase(DbNode& node);

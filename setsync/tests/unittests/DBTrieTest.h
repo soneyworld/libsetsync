@@ -56,6 +56,7 @@ CPPUNIT_TEST_SUITE( DbNodeTest);
 		CPPUNIT_TEST( testInsert);
 		CPPUNIT_TEST( testErase);
 		CPPUNIT_TEST( testCommon);
+		CPPUNIT_TEST( testSimilar);
 		CPPUNIT_TEST( testToDb);
 		CPPUNIT_TEST( testToString);
 	CPPUNIT_TEST_SUITE_END();
@@ -82,6 +83,7 @@ protected:
 	void testInsert();
 	void testErase();
 	void testCommon();
+	void testSimilar();
 	void testToDb();
 	void testToString();
 };
@@ -90,8 +92,8 @@ CPPUNIT_TEST_SUITE_REGISTRATION(DbNodeTest);
 class DbRootNodeTest: public CPPUNIT_NS::TestCase {
 
 CPPUNIT_TEST_SUITE( DbRootNodeTest);
-//		CPPUNIT_TEST( testConstructor);
-//		CPPUNIT_TEST( testToDb);
+		//		CPPUNIT_TEST( testConstructor);
+		//		CPPUNIT_TEST( testToDb);
 		CPPUNIT_TEST( testToString);
 	CPPUNIT_TEST_SUITE_END();
 

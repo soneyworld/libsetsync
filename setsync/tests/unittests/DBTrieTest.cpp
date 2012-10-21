@@ -170,21 +170,26 @@ void DbTrieTest::testSavingAndLoading() {
 void DbTrieTest::testToString() {
 //	cout << endl;
 	trie::DBTrie trie1(db);
-	trie1.add(smaller,false);
-	trie1.add(larger,false);
-//	cout << trie1.toString();
-	trie1.Trie::add("bla1",false);
-//	cout << trie1.toString();
-	trie1.Trie::add("bla2",false);
-	trie1.Trie::add("bla3",false);
-	trie1.Trie::add("bla4",false);
-	trie1.Trie::add("bla5",false);
-	trie1.Trie::add("bla6",false);
-	trie1.Trie::add("bla7",false);
-	trie1.Trie::add("bla8",false);
-	trie1.Trie::add("bla9",false);
-	trie1.Trie::add("bla10",false);
-//	cout << trie1.toString();
+	trie1.Trie::add(smaller);
+	trie1.Trie::add(larger);
+	trie1.Trie::add("bla1");
+	trie1.Trie::add("bla2");
+	trie1.Trie::add("bla3");
+	trie1.Trie::add("bla4");
+	trie1.Trie::add("bla5");
+	trie1.Trie::add("bla6");
+	trie1.Trie::add("bla7");
+	trie1.Trie::add("bla8");
+	trie1.Trie::add("bla9");
+	trie1.Trie::add("bla10");
+	trie1.Trie::add("bla11");
+	trie1.Trie::add("bla12");
+	trie1.Trie::add("bla13");
+	trie1.Trie::add("bla14");
+	trie1.Trie::add("bla15");
+	trie1.Trie::add("bla16");
+	string dot = trie1.toString();
+//	cout << dot;
 }
 
 void DbNodeTest::setUp(void) {
@@ -255,9 +260,9 @@ void DbNodeTest::testNotEquals() {
 
 void DbNodeTest::testLarger() {
 	DbNode node1(this->db, smaller, true);
-	node1.prefix_mask = 10;
+	node1.prefix_mask = 1;
 	DbNode node2(this->db, larger, true);
-	node2.prefix_mask = 10;
+	node2.prefix_mask = 1;
 	CPPUNIT_ASSERT(node2 > node1);
 	CPPUNIT_ASSERT(node1.isLarger(node2));
 	CPPUNIT_ASSERT(!node2.isLarger(node1));
@@ -328,75 +333,93 @@ void DbNodeTest::testCommon() {
 	CPPUNIT_ASSERT(node3.commonPrefixSize(node5)==4*HASHSIZE);
 }
 
+void DbNodeTest::testSimilar() {
+	DbNode smaller(this->db, this->smaller, true);
+	DbNode larger(this->db, this->larger, true);
+	smaller.prefix_mask = 0;
+	larger.prefix_mask = 0;
+	CPPUNIT_ASSERT(smaller.similar(larger));
+	CPPUNIT_ASSERT(larger.similar(smaller));
+	smaller.prefix_mask = 1;
+	larger.prefix_mask = 1;
+	CPPUNIT_ASSERT(!smaller.similar(larger));
+	CPPUNIT_ASSERT(!larger.similar(smaller));
+	smaller.prefix_mask = 0;
+	larger.prefix_mask = 1;
+	CPPUNIT_ASSERT(smaller.similar(larger));
+	CPPUNIT_ASSERT(!larger.similar(smaller));
+
+}
+
 void DbNodeTest::testToDb() {
-	DbNode node1(this->db, key1, true);
-	DbNode node2(this->db, key2, true);
-	DbNode node3(this->db, key3, true);
-	DbNode node4(this->db, key4, true);
-	node1.dirty_ = true;
-	node2.hasChildren_ = true;
-	node3.hasParent_ = true;
-	node4.prefix_mask = 8;
-	CPPUNIT_ASSERT(node1.toDb());
-	CPPUNIT_ASSERT(node2.toDb());
-	CPPUNIT_ASSERT(node3.toDb());
-	CPPUNIT_ASSERT(node4.toDb());
-	DbNode node5(this->db, key1);
-	DbNode node6(this->db, key2);
-	DbNode node7(this->db, key3);
-	DbNode node8(this->db, key4);
-	CPPUNIT_ASSERT(node1 == node5);
-	CPPUNIT_ASSERT(node2 == node6);
-	CPPUNIT_ASSERT(node3 == node7);
-	CPPUNIT_ASSERT(node4 == node8);
-	CPPUNIT_ASSERT(node2 != node5);
-	CPPUNIT_ASSERT(node3 != node6);
-	CPPUNIT_ASSERT(node4 != node7);
-	CPPUNIT_ASSERT(node1 != node8);
+DbNode node1(this->db, key1, true);
+DbNode node2(this->db, key2, true);
+DbNode node3(this->db, key3, true);
+DbNode node4(this->db, key4, true);
+node1.dirty_ = true;
+node2.hasChildren_ = true;
+node3.hasParent_ = true;
+node4.prefix_mask = 8;
+CPPUNIT_ASSERT(node1.toDb());
+CPPUNIT_ASSERT(node2.toDb());
+CPPUNIT_ASSERT(node3.toDb());
+CPPUNIT_ASSERT(node4.toDb());
+DbNode node5(this->db, key1);
+DbNode node6(this->db, key2);
+DbNode node7(this->db, key3);
+DbNode node8(this->db, key4);
+CPPUNIT_ASSERT(node1 == node5);
+CPPUNIT_ASSERT(node2 == node6);
+CPPUNIT_ASSERT(node3 == node7);
+CPPUNIT_ASSERT(node4 == node8);
+CPPUNIT_ASSERT(node2 != node5);
+CPPUNIT_ASSERT(node3 != node6);
+CPPUNIT_ASSERT(node4 != node7);
+CPPUNIT_ASSERT(node1 != node8);
 }
 
 void DbNodeTest::testToString() {
-	//	cout << endl;
-	//	cout << "KEY1: " << utils::OutputFunctions::CryptoHashtoString(key1) << endl;
-	//	cout << "KEY2: " << utils::OutputFunctions::CryptoHashtoString(key2) << endl;
-	DbNode node1(this->db, smaller, true);
-	node1.toDb();
-	//	cout << node1.toString();
-	DbRootNode root(this->db);
-	root.set(smaller);
-	node1 = root.get();
-	//	cout << node1.toString();
-	node1.insert(larger);
-	//	cout << node1.toString();
-	node1 = root.get();
-	//	cout << node1.toString();
-	//	std::cout << std::endl;
+//	cout << endl;
+//	cout << "KEY1: " << utils::OutputFunctions::CryptoHashtoString(key1) << endl;
+//	cout << "KEY2: " << utils::OutputFunctions::CryptoHashtoString(key2) << endl;
+DbNode node1(this->db, smaller, true);
+node1.toDb();
+//	cout << node1.toString();
+DbRootNode root(this->db);
+root.set(smaller);
+node1 = root.get();
+//	cout << node1.toString();
+node1.insert(larger);
+//	cout << node1.toString();
+node1 = root.get();
+//	cout << node1.toString();
+//	std::cout << std::endl;
 }
 
 void DbRootNodeTest::setUp(void) {
-	this->db = new Db(NULL, 0);
-	db->open(NULL, "trierootnode1.db", trie::DBTrie::getLogicalDatabaseName(),
-			trie::DBTrie::getTableType(), DB_CREATE, 0);
-	this->db2 = new Db(NULL, 0);
-	db2->open(NULL, "trierootnode2.db", trie::DBTrie::getLogicalDatabaseName(),
-			trie::DBTrie::getTableType(), DB_CREATE, 0);
-	SHA1((unsigned char*) "bla1", 4, this->key1);
-	SHA1((unsigned char*) "bla2", 4, this->key2);
-	SHA1((unsigned char*) "bla3", 4, this->key3);
-	SHA1((unsigned char*) "bla4", 4, this->key4);
+this->db = new Db(NULL, 0);
+db->open(NULL, "trierootnode1.db", trie::DBTrie::getLogicalDatabaseName(),
+		trie::DBTrie::getTableType(), DB_CREATE, 0);
+this->db2 = new Db(NULL, 0);
+db2->open(NULL, "trierootnode2.db", trie::DBTrie::getLogicalDatabaseName(),
+		trie::DBTrie::getTableType(), DB_CREATE, 0);
+SHA1((unsigned char*) "bla1", 4, this->key1);
+SHA1((unsigned char*) "bla2", 4, this->key2);
+SHA1((unsigned char*) "bla3", 4, this->key3);
+SHA1((unsigned char*) "bla4", 4, this->key4);
 }
 
 void DbRootNodeTest::tearDown(void) {
-	db->close(0);
-	db2->close(0);
-	delete this->db;
-	delete this->db2;
-	this->db = new Db(NULL, 0);
-	this->db->remove("trierootnode1.db", NULL, 0);
-	delete this->db;
-	this->db = new Db(NULL, 0);
-	this->db->remove("trierootnode2.db", NULL, 0);
-	delete this->db;
+db->close(0);
+db2->close(0);
+delete this->db;
+delete this->db2;
+this->db = new Db(NULL, 0);
+this->db->remove("trierootnode1.db", NULL, 0);
+delete this->db;
+this->db = new Db(NULL, 0);
+this->db->remove("trierootnode2.db", NULL, 0);
+delete this->db;
 }
 
 void DbRootNodeTest::testToDb() {
@@ -408,8 +431,8 @@ void DbRootNodeTest::testConstructor() {
 }
 
 void DbRootNodeTest::testToString() {
-	DbRootNode root(this->db);
-	root.toString();
-	//	std::cout << root.toString() << std::endl;
+DbRootNode root(this->db);
+root.toString();
+//	std::cout << root.toString() << std::endl;
 }
 }

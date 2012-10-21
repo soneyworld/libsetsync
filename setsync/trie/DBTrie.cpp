@@ -223,6 +223,16 @@ bool DbNode::isLarger(const DbNode& larger) const {
 	return BITTEST(larger.prefix , this->prefix_mask);
 }
 
+/*void DbNode::updateChild(const DbNode& oldchild, const DbNode& newchild) {
+ if (this->isEqualToSmaller(oldchild)) {
+
+ } else if (this->isEqualToLarger(oldchild)) {
+
+ } else {
+ throw DbTrieException("Old child has not been found");
+ }
+ }*/
+
 bool DbNode::insert(DbNode& node, bool performHash) {
 	bool thesame = similar(node);
 	if (thesame) {
@@ -240,15 +250,17 @@ bool DbNode::insert(DbNode& node, bool performHash) {
 		}
 	}
 	/** Not the same: Need to split */
-	DbNode intermediate = DbNode(*this);
+	DbNode intermediate = *this;
 	// The intermediate common prefix
 	intermediate.prefix_mask = intermediate.commonPrefixSize(node);
 	// Copy myself as the new children of intermediate
-	DbNode oldnode = DbNode(*this);
-	if (intermediate < node) {
+	DbNode oldnode = *this;
+	if (intermediate.isLarger(node)) {
 		intermediate.setChildren(oldnode, node);
-	} else {
+	} else if (intermediate.isSmaller(node)) {
 		intermediate.setChildren(node, oldnode);
+	} else {
+		throw DbTrieException("ERROR");
 	}
 	intermediate.updateHash();
 	node.setParent(intermediate);
@@ -259,41 +271,67 @@ bool DbNode::insert(DbNode& node, bool performHash) {
 		intermediate.toDb();
 	}
 	if (performHash) {
+		// Update the parent and their direct children
+		// All no more needed nodes of the DB
 		std::vector<DbNode> toBeDeleted;
+		// Child before change
 		DbNode oldchild = *this;
+		// Child after change
 		DbNode child = intermediate;
+		// Root node should show to this after updates
 		unsigned char roothash[HASHSIZE];
 		memcpy(roothash, intermediate.hash, HASHSIZE);
+		// The old child have got a parent
 		while (oldchild.hasParent_) {
+			// Request the parent of the old child
 			DbNode oldparent = oldchild.getParent();
+			// Copy the old parent to create a new parent
 			DbNode parent = oldparent;
+			// Request the other child of the old parent, which has to get a new parent
 			DbNode otherchild = oldparent.getLarger();
 			if (oldparent.isEqualToSmaller(oldchild)) {
+				// The old child has been the smaller one, replace it with the new child
 				parent.setSmaller(child);
 			} else if (oldparent.isEqualToLarger(oldchild)) {
+				// The other child of the parent has been the smaller one
 				otherchild = oldparent.getSmaller();
+				// The old child has been the lager one, replace it with the new child
 				parent.setLarger(child);
 			} else {
+				// the old child hasn't been a child of the old parent. This should never occur.
 				throw DbTrieException(
 						"Child hasn't been correct child of parent");
 			}
+			// Create the new father
 			parent.updateHash();
+			// Set the new parent to the other child
 			otherchild.setParent(parent);
 			otherchild.toDb();
+			// Set the new parent to the new child
 			child.setParent(parent);
 			child.toDb();
-			memcpy(roothash, parent.hash, HASHSIZE);
+			// Copy the new hash as potentially new root
+			if (!parent.hasParent_) {
+				memcpy(roothash, parent.hash, HASHSIZE);
+			}
+			// Save the new parent
 			parent.toDb();
+			// Set the old parent as the old child
 			oldchild = oldparent;
+			// Set the new parent as new child
+			child = parent;
+			// delete old parent, if finished
 			toBeDeleted.push_back(oldparent);
 			//			oldparent.deleteFromDb();
 		}
+		// Set the new root of the trie
+		DbRootNode(this->db_).set(roothash);
+		// Now delete all old and replaced parents
 		std::vector<DbNode>::const_iterator iter;
 		for (iter = toBeDeleted.begin(); iter != toBeDeleted.end(); iter++) {
 			DbNode d = *iter;
 			d.deleteFromDb();
 		}
-		DbRootNode(this->db_).set(roothash);
 	} else {
 		if (intermediate.hasParent_) {
 			DbNode parent = intermediate.getParent();
@@ -479,8 +517,12 @@ std::string DbNode::toString() const {
 	ss << "label=\"";
 	if (hasChildren_)
 		ss << "{{";
-	ss << utils::OutputFunctions::CryptoHashtoString(hash, 3);
+	ss << "hash: 0x" << utils::OutputFunctions::CryptoHashtoString(hash, 3);
 	ss << "...";
+	if (!hasChildren_) {
+		ss << "\\n0b" << utils::OutputFunctions::ArrayToBitString(hash, 8)
+				<< "...";
+	}
 	if (hasChildren_) {
 		ss << "}|{prefix(" << (int) this->prefix_mask << "): ";
 		ss << utils::OutputFunctions::ArrayToBitString(prefix,
@@ -491,7 +533,7 @@ std::string DbNode::toString() const {
 	if (hasChildren_) {
 		ss << ", shape=record";
 	}
-	if (dirty_){
+	if (dirty_) {
 		ss << ", color=red";
 	}
 	ss << "];" << std::endl;
@@ -508,7 +550,7 @@ std::string DbNode::toString() const {
 				<< "N" << utils::OutputFunctions::CryptoHashtoString(larger)
 				<< " [label=\"larger\"];" << std::endl;
 	}
-
+	std::string result = ss.str();
 	if (hasChildren_) {
 		DbNode smaller = this->getSmaller();
 		ss << smaller.toString();
