@@ -14,85 +14,94 @@
 
 namespace trie {
 
-Trie::Trie(const size_t hashsize) : hashsize_(hashsize){
+Trie::Trie(const size_t hashsize) :
+	hashsize_(hashsize) {
 	this->size = 0;
-	this->hashscratch = new unsigned char[this->hashsize_*2];
+	this->hashscratch = new unsigned char[this->hashsize_ * 2];
 }
 
 Trie::~Trie() {
 }
 
-size_t Trie::getSize() const{
+size_t Trie::getSize() const {
 	return this->size;
 }
 
-void Trie::setHashSize(const size_t size){
+void Trie::setHashSize(const size_t size) {
 	this->hashsize_ = size;
 }
 
-size_t Trie::getHashSize() const{
+size_t Trie::getHashSize() const {
 	return this->hashsize_;
 }
 
-void Trie::setSize(const size_t size){
+void Trie::setSize(const size_t size) {
 	this->size = size;
 }
 
-void Trie::incSize(){
+void Trie::incSize() {
 	this->size++;
 }
 
-void Trie::decSize(){
+void Trie::decSize() {
 	this->size--;
 }
 
-bool Trie::isHashPerformingNedded(){
+bool Trie::isHashPerformingNedded() {
 	return this->needsHashPerforming;
 }
 
-void Trie::setHashingPerformed(){
+void Trie::setHashingPerformed() {
 	this->needsHashPerforming = false;
 }
 
-bool Trie::add(const unsigned char * hash){
+bool Trie::add(const unsigned char * hash) {
 	return add(hash, true);
 }
 
-bool Trie::remove(const unsigned char * hash){
+bool Trie::remove(const unsigned char * hash) {
 	return remove(hash, true);
 }
 
-bool Trie::remove(const char * str){
+bool Trie::remove(const char * str) {
 	unsigned char c[SHA_DIGEST_LENGTH];
 	SHA1((unsigned char*) str, strlen(str), c);
 	return remove(c, true);
 }
 
-bool Trie::remove(const std::string& str){
+bool Trie::remove(const std::string& str) {
 	unsigned char c[SHA_DIGEST_LENGTH];
 	SHA1((unsigned char*) str.c_str(), str.size(), c);
 	return remove(c, true);
 }
 
-bool Trie::add(const char * str){
+bool Trie::add(const char * str, bool performhash) {
 	unsigned char c[SHA_DIGEST_LENGTH];
 	SHA1((unsigned char*) str, strlen(str), c);
-	return add(c, true);
+	return add(c, performhash);
 }
 
-bool Trie::add(const std::string& str){
+bool Trie::add(const std::string& str, bool performhash) {
 	unsigned char c[SHA_DIGEST_LENGTH];
 	SHA1((unsigned char*) str.c_str(), str.size(), c);
-	return add(c, true);
+	return add(c, performhash);
 }
 
-bool Trie::contains(const char * str) const{
+bool Trie::add(const char * str) {
+	return add(str, true);
+}
+
+bool Trie::add(const std::string& str) {
+	return add(str, true);
+}
+
+bool Trie::contains(const char * str) const {
 	unsigned char c[SHA_DIGEST_LENGTH];
 	SHA1((unsigned char*) str, strlen(str), c);
 	return contains(c);
 }
 
-bool Trie::contains(const std::string& str) const{
+bool Trie::contains(const std::string& str) const {
 	unsigned char c[SHA_DIGEST_LENGTH];
 	SHA1((unsigned char*) str.c_str(), str.size(), c);
 	return contains(c);
