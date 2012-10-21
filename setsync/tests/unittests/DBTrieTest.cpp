@@ -170,12 +170,20 @@ void DbTrieTest::testSavingAndLoading() {
 void DbTrieTest::testToString() {
 //	cout << endl;
 	trie::DBTrie trie1(db);
-	trie1.Trie::add(smaller);
-	trie1.Trie::add(larger);
-	trie1.Trie::add("bla1");
-//	trie1.Trie::add("bla2");
-//	trie1.Trie::add("bla3");
-//	trie1.Trie::add("bla4");
+	trie1.add(smaller,false);
+	trie1.add(larger,false);
+//	cout << trie1.toString();
+	trie1.Trie::add("bla1",false);
+//	cout << trie1.toString();
+	trie1.Trie::add("bla2",false);
+	trie1.Trie::add("bla3",false);
+	trie1.Trie::add("bla4",false);
+	trie1.Trie::add("bla5",false);
+	trie1.Trie::add("bla6",false);
+	trie1.Trie::add("bla7",false);
+	trie1.Trie::add("bla8",false);
+	trie1.Trie::add("bla9",false);
+	trie1.Trie::add("bla10",false);
 //	cout << trie1.toString();
 }
 
