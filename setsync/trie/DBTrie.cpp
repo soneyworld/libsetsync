@@ -78,7 +78,6 @@ bool DBValue::hasParent() const {
 }
 
 unsigned char DbNode::hashscratch[HASHSIZE * 2];
-unsigned char DbNode::nullarray[HASHSIZE];
 const char DbRootNode::root_name[] = "root";
 
 DbRootNode::DbRootNode(Db * db) :
@@ -222,16 +221,6 @@ bool DbNode::isLarger(const DbNode& larger) const {
 	}
 	return BITTEST(larger.prefix , this->prefix_mask);
 }
-
-/*void DbNode::updateChild(const DbNode& oldchild, const DbNode& newchild) {
- if (this->isEqualToSmaller(oldchild)) {
-
- } else if (this->isEqualToLarger(oldchild)) {
-
- } else {
- throw DbTrieException("Old child has not been found");
- }
- }*/
 
 bool DbNode::insert(DbNode& node, bool performHash) {
 	bool thesame = similar(node);
