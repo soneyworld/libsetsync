@@ -85,15 +85,6 @@ DbRootNode::DbRootNode(Db * db) :
 
 }
 
-void DbRootNode::set(const unsigned char * hash) {
-	Dbt key(const_cast<char*> (root_name), strlen(root_name));
-	Dbt data(const_cast<unsigned char*> (hash), HASHSIZE);
-	int ret = this->db_->put(NULL, &key, &data, 0);
-	if (ret != 0) {
-		throw DbTrieException("Error on putting root to db");
-	}
-}
-
 DbNode DbRootNode::get() const {
 	Dbt key(const_cast<char *> (root_name), strlen(root_name));
 	unsigned char hash[HASHSIZE];
@@ -106,6 +97,23 @@ DbNode DbRootNode::get() const {
 	}
 	memcpy(hash, data.get_data(), HASHSIZE);
 	return DbNode(this->db_, hash);
+}
+
+void DbRootNode::set(const unsigned char * hash) {
+	Dbt key(const_cast<char*> (root_name), strlen(root_name));
+	Dbt data(const_cast<unsigned char*> (hash), HASHSIZE);
+	int ret = this->db_->put(NULL, &key, &data, 0);
+	if (ret != 0) {
+		throw DbTrieException("Error on putting root to db");
+	}
+}
+
+void DbRootNode::del() {
+	Dbt key(const_cast<char*> (root_name), strlen(root_name));
+	int ret = this->db_->del(NULL, &key, 0);
+	if (ret != 0) {
+		throw DbTrieException("Error on deleting root from db");
+	}
 }
 
 DbNode::DbNode(Db * db, const unsigned char * hash, bool newone) :
@@ -458,20 +466,91 @@ bool DbNode::insert(const unsigned char * hash, bool performHash) {
 }
 
 bool DbNode::erase(const unsigned char * hash, bool performHash) {
-	return false;
-	//TODO
-	unsigned char sha[HASHSIZE];
-	memcpy(sha, hash, HASHSIZE);
-	Dbt key(sha, HASHSIZE);
-	Dbt data(NULL, 0);
-	int ret = this->db_->del(NULL, &key, 0);
-	if (ret == DB_NOTFOUND) {
-		return false;
-	} else if (ret == 0) {
-		return true;
+	try {
+		DbNode toBeDeleted(this->db_, hash);
+		if (toBeDeleted.hasChildren_)
+			throw DbTrieException("This node is not a leaf");
+		if (!toBeDeleted.hasParent_) {
+			// Root node should be deleted
+			DbRootNode root(this->db_);
+			root.del();
+			toBeDeleted.deleteFromDb();
+			return true;
+		}
+		DbNode parent = toBeDeleted.getParent();
+		if (!parent.hasParent_) {
+			DbRootNode root(this->db_);
+			DbNode childOfParent(*this);
+			if (parent.isEqualToLarger(toBeDeleted)) {
+				childOfParent = parent.getSmaller();
+			} else {
+				childOfParent = parent.getLarger();
+			}
+			childOfParent.hasParent_ = false;
+			childOfParent.toDb();
+			root.set(childOfParent.hash);
+			parent.deleteFromDb();
+			toBeDeleted.deleteFromDb();
+			return true;
+		}
+		DbNode grandparent = parent.getParent();
+		DbNode childOfParent(*this);
+		if (parent.isEqualToLarger(toBeDeleted)) {
+			childOfParent = parent.getSmaller();
+		} else {
+			childOfParent = parent.getLarger();
+		}
+		DbNode childOfGrandParent(*this);
+		if (grandparent.isEqualToLarger(parent)) {
+			childOfGrandParent = grandparent.getSmaller();
+			grandparent.setLarger(childOfParent);
+		} else {
+			childOfGrandParent = grandparent.getLarger();
+			grandparent.setSmaller(childOfParent);
+		}
+		DbNode oldgrandparent(grandparent);
+		grandparent.updateHash();
+		childOfGrandParent.setParent(grandparent);
+		grandparent.toDb();
+		oldgrandparent.deleteFromDb();
+		childOfGrandParent.toDb();
+		if (performHash) {
+			while (oldgrandparent.hasParent_) {
+				DbNode oldgrandgrandparent = oldgrandparent.getParent();
+				DbNode grandgrandparent = oldgrandgrandparent;
+				if (oldgrandgrandparent.isEqualToSmaller(oldgrandparent)) {
+					grandgrandparent.setSmaller(grandparent);
+				} else if (oldgrandgrandparent.isEqualToLarger(oldgrandparent)) {
+					grandgrandparent.setLarger(grandparent);
+				}
+				grandgrandparent.toDb();
+				oldgrandparent = oldgrandgrandparent;
+			}
+			DbRootNode root(this->db_);
+			root.set(grandparent.hash);
+			return true;
+		} else {
+			if (grandparent.hasParent_) {
+				DbNode grandgrandparent = grandparent.getParent();
+				if (grandgrandparent.isEqualToSmaller(oldgrandparent)) {
+					grandgrandparent.setSmaller(grandparent);
+				} else if (grandgrandparent.isEqualToLarger(oldgrandparent)) {
+					grandgrandparent.setLarger(grandparent);
+				}
+				grandgrandparent.toDb();
+				return true;
+			} else {
+				DbRootNode root(this->db_);
+				root.set(grandparent.hash);
+				return true;
+			}
+		}
+	} catch (DbException e) {
+		if (e.get_errno() == DB_NOTFOUND)
+			return false;
+		else
+			throw e;
 	}
-	return false;
-
 }
 
 void DbNode::updateHash(void) {
