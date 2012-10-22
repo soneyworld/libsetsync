@@ -37,7 +37,9 @@ public:
 	virtual bool add(const unsigned char * hash);
 	virtual bool add(const unsigned char * hash, bool performhash) = 0;
 	virtual bool remove(const char * str);
+	virtual bool remove(const char * str, bool performhash);
 	virtual bool remove(const std::string& str);
+	virtual bool remove(const std::string& str, bool performhash);
 	virtual bool remove(const unsigned char * hash);
 	virtual bool remove(const unsigned char * hash, bool performhash) = 0;
 	virtual bool contains(const char * str) const;

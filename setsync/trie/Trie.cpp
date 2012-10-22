@@ -63,16 +63,24 @@ bool Trie::remove(const unsigned char * hash) {
 	return remove(hash, true);
 }
 
-bool Trie::remove(const char * str) {
+bool Trie::remove(const char * str){
+	return remove(str, true);
+}
+
+bool Trie::remove(const char * str, bool performhash) {
 	unsigned char c[SHA_DIGEST_LENGTH];
 	SHA1((unsigned char*) str, strlen(str), c);
-	return remove(c, true);
+	return remove(c, performhash);
 }
 
 bool Trie::remove(const std::string& str) {
+	return remove(str, true);
+}
+
+bool Trie::remove(const std::string& str, bool performhash) {
 	unsigned char c[SHA_DIGEST_LENGTH];
 	SHA1((unsigned char*) str.c_str(), str.size(), c);
-	return remove(c, true);
+	return remove(c, performhash);
 }
 
 bool Trie::add(const char * str, bool performhash) {
