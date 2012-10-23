@@ -16,9 +16,9 @@ DBTest::~DBTest() {
 }
 
 void DBTest::run() {
-	//	runMemDb();
+	runMemDb();
 	runFsDb();
-	//	runMemDbTrie();
+	runMemDbTrie();
 	runFsDbTrie();
 }
 
@@ -115,7 +115,8 @@ void DBTest::runTrie(Db * db) {
 		stop = clock();
 		duration += stop - start;
 		iduration = stop - start;
-		double itemsPerSecond = ITEMS_PER_LOOPS/((double)(iduration) / CLOCKS_PER_SEC);
+		double itemsPerSecond = ITEMS_PER_LOOPS / ((double) (iduration)
+				/ CLOCKS_PER_SEC);
 		cout << ITEMS_PER_LOOPS * iter << ": " << ITEMS_PER_LOOPS
 				<< " inserts after " << (float) (iduration) / CLOCKS_PER_SEC;
 		cout << " sec (~" << (long) itemsPerSecond << " per sec)" << endl;
@@ -129,18 +130,23 @@ void DBTest::runTrie(Db * db) {
 void DBTest::runMemDbTrie() {
 	cout << "running Berkeley DB Trie(mem) test:" << endl;
 	Db db(NULL, 0);
+	db.set_cachesize(5,0,0);
 	db.open(NULL, NULL, trie::DBTrie::getLogicalDatabaseName(),
 			trie::DBTrie::getTableType(), DB_CREATE, 0);
 	runTrie(&db);
+	db.stat_print(0);
 	db.close(0);
 }
 
 void DBTest::runFsDbTrie() {
 	cout << "running Berkeley DB Trie(fs) test:" << endl;
 	Db db(NULL, 0);
+	db.set_cachesize(5, 0, 0);
 	db.open(NULL, "temp-table.db", trie::DBTrie::getLogicalDatabaseName(),
 			trie::DBTrie::getTableType(), DB_CREATE, 0);
 	runTrie(&db);
+	db.sync(0);
+	db.stat_print(0);
 	db.close(0);
 	remove("temp-table.db");
 }

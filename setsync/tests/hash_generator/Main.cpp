@@ -18,8 +18,8 @@ int main(int ac, char **av) {
 	dbtest.run();
 
 #ifdef HAVE_SQLITE
-	SQLiteTest sqltest;
-	sqltest.run();
+//	SQLiteTest sqltest;
+//	sqltest.run();
 #endif
 
 
