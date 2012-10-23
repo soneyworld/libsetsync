@@ -327,33 +327,40 @@ void DbNodeTest::testInsert() {
 }
 
 void DbNodeTest::testErase() {
+//	cout << endl;
 	DBTrie trie1(this->db);
-	for (unsigned int i = 0; i < 100; i++) {
+	for (int i = 0; i < 10; i++) {
 		stringstream ss;
 		ss << "bla" << i;
+		//		cout << ss.str() << endl;
 		CPPUNIT_ASSERT(trie1.Trie::add(ss.str()));
 	}
-
-	for (unsigned int i = 100; i > 0; i--) {
+	//	cout << trie1.toString();
+	for (int i = 9; i >= 0; i--) {
 		stringstream ss;
 		ss << "bla" << i;
-		CPPUNIT_ASSERT(trie1.Trie::remove(ss.str()));
+//		cout << ss.str() << " will be deleted" << endl;
+		bool success = trie1.Trie::remove(ss.str(), true);
+//		cout << ss.str() << " deletion done: "<<success << endl;
+//		cout << trie1.toString();
+		CPPUNIT_ASSERT(success);
+
 	}
 
 	DBTrie trie2(this->db2);
-	CPPUNIT_ASSERT(trie1==trie2);
-	CPPUNIT_ASSERT(trie1.Trie::add("bla1"));
-	CPPUNIT_ASSERT(!(trie1==trie2));
-	CPPUNIT_ASSERT(trie1.Trie::add("bla2"));
-	CPPUNIT_ASSERT(!(trie1==trie2));
-	CPPUNIT_ASSERT(trie1.Trie::add("bla3"));
-	CPPUNIT_ASSERT(!(trie1==trie2));
-	CPPUNIT_ASSERT(trie2.Trie::add("bla1"));
-	CPPUNIT_ASSERT(!(trie1==trie2));
-	CPPUNIT_ASSERT(trie2.Trie::add("bla2"));
-	CPPUNIT_ASSERT(!(trie1==trie2));
-	CPPUNIT_ASSERT(trie1.Trie::remove("bla3"));
-	CPPUNIT_ASSERT(trie1==trie2);
+	CPPUNIT_ASSERT_MESSAGE("BOTH SHOULD BE EMPTY", trie1==trie2);
+	CPPUNIT_ASSERT_MESSAGE("adding bla1 to emtpy trie1 failed", trie1.Trie::add("bla1"));
+	CPPUNIT_ASSERT_MESSAGE("trie1: bla1 added", !(trie1==trie2));
+	CPPUNIT_ASSERT_MESSAGE("adding new key bla2 to trie1 failed",trie1.Trie::add("bla2"));
+	CPPUNIT_ASSERT_MESSAGE("trie1: bla2 added", !(trie1==trie2));
+	CPPUNIT_ASSERT_MESSAGE("adding new key bla3 to trie1 failed",trie1.Trie::add("bla3"));
+	CPPUNIT_ASSERT_MESSAGE("trie1: bla3 added", !(trie1==trie2));
+	CPPUNIT_ASSERT_MESSAGE("adding new key bla1 to trie2 failed", trie2.Trie::add("bla1"));
+	CPPUNIT_ASSERT_MESSAGE("trie2: bla1 added", !(trie1==trie2));
+	CPPUNIT_ASSERT_MESSAGE("adding new key bla2 to trie2 failed",trie2.Trie::add("bla2"));
+	CPPUNIT_ASSERT_MESSAGE("trie2: bla2 added",!(trie1==trie2));
+	CPPUNIT_ASSERT_MESSAGE("removing key bla3 from trie1 failed",trie1.Trie::remove("bla3"));
+	CPPUNIT_ASSERT_MESSAGE("Both trie should contain: bla1, bla2", trie1==trie2);
 }
 
 void DbNodeTest::testCommon() {
