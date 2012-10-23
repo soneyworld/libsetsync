@@ -510,6 +510,8 @@ bool DbNode::erase(const unsigned char * hash, bool performHash) {
 		}
 		DbNode oldgrandparent(grandparent);
 		grandparent.updateHash();
+		childOfParent.setParent(grandparent);
+		childOfParent.toDb();
 		childOfGrandParent.setParent(grandparent);
 		grandparent.toDb();
 		oldgrandparent.deleteFromDb();
@@ -530,8 +532,8 @@ bool DbNode::erase(const unsigned char * hash, bool performHash) {
 			root.set(grandparent.hash);
 			return true;
 		} else {
-			if (grandparent.hasParent_) {
-				DbNode grandgrandparent = grandparent.getParent();
+			if (oldgrandparent.hasParent_) {
+				DbNode grandgrandparent = oldgrandparent.getParent();
 				if (grandgrandparent.isEqualToSmaller(oldgrandparent)) {
 					grandgrandparent.setSmaller(grandparent);
 				} else if (grandgrandparent.isEqualToLarger(oldgrandparent)) {
@@ -719,7 +721,7 @@ const char * DBTrie::getLogicalDatabaseName() {
 }
 
 const DBTYPE DBTrie::getTableType() {
-	return DB_BTREE;
+	return DB_HASH;
 }
 
 bool DBTrie::operator ==(const Trie& other) const {
@@ -752,8 +754,12 @@ std::string DBTrie::toString() const {
 	std::stringstream ss;
 	ss << "digraph trie {" << std::endl;
 	ss << this->root_.toString();
-	DbNode node = this->root_.get();
-	ss << node.toString();
+	try{
+		DbNode node = this->root_.get();
+		ss << node.toString();
+	}catch (DbTrieException e) {
+
+	}
 	ss << "}" << std::endl;
 	return ss.str();
 }
