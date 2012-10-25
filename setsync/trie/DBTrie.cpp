@@ -529,6 +529,7 @@ bool DbNode::erase(const unsigned char * hash, bool performHash) {
 					root.set(newgrandparent.hash);
 				} else {
 					if (performHash) {
+						oldnodes.push_back(oldgrandparent);
 						while (oldgrandparent.hasParent_) {
 							DbNode oldgrandgrandparent = oldgrandparent.getParent();
 							DbNode newgrandgrandparent(oldgrandgrandparent);
