@@ -567,6 +567,7 @@ bool DbNode::erase(const unsigned char * hash, bool performHash) {
 							throw DbTrieException(
 									"grandparent hasn't been child of grandgrandparent");
 						}
+						oldnodes.push_back(oldgrandparent);
 						oldgrandgrandparent.toDb();
 					}
 				}
