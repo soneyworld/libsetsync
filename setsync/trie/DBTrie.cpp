@@ -213,8 +213,7 @@ bool DbNode::insert(const unsigned char * hash) {
 }
 
 bool DbNode::erase(DbNode& node, bool performHash) {
-	//TODO
-	return false;
+	return erase(node.hash,performHash);
 }
 
 bool DbNode::isSmaller(const DbNode& smaller) const {
@@ -686,17 +685,6 @@ DBTrie::DBTrie(Db * db, const size_t hashsize) :
 
 DBTrie::~DBTrie() {
 }
-
-/*bool DBTrie::insertHash(const unsigned char * hash, bool performhash) {
- if (this->root_ == NULL) {
- this->root_ = new DbRootNode(this->db_, hash);
- DbNode rootnode = this->root_->getRootNode();
- return rootnode.toDb();
- } else {
- DbNode root = this->root_->getRootNode();
- return root.insert(hash, performhash);
- }
- }*/
 
 bool DBTrie::add(const unsigned char * hash, bool performhash) {
 	try {
