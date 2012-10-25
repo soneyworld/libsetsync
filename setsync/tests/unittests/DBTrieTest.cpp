@@ -327,7 +327,6 @@ void DbNodeTest::testErase() {
 		ss << "bla" << i;
 		bool success = trie1.Trie::remove(ss.str(), false);
 		CPPUNIT_ASSERT(success);
-
 	}
 	// Inserting 30 entries
 	for (int i = 0; i < 30; i++) {
