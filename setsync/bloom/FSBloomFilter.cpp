@@ -16,6 +16,7 @@
 #include <sstream>
 #include "DoubleHashingScheme.h"
 #include <stdexcept>
+#include <setsync/utils/OutputFunctions.h>
 
 #ifndef BYTESIZE
 #define BYTESIZE 8
@@ -187,7 +188,7 @@ std::size_t FSBloomFilter::containsAll(const unsigned char *keys,
 
 void FSBloomFilter::compute_indices(const uint64_t hash,
 		std::size_t& bit_index, std::size_t& bit) const {
-	bit_index = ((hash % this->filterSize_) + 7) / BYTESIZE;
+	bit_index = (hash % this->filterSize_) / BYTESIZE;
 	bit = hash % BYTESIZE;
 }
 
@@ -277,16 +278,7 @@ bool FSBloomFilter::operator !=(const AbstractBloomFilter& filter) const {
 }
 
 std::string FSBloomFilter::toString() {
-	std::stringstream ss;
-	for (int i = 0; i < this->mmapLength_; i++) {
-		unsigned char byte = this->bitArray_[i];
-		for (int j = 7; j >= 0; j--) {
-			if (byte & (1 << j))
-				ss << "1";
-			else
-				ss << "0";
-		}
-	}
-	return ss.str();
+	return utils::OutputFunctions::ArrayToBitString(this->bitArray_,
+			this->filterSize_);
 }
 }
