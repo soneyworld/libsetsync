@@ -551,6 +551,7 @@ bool DbNode::erase(const unsigned char * hash, bool performHash) {
 							newgrandparent.toDb();
 							otherchild.setParent(newgrandgrandparent);
 							otherchild.toDb();
+							oldnodes.push_back(oldgrandgrandparent);
 							oldgrandparent = oldgrandgrandparent;
 							newgrandparent = newgrandgrandparent;
 						}
