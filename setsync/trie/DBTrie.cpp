@@ -475,76 +475,106 @@ bool DbNode::erase(const unsigned char * hash, bool performHash) {
 			DbRootNode root(this->db_);
 			root.del();
 			toBeDeleted.deleteFromDb();
-			return true;
-		}
-		DbNode parent = toBeDeleted.getParent();
-		if (!parent.hasParent_) {
+		} else {
+			DbNode parent = toBeDeleted.getParent();
 			DbRootNode root(this->db_);
-			DbNode childOfParent(*this);
-			if (parent.isEqualToLarger(toBeDeleted)) {
-				childOfParent = parent.getSmaller();
-			} else {
-				childOfParent = parent.getLarger();
-			}
-			childOfParent.hasParent_ = false;
-			childOfParent.toDb();
-			root.set(childOfParent.hash);
-			parent.deleteFromDb();
-			toBeDeleted.deleteFromDb();
-			return true;
-		}
-		DbNode grandparent = parent.getParent();
-		DbNode childOfParent(*this);
-		if (parent.isEqualToLarger(toBeDeleted)) {
-			childOfParent = parent.getSmaller();
-		} else {
-			childOfParent = parent.getLarger();
-		}
-		DbNode childOfGrandParent(*this);
-		if (grandparent.isEqualToLarger(parent)) {
-			childOfGrandParent = grandparent.getSmaller();
-			grandparent.setLarger(childOfParent);
-		} else {
-			childOfGrandParent = grandparent.getLarger();
-			grandparent.setSmaller(childOfParent);
-		}
-		DbNode oldgrandparent(grandparent);
-		grandparent.updateHash();
-		childOfParent.setParent(grandparent);
-		childOfParent.toDb();
-		childOfGrandParent.setParent(grandparent);
-		grandparent.toDb();
-		oldgrandparent.deleteFromDb();
-		childOfGrandParent.toDb();
-		if (performHash) {
-			while (oldgrandparent.hasParent_) {
-				DbNode oldgrandgrandparent = oldgrandparent.getParent();
-				DbNode grandgrandparent = oldgrandgrandparent;
-				if (oldgrandgrandparent.isEqualToSmaller(oldgrandparent)) {
-					grandgrandparent.setSmaller(grandparent);
-				} else if (oldgrandgrandparent.isEqualToLarger(oldgrandparent)) {
-					grandgrandparent.setLarger(grandparent);
+			if (!parent.hasParent_) {
+				// Other Child has to become the new root
+				DbNode childOfParent(*this);
+				if (parent.isEqualToLarger(toBeDeleted)) {
+					childOfParent = parent.getSmaller();
+				} else {
+					childOfParent = parent.getLarger();
 				}
-				grandgrandparent.toDb();
-				oldgrandparent = oldgrandgrandparent;
-			}
-			DbRootNode root(this->db_);
-			root.set(grandparent.hash);
-			return true;
-		} else {
-			if (oldgrandparent.hasParent_) {
-				DbNode grandgrandparent = oldgrandparent.getParent();
-				if (grandgrandparent.isEqualToSmaller(oldgrandparent)) {
-					grandgrandparent.setSmaller(grandparent);
-				} else if (grandgrandparent.isEqualToLarger(oldgrandparent)) {
-					grandgrandparent.setLarger(grandparent);
-				}
-				grandgrandparent.toDb();
-				return true;
+				childOfParent.hasParent_ = false;
+				childOfParent.toDb();
+				root.set(childOfParent.hash);
+				parent.deleteFromDb();
+				toBeDeleted.deleteFromDb();
 			} else {
-				DbRootNode root(this->db_);
-				root.set(grandparent.hash);
-				return true;
+				// found node and his parent has to be deleted.
+				// His grandparent has to be updated.
+				DbNode oldgrandparent = parent.getParent();
+				DbNode newgrandparent(oldgrandparent);
+				DbNode childOfParent(*this);
+				// All old nodes will be deleted after successful execution
+				std::vector<DbNode> oldnodes;
+				if (parent.isEqualToLarger(toBeDeleted)) {
+					childOfParent = parent.getSmaller();
+				} else if (parent.isEqualToSmaller(toBeDeleted)) {
+					childOfParent = parent.getLarger();
+				} else {
+					throw DbTrieException("Parent has wrong children");
+				}
+				DbNode childOfGrandParent(*this);
+				if (oldgrandparent.isEqualToLarger(parent)) {
+					childOfGrandParent = oldgrandparent.getSmaller();
+					newgrandparent.setLarger(childOfParent);
+				} else if (oldgrandparent.isEqualToSmaller(parent)) {
+					childOfGrandParent = oldgrandparent.getLarger();
+					newgrandparent.setSmaller(childOfParent);
+				} else {
+					throw DbTrieException("Grandparent has wrong children");
+				}
+				newgrandparent.updateHash();
+				childOfParent.setParent(newgrandparent);
+				childOfGrandParent.setParent(newgrandparent);
+				newgrandparent.toDb();
+				childOfParent.toDb();
+				childOfGrandParent.toDb();
+				oldnodes.push_back(parent);
+				oldnodes.push_back(toBeDeleted);
+				if (!oldgrandparent.hasParent_) {
+					oldnodes.push_back(oldgrandparent);
+					root.set(newgrandparent.hash);
+				} else {
+					if (performHash) {
+						while (oldgrandparent.hasParent_) {
+							DbNode oldgrandgrandparent = oldgrandparent.getParent();
+							DbNode newgrandgrandparent(oldgrandgrandparent);
+							DbNode otherchild(*this);
+							if (oldgrandgrandparent.isEqualToLarger(
+									oldgrandparent)) {
+								newgrandgrandparent.setLarger(newgrandparent);
+								otherchild = oldgrandgrandparent.getSmaller();
+							} else if (oldgrandgrandparent.isEqualToSmaller(
+									oldgrandparent)) {
+								newgrandgrandparent.setSmaller(newgrandparent);
+								otherchild = oldgrandgrandparent.getLarger();
+							} else {
+								throw DbTrieException(
+										"a old grandparent hasn't been child of a old grandgrandparent");
+							}
+							newgrandgrandparent.updateHash();
+							newgrandgrandparent.toDb();
+							newgrandparent.setParent(newgrandgrandparent);
+							newgrandparent.toDb();
+							otherchild.setParent(newgrandgrandparent);
+							otherchild.toDb();
+							oldgrandparent = oldgrandgrandparent;
+							newgrandparent = newgrandgrandparent;
+						}
+						root.set(newgrandparent.hash);
+					} else {
+						DbNode oldgrandgrandparent = oldgrandparent.getParent();
+						if (oldgrandgrandparent.isEqualToLarger(oldgrandparent)) {
+							oldgrandgrandparent.setLarger(newgrandparent);
+						} else if (oldgrandgrandparent.isEqualToSmaller(
+								oldgrandparent)) {
+							oldgrandgrandparent.setSmaller(newgrandparent);
+						} else {
+							throw DbTrieException(
+									"grandparent hasn't been child of grandgrandparent");
+						}
+						oldgrandgrandparent.toDb();
+					}
+				}
+
+				std::vector<DbNode>::const_iterator iter;
+				for (iter = oldnodes.begin(); iter != oldnodes.end(); iter++) {
+					DbNode d = *iter;
+					d.deleteFromDb();
+				}
 			}
 		}
 	} catch (DbException e) {
@@ -553,6 +583,7 @@ bool DbNode::erase(const unsigned char * hash, bool performHash) {
 		else
 			throw e;
 	}
+	return true;
 }
 
 void DbNode::updateHash(void) {
@@ -754,10 +785,10 @@ std::string DBTrie::toString() const {
 	std::stringstream ss;
 	ss << "digraph trie {" << std::endl;
 	ss << this->root_.toString();
-	try{
+	try {
 		DbNode node = this->root_.get();
 		ss << node.toString();
-	}catch (DbTrieException e) {
+	} catch (DbTrieException e) {
 
 	}
 	ss << "}" << std::endl;

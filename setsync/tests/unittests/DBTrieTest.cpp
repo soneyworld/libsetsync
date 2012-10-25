@@ -177,28 +177,15 @@ void DbTrieTest::testSavingAndLoading() {
 }
 
 void DbTrieTest::testToString() {
-	//	cout << endl;
+//	cout << endl;
 	trie::DBTrie trie1(db);
-	trie1.Trie::add(smaller);
-	trie1.Trie::add(larger);
-	trie1.Trie::add("bla1");
-	trie1.Trie::add("bla2");
-	trie1.Trie::add("bla3");
-	trie1.Trie::add("bla4");
-	trie1.Trie::add("bla5");
-	trie1.Trie::add("bla6");
-	trie1.Trie::add("bla7");
-	trie1.Trie::add("bla8");
-	trie1.Trie::add("bla9");
-	trie1.Trie::add("bla10");
-	trie1.Trie::add("bla11");
-	trie1.Trie::add("bla12");
-	trie1.Trie::add("bla13");
-	trie1.Trie::add("bla14");
-	trie1.Trie::add("bla15");
-	trie1.Trie::add("bla16");
+	for (unsigned int i = 1; i <= 20; i++) {
+		stringstream ss;
+		ss << "bla" << i;
+		CPPUNIT_ASSERT(trie1.Trie::add(ss.str()));
+	}
 	string dot = trie1.toString();
-	//	cout << dot;
+//	cout << dot;
 }
 
 void DbNodeTest::setUp(void) {
@@ -327,24 +314,33 @@ void DbNodeTest::testInsert() {
 }
 
 void DbNodeTest::testErase() {
-//	cout << endl;
 	DBTrie trie1(this->db);
-	for (int i = 0; i < 10; i++) {
+	// Inserting 30 entries
+	for (int i = 0; i < 30; i++) {
 		stringstream ss;
 		ss << "bla" << i;
-		//		cout << ss.str() << endl;
 		CPPUNIT_ASSERT(trie1.Trie::add(ss.str()));
 	}
-	//	cout << trie1.toString();
-	for (int i = 9; i >= 0; i--) {
+	// Removing 30 entries without hashing
+	for (int i = 29; i >= 0; i--) {
 		stringstream ss;
 		ss << "bla" << i;
-//		cout << ss.str() << " will be deleted" << endl;
-		bool success = trie1.Trie::remove(ss.str(), true);
-//		cout << ss.str() << " deletion done: "<<success << endl;
-//		cout << trie1.toString();
+		bool success = trie1.Trie::remove(ss.str(), false);
 		CPPUNIT_ASSERT(success);
 
+	}
+	// Inserting 30 entries
+	for (int i = 0; i < 30; i++) {
+		stringstream ss;
+		ss << "bla" << i;
+		CPPUNIT_ASSERT(trie1.Trie::add(ss.str()));
+	}
+	// Removing 30 entries with hashing
+	for (int i = 29; i >= 0; i--) {
+		stringstream ss;
+		ss << "bla" << i;
+		bool success = trie1.Trie::remove(ss.str(), true);
+		CPPUNIT_ASSERT(success);
 	}
 
 	DBTrie trie2(this->db2);
