@@ -33,16 +33,17 @@ void BFTest::runFSBF() {
 	runBF(&bf);
 }
 void BFTest::runDBBF() {
-	cout << "running Berkeley DBBloomFilter(MEMDB) test:" << endl;
+/*	cout << "running Berkeley DBBloomFilter(MEMDB) test:" << endl;
 	Db db1(NULL, 0);
 	db1.set_flags(bloom::DBBloomFilter::getTableFlags());
-	db1.open(NULL, NULL, bloom::DBBloomFilter::getLogicalDatabaseName(),
-			bloom::DBBloomFilter::getTableType(), DB_CREATE, 0);
 	// Setting Cache to 8 GB
 	db1.set_cachesize(8, 0, 0);
+	db1.open(NULL, NULL, bloom::DBBloomFilter::getLogicalDatabaseName(),
+			bloom::DBBloomFilter::getTableType(), DB_CREATE, 0);
+
 	bloom::DBBloomFilter bf(&db1, ITERATIONS);
 	runBF(&bf);
-	db1.close(0);
+	db1.close(0);*/
 	cout << "running Berkeley DBBloomFilter(FS) test:" << endl;
 	Db db2(NULL, 0);
 	db2.set_flags(bloom::DBBloomFilter::getTableFlags());
