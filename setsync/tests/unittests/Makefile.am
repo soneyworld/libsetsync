@@ -31,8 +31,8 @@ noinst_HEADERS += SQLiteTrieTest.h SQLiteIndexTest.h
 endif
 
 if BERKELEY_DB
-unittest_SOURCES += DBTrieTest.cpp DBBloomFilterTest.cpp
-noinst_HEADERS += DBTrieTest.h DBBloomFilterTest.h
+unittest_SOURCES += DBTrieTest.cpp DBBloomFilterTest.cpp DbSetTest.cpp
+noinst_HEADERS += DBTrieTest.h DBBloomFilterTest.h DbSetTest.h
 endif
 
 INCLUDES = -I@top_srcdir@ -I@top_srcdir@/setsync/tests/unittests

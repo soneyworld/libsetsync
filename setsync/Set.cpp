@@ -16,25 +16,21 @@ namespace setsync {
 
 Set::Set(const uint64_t maxSize, const bool hardMaximum,
 		const std::size_t hashsize) :
-	maxSize_(maxSize), hardMaximum_(hardMaximum), hashSize_(hashsize), size_(0) {
+	maxSize_(maxSize), hardMaximum_(hardMaximum), hashSize_(hashsize) {
 }
 
 Set::~Set() {
 }
 
 bool Set::isEmpty() const {
-	return (this->size_ == 0) ? true : false;
+	return (getSize() == 0) ? true : false;
 }
 
 size_t Set::getSize() const {
-	return this->size_;
+	return trie_->getSize();
 }
 size_t Set::getMaximumSize() const {
 	return this->maxSize_;
-}
-
-void Set::setSize(const size_t s) {
-	this->size_ = s;
 }
 
 bool Set::erase(const char * key) {
@@ -75,7 +71,6 @@ bool Set::insert(const std::string key) {
 bool Set::insert(const unsigned char * key) {
 	if (this->trie_->add(key)) {
 		this->bf_->add(key);
-		this->size_++;
 		return true;
 	}
 	return false;

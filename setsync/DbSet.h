@@ -10,12 +10,13 @@
 #include <db_cxx.h>
 namespace setsync {
 
-class DbSet : public Set {
+class DbSet: public Set {
 private:
 	Db * bfdb;
 	Db * triedb;
 public:
 	DbSet(const uint64_t maxSize = 1000, const bool hardMaximum = false,
+			const float falsePositiveRate = 0.01,
 			const std::size_t hashsize = SHA_DIGEST_LENGTH);
 	virtual ~DbSet();
 };

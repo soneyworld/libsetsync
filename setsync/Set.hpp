@@ -15,7 +15,6 @@ namespace setsync {
 
 class Set {
 private:
-	size_t size_;
 	size_t maxSize_;
 	size_t hashSize_;
 	bool hardMaximum_;
