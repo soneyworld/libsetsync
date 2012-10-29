@@ -12,46 +12,145 @@
 
 namespace setsync {
 
-
-class DiffHandler {
+/**
+ * Instances of this abstract class must implement the handle method.
+ * The handle method is called, if a local hash is saved and the remote
+ * set doesn't contain this hash.
+ */
+class AbstractDiffHandler {
 public:
+	/**
+	 * This method will be called if the given hash exists only on the local
+	 * set, not on the remote one. This can be called multiple times with the
+	 * same key, if the bloom filter has multiple positions found where this
+	 * hash hasn't been found. So duplicated calls must be handled by the
+	 * implementation of the AbstractDiffHandler of the using instance.
+	 *
+	 * \param hash to be handled by a DiffHandler
+	 * \param hashsize of the given hash in bytes
+	 */
 	virtual void
-			handle(const unsigned char * hash, const std::size_t hashsize) = 0;
+	handle(const unsigned char * hash, const std::size_t hashsize) = 0;
+
+	/**
+	 * All instances can be called directly like a function. This calls
+	 * directly the handle method. So it is just a little code saving method
+	 *
+	 * \param hash to be handled by this DiffHandler
+	 * \param hashsize of the given hash in bytes
+	 */
 	void operator()(const unsigned char * hash, const std::size_t hashsize);
 };
 
-class ListDiffHandler: public DiffHandler {
+/**
+ * Simple list implementation for a AbstractDiffHandler. All distinct hashes
+ * which are given by the handle method, are saved in a vector. So the size
+ * can be used to get the number of distinct hashes. There are no multiple
+ * entries per hash. The entries can be accessed like elements in an array.
+ */
+class ListDiffHandler: public AbstractDiffHandler {
 private:
+	/// list of hashes to be sent to remote set
 	std::vector<unsigned char *> list_;
 public:
+	/**
+	 * Creates a simple DiffHandler which saves all distinct hashes, which should be
+	 * handled.
+	 */
 	ListDiffHandler();
+
+	/**
+	 * Adds the given hash to the list of hashes, which should be sent to remote
+	 * set. Only distinct hashes will be saved.
+	 *
+	 * \param hash which has to be sent to remote set
+	 * \param hashsize of the given hash
+	 */
 	virtual void handle(const unsigned char * hash, const std::size_t hashsize);
+
+	/**
+	 * Destroys all allocated and copied hashes in the list
+	 */
 	virtual ~ListDiffHandler();
+
+	/**
+	 * \param index
+	 * \return pointer to the hash or NULL if index is larger then returned hashes
+	 */
 	virtual const unsigned char * operator[](unsigned int const& index) const;
+
+	/**
+	 * \return the count of the distinct hashes to be sent to remote
+	 */
 	virtual const std::size_t size();
 };
 
-class OutputStreamDiffHandler: public DiffHandler {
+/**
+ * A simple implementation of AbstractDiffHandler to write each given hash to
+ * the given output stream. Multiple hashes with the same value will be written
+ * multiple times to the output stream. There is no filter for distinct hashes.
+ */
+class OutputStreamDiffHandler: public AbstractDiffHandler {
 private:
+	/// output stream to write the hashes to
 	std::ostream& out_;
 public:
+	/**
+	 * Constructor
+	 *
+	 * \param out output stream where the hashes will be written to
+	 */
 	OutputStreamDiffHandler(std::ostream& out);
-	virtual ~OutputStreamDiffHandler() {
-	}
-	;
+
+	/**
+	 * Destructor
+	 */
+	virtual ~OutputStreamDiffHandler();
+
+	/**
+	 * Writes the given hash to the output stream, specified on the constructor
+	 *
+	 * \param hash to be written to out
+	 * \param hashsize of the given hash
+	 */
 	virtual void handle(const unsigned char * hash, const std::size_t hashsize);
 };
 
-class C_DiffHandler: public DiffHandler {
+/**
+ * A simple Wrapper for ANSI C usage. If the plain C interface will be used,
+ * this class is used to wrap the way a callback is implemented in C.
+ */
+class C_DiffHandler: public AbstractDiffHandler {
 private:
+	/// Pointer to the calling instance
 	void *closure_;
+	/// Callback function pointer to be called by handle
 	diff_callback * callback_;
 public:
-	C_DiffHandler(diff_callback *callback, void *closure) :
-		closure_(closure), callback_(callback) {
-	}
-	virtual ~C_DiffHandler() {
-	}
+
+	/**
+	 * Constructor of the C Wrapper. The given callback function
+	 * will be called by the handle method and the given closure
+	 * will be added as parameter to the diff_callback function.
+	 *
+	 * \param callback to be called by handler method
+	 * \param closure pointer to the calling instance
+	 */
+	C_DiffHandler(diff_callback *callback, void *closure);
+
+	/**
+	 * Default destructor
+	 */
+	virtual ~C_DiffHandler();
+
+	/**
+	 * Calls directly the diff_callback with the given hash and hashsize.
+	 * Also the closure will be added to the diff_callback function as
+	 * parameter.
+	 *
+	 * \param hash
+	 * \param hashsize
+	 */
 	virtual void handle(const unsigned char * hash, const std::size_t hashsize);
 };
 }

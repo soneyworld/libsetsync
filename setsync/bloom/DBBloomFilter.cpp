@@ -218,8 +218,8 @@ void DBBloomFilter::clear() {
 
 void DBBloomFilter::diff(const unsigned char * externalBF,
 		const std::size_t length, const std::size_t offset,
-		setsync::DiffHandler& handler) {
-	if(length+offset > this->mmapLength_)
+		setsync::AbstractDiffHandler& handler) {
+	if (length + offset > this->mmapLength_)
 		throw "";
 	unsigned char c;
 	// Cursor to read sequentially the db
@@ -230,7 +230,7 @@ void DBBloomFilter::diff(const unsigned char * externalBF,
 			if (!BITTEST(externalBF+i,j) && BITTEST(this->bitArray_+i+offset,j)) {
 				// Loaded position in the bloom filter
 				uint64_t pos = (offset + i) * 8 + j;
-				if(pos > this->filterSize_)
+				if (pos > this->filterSize_)
 					continue;
 				// Buffer
 				unsigned char hash[this->hashsize_];
@@ -245,24 +245,22 @@ void DBBloomFilter::diff(const unsigned char * externalBF,
 				if (ret == DB_NOTFOUND)
 					throw DbException(ret);
 				else
-					handler.handle((unsigned char*) data.get_data(),
-							this->hashsize_);
+					handler((unsigned char*) data.get_data(), this->hashsize_);
 				// Iterate over duplicated entries
 				while ((ret = cursorp->get(&key, &data, DB_NEXT_DUP)) == 0) {
 					// Call handler for the found hash
-					handler.handle((unsigned char*) data.get_data(),
-							this->hashsize_);
+					handler((unsigned char*) data.get_data(), this->hashsize_);
 				}
 				if (ret != DB_NOTFOUND) {
 					// ret should be DB_NOTFOUND upon exiting the loop.
 					// Dbc::get() will by default throw an exception if any
-					// significant errors occur, so by default this if block
+					// significant errors occur, so by default this block
 					// can never be reached.
 				}
-				// closing the loading cursor
 			}
 		}
 	}
+	// closing the loading cursor
 	cursorp->close();
 }
 

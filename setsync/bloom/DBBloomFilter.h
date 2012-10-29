@@ -121,7 +121,7 @@ public:
 	virtual void clear(void);
 
 	void diff(const unsigned char * externalBF, const std::size_t length,
-				const std::size_t offset, setsync::DiffHandler& handler);
+				const std::size_t offset, setsync::AbstractDiffHandler& handler);
 	/**
 	 * Default destructor
 	 */

@@ -12,7 +12,10 @@
 namespace setsync {
 
 ListDiffHandler::ListDiffHandler() {
+}
 
+void AbstractDiffHandler::operator()(const unsigned char * hash, const std::size_t hashsize){
+	this->handle(hash,hashsize);
 }
 void ListDiffHandler::handle(const unsigned char * hash,
 		const std::size_t hashsize) {
@@ -53,6 +56,16 @@ void OutputStreamDiffHandler::handle(const unsigned char * hash,
 
 OutputStreamDiffHandler::OutputStreamDiffHandler(std::ostream& out) :
 	out_(out) {
+}
+
+OutputStreamDiffHandler::~OutputStreamDiffHandler() {
+}
+
+C_DiffHandler::C_DiffHandler(diff_callback *callback, void *closure) :
+	closure_(closure), callback_(callback) {
+}
+
+C_DiffHandler::~C_DiffHandler() {
 }
 
 void C_DiffHandler::handle(const unsigned char * hash,
