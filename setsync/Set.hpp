@@ -12,7 +12,8 @@
 #include "setsync/trie/Trie.h"
 #include "setsync/sha1.h"
 namespace setsync {
-
+typedef void
+diff_callback(void *closure, SET * set);
 class Set {
 private:
 	size_t maxSize_;
