@@ -12,6 +12,14 @@
 #include <setsync/BerkeleyDBTableUserInterface.h>
 
 namespace bloom {
+
+class DbBloomFilterSetting {
+public:
+	uint64_t maxNumberOfElements;
+	bool hardMaximum;
+	float falsePositiveRate;
+	std::size_t hashSize;
+};
 /**
  * Berkeley DB based bloom filter. It saves all inserted hashes
  * and its position in the filter into a given Berkeley DB.
@@ -27,6 +35,7 @@ class DBBloomFilter: public CountingBloomFilter,
 private:
 	/// Given Berkeley DB pointer
 	Db * db_;
+	static const char setting_name[];
 public:
 	/**
 	 * To create a new DBBloomFilter, create a new Berkeley db with the
@@ -90,6 +99,24 @@ public:
 	static const u_int32_t getTableFlags() {
 		return DB_DUPSORT;
 	}
+	/**
+	 * If there is any bloom filter settings saved on the DB, this method
+	 * will return the values. If none is available, an exception is thrown
+	 * \param db pointer to the DB, in which the settings are saved
+	 * \return loaded settings
+	 */
+	static const DbBloomFilterSetting loadSettings(Db * db);
+	/**
+	 * Saves the given settings to the given DB
+	 * \param db pointer to the DB
+	 * \param maxNumberOfElements of the bloom filter
+	 * \param hardMaximum true, if the bloom filter do not accept more than maxNumberOfElements
+	 * \param falsePositiveRate of the bloom filter
+	 * \param hashsize size of the given crypto keys in bytes
+	 */
+	static void saveSettings(Db * db, const uint64_t maxNumberOfElements,
+			const bool hardMaximum, const float falsePositiveRate,
+			const std::size_t hashsize);
 };
 
 }

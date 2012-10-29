@@ -226,6 +226,36 @@ void DBBloomFilterTest::testOperatorXorAndAssign() {
 
 }
 
+
+void DBBloomFilterTest::testSavingAndLoadingSettings(){
+	try{
+		bloom::DBBloomFilter::loadSettings(this->db1);
+		CPPUNIT_FAIL("Should be empty");
+	}catch (...) {
+	}
+	uint64_t maxElements = 10000;
+	bool hardMax = false;
+	float rate = 0.001;
+	std::size_t hashsize = 20;
+	bloom::DBBloomFilter::saveSettings(this->db1,maxElements,hardMax,rate,hashsize);
+	bloom::DbBloomFilterSetting loaded = bloom::DBBloomFilter::loadSettings(this->db1);
+	CPPUNIT_ASSERT_EQUAL(loaded.maxNumberOfElements, maxElements);
+	CPPUNIT_ASSERT_EQUAL(loaded.hardMaximum,hardMax);
+	CPPUNIT_ASSERT_EQUAL(loaded.falsePositiveRate,rate);
+	CPPUNIT_ASSERT_EQUAL(loaded.hashSize, hashsize);
+
+	maxElements = 100;
+	hardMax = true;
+	rate = 0.01;
+	hashsize = 40;
+	bloom::DBBloomFilter::saveSettings(this->db1,maxElements,hardMax,rate,hashsize);
+	loaded = bloom::DBBloomFilter::loadSettings(this->db1);
+	CPPUNIT_ASSERT_EQUAL(loaded.maxNumberOfElements, maxElements);
+	CPPUNIT_ASSERT_EQUAL(loaded.hardMaximum,hardMax);
+	CPPUNIT_ASSERT_EQUAL(loaded.falsePositiveRate,rate);
+	CPPUNIT_ASSERT_EQUAL(loaded.hashSize, hashsize);
+}
+
 /*=== END   tests for class 'DBBloomFilter' ===*/
 
 void DBBloomFilterTest::setUp() {

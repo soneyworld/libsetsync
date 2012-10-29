@@ -11,6 +11,8 @@
 
 namespace bloom {
 
+const char DBBloomFilter::setting_name[] = "bloom_setting";
+
 DBBloomFilter::DBBloomFilter(Db * db, const uint64_t maxNumberOfElements,
 		const bool hardMaximum, const float falsePositiveRate,
 		const std::size_t hashsize) :
@@ -74,8 +76,8 @@ void DBBloomFilter::add(const unsigned char * key) {
 }
 
 void DBBloomFilter::addAll(const unsigned char* keys, const std::size_t count) {
-	for(std::size_t i = 0; i < count; i++){
-		add(keys+this->hashsize_*i);
+	for (std::size_t i = 0; i < count; i++) {
+		add(keys + this->hashsize_ * i);
 	}
 }
 
@@ -177,6 +179,22 @@ void DBBloomFilter::clear() {
 }
 
 DBBloomFilter::~DBBloomFilter() {
+}
+
+const DbBloomFilterSetting DBBloomFilter::loadSettings(Db * db) {
+	Dbt key(const_cast<char *> (setting_name), strlen(setting_name));
+	//TODO
+}
+
+void DBBloomFilter::saveSettings(Db * db, const uint64_t maxNumberOfElements,
+		const bool hardMaximum, const float falsePositiveRate,
+		const std::size_t hashsize) {
+	unsigned int buffersize = sizeof(uint64_t) + sizeof(float)
+			+ sizeof(std::size_t) + sizeof(bool);
+	unsigned char buffer[buffersize];
+	Dbt key(const_cast<char *> (setting_name), strlen(setting_name));
+	Dbt data(buffer, buffersize);
+	//TODO
 }
 
 }
