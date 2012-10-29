@@ -14,38 +14,49 @@
 namespace bloom {
 class DBBloomFilter;
 /**
- *
+ * An object which is used to save and load the bloom filter settings to and
+ * from the berkeley DB.
  */
 class DbBloomFilterSetting {
 	friend class DBBloomFilter;
 private:
 	/**
-	 *
+	 * Constructs an object and sets the member variables
 	 */
 	DbBloomFilterSetting(const uint64_t maxNumberOfElements,
 			const bool hardMaximum, const float falsePositiveRate,
 			const std::size_t hashsize);
 	/**
+	 * Loads the member variables from the given array.
 	 *
+	 * \param toLoad pointer to the loaded array
 	 */
 	DbBloomFilterSetting(void * toLoad);
 	/**
+	 * Returns the size of the marshalled array containing all member variables in bytes
 	 *
+	 * \return buffer size for marshalling in bytes
 	 */
 	static const std::size_t getBufferSize();
 	/**
+	 * Copies the given reference values into the given target array.
+	 * The given target array must be allocated before this is called.
+	 * The needed size of the target array can be requested by calling
+	 * DbBloomFilterSetting::getBufferSize();
 	 *
+	 * \param target pointer to the target array, in which the reference values should be copied
+	 * \param toBeMarshalled reference to the setting object which should be marshalled
 	 */
 	static void marshall(void * target,
 			const DbBloomFilterSetting& toBeMarshalled);
 public:
-	///
+	/// maximum number of elements, which should be saved
 	uint64_t maxNumberOfElements;
-	///
+	/// true if maxNumberOfElements is a hard limit
 	bool hardMaximum;
-	///
+	/// false positive ratio of the bloom filter
 	float falsePositiveRate;
-	///
+	/// Size of the crypto hash key in bytes
 	std::size_t hashSize;
 };
 /**
@@ -63,6 +74,7 @@ class DBBloomFilter: public CountingBloomFilter,
 private:
 	/// Given Berkeley DB pointer
 	Db * db_;
+	/// The unique key name of the settings record in the DB
 	static const char setting_name[];
 public:
 	/**
