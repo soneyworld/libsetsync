@@ -69,6 +69,11 @@ bool Set::insert(const std::string key) {
 }
 
 bool Set::insert(const unsigned char * key) {
+	if(hardMaximum_){
+		if(this->trie_->getSize() >= maxSize_){
+			return false;
+		}
+	}
 	if (this->trie_->add(key)) {
 		this->bf_->add(key);
 		return true;
