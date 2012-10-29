@@ -215,6 +215,15 @@ void DBBloomFilter::clear() {
 	FSBloomFilter::clear();
 }
 
+void DBBloomFilter::diff(const unsigned char * externalBF, const std::size_t length,
+			const std::size_t offset, diff_callback *callback, void *closure){
+
+}
+void DBBloomFilter::diff(const unsigned char * externalBF, const std::size_t length,
+			const std::size_t offset, setsync::DiffHandler& handler){
+
+}
+
 DBBloomFilter::~DBBloomFilter() {
 }
 

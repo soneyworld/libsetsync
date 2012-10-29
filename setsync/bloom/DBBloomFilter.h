@@ -10,8 +10,13 @@
 #include "CountingBloomFilter.h"
 #include "FSBloomFilter.h"
 #include <setsync/BerkeleyDBTableUserInterface.h>
+#include <setsync/DiffHandler.h>
 
 namespace bloom {
+
+typedef void
+diff_callback(void *closure, unsigned char *hash);
+
 class DBBloomFilter;
 /**
  * An object which is used to save and load the bloom filter settings to and
@@ -117,6 +122,11 @@ public:
 	 * cleans the berkeley db and the bloom filter
 	 */
 	virtual void clear(void);
+
+	void diff(const unsigned char * externalBF, const std::size_t length,
+				const std::size_t offset, diff_callback *callback, void *closure);
+	void diff(const unsigned char * externalBF, const std::size_t length,
+				const std::size_t offset, setsync::DiffHandler& handler);
 	/**
 	 * Default destructor
 	 */

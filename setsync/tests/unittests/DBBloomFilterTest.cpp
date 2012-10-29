@@ -252,6 +252,20 @@ void DBBloomFilterTest::testSavingAndLoadingSettings(){
 	CPPUNIT_ASSERT_EQUAL(loaded.hashSize, hashsize);
 }
 
+void DBBloomFilterTest::testDiff(){
+	bloom::DBBloomFilter FilterA(db1, 8196);
+	bloom::DBBloomFilter FilterB(db2, 8196);
+	FilterA.AbstractBloomFilter::add("bla1");
+	FilterA.AbstractBloomFilter::add("bla2");
+	FilterA.AbstractBloomFilter::add("bla3");
+	FilterB.AbstractBloomFilter::add("bla1");
+	FilterB.AbstractBloomFilter::add("bla2");
+	unsigned char buffer[1024];
+	setsync::ListDiffHandler handler;
+	FilterA.diff(buffer,1024,0,handler);
+	CPPUNIT_ASSERT(handler.size()==1);
+}
+
 /*=== END   tests for class 'DBBloomFilter' ===*/
 
 void DBBloomFilterTest::setUp() {
