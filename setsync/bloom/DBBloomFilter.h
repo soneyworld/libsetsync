@@ -12,12 +12,40 @@
 #include <setsync/BerkeleyDBTableUserInterface.h>
 
 namespace bloom {
-
+class DBBloomFilter;
+/**
+ *
+ */
 class DbBloomFilterSetting {
+	friend class DBBloomFilter;
+private:
+	/**
+	 *
+	 */
+	DbBloomFilterSetting(const uint64_t maxNumberOfElements,
+			const bool hardMaximum, const float falsePositiveRate,
+			const std::size_t hashsize);
+	/**
+	 *
+	 */
+	DbBloomFilterSetting(void * toLoad);
+	/**
+	 *
+	 */
+	static const std::size_t getBufferSize();
+	/**
+	 *
+	 */
+	static void marshall(void * target,
+			const DbBloomFilterSetting& toBeMarshalled);
 public:
+	///
 	uint64_t maxNumberOfElements;
+	///
 	bool hardMaximum;
+	///
 	float falsePositiveRate;
+	///
 	std::size_t hashSize;
 };
 /**

@@ -228,11 +228,7 @@ void DBBloomFilterTest::testOperatorXorAndAssign() {
 
 
 void DBBloomFilterTest::testSavingAndLoadingSettings(){
-	try{
-		bloom::DBBloomFilter::loadSettings(this->db1);
-		CPPUNIT_FAIL("Should be empty");
-	}catch (...) {
-	}
+	CPPUNIT_ASSERT_THROW(bloom::DBBloomFilter::loadSettings(this->db1),DbException);
 	uint64_t maxElements = 10000;
 	bool hardMax = false;
 	float rate = 0.001;

@@ -13,6 +13,43 @@ namespace bloom {
 
 const char DBBloomFilter::setting_name[] = "bloom_setting";
 
+const std::size_t DbBloomFilterSetting::getBufferSize() {
+	return sizeof(uint64_t) + sizeof(float) + sizeof(std::size_t)
+			+ sizeof(bool);
+}
+
+void DbBloomFilterSetting::marshall(void * target,
+		const DbBloomFilterSetting& toBeMarshalled) {
+	unsigned char * t = (unsigned char*) target;
+	unsigned int pos = 0;
+	memcpy(t + pos, &(toBeMarshalled.maxNumberOfElements), sizeof(uint64_t));
+	pos += sizeof(uint64_t);
+	memcpy(t + pos, &(toBeMarshalled.hashSize), sizeof(std::size_t));
+	pos += sizeof(std::size_t);
+	memcpy(t + pos, &(toBeMarshalled.falsePositiveRate), sizeof(float));
+	pos += sizeof(float);
+	memcpy(t + pos, &(toBeMarshalled.hardMaximum), sizeof(bool));
+}
+
+DbBloomFilterSetting::DbBloomFilterSetting(const uint64_t maxNumberOfElements,
+		const bool hardMaximum, const float falsePositiveRate,
+		const std::size_t hashsize) :
+	maxNumberOfElements(maxNumberOfElements), hardMaximum(hardMaximum),
+			falsePositiveRate(falsePositiveRate), hashSize(hashsize) {
+}
+
+DbBloomFilterSetting::DbBloomFilterSetting(void * toLoad){
+	unsigned char * load = (unsigned char*) toLoad;
+	unsigned int pos = 0;
+	memcpy(&(this->maxNumberOfElements), load + pos, sizeof(uint64_t));
+	pos += sizeof(uint64_t);
+	memcpy(&(this->hashSize), load + pos, sizeof(std::size_t));
+	pos += sizeof(std::size_t);
+	memcpy(&(this->falsePositiveRate), load + pos, sizeof(float));
+	pos += sizeof(float);
+	memcpy(&(this->hardMaximum), load + pos, sizeof(bool));
+}
+
 DBBloomFilter::DBBloomFilter(Db * db, const uint64_t maxNumberOfElements,
 		const bool hardMaximum, const float falsePositiveRate,
 		const std::size_t hashsize) :
@@ -183,18 +220,31 @@ DBBloomFilter::~DBBloomFilter() {
 
 const DbBloomFilterSetting DBBloomFilter::loadSettings(Db * db) {
 	Dbt key(const_cast<char *> (setting_name), strlen(setting_name));
-	//TODO
+	unsigned char result[DbBloomFilterSetting::getBufferSize()];
+	Dbt data;
+	data.set_data(&result);
+	data.set_flags(DB_DBT_USERMEM);
+	data.set_ulen(DbBloomFilterSetting::getBufferSize());
+	int ret = db->get(NULL, &key, &data, 0);
+	if (ret == 0) {
+		DbBloomFilterSetting settings(data.get_data());
+		return settings;
+	} else {
+		throw DbException(ret);
+	}
 }
 
 void DBBloomFilter::saveSettings(Db * db, const uint64_t maxNumberOfElements,
 		const bool hardMaximum, const float falsePositiveRate,
 		const std::size_t hashsize) {
-	unsigned int buffersize = sizeof(uint64_t) + sizeof(float)
-			+ sizeof(std::size_t) + sizeof(bool);
-	unsigned char buffer[buffersize];
+	unsigned char buffer[DbBloomFilterSetting::getBufferSize()];
 	Dbt key(const_cast<char *> (setting_name), strlen(setting_name));
-	Dbt data(buffer, buffersize);
-	//TODO
+	Dbt data(buffer, DbBloomFilterSetting::getBufferSize());
+	DbBloomFilterSetting toSave(maxNumberOfElements, hardMaximum,
+			falsePositiveRate, hashsize);
+	DbBloomFilterSetting::marshall(buffer, toSave);
+	db->del(NULL,&key,0);
+	db->put(NULL, &key, &data, DB_OVERWRITE_DUP);
 }
 
 }
