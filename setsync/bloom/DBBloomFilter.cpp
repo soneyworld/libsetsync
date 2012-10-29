@@ -8,6 +8,7 @@
 #include <db_cxx.h>
 #include <string.h>
 #include <setsync/utils/OutputFunctions.h>
+#include <setsync/utils/bitset.h>
 
 namespace bloom {
 
@@ -38,7 +39,7 @@ DbBloomFilterSetting::DbBloomFilterSetting(const uint64_t maxNumberOfElements,
 			falsePositiveRate(falsePositiveRate), hashSize(hashsize) {
 }
 
-DbBloomFilterSetting::DbBloomFilterSetting(void * toLoad){
+DbBloomFilterSetting::DbBloomFilterSetting(void * toLoad) {
 	unsigned char * load = (unsigned char*) toLoad;
 	unsigned int pos = 0;
 	memcpy(&(this->maxNumberOfElements), load + pos, sizeof(uint64_t));
@@ -215,13 +216,54 @@ void DBBloomFilter::clear() {
 	FSBloomFilter::clear();
 }
 
-void DBBloomFilter::diff(const unsigned char * externalBF, const std::size_t length,
-			const std::size_t offset, diff_callback *callback, void *closure){
-
-}
-void DBBloomFilter::diff(const unsigned char * externalBF, const std::size_t length,
-			const std::size_t offset, setsync::DiffHandler& handler){
-
+void DBBloomFilter::diff(const unsigned char * externalBF,
+		const std::size_t length, const std::size_t offset,
+		setsync::DiffHandler& handler) {
+	if(length+offset > this->mmapLength_)
+		throw "";
+	unsigned char c;
+	// Cursor to read sequentially the db
+	Dbc *cursorp;
+	this->db_->cursor(NULL, &cursorp, 0);
+	for (std::size_t i = 0; i < length; ++i) {
+		for (unsigned short j = 0; j < 8; j++) {
+			if (!BITTEST(externalBF+i,j) && BITTEST(this->bitArray_+i+offset,j)) {
+				// Loaded position in the bloom filter
+				uint64_t pos = (offset + i) * 8 + j;
+				if(pos > this->filterSize_)
+					continue;
+				// Buffer
+				unsigned char hash[this->hashsize_];
+				Dbt key, data;
+				key.set_data(&pos);
+				key.set_size(sizeof(uint64_t));
+				data.set_data(hash);
+				data.set_ulen(this->hashsize_);
+				data.set_flags(DB_DBT_USERMEM);
+				// Request first entry
+				int ret = cursorp->get(&key, &data, DB_SET);
+				if (ret == DB_NOTFOUND)
+					throw DbException(ret);
+				else
+					handler.handle((unsigned char*) data.get_data(),
+							this->hashsize_);
+				// Iterate over duplicated entries
+				while ((ret = cursorp->get(&key, &data, DB_NEXT_DUP)) == 0) {
+					// Call handler for the found hash
+					handler.handle((unsigned char*) data.get_data(),
+							this->hashsize_);
+				}
+				if (ret != DB_NOTFOUND) {
+					// ret should be DB_NOTFOUND upon exiting the loop.
+					// Dbc::get() will by default throw an exception if any
+					// significant errors occur, so by default this if block
+					// can never be reached.
+				}
+				// closing the loading cursor
+			}
+		}
+	}
+	cursorp->close();
 }
 
 DBBloomFilter::~DBBloomFilter() {
@@ -252,7 +294,7 @@ void DBBloomFilter::saveSettings(Db * db, const uint64_t maxNumberOfElements,
 	DbBloomFilterSetting toSave(maxNumberOfElements, hardMaximum,
 			falsePositiveRate, hashsize);
 	DbBloomFilterSetting::marshall(buffer, toSave);
-	db->del(NULL,&key,0);
+	db->del(NULL, &key, 0);
 	db->put(NULL, &key, &data, DB_OVERWRITE_DUP);
 }
 

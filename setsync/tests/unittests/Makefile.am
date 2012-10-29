@@ -6,7 +6,8 @@ noinst_HEADERS = \
 	BloomFilterTest.h \
 	FSBloomFilterTest.h \
 	DoubleHashingSchemeTest.h \
-	SetTest.h 
+	SetTest.h \
+	DiffHandlerTest.h
 
 unittest_SOURCES = \
 	Main.cpp \
@@ -16,7 +17,8 @@ unittest_SOURCES = \
 	BloomFilterTest.cpp \
 	FSBloomFilterTest.cpp \
 	DoubleHashingSchemeTest.cpp \
-	SetTest.cpp 
+	SetTest.cpp \
+	DiffHandlerTest.cpp
 	
 
 # what flags you want to pass to the C compiler & linker

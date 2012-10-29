@@ -18,6 +18,9 @@ typedef struct {
 	void *set;
 } SET;
 
+typedef void diff_callback(void *closure, const unsigned char * hash,
+		const size_t hashsize);
+
 // Init and Free
 int set_init(SET *set);
 int set_free(SET *set);

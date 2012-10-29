@@ -33,7 +33,6 @@ void DBBloomFilterTest::testConstructor() {
 	CPPUNIT_ASSERT(Filter2.AbstractBloomFilter::contains("bla4"));
 }
 
-
 void DBBloomFilterTest::testLoad() {
 	bloom::DBBloomFilter Filter1(db1, 10, false, 0.01);
 	bloom::DBBloomFilter Filter2(db2, 10, false, 0.01);
@@ -226,15 +225,16 @@ void DBBloomFilterTest::testOperatorXorAndAssign() {
 
 }
 
-
-void DBBloomFilterTest::testSavingAndLoadingSettings(){
+void DBBloomFilterTest::testSavingAndLoadingSettings() {
 	CPPUNIT_ASSERT_THROW(bloom::DBBloomFilter::loadSettings(this->db1),DbException);
 	uint64_t maxElements = 10000;
 	bool hardMax = false;
 	float rate = 0.001;
 	std::size_t hashsize = 20;
-	bloom::DBBloomFilter::saveSettings(this->db1,maxElements,hardMax,rate,hashsize);
-	bloom::DbBloomFilterSetting loaded = bloom::DBBloomFilter::loadSettings(this->db1);
+	bloom::DBBloomFilter::saveSettings(this->db1, maxElements, hardMax, rate,
+			hashsize);
+	bloom::DbBloomFilterSetting loaded = bloom::DBBloomFilter::loadSettings(
+			this->db1);
 	CPPUNIT_ASSERT_EQUAL(loaded.maxNumberOfElements, maxElements);
 	CPPUNIT_ASSERT_EQUAL(loaded.hardMaximum,hardMax);
 	CPPUNIT_ASSERT_EQUAL(loaded.falsePositiveRate,rate);
@@ -244,7 +244,8 @@ void DBBloomFilterTest::testSavingAndLoadingSettings(){
 	hardMax = true;
 	rate = 0.01;
 	hashsize = 40;
-	bloom::DBBloomFilter::saveSettings(this->db1,maxElements,hardMax,rate,hashsize);
+	bloom::DBBloomFilter::saveSettings(this->db1, maxElements, hardMax, rate,
+			hashsize);
 	loaded = bloom::DBBloomFilter::loadSettings(this->db1);
 	CPPUNIT_ASSERT_EQUAL(loaded.maxNumberOfElements, maxElements);
 	CPPUNIT_ASSERT_EQUAL(loaded.hardMaximum,hardMax);
@@ -252,7 +253,7 @@ void DBBloomFilterTest::testSavingAndLoadingSettings(){
 	CPPUNIT_ASSERT_EQUAL(loaded.hashSize, hashsize);
 }
 
-void DBBloomFilterTest::testDiff(){
+void DBBloomFilterTest::testDiff() {
 	bloom::DBBloomFilter FilterA(db1, 8196);
 	bloom::DBBloomFilter FilterB(db2, 8196);
 	FilterA.AbstractBloomFilter::add("bla1");
@@ -261,9 +262,32 @@ void DBBloomFilterTest::testDiff(){
 	FilterB.AbstractBloomFilter::add("bla1");
 	FilterB.AbstractBloomFilter::add("bla2");
 	unsigned char buffer[1024];
+	std::streamsize length = 0;
+	std::size_t offset = 0;
 	setsync::ListDiffHandler handler;
-	FilterA.diff(buffer,1024,0,handler);
+	std::stringstream buf;
+	FilterB.save(buf);
+	while (buf.rdbuf()->in_avail() > 0) {
+		length = buf.readsome((char*) buffer, 1024);
+		FilterA.diff(buffer, length, offset, handler);
+		offset += length;
+	}
 	CPPUNIT_ASSERT(handler.size()==1);
+	FilterA.AbstractBloomFilter::add("bla4");
+	length = 0;
+	offset = 0;
+	FilterB.save(buf);
+	while (buf.rdbuf()->in_avail() > 0) {
+		length = buf.readsome((char*) buffer, 1024);
+		FilterA.diff(buffer, length, offset, handler);
+		offset += length;
+	}
+	CPPUNIT_ASSERT(handler.size()==2);
+	unsigned char sha[SHA_DIGEST_LENGTH];
+	SHA1((unsigned char*)"bla3",strlen("bla3"),sha);
+	CPPUNIT_ASSERT(memcmp(handler[0],sha,SHA_DIGEST_LENGTH)==0);
+	SHA1((unsigned char*)"bla4",strlen("bla4"),sha);
+	CPPUNIT_ASSERT(memcmp(handler[1],sha,SHA_DIGEST_LENGTH)==0);
 }
 
 /*=== END   tests for class 'DBBloomFilter' ===*/
@@ -290,10 +314,8 @@ void DBBloomFilterTest::tearDown() {
 		delete this->db2;
 		this->db1 = new Db(NULL, 0);
 		this->db2 = new Db(NULL, 0);
-		db1->remove("table1.db",
-				NULL, 0);
-		db2->remove("table2.db",
-				NULL, 0);
+		db1->remove("table1.db", NULL, 0);
+		db2->remove("table2.db", NULL, 0);
 	}
 	// Must catch both DbException and std::exception
 	catch (DbException &e) {
@@ -309,4 +331,5 @@ void DBBloomFilterTest::tearDown() {
 	delete this->db2;
 
 }
-};
+}
+;
