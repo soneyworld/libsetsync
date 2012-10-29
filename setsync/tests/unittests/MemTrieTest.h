@@ -27,6 +27,6 @@ protected:
 	void testAddingAndErasingElements();
 	void testAddingAndCleaningElements();
 };
-CPPUNIT_TEST_SUITE_REGISTRATION(MemTrieTest);
+//CPPUNIT_TEST_SUITE_REGISTRATION(MemTrieTest);
 };
 #endif /* MEMTRIETEST_H_ */

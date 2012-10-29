@@ -30,6 +30,6 @@ protected:
 	void testAddingAndCleaningElements();
 
 };
-CPPUNIT_TEST_SUITE_REGISTRATION(MemSetTest);
+//CPPUNIT_TEST_SUITE_REGISTRATION(MemSetTest);
 };
 #endif /* MEMSETTEST_H_ */

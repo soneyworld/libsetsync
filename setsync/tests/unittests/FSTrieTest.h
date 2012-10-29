@@ -31,6 +31,6 @@ protected:
 	void testAddingAndCleaningElements();
 
 };
-CPPUNIT_TEST_SUITE_REGISTRATION(FSTrieTest);
+//CPPUNIT_TEST_SUITE_REGISTRATION(FSTrieTest);
 }
 #endif /* FSTRIETEST_H_ */
