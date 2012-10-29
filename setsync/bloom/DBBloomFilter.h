@@ -11,6 +11,7 @@
 #include "FSBloomFilter.h"
 #include <setsync/BerkeleyDBTableUserInterface.h>
 #include <setsync/DiffHandler.h>
+#include "ComparableBloomFilter.h"
 
 namespace bloom {
 
@@ -72,6 +73,7 @@ public:
  */
 class DBBloomFilter: public CountingBloomFilter,
 		public FSBloomFilter,
+		public ComparableBloomFilterInterface,
 		public berkeley::BerkeleyDBTableUserInferface {
 private:
 	/// Given Berkeley DB pointer
@@ -119,9 +121,11 @@ public:
 	 * cleans the berkeley db and the bloom filter
 	 */
 	virtual void clear(void);
-
-	void diff(const unsigned char * externalBF, const std::size_t length,
-				const std::size_t offset, setsync::AbstractDiffHandler& handler);
+	/**
+	 *
+	 */
+	virtual void diff(const unsigned char * externalBF, const std::size_t length,
+				const std::size_t offset, setsync::AbstractDiffHandler& handler) const;
 	/**
 	 * Default destructor
 	 */

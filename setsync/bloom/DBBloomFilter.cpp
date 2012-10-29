@@ -218,7 +218,7 @@ void DBBloomFilter::clear() {
 
 void DBBloomFilter::diff(const unsigned char * externalBF,
 		const std::size_t length, const std::size_t offset,
-		setsync::AbstractDiffHandler& handler) {
+		setsync::AbstractDiffHandler& handler) const {
 	if (length + offset > this->mmapLength_)
 		throw "";
 	unsigned char c;
@@ -242,10 +242,12 @@ void DBBloomFilter::diff(const unsigned char * externalBF,
 				data.set_flags(DB_DBT_USERMEM);
 				// Request first entry
 				int ret = cursorp->get(&key, &data, DB_SET);
-				if (ret == DB_NOTFOUND)
+				if (ret == DB_NOTFOUND) {
+					cursorp->close();
 					throw DbException(ret);
-				else
+				} else {
 					handler((unsigned char*) data.get_data(), this->hashsize_);
+				}
 				// Iterate over duplicated entries
 				while ((ret = cursorp->get(&key, &data, DB_NEXT_DUP)) == 0) {
 					// Call handler for the found hash

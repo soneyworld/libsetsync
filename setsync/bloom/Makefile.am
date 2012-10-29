@@ -10,7 +10,8 @@ h_sources = BloomFilter.h \
 			bloom.h \
 			HashFunction.h \
 			FSBloomFilter.h \
-			DoubleHashingScheme.h
+			DoubleHashingScheme.h \
+			ComparableBloomFilter.h
 cpp_sources = BloomFilter.cpp \
 			CountingBloomFilter.cpp \
 			bloom.c \
