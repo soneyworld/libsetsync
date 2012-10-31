@@ -24,26 +24,29 @@ void BFTest::run() {
 }
 void BFTest::runMemBF() {
 	cout << "running BloomFilter test:" << endl;
-	bloom::BloomFilter bf(ITERATIONS);
+	utils::CryptoHash sha1;
+	bloom::BloomFilter bf(sha1, ITERATIONS);
 	runBF(&bf);
 }
 void BFTest::runFSBF() {
 	cout << "running FSBloomFilter test:" << endl;
-	bloom::FSBloomFilter bf(ITERATIONS);
+	utils::CryptoHash sha1;
+	bloom::FSBloomFilter bf(sha1, ITERATIONS);
 	runBF(&bf);
 }
 void BFTest::runDBBF() {
-/*	cout << "running Berkeley DBBloomFilter(MEMDB) test:" << endl;
-	Db db1(NULL, 0);
-	db1.set_flags(bloom::DBBloomFilter::getTableFlags());
-	// Setting Cache to 8 GB
-	db1.set_cachesize(8, 0, 0);
-	db1.open(NULL, NULL, bloom::DBBloomFilter::getLogicalDatabaseName(),
-			bloom::DBBloomFilter::getTableType(), DB_CREATE, 0);
+	utils::CryptoHash sha1;
+	/*	cout << "running Berkeley DBBloomFilter(MEMDB) test:" << endl;
+	 Db db1(NULL, 0);
+	 db1.set_flags(bloom::DBBloomFilter::getTableFlags());
+	 // Setting Cache to 8 GB
+	 db1.set_cachesize(8, 0, 0);
+	 db1.open(NULL, NULL, bloom::DBBloomFilter::getLogicalDatabaseName(),
+	 bloom::DBBloomFilter::getTableType(), DB_CREATE, 0);
 
-	bloom::DBBloomFilter bf(&db1, ITERATIONS);
-	runBF(&bf);
-	db1.close(0);*/
+	 bloom::DBBloomFilter bf(sha1 ,&db1, ITERATIONS);
+	 runBF(&bf);
+	 db1.close(0);*/
 	cout << "running Berkeley DBBloomFilter(FS) test:" << endl;
 	Db db2(NULL, 0);
 	db2.set_flags(bloom::DBBloomFilter::getTableFlags());
@@ -51,7 +54,7 @@ void BFTest::runDBBF() {
 			bloom::DBBloomFilter::getLogicalDatabaseName(),
 			bloom::DBBloomFilter::getTableType(), DB_CREATE, 0);
 
-	bloom::DBBloomFilter bf2(&db2, ITERATIONS);
+	bloom::DBBloomFilter bf2(sha1 , &db2, ITERATIONS);
 	runBF(&bf2);
 	db2.close(0);
 	remove("temp-table.db");

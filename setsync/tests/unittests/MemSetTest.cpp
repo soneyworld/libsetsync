@@ -7,8 +7,9 @@
 #include "MemSetTest.h"
 namespace setsync {
 void MemSetTest::setUp(void) {
-	this->memset = new setsync::MemSet();
-	this->key_1 = new unsigned char[20];
+	this->hash = utils::CryptoHash();
+	this->memset = new setsync::MemSet(hash);
+	this->key_1 = new unsigned char[hash.getHashSize()];
 
 }
 

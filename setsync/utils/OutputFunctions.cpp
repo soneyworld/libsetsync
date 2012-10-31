@@ -8,12 +8,12 @@
 #include "OutputFunctions.h"
 #include <sstream>
 #include <iomanip>
-#include <setsync/sha1.h>
 #include <setsync/utils/bitset.h>
+#include <setsync/utils/CryptoHash.h>
 namespace utils {
 
 std::string OutputFunctions::CryptoHashtoString(const unsigned char * hash) {
-	return CryptoHashtoString(hash, SHA_DIGEST_LENGTH);
+	return CryptoHashtoString(hash, CryptoHash::getDefaultDigitLength());
 }
 std::string OutputFunctions::CryptoHashtoString(const unsigned char * hash,
 		const std::size_t hashSize) {

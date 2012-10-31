@@ -7,14 +7,12 @@ AM_LDFLAGS += @OPENSSL_LIBS@
 endif
 h_sources = BloomFilter.h \
 			CountingBloomFilter.h \
-			bloom.h \
 			HashFunction.h \
 			FSBloomFilter.h \
 			DoubleHashingScheme.h \
 			ComparableBloomFilter.h
 cpp_sources = BloomFilter.cpp \
 			CountingBloomFilter.cpp \
-			bloom.c \
 			HashFunction.cpp \
 			FSBloomFilter.cpp \
 			DoubleHashingScheme.cpp

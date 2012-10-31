@@ -8,7 +8,7 @@
 #define MEMTRIE_H_
 
 #include "Trie.h"
-#include "setsync/sha1.h"
+#include <setsync/utils/CryptoHash.h>
 #include <stdint.h>
 
 namespace trie {
@@ -39,7 +39,7 @@ private:
 	void performHash();
 	void clear(MemTrieNode * node);
 public:
-	MemTrie(const size_t hashsize = SHA_DIGEST_LENGTH);
+	MemTrie(const utils::CryptoHash& hash);
 	virtual ~MemTrie();
 	bool add(const unsigned char * hash, bool performhash);
 	bool remove(const unsigned char * hash, bool performhash);

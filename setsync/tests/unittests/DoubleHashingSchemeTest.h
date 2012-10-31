@@ -6,12 +6,14 @@
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include <setsync/utils/CryptoHash.h>
 
 #ifndef DOUBLEFILTERSCHEMETEST_H
 #define DOUBLEFILTERSCHEMETEST_H
 namespace bloom {
 class DoubleHashingSchemeTest: public CppUnit::TestFixture {
 private:
+	utils::CryptoHash hash;
 public:
 	/*=== BEGIN tests for class 'DoubleHashingScheme' ===*/
 	void testCount();

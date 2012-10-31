@@ -6,12 +6,14 @@
  
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include <setsync/utils/CryptoHash.h>
 
 #ifndef FSBLOOMFILTERTEST_H
 #define FSBLOOMFILTERTEST_H
 namespace bloom {
 class FSBloomFilterTest : public CppUnit::TestFixture {
 	private:
+	utils::CryptoHash hash;
 	public:
 		/*=== BEGIN tests for class 'FSBloomFilter' ===*/
 		void testLoad();

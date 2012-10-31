@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits>
-#include "setsync/sha1.h"
+#include <setsync/utils/CryptoHash.h>
 #include <sstream>
 #include <typeinfo>
 #include <algorithm>
@@ -34,27 +34,31 @@ uint64_t AbstractBloomFilter::exactBitSize() const {
 }
 
 void AbstractBloomFilter::add(const std::string& key) {
-	unsigned char c[SHA_DIGEST_LENGTH];
-	SHA1((unsigned char*) key.c_str(), key.size(), c);
+	unsigned char c[this->cryptoHashFunction_.getHashSize()];
+	this->cryptoHashFunction_(c, key);
 	add(c);
 }
 
 void AbstractBloomFilter::add(const char *string) {
-	unsigned char c[SHA_DIGEST_LENGTH];
-	SHA1((unsigned char*) string, strlen(string), c);
+	unsigned char c[this->cryptoHashFunction_.getHashSize()];
+	this->cryptoHashFunction_(c, string);
 	add(c);
 }
 
-bool AbstractBloomFilter::contains(const std::string& key) const {
-	unsigned char c[SHA_DIGEST_LENGTH];
-	SHA1((unsigned char*) key.c_str(), key.size(), c);
+bool AbstractBloomFilter::contains(const std::string& string) const {
+	unsigned char c[this->cryptoHashFunction_.getHashSize()];
+	this->cryptoHashFunction_(c, string);
 	return contains(c);
 }
 
 bool AbstractBloomFilter::contains(const char * string) const {
-	unsigned char c[SHA_DIGEST_LENGTH];
-	SHA1((unsigned char*) string, strlen(string), c);
+	unsigned char c[this->cryptoHashFunction_.getHashSize()];
+	this->cryptoHashFunction_(c, string);
 	return contains(c);
+}
+
+AbstractBloomFilter::AbstractBloomFilter(const utils::CryptoHash& hash) :
+	cryptoHashFunction_(hash) {
 }
 
 const unsigned char AbstractBloomFilter::bit_mask[BYTESIZE] = { 0x01, //00000001
@@ -67,31 +71,32 @@ const unsigned char AbstractBloomFilter::bit_mask[BYTESIZE] = { 0x01, //00000001
 		0x80 //10000000
 		};
 
-BloomFilter::BloomFilter(const BloomFilter& filter) {
+BloomFilter::BloomFilter(const BloomFilter& filter) :
+	AbstractBloomFilter(filter.cryptoHashFunction_) {
 	this->itemCount_ = filter.itemCount_;
 	this->maxElements_ = filter.maxElements_;
 	this->filterSize_ = filter.filterSize_;
 	this->hardMaximum_ = filter.hardMaximum_;
 	this->functionCount_ = filter.functionCount_;
-	this->hashsize_ = filter.hashsize_;
 	this->bitArray_ = (unsigned char *) malloc(
 			(this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE);
 	memcpy(this->bitArray_, filter.bitArray_,
 			(this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE);
 }
 
-BloomFilter::BloomFilter(const uint64_t maxNumberOfElements,
-		const bool hardMaximum, const float falsePositiveRate,
-		const std::size_t hashsize) {
-	this->hashsize_ = hashsize;
+BloomFilter::BloomFilter(const utils::CryptoHash& hash,
+		const uint64_t maxNumberOfElements, const bool hardMaximum,
+		const float falsePositiveRate) :
+	AbstractBloomFilter(hash) {
 	init(falsePositiveRate, hardMaximum, maxNumberOfElements);
-	this->hashFunction_ = new DoubleHashingScheme(this->hashsize_);
+	this->hashFunction_ = new DoubleHashingScheme(
+			this->cryptoHashFunction_.getHashSize());
 }
 
-BloomFilter::BloomFilter(const std::string hashFunction,
-		const uint64_t maxNumberOfElements, const bool hardMaximum,
-		const float falsePositiveRate, const std::size_t hashsize) {
-	this->hashsize_ = hashsize;
+BloomFilter::BloomFilter(const utils::CryptoHash& hash,
+		const std::string hashFunction, const uint64_t maxNumberOfElements,
+		const bool hardMaximum, const float falsePositiveRate) :
+	AbstractBloomFilter(hash) {
 	init(falsePositiveRate, hardMaximum, maxNumberOfElements);
 	this->hashFunction_
 			= HashFunctionFactory::getInstance().createHashFunction(
@@ -219,7 +224,8 @@ void BloomFilter::add(const unsigned char *key) {
 	std::size_t bit_index = 0;
 	std::size_t bit = 0;
 	for (int i = 0; i < this->functionCount_; i++) {
-		uint64_t pos = this->hashFunction_->hash(key, this->hashsize_, i);
+		uint64_t pos = this->hashFunction_->hash(key,
+				this->cryptoHashFunction_.getHashSize(), i);
 		compute_indices(pos, bit_index, bit);
 		this->bitArray_[bit_index / BYTESIZE] |= bit_mask[bit];
 	}
@@ -234,7 +240,8 @@ void BloomFilter::addAll(const unsigned char *keys, const std::size_t count) {
 	for (int i = 0; i < count; i++) {
 		for (int j = 0; j < this->functionCount_; j++) {
 			hashes[i * this->functionCount_ + j] = this->hashFunction_->hash(
-					keys + (this->hashsize_ * i), this->hashsize_, j);
+					keys + (this->cryptoHashFunction_.getHashSize() * i),
+					this->cryptoHashFunction_.getHashSize(), j);
 		}
 	}
 	std::sort(hashes, hashes + (count * this->functionCount_));
@@ -273,7 +280,8 @@ bool BloomFilter::contains(const unsigned char *key) const {
 	std::size_t bit = 0;
 
 	for (int i = 0; i < this->functionCount_; i++) {
-		uint64_t pos = this->hashFunction_->hash(key, SHA_DIGEST_LENGTH, i);
+		uint64_t pos = this->hashFunction_->hash(key,
+				this->cryptoHashFunction_.getHashSize(), i);
 		compute_indices(pos, bit_index, bit);
 		if ((this->bitArray_[bit_index / BYTESIZE] & bit_mask[bit])
 				!= bit_mask[bit]) {
@@ -287,7 +295,8 @@ std::size_t BloomFilter::containsAll(const unsigned char *keys,
 		const std::size_t count) const {
 	std::size_t i;
 	for (i = 0; i < count; i++) {
-		if (!this->contains(keys + (this->hashsize_ * i))) {
+		if (!this->contains(
+				keys + (this->cryptoHashFunction_.getHashSize() * i))) {
 			return i;
 		}
 	}

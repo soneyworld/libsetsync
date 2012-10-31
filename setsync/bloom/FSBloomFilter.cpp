@@ -24,20 +24,19 @@
 
 namespace bloom {
 
-FSBloomFilter::FSBloomFilter(const uint64_t maxNumberOfElements,
-		const bool hardMaximum, const float falsePositiveRate,
-		const std::size_t hashsize) :
-	filehandler_(NULL) {
-	this->hashsize_ = hashsize;
+FSBloomFilter::FSBloomFilter(const utils::CryptoHash& hash,
+		const uint64_t maxNumberOfElements, const bool hardMaximum,
+		const float falsePositiveRate) :
+	AbstractBloomFilter(hash), filehandler_(NULL) {
 	init(falsePositiveRate, hardMaximum, maxNumberOfElements);
-	this->hashFunction_ = new DoubleHashingScheme(this->hashsize_);
+	this->hashFunction_ = new DoubleHashingScheme(
+			this->cryptoHashFunction_.getHashSize());
 }
 
-FSBloomFilter::FSBloomFilter(const std::string hashFunction,
-		const uint64_t maxNumberOfElements, const bool hardMaximum,
-		const float falsePositiveRate, const std::size_t hashsize) :
-	filehandler_(NULL) {
-	this->hashsize_ = hashsize;
+FSBloomFilter::FSBloomFilter(const utils::CryptoHash& hash,
+		const std::string hashFunction, const uint64_t maxNumberOfElements,
+		const bool hardMaximum, const float falsePositiveRate) :
+	AbstractBloomFilter(hash), filehandler_(NULL) {
 	init(falsePositiveRate, hardMaximum, maxNumberOfElements);
 	this->hashFunction_
 			= HashFunctionFactory::getInstance().createHashFunction(
@@ -117,8 +116,8 @@ void FSBloomFilter::add(const unsigned char *key) {
 	std::size_t bit_index = 0;
 	std::size_t bit = 0;
 	for (int i = 0; i < this->functionCount_; i++) {
-		uint64_t pos = this->hashFunction_->hash(key, SHA_DIGEST_LENGTH, i)
-				% this->filterSize_;
+		uint64_t pos = this->hashFunction_->hash(key,
+				this->cryptoHashFunction_.getHashSize(), i) % this->filterSize_;
 		compute_indices(pos, bit_index, bit);
 		this->bitArray_[bit_index] |= bit_mask[bit];
 	}
@@ -133,7 +132,8 @@ void FSBloomFilter::addAll(const unsigned char* keys, const std::size_t count) {
 	for (int i = 0; i < count; i++) {
 		for (int j = 0; j < this->functionCount_; j++) {
 			hashes[i * this->functionCount_ + j] = this->hashFunction_->hash(
-					keys + (this->hashsize_ * i), this->hashsize_, j);
+					keys + (this->cryptoHashFunction_.getHashSize() * i),
+					this->cryptoHashFunction_.getHashSize(), j);
 		}
 	}
 	std::sort(hashes, hashes + (count * this->functionCount_));
@@ -155,8 +155,8 @@ bool FSBloomFilter::contains(const unsigned char *key) const {
 	std::size_t bit = 0;
 
 	for (int i = 0; i < this->functionCount_; i++) {
-		uint64_t pos = this->hashFunction_->hash(key, SHA_DIGEST_LENGTH, i)
-				% this->filterSize_;
+		uint64_t pos = this->hashFunction_->hash(key,
+				this->cryptoHashFunction_.getHashSize(), i) % this->filterSize_;
 		compute_indices(pos, bit_index, bit);
 		if ((this->bitArray_[bit_index] & bit_mask[bit]) != bit_mask[bit]) {
 			return false;
@@ -171,7 +171,8 @@ std::size_t FSBloomFilter::containsAll(const unsigned char *keys,
 	for (int i = 0; i < count; i++) {
 		for (int j = 0; j < this->functionCount_; j++) {
 			hashes[i * this->functionCount_ + j] = this->hashFunction_->hash(
-					keys + (this->hashsize_ * i), this->hashsize_, j)
+					keys + (this->cryptoHashFunction_.getHashSize() * i),
+					this->cryptoHashFunction_.getHashSize(), j)
 					% this->filterSize_;
 		}
 	}

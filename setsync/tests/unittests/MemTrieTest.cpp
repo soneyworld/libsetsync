@@ -5,17 +5,16 @@
  */
 
 #include "MemTrieTest.h"
-#include <setsync/sha1.h>
 #include <iostream>
 
 using namespace std;
 namespace setsync {
 void MemTrieTest::setUp(void) {
-	this->memtrie = new trie::MemTrie();
-	this->key_1 = new unsigned char[20];
-	SHA1((const unsigned char*)"hello",5,this->key_1);
-	this->key_2 = new unsigned char[20];
-	SHA1((const unsigned char*)"byebye",6,this->key_2);
+	this->memtrie = new trie::MemTrie(hash);
+	this->key_1 = new unsigned char[hash.getHashSize()];
+	hash(this->key_1, "hello");
+	this->key_2 = new unsigned char[hash.getHashSize()];
+	hash(this->key_2, "byebye");
 }
 
 void MemTrieTest::tearDown(void) {

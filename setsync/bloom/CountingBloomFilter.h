@@ -34,6 +34,9 @@ public:
 	 * \return true on successful remove
 	 */
 	virtual bool remove(const std::string& string);
+
+	CountingBloomFilter(const utils::CryptoHash& hash);
+	virtual ~CountingBloomFilter();
 };
 
 }

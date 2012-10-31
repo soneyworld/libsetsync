@@ -20,9 +20,6 @@ endif
 if OPENSSL
 AM_CFLAGS += $(OPENSSL_CFLAGS)
 AM_LDFLAGS += $(OPENSSL_LIBS)
-else
-h_sources += sha1.h
-c_sources += sha1.c
 endif
 
 if SQLITE

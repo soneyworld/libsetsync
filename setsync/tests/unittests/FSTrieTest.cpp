@@ -7,7 +7,7 @@
 #include "FSTrieTest.h"
 namespace trie {
 void FSTrieTest::setUp(void) {
-	this->fstrie = new trie::FSTrie();
+	this->fstrie = new trie::FSTrie(hash);
 	this->key_1 = new unsigned char[20];
 }
 
@@ -17,7 +17,7 @@ void FSTrieTest::tearDown(void) {
 }
 
 void FSTrieTest::testAdding() {
-	trie::FSTrie trie;
+	trie::FSTrie trie(hash);
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie.getSize() == 1);

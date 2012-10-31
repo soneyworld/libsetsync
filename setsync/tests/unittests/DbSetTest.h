@@ -26,6 +26,7 @@ public:
 	void tearDown(void);
 private:
 	unsigned char * key_1;
+	utils::CryptoHash hash;
 
 protected:
 	void testAdding();

@@ -8,6 +8,7 @@
 #define DIFFHANDLERTEST_H_
 #include <cppunit/extensions/HelperMacros.h>
 #include <setsync/DiffHandler.h>
+#include <setsync/utils/CryptoHash.h>
 
 namespace setsync {
 
@@ -22,6 +23,8 @@ public:
 protected:
 	void testListHandle();
 	void testOutputStreamHandle();
+private:
+	utils::CryptoHash hash_;
 };
 CPPUNIT_TEST_SUITE_REGISTRATION(DiffHandlerTest);
 }

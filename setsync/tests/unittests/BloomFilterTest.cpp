@@ -12,7 +12,6 @@
 #include <string.h>
 #include <math.h>
 #include <list>
-#include <setsync/sha1.h>
 #include <stdlib.h>
 
 using namespace std;
@@ -37,23 +36,23 @@ void BloomFilterTest::testHash() {
 	bloom::SaltedHashFunction ProviderA(5);
 	bloom::SaltedHashFunction ProviderB(5);
 	bloom::SaltedHashFunction ProviderC(5);
-	unsigned char cad1[SHA_DIGEST_LENGTH];
-	unsigned char cad2[SHA_DIGEST_LENGTH];
+	unsigned char cad1[hash.getHashSize()];
+	unsigned char cad2[hash.getHashSize()];
 	std::string s1 = "example";
 	std::string s2 = "sample";
 	for (std::size_t i = 0; i < ProviderA.count(); i++) {
 		CPPUNIT_ASSERT(
-				ProviderA.hash(cad1, SHA_DIGEST_LENGTH, i) == ProviderB.hash(
-						cad1, SHA_DIGEST_LENGTH, i));
+				ProviderA.hash(cad1, hash.getHashSize(), i) == ProviderB.hash(
+						cad1, hash.getHashSize(), i));
 		CPPUNIT_ASSERT(
-				ProviderA.hash(cad1, SHA_DIGEST_LENGTH, i) != ProviderC.hash(
-						cad2, SHA_DIGEST_LENGTH, i));
+				ProviderA.hash(cad1, hash.getHashSize(), i) != ProviderC.hash(
+						cad2, hash.getHashSize(), i));
 	}
 	// Check, if all generated hash functions are different
 	for (std::size_t i = 1; i < ProviderA.count(); i++) {
 		CPPUNIT_ASSERT(
-				ProviderA.hash(cad1, SHA_DIGEST_LENGTH, 0) != ProviderB.hash(
-						cad1, SHA_DIGEST_LENGTH, i));
+				ProviderA.hash(cad1, hash.getHashSize(), 0) != ProviderB.hash(
+						cad1, hash.getHashSize(), i));
 	}
 }
 
@@ -61,8 +60,8 @@ void BloomFilterTest::testHash() {
 
 /*=== BEGIN tests for class 'BloomFilter' ===*/
 void BloomFilterTest::testLoad() {
-	bloom::BloomFilter Filter1(10, false, 0.01);
-	bloom::BloomFilter Filter2(10, false, 0.01);
+	bloom::BloomFilter Filter1(hash, 10, false, 0.01);
+	bloom::BloomFilter Filter2(hash, 10, false, 0.01);
 	string s1 = "hello";
 	string s2 = "byebye";
 	Filter1.AbstractBloomFilter::add(s1);
@@ -77,12 +76,12 @@ void BloomFilterTest::testLoad() {
 }
 
 void BloomFilterTest::testInsert() {
-	bloom::BloomFilter Filter1(10, false, 0.01);
+	bloom::BloomFilter Filter1(hash, 10, false, 0.01);
 
 	//	 test signature (const unsigned char* key)
 
-	unsigned char cad1[SHA_DIGEST_LENGTH];
-	SHA1((const unsigned char*) "ejemplo", 7, cad1);
+	unsigned char cad1[hash.getHashSize()];
+	hash(cad1, "ejemplo");
 	Filter1.add(cad1);
 	CPPUNIT_ASSERT_EQUAL(true, Filter1.contains(cad1));
 
@@ -92,7 +91,7 @@ void BloomFilterTest::testInsert() {
 	strin = "hello";
 	Filter1.AbstractBloomFilter::add(strin);
 	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains(strin));
-//	std::cout << Filter1.toString() << std::endl;
+	//	std::cout << Filter1.toString() << std::endl;
 
 }
 
@@ -100,7 +99,7 @@ void BloomFilterTest::testContains() {
 	/* test signature (const std::string& key) const */
 	/* test signature (const char* data, const std::size_t& length) const */
 
-	bloom::BloomFilter Filter1(8196);
+	bloom::BloomFilter Filter1(hash, 8196);
 	char word[8];
 	for (int j = 0; j <= 127; j++) {
 		for (int i = 0; i <= 7; i++) {
@@ -115,17 +114,17 @@ void BloomFilterTest::testContains() {
 }
 
 void BloomFilterTest::testContainsAll() {
-	bloom::BloomFilter Filter2(8196);
-	unsigned char hashes[100 * SHA_DIGEST_LENGTH];
+	bloom::BloomFilter Filter2(hash,8196);
+	unsigned char hashes[100 * hash.getHashSize()];
 	for (int j = 0; j < 100; j++) {
 		unsigned char word[8];
 		for (int i = 0; i < 8; i++) {
 			word[i] = 33 + rand() % (126 - 23);
 		}
-		SHA1(word, 8, hashes + SHA_DIGEST_LENGTH * j);
+		hash(hashes + hash.getHashSize() * j, word, 8);
 	}
 	for (int i = 0; i < 100; i++) {
-		Filter2.add(hashes + i * SHA_DIGEST_LENGTH);
+		Filter2.add(hashes + i * hash.getHashSize());
 	}
 	Filter2.containsAll(hashes, 100);
 	CPPUNIT_ASSERT(Filter2.containsAll(hashes, 100));
@@ -134,8 +133,8 @@ void BloomFilterTest::testContainsAll() {
 void BloomFilterTest::testOperatorAndAndAssign() {
 	/* test signature (const BloomFilter& filter) */
 
-	bloom::BloomFilter FilterA(8196);
-	bloom::BloomFilter FilterB(8196);
+	bloom::BloomFilter FilterA(hash,8196);
+	bloom::BloomFilter FilterB(hash,8196);
 
 	string strin1, strin2, strin3, strin4;
 	strin1 = "hello";
@@ -162,8 +161,8 @@ void BloomFilterTest::testOperatorAndAndAssign() {
 
 void BloomFilterTest::testOperatorInclusiveOrAndAssign() {
 	/* test signature (const BloomFilter& filter) */
-	bloom::BloomFilter FilterA(8196);
-	bloom::BloomFilter FilterB(8196);
+	bloom::BloomFilter FilterA(hash,8196);
+	bloom::BloomFilter FilterB(hash,8196);
 
 	string strin1, strin2, strin3, strin4;
 	strin1 = "hello";
@@ -191,8 +190,8 @@ void BloomFilterTest::testOperatorInclusiveOrAndAssign() {
 void BloomFilterTest::testOperatorXorAndAssign() {
 	/* test signature (const BloomFilter& filter) */
 
-	bloom::BloomFilter FilterA(8196);
-	bloom::BloomFilter FilterB(8196);
+	bloom::BloomFilter FilterA(hash,8196);
+	bloom::BloomFilter FilterB(hash,8196);
 
 	string strin1, strin2, strin3, strin4;
 	strin1 = "hello";
@@ -224,4 +223,5 @@ void BloomFilterTest::setUp() {
 
 void BloomFilterTest::tearDown() {
 }
-};
+}
+;

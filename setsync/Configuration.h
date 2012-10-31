@@ -6,9 +6,9 @@
 
 #ifndef CONFIG_H_
 #define CONFIG_H_
-#include <setsync/sha1.h>
 #include <cstddef>
 #include <stdint.h>
+#include <string>
 
 namespace setsync {
 
@@ -17,11 +17,13 @@ public:
 	Configuration(const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
 			const float falsePositiveRate = 0.001,
-			const std::size_t hashsize = SHA_DIGEST_LENGTH):bloomFilterHardMaximum(hardMaximum), hashSize(hashsize){}
+			const char * hashname = "sha1") :
+		bloomFilterHardMaximum(hardMaximum), hashname(hashname) {
+	}
 	uint64_t bloomFilterMaxElements;
 	bool bloomFilterHardMaximum;
 	float bloomFilterFalsePositiveRate;
-	const size_t hashSize;
+	const std::string hashname;
 };
 
 }

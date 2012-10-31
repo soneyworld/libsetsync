@@ -5,19 +5,13 @@
  */
 
 #include "Trie.h"
-#ifdef HAVE_OPENSSL_SHA_H
-#include <openssl/sha.h>
-#else
-#define SHA_DIGEST_LENGTH 20
-#include "setsync/sha1.h"
-#endif
 
 namespace trie {
 
-Trie::Trie(const size_t hashsize) :
-	hashsize_(hashsize) {
+Trie::Trie(const utils::CryptoHash& hash) :
+	hash_(hash){
 	this->size = 0;
-	this->hashscratch = new unsigned char[this->hashsize_ * 2];
+	this->hashscratch = new unsigned char[this->hash_.getHashSize()* 2];
 }
 
 Trie::~Trie() {
@@ -27,12 +21,8 @@ size_t Trie::getSize() const {
 	return this->size;
 }
 
-void Trie::setHashSize(const size_t size) {
-	this->hashsize_ = size;
-}
-
-size_t Trie::getHashSize() const {
-	return this->hashsize_;
+const utils::CryptoHash& Trie::getHash() const {
+	return this->hash_;
 }
 
 void Trie::setSize(const size_t size) {
@@ -68,8 +58,8 @@ bool Trie::remove(const char * str){
 }
 
 bool Trie::remove(const char * str, bool performhash) {
-	unsigned char c[SHA_DIGEST_LENGTH];
-	SHA1((unsigned char*) str, strlen(str), c);
+	unsigned char c[this->hash_.getHashSize()];
+	this->hash_(c,str);
 	return remove(c, performhash);
 }
 
@@ -78,20 +68,20 @@ bool Trie::remove(const std::string& str) {
 }
 
 bool Trie::remove(const std::string& str, bool performhash) {
-	unsigned char c[SHA_DIGEST_LENGTH];
-	SHA1((unsigned char*) str.c_str(), str.size(), c);
+	unsigned char c[this->hash_.getHashSize()];
+	this->hash_(c,str);
 	return remove(c, performhash);
 }
 
 bool Trie::add(const char * str, bool performhash) {
-	unsigned char c[SHA_DIGEST_LENGTH];
-	SHA1((unsigned char*) str, strlen(str), c);
+	unsigned char c[this->hash_.getHashSize()];
+	this->hash_(c,str);
 	return add(c, performhash);
 }
 
 bool Trie::add(const std::string& str, bool performhash) {
-	unsigned char c[SHA_DIGEST_LENGTH];
-	SHA1((unsigned char*) str.c_str(), str.size(), c);
+	unsigned char c[this->hash_.getHashSize()];
+	this->hash_(c,str);
 	return add(c, performhash);
 }
 
@@ -104,14 +94,14 @@ bool Trie::add(const std::string& str) {
 }
 
 bool Trie::contains(const char * str) const {
-	unsigned char c[SHA_DIGEST_LENGTH];
-	SHA1((unsigned char*) str, strlen(str), c);
+	unsigned char c[this->hash_.getHashSize()];
+	this->hash_(c,str);
 	return contains(c);
 }
 
 bool Trie::contains(const std::string& str) const {
-	unsigned char c[SHA_DIGEST_LENGTH];
-	SHA1((unsigned char*) str.c_str(), str.size(), c);
+	unsigned char c[this->hash_.getHashSize()];
+	this->hash_(c,str);
 	return contains(c);
 }
 

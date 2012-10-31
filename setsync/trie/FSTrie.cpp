@@ -8,7 +8,7 @@
 
 namespace trie {
 
-FSTrie::FSTrie() {
+FSTrie::FSTrie(const utils::CryptoHash& hash) : Trie(hash) {
 	// TODO Auto-generated constructor stub
 
 }

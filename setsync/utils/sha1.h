@@ -1,7 +1,3 @@
-#include "config.h"
-#ifdef HAVE_OPENSSL_SHA
-#include <openssl/sha.h>
-#else
 /**
  * \file sha1.h
  *
@@ -30,18 +26,15 @@
  */
 #ifndef POLARSSL_SHA1_H
 #define POLARSSL_SHA1_H
-#define SHA_DIGEST_LENGTH 20
-#define SHA_CTX sha1_context
-#define SHA_DIGEST_LENGTH 20
-#define SHA1_Init( CTX ) \
-        sha1_starts( (CTX) )
-#define SHA1( BUF, LEN, OUT) \
-		sha1((unsigned char *)(BUF), (LEN), (OUT))
-#define SHA1_Update(  CTX, BUF, LEN ) \
-        sha1_update( (CTX), (unsigned char *)(BUF), (LEN) )
-#define SHA1_Final( OUT, CTX ) \
-        sha1_finish( (CTX), (OUT) )
+
 #include <string.h>
+
+#ifdef _MSC_VER
+#include <basetsd.h>
+typedef UINT32 uint32_t;
+#else
+#include <inttypes.h>
+#endif
 
 #define POLARSSL_ERR_SHA1_FILE_IO_ERROR                -0x0076  /**< Read/write error in file. */
 
@@ -50,8 +43,8 @@
  */
 typedef struct
 {
-    unsigned long total[2];     /*!< number of bytes processed  */
-    unsigned long state[5];     /*!< intermediate digest state  */
+    uint32_t total[2];          /*!< number of bytes processed  */
+    uint32_t state[5];          /*!< intermediate digest state  */
     unsigned char buffer[64];   /*!< data block being processed */
 
     unsigned char ipad[64];     /*!< HMAC: inner padding        */
@@ -164,4 +157,3 @@ int sha1_self_test( int verbose );
 #endif
 
 #endif /* sha1.h */
-#endif

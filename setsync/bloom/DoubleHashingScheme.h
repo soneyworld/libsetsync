@@ -24,7 +24,7 @@
 #define DOUBLEHASHINGSCHEME_H_
 
 #include "HashFunction.h"
-#include "setsync/sha1.h"
+#include <setsync/utils/CryptoHash.h>
 
 namespace bloom {
 /**
@@ -36,7 +36,7 @@ public:
 	/**
 	 *  Default constructor takes the length of the given cryptographically input key
 	 */
-	DoubleHashingScheme(const std::size_t hashsize = SHA_DIGEST_LENGTH);
+	DoubleHashingScheme(const std::size_t hashsize = utils::CryptoHash::getDefaultDigitLength());
 	/// Default destructor
 	virtual ~DoubleHashingScheme();
 	/**
@@ -77,7 +77,7 @@ public:
 	/**
 	 *  Default constructor takes the length of the given cryptographically input key
 	 */
-	ExtendedDoubleHashingScheme(const std::size_t hashsize = SHA_DIGEST_LENGTH);
+	ExtendedDoubleHashingScheme(const std::size_t hashsize = utils::CryptoHash::getDefaultDigitLength());
 	/// Default destructor
 	virtual ~ExtendedDoubleHashingScheme();
 	virtual uint64_t hash(const unsigned char * input,

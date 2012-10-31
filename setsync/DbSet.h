@@ -45,10 +45,9 @@ public:
 	 * \param falsePositiveRate is a float between 0 and 1 and will be given to bloom filter
 	 * \param hashsize of the crypto hash key size in bytes
 	 */
-	DbSet(const char * db_home = NULL, const uint64_t maxSize = 1000,
-			const bool hardMaximum = false,
-			const float falsePositiveRate = 0.01,
-			const std::size_t hashsize = SHA_DIGEST_LENGTH);
+	DbSet(const utils::CryptoHash& hash, const char * db_home = NULL,
+			const uint64_t maxSize = 1000, const bool hardMaximum = false,
+			const float falsePositiveRate = 0.01);
 	/**
 	 * Destroys the set and if db_home has been NULL, the temporary created folder
 	 * will be removed. Otherwise db_home will stay untouched.

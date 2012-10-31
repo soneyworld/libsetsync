@@ -90,16 +90,15 @@ public:
 	 * closed on destroying this instance. It has to be closed manually after
 	 * destroying.
 	 *
+	 * \param hash the crypto hash function, used for keys
 	 * \param db pointer to opened berkeley db
 	 * \param maxNumberOfElements will be passed to FSBloomFilter
 	 * \param hardMaximum will be passed to FSBloomFilter
 	 * \param falsePositiveRate will be passed to FSBloomFilter
-	 * \param hashsize will be passed to FSBloomFilter
 	 */
-	DBBloomFilter(Db * db, const uint64_t maxNumberOfElements = 10000,
+	DBBloomFilter(const utils::CryptoHash& hash, Db * db, const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
-			const float falsePositiveRate = 0.001,
-			const std::size_t hashsize = SHA_DIGEST_LENGTH);
+			const float falsePositiveRate = 0.001);
 	/**
 	 *  adds this given key to bloom filter and berkeley db
 	 *  \param key to be added

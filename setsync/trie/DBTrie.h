@@ -6,7 +6,6 @@
 
 #ifndef DBTRIE_H_
 #define DBTRIE_H_
-#define HASHSIZE 20
 
 #include "Trie.h"
 #include <db_cxx.h>
@@ -55,24 +54,25 @@ public:
 };
 
 class DBValue {
+private:
+	std::size_t hashsize;
 public:
 	DBValue(const DbNode& toSave);
-	DBValue(void * toLoad);
+	DBValue(void * toLoad, const std::size_t hashsize);
 	static const uint8_t HAS_PARENT;
 	static const uint8_t HAS_CHILDREN;
 	static const uint8_t DIRTY;
-	static const std::size_t getBufferSize();
-	static void marshall(void * target, const DBValue& toBeMarshalled);
+	static const std::size_t getBufferSize(const std::size_t hashsize);
+	void marshall(void * target);
 	bool isDirty() const;
 	bool hasChildren() const;
 	bool hasParent() const;
-	DBValue(const uint8_t flags = 0);
-	virtual ~DBValue() {
-	}
-	unsigned char parent[HASHSIZE];
-	unsigned char smaller[HASHSIZE];
-	unsigned char larger[HASHSIZE];
-	unsigned char prefix[HASHSIZE];
+	DBValue(const std::size_t hashsize, const uint8_t flags = 0);
+	virtual ~DBValue();
+	unsigned char * parent;
+	unsigned char * smaller;
+	unsigned char * larger;
+	unsigned char * prefix;
 	uint8_t prefix_mask;
 	uint8_t flags;
 };
@@ -92,7 +92,7 @@ private:
 	 * field to build the new hash of a node
 	 * is only used by updateHash function
 	 */
-	static unsigned char hashscratch[HASHSIZE * 2];
+	unsigned char * hashscratch;
 	/// Pointer to the Berkeley DB where the node (should) exist
 	Db * db_;
 	/**
@@ -116,17 +116,19 @@ private:
 	/// true, if the hash of this node hasn't been updated since a new child has been added
 	bool dirty_;
 	/// The hash of this node
-	unsigned char hash[HASHSIZE];
+	unsigned char * hash;
 	/// The hash of the parent of this node
-	unsigned char parent[HASHSIZE];
+	unsigned char * parent;
 	/// The hash of the smaller child of this node
-	unsigned char smaller[HASHSIZE];
+	unsigned char * smaller;
 	/// The hash of the larger child of this node
-	unsigned char larger[HASHSIZE];
+	unsigned char * larger;
 	/// The prefix of this node
-	unsigned char prefix[HASHSIZE];
+	unsigned char * prefix;
 	/// The size of the prefix
 	uint8_t prefix_mask;
+
+	const utils::CryptoHash& hashfunction_;
 	/**
 	 * Constructor of a node, which could exist in the given DB, or should be
 	 * created to be saved in the given DB. The given hash could be the default
@@ -136,7 +138,7 @@ private:
 	 * \param hash of the node, which should be created or loaded
 	 * \param newone if true, a new node will be created, otherwise load the node with this hash from the given DB
 	 */
-	DbNode(Db * db, const unsigned char * hash, bool newone = false);
+	DbNode(const utils::CryptoHash& hashfunction, Db * db, const unsigned char * hash, bool newone = false);
 	/**
 	 * Sets the given parent as new parent and overwrites the old one.
 	 * This method is in memory only! To save the changes to DB, call toDB()
@@ -223,7 +225,7 @@ private:
 	 */
 	bool isEqualToLarger(const DbNode& node) const;
 public:
-	DbNode(Db * db);
+	DbNode(const utils::CryptoHash& hashfunction, Db * db);
 	DbNode(const DbNode& other);
 	/**
 	 * \return true if node has children, otherwise false
@@ -293,6 +295,8 @@ private:
 	Db * db_;
 	/// The key of the <key,value> pair in the DB, where the root hash is saved as value
 	static const char root_name[];
+	///
+	const utils::CryptoHash& hashfunction_;
 public:
 	/**
 	 * Initializes this class with the given pointer to the Berkeley DB, which should
@@ -301,7 +305,7 @@ public:
 	 *
 	 * \param db pointer to berkeley db to be used
 	 */
-	DbRootNode(Db * db);
+	DbRootNode(const utils::CryptoHash& hashfunction, Db * db);
 	/**
 	 * Loads the hash of the DbNode, which is saved as root node. Throws a
 	 * DbNoRootFoundException if no root is available on this db.
@@ -331,7 +335,7 @@ private:
 	Db * db_;
 	DbRootNode root_;
 public:
-	DBTrie(Db * db, const size_t hashsize = SHA_DIGEST_LENGTH);
+	DBTrie(const utils::CryptoHash& hash, Db * db);
 	virtual ~DBTrie();
 	virtual bool add(const unsigned char * hash, bool performhash);
 	virtual bool remove(const unsigned char * hash, bool performhash);

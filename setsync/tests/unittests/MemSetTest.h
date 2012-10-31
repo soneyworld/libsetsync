@@ -9,6 +9,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "setsync/Set.hpp"
 #include "setsync/MemSet.h"
+#include <setsync/utils/CryptoHash.h>
 
 namespace setsync {
 class MemSetTest : public CPPUNIT_NS::TestCase{
@@ -23,6 +24,7 @@ public:
 	void tearDown(void);
 private:
 	setsync::MemSet * memset;
+	utils::CryptoHash hash;
 	unsigned char * key_1;
 
 protected:

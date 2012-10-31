@@ -15,7 +15,7 @@
 #include <stdint.h>
 #include <iostream>
 #include "HashFunction.h"
-#include <setsync/sha1.h>
+#include <setsync/utils/CryptoHash.h>
 #ifndef BYTESIZE
 #define BYTESIZE 8
 #endif
@@ -109,17 +109,17 @@ public:
 	 * \return the intersection between both bloom filter
 	 */
 	virtual AbstractBloomFilter
-			& operator &=(const AbstractBloomFilter& filter) = 0;
+	& operator &=(const AbstractBloomFilter& filter) = 0;
 	/**
 	 * \return the union of both bloom filter
 	 */
 	virtual AbstractBloomFilter
-			& operator |=(const AbstractBloomFilter& filter) = 0;
+	& operator |=(const AbstractBloomFilter& filter) = 0;
 	/**
 	 * \return the difference between the both bloom filter
 	 */
 	virtual AbstractBloomFilter
-			& operator ^=(const AbstractBloomFilter& filter) = 0;
+	& operator ^=(const AbstractBloomFilter& filter) = 0;
 
 protected:
 	static const unsigned char bit_mask[BYTESIZE];
@@ -137,11 +137,12 @@ protected:
 	bool hardMaximum_;
 	/// The hard limit of elements, if hardMaximum is set
 	uint64_t maxElements_;
-	/// Size of the given hash keys
-	std::size_t hashsize_;
 	/// Pointer to the used hash Function of the filter
 	HashFunction* hashFunction_;
-
+	/// Reference to the crypto hash function used to create the inserted keys
+	const utils::CryptoHash& cryptoHashFunction_;
+public:
+	AbstractBloomFilter(const utils::CryptoHash& hash);
 };
 
 /**
@@ -154,24 +155,21 @@ public:
 	 * \param maxNumberOfElements which should be represented by the bloom filter
 	 * \param hardMaximum ensures that the the maximum of storable entries will never be exceeded
 	 * \param falsePositiveRate can be set to any value ]0,1[.
-	 * \param hashsize sets the size of the inserted keys. 20 bytes for SHA1 for example.
 	 */
-	BloomFilter(const uint64_t maxNumberOfElements = 10000,
+	BloomFilter(const utils::CryptoHash& hash,
+			const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
-			const float falsePositiveRate = 0.001,
-			const std::size_t hashsize = SHA_DIGEST_LENGTH);
+			const float falsePositiveRate = 0.001);
 	/**
 	 * \param hashFunction is the Function which should be used by the BloomFilter
 	 * \param maxNumberOfElements which should be represented by the bloom filter
 	 * \param hardMaximum ensures that the the maximum of storable entries will never be exceeded
 	 * \param falsePositiveRate can be set to any value ]0,1[.
-	 * \param hashsize sets the size of the inserted keys. 20 bytes for SHA1 for example.
 	 */
-	BloomFilter(const std::string hashFunction,
+	BloomFilter(const utils::CryptoHash& hash, const std::string hashFunction,
 			const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
-			const float falsePositiveRate = 0.001,
-			const std::size_t hashsize = SHA_DIGEST_LENGTH);
+			const float falsePositiveRate = 0.001);
 	/**
 	 * Simple copy constructor
 	 * \param filter the BloomFilter instance, which should be copied

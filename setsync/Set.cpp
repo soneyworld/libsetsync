@@ -5,18 +5,19 @@
  */
 
 #include "Set.hpp"
-#include "MemSet.h"
-#include "setsync/bloom/CountingBloomFilter.h"
-#include "setsync/trie/DBTrie.h"
+#include <setsync/DbSet.h>
+#include <setsync/bloom/CountingBloomFilter.h>
+#include <setsync/trie/DBTrie.h>
 #include <typeinfo>
 #include <string.h>
 #include <iostream>
 
 namespace setsync {
 
-Set::Set(const uint64_t maxSize, const bool hardMaximum,
-		const std::size_t hashsize) :
-	maxSize_(maxSize), hardMaximum_(hardMaximum), hashSize_(hashsize) {
+Set::Set(const utils::CryptoHash& hash, const uint64_t maxSize,
+		const bool hardMaximum) :
+	hash_(hash), maxSize_(maxSize), hardMaximum_(hardMaximum) {
+
 }
 
 Set::~Set() {
@@ -33,14 +34,14 @@ size_t Set::getMaximumSize() const {
 	return this->maxSize_;
 }
 
-bool Set::erase(const char * key) {
-	unsigned char k[this->hashSize_];
-	SHA1((const unsigned char*) key, strlen(key), k);
+bool Set::erase(const char * str) {
+	unsigned char k[this->hash_.getHashSize()];
+	this->hash_(k, str);
 	return erase(k);
 }
 
-bool Set::erase(const std::string key) {
-	return erase(key.c_str());
+bool Set::erase(const std::string& str) {
+	return erase(str.c_str());
 }
 
 bool Set::erase(const unsigned char * key) {
@@ -58,19 +59,19 @@ bool Set::erase(const unsigned char * key) {
 	}
 }
 
-bool Set::insert(const char * key) {
-	unsigned char k[this->hashSize_];
-	SHA1((const unsigned char*) key, strlen(key), k);
+bool Set::insert(const char * str) {
+	unsigned char k[this->hash_.getHashSize()];
+	this->hash_(k, str);
 	return insert(k);
 }
 
-bool Set::insert(const std::string key) {
-	return insert(key.c_str());
+bool Set::insert(const std::string& str) {
+	return insert(str.c_str());
 }
 
 bool Set::insert(const unsigned char * key) {
-	if(hardMaximum_){
-		if(this->trie_->getSize() >= maxSize_){
+	if (hardMaximum_) {
+		if (this->trie_->getSize() >= maxSize_) {
 			return false;
 		}
 	}
@@ -81,13 +82,13 @@ bool Set::insert(const unsigned char * key) {
 	return false;
 }
 
-bool Set::find(const char * key) {
-	unsigned char k[this->hashSize_];
-	SHA1((const unsigned char*) key, strlen(key), k);
+bool Set::find(const char * str) {
+	unsigned char k[this->hash_.getHashSize()];
+	this->hash_(k, str);
 	return find(k);
 }
 
-bool Set::find(const std::string key) {
+bool Set::find(const std::string& key) {
 	return find(key.c_str());
 }
 
@@ -105,14 +106,22 @@ void Set::clear() {
 
 }
 
-int set_init(SET *set) {
-	setsync::Set * cppset = new setsync::MemSet();
-	set->set = (void *) cppset;
+int set_free(SET *set) {
+	setsync::Set * cppset = static_cast<setsync::DbSet*> (set->set);
+	cppset->~Set();
+	utils::CryptoHash * cpphash = static_cast<utils::CryptoHash*> (set->hash);
+	cpphash->~CryptoHash();
 }
 
-int set_free(SET *set) {
-	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
-	delete cppset;
+int set_init(SET *set, const char * path, const size_t maxSize,
+		const int hardMaximum, const float falsePositiveRate) {
+	utils::CryptoHash * hashfunction = new utils::CryptoHash();
+	set->hash = (void *) hashfunction;
+	bool max = hardMaximum ? true : false;
+	setsync::Set * cppset = new setsync::DbSet(*hashfunction, path, maxSize,
+			max, falsePositiveRate);
+	set->set = (void *) cppset;
+
 }
 
 // Lookup
@@ -125,6 +134,11 @@ int find(SET *set, const unsigned char * key) {
 int set_insert(SET *set, const unsigned char * key) {
 	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
 	return cppset->insert(key);
+}
+
+int set_insert_string(SET *set, const char * str) {
+	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
+	return cppset->insert(str);
 }
 
 int set_erase(SET *set, const unsigned char * key) {

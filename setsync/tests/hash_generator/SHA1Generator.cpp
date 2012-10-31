@@ -4,9 +4,8 @@
  *      Author: Till Lorentzen
  */
 
-#include <setsync/sha1.h>
-
 #include "SHA1Generator.h"
+#include <setsync/utils/CryptoHash.h>
 #include <stdlib.h>
 #include <iostream>
 #include <sstream>
@@ -41,10 +40,9 @@ SHA1Generator::~SHA1Generator() {
 
 void SHA1Generator::run() {
 	uint64_t i;
-	SHA_CTX ctx;
+	utils::CryptoHash sha1("sha1");
 	for (i = this->start; i < this->end; i++) {
-		SHA1_Init(&ctx);
-		SHA1_Update(&ctx, &i, 8);
-		SHA1_Final(this->array + 20 * (i - this->start), &ctx);
+		sha1(this->array + 20 * (i - this->start), (unsigned char*) &i,
+				sizeof(uint64_t));
 	}
 }

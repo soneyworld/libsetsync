@@ -18,8 +18,8 @@ HashFunction * HashFunctionFactory::createHashFunction(std::string function) {
 }
 
 SplittingMDHashFunction::SplittingMDHashFunction(
-		const std::size_t outputLength, const std::size_t hashSize) :
-	hashSize_(hashSize), outputLength_(outputLength) {
+		const std::size_t outputLength, const utils::CryptoHash& hash) :
+	hash_(hash), outputLength_(outputLength) {
 
 }
 
@@ -33,7 +33,7 @@ size_t SplittingMDHashFunction::count() const {
 
 uint64_t SplittingMDHashFunction::hash(const unsigned char * input,
 		const std::size_t length) const {
-	return hash(input,length,0);
+	return hash(input, length, 0);
 }
 
 uint64_t SplittingMDHashFunction::hash(const unsigned char * input,

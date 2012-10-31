@@ -28,9 +28,9 @@ MemTrieNode::MemTrieNode(Trie * trie) :
 	this->parent_ = NULL;
 	this->larger_ = NULL;
 	this->smaller_ = NULL;
-	this->hash_ = new unsigned char[trie->getHashSize()];
-	this->prefix_ = new unsigned char[trie->getHashSize()];
-	this->prefix_mask_ = trie_->getHashSize() * BITS_PER_CHAR;
+	this->hash_ = new unsigned char[trie->getHash().getHashSize()];
+	this->prefix_ = new unsigned char[trie->getHash().getHashSize()];
+	this->prefix_mask_ = trie->getHash().getHashSize() * BITS_PER_CHAR;
 }
 MemTrieNode::~MemTrieNode() {
 	delete this->hash_;
@@ -39,7 +39,7 @@ MemTrieNode::~MemTrieNode() {
 
 uint8_t MemTrieNode::commonPrefixSize(MemTrieNode * node) {
 	uint8_t common = 0;
-	for (uint8_t i = 0; i < this->trie_->getHashSize(); i++) {
+	for (uint8_t i = 0; i < this->trie_->getHash().getHashSize(); i++) {
 		if (BITTEST(this->prefix_, i) != BITTEST(node->prefix_, i))
 			break;
 		common++;
@@ -66,10 +66,11 @@ void MemTrieNode::updateHash() {
 			this->parent_->updateHash();
 		return;
 	} else {
-		memcpy(trie_->hashscratch, this->smaller_->hash_, trie_->getHashSize());
-		memcpy(trie_->hashscratch + trie_->getHashSize(), this->larger_->hash_,
-				trie_->getHashSize());
-		SHA1(trie_->hashscratch, 2 * trie_->getHashSize(), this->hash_);
+		const utils::CryptoHash& chash = trie_->getHash();
+		memcpy(trie_->hashscratch, this->smaller_->hash_, chash.getHashSize());
+		memcpy(trie_->hashscratch + chash.getHashSize(), this->larger_->hash_,
+				chash.getHashSize());
+		chash(this->hash_, trie_->hashscratch, 2 * chash.getHashSize());
 		if (this->parent_ != NULL)
 			this->parent_->updateHash();
 
@@ -77,8 +78,8 @@ void MemTrieNode::updateHash() {
 	}
 }
 
-MemTrie::MemTrie(const size_t hashsize) {
-	this->setHashSize(hashsize);
+MemTrie::MemTrie(const utils::CryptoHash& hash) :
+	Trie(hash) {
 	this->setSize(0);
 	this->root_ = NULL;
 }
@@ -91,8 +92,8 @@ bool MemTrie::add(const unsigned char * hash, bool performhash) {
 	MemTrieNode * newnode = new MemTrieNode(this);
 	if (this->root_ == NULL) {
 		this->root_ = newnode;
-		memcpy(this->root_->hash_, hash, this->getHashSize());
-		memcpy(this->root_->prefix_, hash, this->getHashSize());
+		memcpy(this->root_->hash_, hash, this->hash_.getHashSize());
+		memcpy(this->root_->prefix_, hash, this->hash_.getHashSize());
 		incSize();
 		return true;
 	} else {
@@ -102,13 +103,14 @@ bool MemTrie::add(const unsigned char * hash, bool performhash) {
 			if (thesame) {
 				MemTrieNode * next;
 				bool
-						larger = BITTEST( (unsigned char *)(newnode->prefix_) ,currentnode->prefix_mask_);
+						larger =
+								BITTEST( (unsigned char *)(newnode->prefix_) ,currentnode->prefix_mask_);
 				if (larger)
 					next = currentnode->larger_;
 				else
 					next = currentnode->smaller_;
 				if (next == NULL) {
-					if (currentnode->prefix_mask_ == getHashSize()
+					if (currentnode->prefix_mask_ == this->hash_.getHashSize()
 							* BITS_PER_CHAR) {
 						//ignore
 						return false;
@@ -118,16 +120,16 @@ bool MemTrie::add(const unsigned char * hash, bool performhash) {
 				currentnode = next;
 			} else {
 				// Split
-				uint8_t common=currentnode->commonPrefixSize(newnode);
+				uint8_t common = currentnode->commonPrefixSize(newnode);
 				MemTrieNode * intermediate = new MemTrieNode(this);
 				intermediate->parent_ = currentnode->parent_;
 				bool rootReplaced = false;
-				if(currentnode->parent_ == NULL){
+				if (currentnode->parent_ == NULL) {
 					this->root_ = intermediate;
 					rootReplaced = true;
 				}
-				if(!rootReplaced){
-					if(currentnode->parent_->larger_ == currentnode){
+				if (!rootReplaced) {
+					if (currentnode->parent_->larger_ == currentnode) {
 						currentnode->parent_->larger_ = intermediate;
 					} else {
 						currentnode->parent_->smaller_ = intermediate;
@@ -135,18 +137,21 @@ bool MemTrie::add(const unsigned char * hash, bool performhash) {
 				}
 
 				intermediate->prefix_mask_ = common;
-				memcpy(intermediate->prefix_, currentnode->prefix_, getHashSize());
+				memcpy(intermediate->prefix_, currentnode->prefix_,
+						this->hash_.getHashSize());
 				newnode->parent_ = intermediate;
 				currentnode->parent_ = intermediate;
-				bool larger = BITTEST( (unsigned char *)(newnode->prefix_) ,common);
-				if(larger){
-					intermediate->larger_= newnode;
-					intermediate->smaller_=currentnode;
-				}else{
-					intermediate->larger_=currentnode;
-					intermediate->smaller_=newnode;
+				bool
+						larger =
+								BITTEST( (unsigned char *)(newnode->prefix_) ,common);
+				if (larger) {
+					intermediate->larger_ = newnode;
+					intermediate->smaller_ = currentnode;
+				} else {
+					intermediate->larger_ = currentnode;
+					intermediate->smaller_ = newnode;
 				}
-				if(performhash)
+				if (performhash)
 					currentnode->updateHash();
 				incSize();
 				return true;
@@ -195,7 +200,7 @@ void MemTrie::performHash() {
 
 }
 
-bool MemTrie::operator ==(const Trie& other) const{
+bool MemTrie::operator ==(const Trie& other) const {
 	//TODO
 	return false;
 }

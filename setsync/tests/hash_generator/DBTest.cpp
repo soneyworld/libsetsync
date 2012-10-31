@@ -101,7 +101,8 @@ void DBTest::runFsDb() {
 }
 
 void DBTest::runTrie(Db * db) {
-	trie::DBTrie trie(db);
+	utils::CryptoHash sha1;
+	trie::DBTrie trie(sha1,db);
 	clock_t start, stop, duration, iduration;
 	duration = 0;
 	for (int iter = 0; iter < LOOP_ITERATIONS; iter++) {

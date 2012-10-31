@@ -13,7 +13,7 @@ namespace trie {
 
 class FSTrie: public trie::Trie {
 public:
-	FSTrie();
+	FSTrie(const utils::CryptoHash& hash);
 	virtual ~FSTrie();
 	bool add(const unsigned char * hash);
 	bool add(const unsigned char * hash, bool performhash);

@@ -13,9 +13,10 @@
 
 namespace setsync {
 
-DbSet::DbSet(const char * db_home, const uint64_t maxSize,
-		const bool hardMaximum, const float falsePositiveRate,
-		const std::size_t hashsize) {
+DbSet::DbSet(const utils::CryptoHash& hash, const char * db_home,
+		const uint64_t maxSize, const bool hardMaximum,
+		const float falsePositiveRate) :
+	setsync::Set(hash, maxSize, hardMaximum) {
 	this->env_ = new DbEnv(0);
 	if (db_home == NULL) {
 		this->db_temp_home = (char*) malloc(strlen("set_XXXXXX") + 1);
@@ -43,9 +44,9 @@ DbSet::DbSet(const char * db_home, const uint64_t maxSize,
 	this->triedb->set_flags(trie::DBTrie::getTableFlags());
 	this->triedb->open(NULL, "set", trie::DBTrie::getLogicalDatabaseName(),
 			trie::DBTrie::getTableType(), DB_CREATE, 0);
-	this->bf_ = new bloom::DBBloomFilter(this->bfdb, maxSize, hardMaximum,
-			falsePositiveRate, hashsize);
-	this->trie_ = new trie::DBTrie(this->triedb, hashsize);
+	this->bf_ = new bloom::DBBloomFilter(this->hash_, this->bfdb, maxSize,
+			hardMaximum, falsePositiveRate);
+	this->trie_ = new trie::DBTrie(this->hash_, this->triedb);
 }
 
 DbSet::~DbSet() {

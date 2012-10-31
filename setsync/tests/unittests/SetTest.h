@@ -21,6 +21,9 @@ CPPUNIT_TEST_SUITE( SetTest);
 	CPPUNIT_TEST( testMaximum);
 CPPUNIT_TEST_SUITE_END();
 
+private:
+	utils::CryptoHash hash;
+
 public:
 	void setUp(void);
 	void tearDown(void);

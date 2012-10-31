@@ -24,6 +24,7 @@ public:
 private:
 	trie::FSTrie * fstrie;
 	unsigned char * key_1;
+	utils::CryptoHash hash;
 
 protected:
 	void testAdding();

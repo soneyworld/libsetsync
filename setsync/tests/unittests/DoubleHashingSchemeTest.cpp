@@ -12,7 +12,6 @@
 #include <string.h>
 #include <math.h>
 #include <list>
-#include <setsync/sha1.h>
 #include <stdlib.h>
 #include <limits>
 
@@ -31,23 +30,23 @@ void DoubleHashingSchemeTest::testHash() {
 	bloom::DoubleHashingScheme ProviderA;
 	bloom::DoubleHashingScheme ProviderB;
 	bloom::DoubleHashingScheme ProviderC;
-	unsigned char cad1[SHA_DIGEST_LENGTH];
-	unsigned char cad2[SHA_DIGEST_LENGTH];
+	unsigned char cad1[hash.getHashSize()];
+	unsigned char cad2[hash.getHashSize()];
 	std::string s1 = "example";
 	std::string s2 = "sample";
 	for (std::size_t i = 0; i < 10; i++) {
 		CPPUNIT_ASSERT(
-				ProviderA.hash(cad1, SHA_DIGEST_LENGTH, i) == ProviderB.hash(
-						cad1, SHA_DIGEST_LENGTH, i));
+				ProviderA.hash(cad1, hash.getHashSize(), i) == ProviderB.hash(
+						cad1, hash.getHashSize(), i));
 		CPPUNIT_ASSERT(
-				ProviderA.hash(cad1, SHA_DIGEST_LENGTH, i) != ProviderC.hash(
-						cad2, SHA_DIGEST_LENGTH, i));
+				ProviderA.hash(cad1, hash.getHashSize(), i) != ProviderC.hash(
+						cad2, hash.getHashSize(), i));
 	}
 	// Check, if all generated hash functions are different
 	for (std::size_t i = 1; i < 10; i++) {
 		CPPUNIT_ASSERT(
-				ProviderA.hash(cad1, SHA_DIGEST_LENGTH, 0) != ProviderB.hash(
-						cad1, SHA_DIGEST_LENGTH, i));
+				ProviderA.hash(cad1, hash.getHashSize(), 0) != ProviderB.hash(
+						cad1, hash.getHashSize(), i));
 	}
 }
 
@@ -65,23 +64,23 @@ void DoubleHashingSchemeTest::testExtendedHash() {
 	bloom::ExtendedDoubleHashingScheme ProviderA;
 	bloom::ExtendedDoubleHashingScheme ProviderB;
 	bloom::ExtendedDoubleHashingScheme ProviderC;
-	unsigned char cad1[SHA_DIGEST_LENGTH];
-	unsigned char cad2[SHA_DIGEST_LENGTH];
+	unsigned char cad1[hash.getHashSize()];
+	unsigned char cad2[hash.getHashSize()];
 	std::string s1 = "example";
 	std::string s2 = "sample";
 	for (std::size_t i = 0; i < 10; i++) {
 		CPPUNIT_ASSERT(
-				ProviderA.hash(cad1, SHA_DIGEST_LENGTH, i) == ProviderB.hash(
-						cad1, SHA_DIGEST_LENGTH, i));
+				ProviderA.hash(cad1, hash.getHashSize(), i) == ProviderB.hash(
+						cad1, hash.getHashSize(), i));
 		CPPUNIT_ASSERT(
-				ProviderA.hash(cad1, SHA_DIGEST_LENGTH, i) != ProviderC.hash(
-						cad2, SHA_DIGEST_LENGTH, i));
+				ProviderA.hash(cad1, hash.getHashSize(), i) != ProviderC.hash(
+						cad2, hash.getHashSize(), i));
 	}
 	// Check, if all generated hash functions are different
 	for (std::size_t i = 1; i < 10; i++) {
 		CPPUNIT_ASSERT(
-				ProviderA.hash(cad1, SHA_DIGEST_LENGTH, 0) != ProviderB.hash(
-						cad1, SHA_DIGEST_LENGTH, i));
+				ProviderA.hash(cad1, hash.getHashSize(), 0) != ProviderB.hash(
+						cad1, hash.getHashSize(), i));
 	}
 }
 

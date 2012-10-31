@@ -51,11 +51,12 @@ DbBloomFilterSetting::DbBloomFilterSetting(void * toLoad) {
 	memcpy(&(this->hardMaximum), load + pos, sizeof(bool));
 }
 
-DBBloomFilter::DBBloomFilter(Db * db, const uint64_t maxNumberOfElements,
-		const bool hardMaximum, const float falsePositiveRate,
-		const std::size_t hashsize) :
-			FSBloomFilter(maxNumberOfElements, hardMaximum, falsePositiveRate,
-					hashsize), db_(db) {
+DBBloomFilter::DBBloomFilter(const utils::CryptoHash& hash, Db * db,
+		const uint64_t maxNumberOfElements, const bool hardMaximum,
+		const float falsePositiveRate) :
+			AbstractBloomFilter(hash),
+			FSBloomFilter(hash, maxNumberOfElements, hardMaximum,
+					falsePositiveRate), CountingBloomFilter(hash), db_(db) {
 	/*
 	 * Loading all set bloom filter bits from db
 	 */
@@ -65,12 +66,12 @@ DBBloomFilter::DBBloomFilter(Db * db, const uint64_t maxNumberOfElements,
 	// Loaded position in the bloom filter
 	uint64_t pos;
 	// Buffer
-	unsigned char hash[this->hashsize_];
+	unsigned char _hash[this->cryptoHashFunction_.getHashSize()];
 	Dbt key, data;
 	key.set_data(&pos);
 	key.set_size(sizeof(uint64_t));
-	data.set_data(hash);
-	data.set_ulen(this->hashsize_);
+	data.set_data(_hash);
+	data.set_ulen(this->cryptoHashFunction_.getHashSize());
 	data.set_flags(DB_DBT_USERMEM);
 	int ret;
 	// Iterate over the database, retrieving each key in turn.;
@@ -95,11 +96,13 @@ DBBloomFilter::DBBloomFilter(Db * db, const uint64_t maxNumberOfElements,
 
 void DBBloomFilter::add(const unsigned char * key) {
 	// take the given key as value for new db entries
-	Dbt value(const_cast<unsigned char*> (key), this->hashsize_);
+	Dbt value(const_cast<unsigned char*> (key),
+			this->cryptoHashFunction_.getHashSize());
 	// Insert the given key once per hash function
 	for (int i = 0; i < this->functionCount_; i++) {
 		// calculate the db key
-		uint64_t pos = this->hashFunction_->hash(key, this->hashsize_, i);
+		uint64_t pos = this->hashFunction_->hash(key,
+				this->cryptoHashFunction_.getHashSize(), i);
 		pos = pos % this->filterSize_;
 		Dbt db_key(&pos, sizeof(uint64_t));
 		// putting <pos/key> as key/value pair to berkeley db
@@ -115,7 +118,7 @@ void DBBloomFilter::add(const unsigned char * key) {
 
 void DBBloomFilter::addAll(const unsigned char* keys, const std::size_t count) {
 	for (std::size_t i = 0; i < count; i++) {
-		add(keys + this->hashsize_ * i);
+		add(keys + this->cryptoHashFunction_.getHashSize() * i);
 	}
 }
 
@@ -131,13 +134,13 @@ bool DBBloomFilter::remove(const unsigned char * key) {
 	// cursor to iterate over multiple saved crypto keys
 	Dbc *cursorp;
 	// value buffer for found crypto keys
-	unsigned char hash[this->hashsize_];
+	unsigned char hash[this->cryptoHashFunction_.getHashSize()];
 	// position in the bloom filter
 	uint64_t pos;
 	uint64_t temphash;
 	Dbt db_key, db_data;
 	db_data.set_data(hash);
-	db_data.set_ulen(this->hashsize_);
+	db_data.set_ulen(this->cryptoHashFunction_.getHashSize());
 	db_data.set_flags(DB_DBT_USERMEM);
 	// Getting crypto key entries for all hash functions
 	for (int func = 0; func < functionCount_; func++) {
@@ -147,7 +150,8 @@ bool DBBloomFilter::remove(const unsigned char * key) {
 		bool other_hash_found = false;
 		// create new cursor
 		this->db_->cursor(NULL, &cursorp, 0);
-		temphash = this->hashFunction_->hash(key, this->hashsize_, func);
+		temphash = this->hashFunction_->hash(key,
+				this->cryptoHashFunction_.getHashSize(), func);
 		pos = temphash % this->filterSize_;
 		db_key.set_data(&pos);
 		db_key.set_size(sizeof(uint64_t));
@@ -155,8 +159,9 @@ bool DBBloomFilter::remove(const unsigned char * key) {
 		ret = cursorp->get(&db_key, &db_data, DB_SET);
 		if (ret == 0) {
 			// Prove, if the returned crypto key is equal to the given key
-			memcpy(hash, db_data.get_data(), this->hashsize_);
-			if (memcmp(key, hash, this->hashsize_) == 0) {
+			memcpy(hash, db_data.get_data(),
+					this->cryptoHashFunction_.getHashSize());
+			if (memcmp(key, hash, this->cryptoHashFunction_.getHashSize()) == 0) {
 				hash_found = true;
 				// Delete this entry from db
 				cursorp->del(0);
@@ -171,8 +176,10 @@ bool DBBloomFilter::remove(const unsigned char * key) {
 				// Iterating over the set to find the correct entry
 				while ((ret = cursorp->get(&db_key, &db_data, DB_NEXT_DUP))
 						== 0) {
-					memcpy(hash, db_data.get_data(), this->hashsize_);
-					if (memcmp(key, hash, this->hashsize_) == 0) {
+					memcpy(hash, db_data.get_data(),
+							this->cryptoHashFunction_.getHashSize());
+					if (memcmp(key, hash,
+							this->cryptoHashFunction_.getHashSize()) == 0) {
 						// correct crypto key found
 						hash_found = true;
 						cursorp->del(0);
@@ -233,12 +240,12 @@ void DBBloomFilter::diff(const unsigned char * externalBF,
 				if (pos > this->filterSize_)
 					continue;
 				// Buffer
-				unsigned char hash[this->hashsize_];
+				unsigned char hash[this->cryptoHashFunction_.getHashSize()];
 				Dbt key, data;
 				key.set_data(&pos);
 				key.set_size(sizeof(uint64_t));
 				data.set_data(hash);
-				data.set_ulen(this->hashsize_);
+				data.set_ulen(this->cryptoHashFunction_.getHashSize());
 				data.set_flags(DB_DBT_USERMEM);
 				// Request first entry
 				int ret = cursorp->get(&key, &data, DB_SET);
@@ -246,12 +253,14 @@ void DBBloomFilter::diff(const unsigned char * externalBF,
 					cursorp->close();
 					throw DbException(ret);
 				} else {
-					handler((unsigned char*) data.get_data(), this->hashsize_);
+					handler((unsigned char*) data.get_data(),
+							this->cryptoHashFunction_.getHashSize());
 				}
 				// Iterate over duplicated entries
 				while ((ret = cursorp->get(&key, &data, DB_NEXT_DUP)) == 0) {
 					// Call handler for the found hash
-					handler((unsigned char*) data.get_data(), this->hashsize_);
+					handler((unsigned char*) data.get_data(),
+							this->cryptoHashFunction_.getHashSize());
 				}
 				if (ret != DB_NOTFOUND) {
 					// ret should be DB_NOTFOUND upon exiting the loop.

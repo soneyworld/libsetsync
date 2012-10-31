@@ -17,7 +17,7 @@ void DbSetTest::tearDown(void) {
 }
 
 void DbSetTest::testAddingAndErasingElements() {
-	DbSet set1;
+	DbSet set1(hash);
 	CPPUNIT_ASSERT(set1.getSize() == 0);
 	set1.insert(key_1);
 	CPPUNIT_ASSERT(set1.getSize() == 1);
@@ -28,7 +28,7 @@ void DbSetTest::testAddingAndErasingElements() {
 }
 
 void DbSetTest::testAddingAndCleaningElements() {
-	DbSet set1;
+	DbSet set1(hash);
 	CPPUNIT_ASSERT(set1.getSize() == 0);
 	set1.insert(key_1);
 	CPPUNIT_ASSERT(set1.getSize() == 1);
@@ -36,7 +36,7 @@ void DbSetTest::testAddingAndCleaningElements() {
 	CPPUNIT_ASSERT(set1.getSize() == 0);
 }
 void DbSetTest::testAdding() {
-	DbSet set1(NULL, 10, true, 0.1);
+	DbSet set1(hash, NULL, 10, true, 0.1);
 	CPPUNIT_ASSERT(set1.insert("bla1"));
 	CPPUNIT_ASSERT(set1.insert("bla2"));
 	CPPUNIT_ASSERT(set1.insert("bla3"));
@@ -49,7 +49,7 @@ void DbSetTest::testAdding() {
 	CPPUNIT_ASSERT(!set1.insert("bla5"));
 }
 void DbSetTest::testSize() {
-	DbSet set1(NULL,10, true, 0.1);
+	DbSet set1(hash,NULL,10, true, 0.1);
 	CPPUNIT_ASSERT(set1.getSize() == 0);
 	CPPUNIT_ASSERT(set1.insert("bla1"));
 	CPPUNIT_ASSERT(set1.getSize() == 1);
@@ -57,7 +57,7 @@ void DbSetTest::testSize() {
 	CPPUNIT_ASSERT(set1.getSize() == 1);
 }
 void DbSetTest::testErasing() {
-	DbSet set1(NULL,10, true, 0.1);
+	DbSet set1(hash,NULL,10, true, 0.1);
 	CPPUNIT_ASSERT(!set1.erase("bla1"));
 	CPPUNIT_ASSERT(set1.insert("bla1"));
 	CPPUNIT_ASSERT(set1.erase("bla1"));

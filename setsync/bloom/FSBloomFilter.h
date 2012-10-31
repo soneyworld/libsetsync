@@ -20,10 +20,10 @@ public:
 	 * \param falsePositiveRate can be set to any value ]0,1[.
 	 * \param hashsize sets the size of the inserted keys. 20 bytes for SHA1 for example.
 	 */
-	FSBloomFilter(const uint64_t maxNumberOfElements = 10000,
+	FSBloomFilter(const utils::CryptoHash& hash,
+			const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
-			const float falsePositiveRate = 0.001,
-			const std::size_t hashsize = SHA_DIGEST_LENGTH);
+			const float falsePositiveRate = 0.001);
 	/**
 	 * \param hashFunction is the Function which should be used by the BloomFilter
 	 * \param maxNumberOfElements which should be represented by the bloom filter
@@ -31,11 +31,11 @@ public:
 	 * \param falsePositiveRate can be set to any value ]0,1[.
 	 * \param hashsize sets the size of the inserted keys. 20 bytes for SHA1 for example.
 	 */
-	FSBloomFilter(const std::string hashFunction,
+	FSBloomFilter(const utils::CryptoHash& hash,
+			const std::string hashFunction,
 			const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
-			const float falsePositiveRate = 0.001,
-			const std::size_t hashsize = SHA_DIGEST_LENGTH);
+			const float falsePositiveRate = 0.001);
 	virtual ~FSBloomFilter();
 	virtual void load(std::istream &in, const uint64_t numberOfElements);
 	virtual uint64_t save(std::ostream &out);

@@ -7,13 +7,13 @@
 #include "SetTest.h"
 namespace setsync {
 void SetTest::testInsert() {
-	setsync::Set set;
+	setsync::Set set(hash);
 	CPPUNIT_ASSERT(set.getSize() == 0);
 	CPPUNIT_ASSERT(set.insert("hallo"));
 	CPPUNIT_ASSERT(set.getSize() == 1);
 }
 void SetTest::testErase() {
-	setsync::Set set;
+	setsync::Set set(hash);
 	CPPUNIT_ASSERT(set.getSize() == 0);
 	CPPUNIT_ASSERT(!set.erase("hallo"));
 	CPPUNIT_ASSERT(set.getSize() == 0);
@@ -24,7 +24,7 @@ void SetTest::testErase() {
 	CPPUNIT_ASSERT(!set.erase("hallo"));
 }
 void SetTest::testClear() {
-	setsync::Set set;
+	setsync::Set set(hash);
 	CPPUNIT_ASSERT(set.getSize() == 0);
 	CPPUNIT_ASSERT(set.insert("hallo"));
 	CPPUNIT_ASSERT(set.getSize() == 1);
@@ -33,7 +33,7 @@ void SetTest::testClear() {
 }
 
 void SetTest::testFind() {
-	setsync::Set set;
+	setsync::Set set(hash);
 	CPPUNIT_ASSERT(set.getSize() == 0);
 	CPPUNIT_ASSERT(!set.find("hallo"));
 	CPPUNIT_ASSERT(set.insert("hallo"));
@@ -45,7 +45,7 @@ void SetTest::testFind() {
 }
 
 void SetTest::testMaximum() {
-	setsync::Set set(5, true);
+	setsync::Set set(hash, 5, true);
 	CPPUNIT_ASSERT(set.getSize() == 0);
 	CPPUNIT_ASSERT(set.insert("1"));
 	CPPUNIT_ASSERT(set.getSize() == 1);
