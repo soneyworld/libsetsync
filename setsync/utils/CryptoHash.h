@@ -11,7 +11,7 @@
 #ifdef HAVE_OPENSSL
 #include <openssl/evp.h>
 #else
-
+#include "md.h"
 #endif
 namespace utils{
 
@@ -20,7 +20,7 @@ private:
 #ifdef HAVE_OPENSSL
 	const EVP_MD *digit;
 #else
-	std::size_t hashSize;
+	const md_info_t *digit;
 #endif
 	int hash(unsigned char * target_md, const char * str) const;
 	int hash(unsigned char * target_md, const unsigned char * data, const std::size_t length) const;

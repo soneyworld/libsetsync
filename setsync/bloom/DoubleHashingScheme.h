@@ -36,7 +36,7 @@ public:
 	/**
 	 *  Default constructor takes the length of the given cryptographically input key
 	 */
-	DoubleHashingScheme(const std::size_t hashsize = utils::CryptoHash::getDefaultDigitLength());
+	DoubleHashingScheme(const std::size_t hashsize);
 	/// Default destructor
 	virtual ~DoubleHashingScheme();
 	/**
@@ -77,7 +77,7 @@ public:
 	/**
 	 *  Default constructor takes the length of the given cryptographically input key
 	 */
-	ExtendedDoubleHashingScheme(const std::size_t hashsize = utils::CryptoHash::getDefaultDigitLength());
+	ExtendedDoubleHashingScheme(const std::size_t hashsize);
 	/// Default destructor
 	virtual ~ExtendedDoubleHashingScheme();
 	virtual uint64_t hash(const unsigned char * input,

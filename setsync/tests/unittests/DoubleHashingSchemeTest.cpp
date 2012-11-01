@@ -21,15 +21,15 @@ namespace bloom {
 /*=== BEGIN tests for class 'DoubleHashingScheme' ===*/
 
 void DoubleHashingSchemeTest::testCount() {
-	bloom::DoubleHashingScheme hashProvider;
+	bloom::DoubleHashingScheme hashProvider(hash.getHashSize());
 	CPPUNIT_ASSERT(std::numeric_limits<size_t>::max() == hashProvider.count());
 
 }
 
 void DoubleHashingSchemeTest::testHash() {
-	bloom::DoubleHashingScheme ProviderA;
-	bloom::DoubleHashingScheme ProviderB;
-	bloom::DoubleHashingScheme ProviderC;
+	bloom::DoubleHashingScheme ProviderA(hash.getHashSize());
+	bloom::DoubleHashingScheme ProviderB(hash.getHashSize());
+	bloom::DoubleHashingScheme ProviderC(hash.getHashSize());
 	unsigned char cad1[hash.getHashSize()];
 	unsigned char cad2[hash.getHashSize()];
 	std::string s1 = "example";
@@ -55,15 +55,15 @@ void DoubleHashingSchemeTest::testHash() {
 /*=== BEGIN tests for class 'ExtendedDoubleHashingScheme' ===*/
 
 void DoubleHashingSchemeTest::testExtendedCount() {
-	bloom::ExtendedDoubleHashingScheme hashProvider;
+	bloom::ExtendedDoubleHashingScheme hashProvider(hash.getHashSize());
 	CPPUNIT_ASSERT(std::numeric_limits<size_t>::max() == hashProvider.count());
 
 }
 
 void DoubleHashingSchemeTest::testExtendedHash() {
-	bloom::ExtendedDoubleHashingScheme ProviderA;
-	bloom::ExtendedDoubleHashingScheme ProviderB;
-	bloom::ExtendedDoubleHashingScheme ProviderC;
+	bloom::ExtendedDoubleHashingScheme ProviderA(hash.getHashSize());
+	bloom::ExtendedDoubleHashingScheme ProviderB(hash.getHashSize());
+	bloom::ExtendedDoubleHashingScheme ProviderC(hash.getHashSize());
 	unsigned char cad1[hash.getHashSize()];
 	unsigned char cad2[hash.getHashSize()];
 	std::string s1 = "example";

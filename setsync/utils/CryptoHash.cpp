@@ -16,7 +16,10 @@ CryptoHash::CryptoHash(const char * name) {
 		throw "Crypto hash algorithm not found";
 	}
 #else
-
+	this->digit = md_info_from_string(name);
+	if (this->digit == NULL) {
+		throw "Crypto hash algorithm not found";
+	}
 #endif
 }
 
@@ -24,13 +27,13 @@ const std::size_t CryptoHash::getHashSize() const {
 #ifdef HAVE_OPENSSL
 	return this->digit->md_size;
 #else
-	return this->hashSize;
+	return this->digit->size;
 #endif
 }
 
 int CryptoHash::hash(unsigned char * target_md, const char *str) const {
-	int result = 0;
 #ifdef HAVE_OPENSSL
+	int result = 0;
 	unsigned int md_len;
 	EVP_MD_CTX mdctx;
 	EVP_MD_CTX_init(&mdctx);
@@ -40,14 +43,14 @@ int CryptoHash::hash(unsigned char * target_md, const char *str) const {
 	result = EVP_MD_CTX_cleanup(&mdctx);
 	return result == 1;
 #else
-
+	return md(this->digit, (const unsigned char*) str, strlen(str), target_md);
 #endif
 }
 
 int CryptoHash::hash(unsigned char * target_md, const unsigned char *data,
 		const size_t length) const {
-	int result = 0;
 #ifdef HAVE_OPENSSL
+	int result = 0;
 	unsigned int md_len;
 	EVP_MD_CTX mdctx;
 	EVP_MD_CTX_init(&mdctx);
@@ -57,13 +60,13 @@ int CryptoHash::hash(unsigned char * target_md, const unsigned char *data,
 	result = EVP_MD_CTX_cleanup(&mdctx);
 	return result == 1;
 #else
-
+	return md(this->digit, data, length, target_md);
 #endif
 }
 
 int CryptoHash::hash(unsigned char * target_md, const std::string& str) const {
-	int result = 0;
 #ifdef HAVE_OPENSSL
+	int result = 0;
 	unsigned int md_len;
 	EVP_MD_CTX mdctx;
 	EVP_MD_CTX_init(&mdctx);
@@ -73,7 +76,8 @@ int CryptoHash::hash(unsigned char * target_md, const std::string& str) const {
 	result = EVP_MD_CTX_cleanup(&mdctx);
 	return result == 1;
 #else
-
+	return md(this->digit, (const unsigned char*) str.c_str(), str.size(),
+			target_md);
 #endif
 }
 
@@ -92,12 +96,20 @@ int CryptoHash::hash(unsigned char * target_md, std::istream& in) const {
 	result = EVP_MD_CTX_cleanup(&mdctx);
 	return result == 1;
 #else
-
+	md_context_t mdctx;
+	result = md_init_ctx(&mdctx, digit);
+	result = md_starts(&mdctx);
+	char ch;
+	while (in.get(ch) && result == 1) {
+		result = md_update(&mdctx,(unsigned char *) &ch, 1);
+	}
+	result = md_finish(&mdctx, target_md);
+	result = md_free_ctx(&mdctx);
+	return result;
 #endif
 }
 
 CryptoHash::~CryptoHash() {
-
 }
 
 std::size_t CryptoHash::getDefaultDigitLength() {
@@ -111,8 +123,8 @@ std::size_t CryptoHash::getDefaultDigitLength() {
 int CryptoHash::operator()(unsigned char * target_md, const char * str) const {
 	return hash(target_md, str);
 }
-int CryptoHash::operator()(unsigned char * target_md, const unsigned char * data,
-		const std::size_t length) const {
+int CryptoHash::operator()(unsigned char * target_md,
+		const unsigned char * data, const std::size_t length) const {
 	return hash(target_md, data, length);
 }
 int CryptoHash::operator()(unsigned char * target_md, const std::string& str) const {

@@ -38,31 +38,19 @@
 
 static const int supported_digests[] = {
 
-#if defined(POLARSSL_MD2_C)
         POLARSSL_MD_MD2,
-#endif
 
-#if defined(POLARSSL_MD4_C)
         POLARSSL_MD_MD4,
-#endif
 
-#if defined(POLARSSL_MD5_C)
         POLARSSL_MD_MD5,
-#endif
 
-#if defined(POLARSSL_SHA1_C)
         POLARSSL_MD_SHA1,
-#endif
 
-#if defined(POLARSSL_SHA2_C)
         POLARSSL_MD_SHA224,
         POLARSSL_MD_SHA256,
-#endif
 
-#if defined(POLARSSL_SHA4_C)
         POLARSSL_MD_SHA384,
         POLARSSL_MD_SHA512,
-#endif
 
         0
 };
@@ -78,34 +66,22 @@ const md_info_t *md_info_from_string( const char *md_name )
         return NULL;
 
     /* Get the appropriate digest information */
-#if defined(POLARSSL_MD2_C)
     if( !strcasecmp( "MD2", md_name ) )
         return md_info_from_type( POLARSSL_MD_MD2 );
-#endif
-#if defined(POLARSSL_MD4_C)
     if( !strcasecmp( "MD4", md_name ) )
         return md_info_from_type( POLARSSL_MD_MD4 );
-#endif
-#if defined(POLARSSL_MD5_C)
     if( !strcasecmp( "MD5", md_name ) )
         return md_info_from_type( POLARSSL_MD_MD5 );
-#endif
-#if defined(POLARSSL_SHA1_C)
     if( !strcasecmp( "SHA1", md_name ) || !strcasecmp( "SHA", md_name ) )
         return md_info_from_type( POLARSSL_MD_SHA1 );
-#endif
-#if defined(POLARSSL_SHA2_C)
     if( !strcasecmp( "SHA224", md_name ) )
         return md_info_from_type( POLARSSL_MD_SHA224 );
     if( !strcasecmp( "SHA256", md_name ) )
         return md_info_from_type( POLARSSL_MD_SHA256 );
-#endif
-#if defined(POLARSSL_SHA4_C)
     if( !strcasecmp( "SHA384", md_name ) )
         return md_info_from_type( POLARSSL_MD_SHA384 );
     if( !strcasecmp( "SHA512", md_name ) )
         return md_info_from_type( POLARSSL_MD_SHA512 );
-#endif
     return NULL;
 }
 
@@ -113,34 +89,22 @@ const md_info_t *md_info_from_type( md_type_t md_type )
 {
     switch( md_type )
     {
-#if defined(POLARSSL_MD2_C)
         case POLARSSL_MD_MD2:
             return &md2_info;
-#endif
-#if defined(POLARSSL_MD4_C)
         case POLARSSL_MD_MD4:
             return &md4_info;
-#endif
-#if defined(POLARSSL_MD5_C)
         case POLARSSL_MD_MD5:
             return &md5_info;
-#endif
-#if defined(POLARSSL_SHA1_C)
         case POLARSSL_MD_SHA1:
             return &sha1_info;
-#endif
-#if defined(POLARSSL_SHA2_C)
         case POLARSSL_MD_SHA224:
             return &sha224_info;
         case POLARSSL_MD_SHA256:
             return &sha256_info;
-#endif
-#if defined(POLARSSL_SHA4_C)
         case POLARSSL_MD_SHA384:
             return &sha384_info;
         case POLARSSL_MD_SHA512:
             return &sha512_info;
-#endif
         default:
             return NULL;
     }
