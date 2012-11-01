@@ -27,7 +27,7 @@ void SQLiteIndexTest::testAddingAndCleaningElements() {
 	unsigned char md[hash.getHashSize()];
 	hash(md,"hello");
 	for (std::size_t i = 0; i < f.count(); i++) {
-		this->index->insert(f.hash(md, 20, i), md, 20);
+		this->index->insert(f(md, 20, i), md, 20);
 	}
 }
 void SQLiteIndexTest::testAddingAndFindingElements() {

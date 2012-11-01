@@ -5,6 +5,7 @@
  */
 
 #include "SQLiteTest.h"
+#include <setsync/utils/CryptoHash.h>
 
 SQLiteTest::SQLiteTest() {
 	// TODO Auto-generated constructor stub
@@ -25,15 +26,15 @@ void SQLiteTest::testInMemory() {
 	seconds = time(NULL);
 	time_t duration = 0;
 	time_t iduration = 0;
-	bloom::DoubleHashingScheme function;
+	utils::CryptoHash chash;
+	bloom::DoubleHashingScheme function(chash.getHashSize());
 	for (int i = 0; i < LOOP_ITERATIONS; i++) {
 		SHA1Generator generator(i * ITEMS_PER_LOOPS,
 				i * ITEMS_PER_LOOPS + ITEMS_PER_LOOPS);
 		generator.run();
 		for (uint64_t k = 0; k < ITEMS_PER_LOOPS; k++) {
 			for (int j = 0; j < function.count(); j++) {
-				uint64_t hash =
-						function.hash(generator.array + (k * 20), 20, j);
+				uint64_t hash = function(generator.array + (k * 20), 20, j);
 				index.insert(hash, generator.array + (k * 20), 20);
 				counter++;
 				icounter++;
@@ -67,15 +68,15 @@ void SQLiteTest::testOnFS() {
 	seconds = time(NULL);
 	time_t duration = 0;
 	time_t iduration = 0;
-	bloom::DoubleHashingScheme function;
+	utils::CryptoHash chash;
+	bloom::DoubleHashingScheme function(chash.getHashSize());
 	for (int i = 0; i < LOOP_ITERATIONS; i++) {
 		SHA1Generator generator(i * ITEMS_PER_LOOPS,
 				i * ITEMS_PER_LOOPS + ITEMS_PER_LOOPS);
 		generator.run();
 		for (uint64_t k = 0; k < ITEMS_PER_LOOPS; k++) {
 			for (int j = 0; j < function.count(); j++) {
-				uint64_t hash =
-						function.hash(generator.array + (k * 20), 20, j);
+				uint64_t hash = function(generator.array + (k * 20), 20, j);
 				index.insert(hash, generator.array + (k * 20), 20);
 				counter++;
 				icounter++;

@@ -6,6 +6,7 @@
 
 #include "DoubleHashingScheme.h"
 #include <limits>
+#include <string.h>
 
 namespace bloom {
 
