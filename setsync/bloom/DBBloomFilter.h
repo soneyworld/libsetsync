@@ -75,6 +75,7 @@ class DBBloomFilter: public CountingBloomFilter,
 		public FSBloomFilter,
 		public ComparableBloomFilterInterface,
 		public berkeley::BerkeleyDBTableUserInferface {
+	friend class DBBloomFilterTest;
 private:
 	/// Given Berkeley DB pointer
 	Db * db_;
@@ -96,7 +97,8 @@ public:
 	 * \param hardMaximum will be passed to FSBloomFilter
 	 * \param falsePositiveRate will be passed to FSBloomFilter
 	 */
-	DBBloomFilter(const utils::CryptoHash& hash, Db * db, const uint64_t maxNumberOfElements = 10000,
+	DBBloomFilter(const utils::CryptoHash& hash, Db * db,
+			const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
 			const float falsePositiveRate = 0.001);
 	/**
@@ -123,8 +125,9 @@ public:
 	/**
 	 *
 	 */
-	virtual void diff(const unsigned char * externalBF, const std::size_t length,
-				const std::size_t offset, setsync::AbstractDiffHandler& handler) const;
+	virtual void diff(const unsigned char * externalBF,
+			const std::size_t length, const std::size_t offset,
+			setsync::AbstractDiffHandler& handler) const;
 	/**
 	 * Default destructor
 	 */
