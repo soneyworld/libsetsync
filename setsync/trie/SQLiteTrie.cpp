@@ -8,7 +8,7 @@
 
 namespace trie {
 
-SQLiteTrie::SQLiteTrie(){
+SQLiteTrie::SQLiteTrie(const utils::CryptoHash& hash): Trie(hash){
 
 }
 

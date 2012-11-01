@@ -18,7 +18,7 @@ class SQLiteIndexTest: public CPPUNIT_NS::TestCase {
 private:
 	sqlite::SQLiteDatabase * db;
 	sqlite::SQLiteIndex * index;
-
+	utils::CryptoHash hash;
 public:
 	void setUp(void);
 	void tearDown(void);

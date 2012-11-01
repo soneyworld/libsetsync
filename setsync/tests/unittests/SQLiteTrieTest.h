@@ -7,7 +7,7 @@
 #ifndef SQLITETRIETEST_H_
 #define SQLITETRIETEST_H_
 #include <cppunit/extensions/HelperMacros.h>
-#include "setsync/trie/SQLiteTrie.h"
+#include <setsync/trie/SQLiteTrie.h>
 
 namespace trie {
 class SQLiteTrieTest: public CPPUNIT_NS::TestCase {
@@ -22,6 +22,7 @@ public:
 private:
 	trie::SQLiteTrie * sqltrie;
 	unsigned char * key_1;
+	utils::CryptoHash hash;
 protected:
 	void testAddingAndErasingElements();
 	void testAddingAndCleaningElements();

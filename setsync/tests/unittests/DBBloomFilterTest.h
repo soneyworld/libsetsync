@@ -7,6 +7,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <setsync/bloom/DBBloomFilter.h>
+#include <setsync/utils/CryptoHash.h>
 
 #ifndef DBBLOOMFILTERTEST_H
 #define DBBLOOMFILTERTEST_H
@@ -16,6 +17,7 @@ class DBBloomFilterTest: public CppUnit::TestFixture {
 private:
 	Db * db1;
 	Db * db2;
+	utils::CryptoHash hashFunction_;
 public:
 	/*=== BEGIN tests for class 'DBBloomFilter' ===*/
 	void testConstructor();

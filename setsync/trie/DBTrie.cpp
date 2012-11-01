@@ -58,9 +58,13 @@ DBValue::DBValue(const DbNode& toSave) :
 	this->prefix_mask = toSave.prefix_mask;
 }
 
-DBValue::DBValue(void * toLoad, const std::size_t hashsize) : hashsize(hashsize){
+DBValue::DBValue(void * toLoad, const std::size_t hashsize) :
+	hashsize(hashsize) {
 	unsigned char * load = (unsigned char*) toLoad;
 	this->parent = (unsigned char *) malloc(4 * hashsize);
+	this->smaller = this->parent + hashsize;
+	this->larger = this->smaller + hashsize;
+	this->prefix = this->larger + hashsize;
 	memcpy(this->parent, load, hashsize);
 	memcpy(this->smaller, load + hashsize, hashsize);
 	memcpy(this->larger, load + 2 * hashsize, hashsize);
@@ -87,8 +91,9 @@ bool DBValue::hasParent() const {
 
 const char DbRootNode::root_name[] = "root";
 
-DbRootNode::DbRootNode(const utils::CryptoHash& hashfunction, Db * db) :
-	hashfunction_(hashfunction), db_(db) {
+DbRootNode::DbRootNode(const DBTrie& trie,
+		const utils::CryptoHash& hashfunction, Db * db) :
+	trie_(trie), hashfunction_(hashfunction), db_(db) {
 
 }
 
@@ -103,7 +108,7 @@ DbNode DbRootNode::get() const {
 		throw DbException(ret);
 	}
 	memcpy(hash, data.get_data(), hashfunction_.getHashSize());
-	return DbNode(this->hashfunction_, this->db_, hash);
+	return DbNode(this->trie_, this->hashfunction_, this->db_, hash);
 }
 
 void DbRootNode::set(const unsigned char * hash) {
@@ -123,10 +128,10 @@ void DbRootNode::del() {
 	}
 }
 
-DbNode::DbNode(const utils::CryptoHash& hashfunction, Db * db,
-		const unsigned char * hash, bool newone) :
-	db_(db), hashfunction_(hashfunction) {
-	this->hash = (unsigned char*) malloc(hashfunction_.getHashSize()*5);
+DbNode::DbNode(const DBTrie& trie, const utils::CryptoHash& hashfunction,
+		Db * db, const unsigned char * hash, bool newone) :
+	trie_(trie), db_(db), hashfunction_(hashfunction) {
+	this->hash = (unsigned char*) malloc(hashfunction_.getHashSize() * 5);
 	this->smaller = this->hash + hashfunction_.getHashSize();
 	this->larger = this->smaller + hashfunction_.getHashSize();
 	this->parent = this->larger + hashfunction_.getHashSize();
@@ -139,7 +144,8 @@ DbNode::DbNode(const utils::CryptoHash& hashfunction, Db * db,
 		this->prefix_mask = 8 * hashfunction_.getHashSize();
 		this->dirty_ = false;
 	} else {
-		unsigned char result[DBValue::getBufferSize(hashfunction_.getHashSize())];
+		unsigned char
+				result[DBValue::getBufferSize(hashfunction_.getHashSize())];
 		Dbt key(this->hash, hashfunction_.getHashSize());
 		Dbt data;
 		data.set_data(&result);
@@ -164,7 +170,8 @@ DbNode::DbNode(const utils::CryptoHash& hashfunction, Db * db,
 }
 
 bool DbNode::toDb() {
-	unsigned char buffer[DBValue::getBufferSize(this->hashfunction_.getHashSize())];
+	unsigned char buffer[DBValue::getBufferSize(
+			this->hashfunction_.getHashSize())];
 	DBValue toSave(*this);
 	toSave.marshall(buffer);
 	Dbt key(this->hash, hashfunction_.getHashSize());
@@ -335,7 +342,7 @@ bool DbNode::insert(DbNode& node, bool performHash) {
 			//			oldparent.deleteFromDb();
 		}
 		// Set the new root of the trie
-		DbRootNode(this->hashfunction_, this->db_).set(roothash);
+		DbRootNode(this->trie_, this->hashfunction_, this->db_).set(roothash);
 		// Now delete all old and replaced parents
 		std::vector<DbNode>::const_iterator iter;
 		for (iter = toBeDeleted.begin(); iter != toBeDeleted.end(); iter++) {
@@ -355,7 +362,8 @@ bool DbNode::insert(DbNode& node, bool performHash) {
 			}
 			parent.toDb();
 		} else {
-			DbRootNode(this->hashfunction_, this->db_).set(intermediate.hash);
+			DbRootNode(this->trie_, this->hashfunction_, this->db_).set(
+					intermediate.hash);
 		}
 		intermediate.toDb();
 	}
@@ -426,8 +434,9 @@ bool DbNode::operator >(const DbNode& other) const {
 DbNode::DbNode(const DbNode& other) :
 	dirty_(other.dirty_), hasChildren_(other.hasChildren_),
 			hasParent_(other.hasParent_), prefix_mask(other.prefix_mask),
-			db_(other.db_), hashfunction_(other.hashfunction_) {
-	this->hash = (unsigned char*) malloc(hashfunction_.getHashSize()*5);
+			db_(other.db_), hashfunction_(other.hashfunction_),
+			trie_(other.trie_) {
+	this->hash = (unsigned char*) malloc(hashfunction_.getHashSize() * 5);
 	this->smaller = this->hash + hashfunction_.getHashSize();
 	this->larger = this->smaller + hashfunction_.getHashSize();
 	this->parent = this->larger + hashfunction_.getHashSize();
@@ -445,7 +454,7 @@ DbNode& DbNode::operator=(const DbNode& rhs) {
 	this->hasChildren_ = rhs.hasChildren_;
 	this->hasParent_ = rhs.hasParent_;
 	this->prefix_mask = rhs.prefix_mask;
-	this->hash = (unsigned char*) malloc(hashfunction_.getHashSize()*5);
+	this->hash = (unsigned char*) malloc(hashfunction_.getHashSize() * 5);
 	this->smaller = this->hash + hashfunction_.getHashSize();
 	this->larger = this->smaller + hashfunction_.getHashSize();
 	this->parent = this->larger + hashfunction_.getHashSize();
@@ -460,7 +469,7 @@ DbNode& DbNode::operator=(const DbNode& rhs) {
 
 DbNode DbNode::getSmaller() const {
 	if (hasChildren_) {
-		DbNode result = DbNode(this->hashfunction_, this->db_, this->smaller);
+		DbNode result = DbNode(this->trie_, this->hashfunction_, this->db_, this->smaller);
 		return result;
 	} else {
 		throw DbTrieException("THERE ARE NO CHILDREN");
@@ -468,7 +477,7 @@ DbNode DbNode::getSmaller() const {
 }
 DbNode DbNode::getLarger() const {
 	if (hasChildren_) {
-		DbNode result = DbNode(this->hashfunction_, this->db_, this->larger);
+		DbNode result = DbNode(this->trie_, this->hashfunction_, this->db_, this->larger);
 		return result;
 	} else {
 		throw DbTrieException("THERE ARE NO CHILDREN");
@@ -476,7 +485,7 @@ DbNode DbNode::getLarger() const {
 }
 DbNode DbNode::getParent() const {
 	if (hasParent_) {
-		DbNode result = DbNode(this->hashfunction_, this->db_, this->parent);
+		DbNode result = DbNode(this->trie_, this->hashfunction_, this->db_, this->parent);
 		return result;
 	} else {
 		throw DbTrieException("THERE IS NO PARENT");
@@ -484,23 +493,23 @@ DbNode DbNode::getParent() const {
 }
 
 bool DbNode::insert(const unsigned char * hash, bool performHash) {
-	DbNode newnode = DbNode(this->hashfunction_, this->db_, hash, true);
+	DbNode newnode = DbNode(this->trie_, this->hashfunction_, this->db_, hash, true);
 	return this->insert(newnode, performHash);
 }
 
 bool DbNode::erase(const unsigned char * hash, bool performHash) {
 	try {
-		DbNode toBeDeleted(this->hashfunction_, this->db_, hash);
+		DbNode toBeDeleted(this->trie_, this->hashfunction_, this->db_, hash);
 		if (toBeDeleted.hasChildren_)
 			throw DbTrieException("This node is not a leaf");
 		if (!toBeDeleted.hasParent_) {
 			// Root node should be deleted
-			DbRootNode root(this->hashfunction_, this->db_);
+			DbRootNode root(this->trie_, this->hashfunction_, this->db_);
 			root.del();
 			toBeDeleted.deleteFromDb();
 		} else {
 			DbNode parent = toBeDeleted.getParent();
-			DbRootNode root(this->hashfunction_, this->db_);
+			DbRootNode root(this->trie_, this->hashfunction_, this->db_);
 			if (!parent.hasParent_) {
 				// Other Child has to become the new root
 				DbNode childOfParent(*this);
@@ -615,11 +624,11 @@ bool DbNode::erase(const unsigned char * hash, bool performHash) {
 
 void DbNode::updateHash(void) {
 	if (hasChildren_) {
-		memcpy(DbNode::hashscratch, this->smaller,
+		memcpy(trie_.hashscratch, this->smaller,
 				this->hashfunction_.getHashSize());
-		memcpy(DbNode::hashscratch + this->hashfunction_.getHashSize(),
+		memcpy(trie_.hashscratch + this->hashfunction_.getHashSize(),
 				this->larger, this->hashfunction_.getHashSize());
-		this->hashfunction_(this->hash, DbNode::hashscratch,
+		this->hashfunction_(this->hash, trie_.hashscratch,
 				2 * this->hashfunction_.getHashSize());
 		this->dirty_ = false;
 	}
@@ -707,13 +716,11 @@ std::string DbRootNode::toString() const {
 }
 
 DBTrie::DBTrie(const utils::CryptoHash& hash, Db * db) :
-	Trie(hash), root_(hash, db), db_(db) {
+	Trie(hash), root_(*this, hash, db), db_(db) {
 	// Loading root, if available
-	this->hashscratch = (unsigned char* ) malloc(this->hash_.getHashSize()*2);
 }
 
 DBTrie::~DBTrie() {
-	free(this->hashscratch);
 }
 
 bool DBTrie::add(const unsigned char * hash, bool performhash) {
@@ -725,7 +732,7 @@ bool DBTrie::add(const unsigned char * hash, bool performhash) {
 		return inserted;
 	} catch (...) {
 		// Create a new node
-		DbNode root(this->hash_, this->db_, hash, true);
+		DbNode root(*this, this->hash_, this->db_, hash, true);
 		root.toDb();
 		this->root_.set(hash);
 		incSize();

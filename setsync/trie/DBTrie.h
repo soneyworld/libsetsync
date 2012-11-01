@@ -88,11 +88,6 @@ class DbNode {
 	friend class DbNodeTest;
 	friend class DBTrie;
 private:
-	/**
-	 * field to build the new hash of a node
-	 * is only used by updateHash function
-	 */
-	unsigned char * hashscratch;
 	/// Pointer to the Berkeley DB where the node (should) exist
 	Db * db_;
 	/**
@@ -129,6 +124,8 @@ private:
 	uint8_t prefix_mask;
 
 	const utils::CryptoHash& hashfunction_;
+
+	const DBTrie& trie_;
 	/**
 	 * Constructor of a node, which could exist in the given DB, or should be
 	 * created to be saved in the given DB. The given hash could be the default
@@ -138,7 +135,8 @@ private:
 	 * \param hash of the node, which should be created or loaded
 	 * \param newone if true, a new node will be created, otherwise load the node with this hash from the given DB
 	 */
-	DbNode(const utils::CryptoHash& hashfunction, Db * db, const unsigned char * hash, bool newone = false);
+	DbNode(const DBTrie& trie, const utils::CryptoHash& hashfunction, Db * db,
+			const unsigned char * hash, bool newone = false);
 	/**
 	 * Sets the given parent as new parent and overwrites the old one.
 	 * This method is in memory only! To save the changes to DB, call toDB()
@@ -225,7 +223,7 @@ private:
 	 */
 	bool isEqualToLarger(const DbNode& node) const;
 public:
-	DbNode(const utils::CryptoHash& hashfunction, Db * db);
+	DbNode(const DBTrie& trie, const utils::CryptoHash& hashfunction, Db * db);
 	DbNode(const DbNode& other);
 	/**
 	 * \return true if node has children, otherwise false
@@ -297,6 +295,7 @@ private:
 	static const char root_name[];
 	///
 	const utils::CryptoHash& hashfunction_;
+	const DBTrie& trie_;
 public:
 	/**
 	 * Initializes this class with the given pointer to the Berkeley DB, which should
@@ -305,7 +304,7 @@ public:
 	 *
 	 * \param db pointer to berkeley db to be used
 	 */
-	DbRootNode(const utils::CryptoHash& hashfunction, Db * db);
+	DbRootNode(const DBTrie& trie, const utils::CryptoHash& hashfunction, Db * db);
 	/**
 	 * Loads the hash of the DbNode, which is saved as root node. Throws a
 	 * DbNoRootFoundException if no root is available on this db.
@@ -331,6 +330,7 @@ public:
 
 class DBTrie: public trie::Trie,
 		public virtual berkeley::BerkeleyDBTableUserInferface {
+	friend class DbNode;
 private:
 	Db * db_;
 	DbRootNode root_;

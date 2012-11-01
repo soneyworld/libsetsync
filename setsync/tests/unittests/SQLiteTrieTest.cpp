@@ -7,8 +7,8 @@
 #include "SQLiteTrieTest.h"
 namespace trie {
 void SQLiteTrieTest::setUp(void) {
-	this->sqltrie = new trie::SQLiteTrie();
-	this->key_1 = new unsigned char[20];
+	this->sqltrie = new trie::SQLiteTrie(hash);
+	this->key_1 = new unsigned char[hash.getHashSize()];
 }
 
 void SQLiteTrieTest::tearDown(void) {

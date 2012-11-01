@@ -7,12 +7,13 @@
 #ifndef SQLITETRIE_H_
 #define SQLITETRIE_H_
 #include "Trie.h"
+#include <setsync/utils/CryptoHash.h>
 
 
 namespace trie{
 class SQLiteTrie: public Trie {
 public:
-	SQLiteTrie();
+	SQLiteTrie(const utils::CryptoHash& hash);
 	virtual ~SQLiteTrie();
 	bool add(const unsigned char * hash);
 	bool add(const unsigned char * hash, bool performhash);

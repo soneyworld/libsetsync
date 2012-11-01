@@ -7,6 +7,7 @@
 #include "DBTrieTest.h"
 #include <sstream>
 #include <setsync/utils/OutputFunctions.h>
+#include <stdlib.h>
 using namespace std;
 
 namespace trie {
@@ -18,8 +19,10 @@ void DbTrieTest::setUp(void) {
 	this->db2 = new Db(NULL, 0);
 	db2->open(NULL, "trie2.db", trie::DBTrie::getLogicalDatabaseName(),
 			trie::DBTrie::getTableType(), DB_CREATE, 0);
-	memset(this->smaller, 0, HASHSIZE);
-	memset(this->larger, 0xFF, HASHSIZE);
+	this->smaller = (unsigned char *) malloc(this->hash.getHashSize());
+	this->larger = (unsigned char *) malloc(this->hash.getHashSize());
+	memset(this->smaller, 0, hash.getHashSize());
+	memset(this->larger, 0xFF, hash.getHashSize());
 }
 
 void DbTrieTest::tearDown(void) {
@@ -34,10 +37,12 @@ void DbTrieTest::tearDown(void) {
 	this->db->remove("trie2.db", NULL, 0);
 	delete this->db;
 	remove("trieCopy.db");
+	free(this->smaller);
+	free(this->larger);
 }
 
 void DbTrieTest::testAdding() {
-	trie::DBTrie trie(db);
+	trie::DBTrie trie(hash, db);
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie.getSize() == 1);
@@ -49,7 +54,7 @@ void DbTrieTest::testAdding() {
 }
 
 void DbTrieTest::testAddingAndErasingElements() {
-	trie::DBTrie trie(db);
+	trie::DBTrie trie(hash, db);
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie.getSize() == 1);
@@ -70,7 +75,7 @@ void DbTrieTest::testAddingAndErasingElements() {
 }
 
 void DbTrieTest::testAddingAndCleaningElements() {
-	trie::DBTrie trie(db);
+	trie::DBTrie trie(hash, db);
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie.Trie::add("bla2"));
@@ -81,7 +86,7 @@ void DbTrieTest::testAddingAndCleaningElements() {
 }
 
 void DbTrieTest::testContains() {
-	trie::DBTrie trie(db);
+	trie::DBTrie trie(hash, db);
 	CPPUNIT_ASSERT(!trie.Trie::contains("bla1"));
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie.Trie::contains("bla1"));
@@ -94,7 +99,7 @@ void DbTrieTest::testContains() {
 }
 
 void DbTrieTest::testSize() {
-	trie::DBTrie trie(db);
+	trie::DBTrie trie(hash, db);
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie.getSize() == 1);
@@ -131,8 +136,8 @@ void DbTrieTest::testSize() {
 }
 
 void DbTrieTest::testEquals() {
-	trie::DBTrie trie1(db);
-	trie::DBTrie trie2(db2);
+	trie::DBTrie trie1(hash, db);
+	trie::DBTrie trie2(hash, db2);
 	CPPUNIT_ASSERT(trie1==trie2);
 	CPPUNIT_ASSERT(trie1.Trie::add("bla1"));
 	CPPUNIT_ASSERT(!(trie1==trie2));
@@ -157,7 +162,7 @@ void DbTrieTest::testSavingAndLoading() {
 	Db * dbcopy = new Db(NULL, 0);
 	dbcopy->open(NULL, "trieCopy.db", trie::DBTrie::getLogicalDatabaseName(),
 			trie::DBTrie::getTableType(), DB_CREATE, 0);
-	trie::DBTrie * trie = new trie::DBTrie(dbcopy);
+	trie::DBTrie * trie = new trie::DBTrie(hash, dbcopy);
 	CPPUNIT_ASSERT(trie->Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie->Trie::add("bla2"));
 	delete trie;
@@ -166,7 +171,7 @@ void DbTrieTest::testSavingAndLoading() {
 	dbcopy = new Db(NULL, 0);
 	dbcopy->open(NULL, "trieCopy.db", trie::DBTrie::getLogicalDatabaseName(),
 			trie::DBTrie::getTableType(), DB_CREATE, 0);
-	trie = new trie::DBTrie(dbcopy);
+	trie = new trie::DBTrie(hash, dbcopy);
 	CPPUNIT_ASSERT(trie->Trie::contains("bla1"));
 	CPPUNIT_ASSERT(trie->Trie::contains("bla2"));
 	delete trie;
@@ -177,15 +182,15 @@ void DbTrieTest::testSavingAndLoading() {
 }
 
 void DbTrieTest::testToString() {
-//	cout << endl;
-	trie::DBTrie trie1(db);
+	//	cout << endl;
+	trie::DBTrie trie1(hash, db);
 	for (unsigned int i = 1; i <= 20; i++) {
 		stringstream ss;
 		ss << "bla" << i;
 		CPPUNIT_ASSERT(trie1.Trie::add(ss.str()));
 	}
 	string dot = trie1.toString();
-//	cout << dot;
+	//	cout << dot;
 }
 
 void DbNodeTest::setUp(void) {
@@ -195,15 +200,24 @@ void DbNodeTest::setUp(void) {
 	this->db2 = new Db(NULL, 0);
 	db2->open(NULL, "trienode2.db", trie::DBTrie::getLogicalDatabaseName(),
 			trie::DBTrie::getTableType(), DB_CREATE, 0);
-	SHA1((unsigned char*) "bla1", 4, this->key1);
-	SHA1((unsigned char*) "bla2", 4, this->key2);
-	SHA1((unsigned char*) "bla3", 4, this->key3);
-	SHA1((unsigned char*) "bla4", 4, this->key4);
-	memset(this->smaller, 0, HASHSIZE);
-	memset(this->larger, 0xFF, HASHSIZE);
+	this->trie = new DBTrie(hashFunction_, this->db);
+	this->key1 = (unsigned char*) malloc(hashFunction_.getHashSize());
+	this->key2 = (unsigned char*) malloc(hashFunction_.getHashSize());
+	this->key3 = (unsigned char*) malloc(hashFunction_.getHashSize());
+	this->key4 = (unsigned char*) malloc(hashFunction_.getHashSize());
+	this->smaller = (unsigned char*) malloc(hashFunction_.getHashSize());
+	this->larger = (unsigned char*) malloc(hashFunction_.getHashSize());
+	this->hash = (unsigned char*) malloc(hashFunction_.getHashSize());
+	hashFunction_(key1, "bla1");
+	hashFunction_(key2, "bla2");
+	hashFunction_(key3, "bla3");
+	hashFunction_(key4, "bla4");
+	memset(this->smaller, 0, hashFunction_.getHashSize());
+	memset(this->larger, 0xFF, hashFunction_.getHashSize());
 }
 
 void DbNodeTest::tearDown(void) {
+	delete this->trie;
 	db->close(0);
 	db2->close(0);
 	delete this->db;
@@ -214,18 +228,25 @@ void DbNodeTest::tearDown(void) {
 	this->db = new Db(NULL, 0);
 	this->db->remove("trienode2.db", NULL, 0);
 	delete this->db;
+	free(key1);
+	free(key2);
+	free(key3);
+	free(key4);
+	free(smaller);
+	free(larger);
+	free(hash);
 }
 
 void DbNodeTest::testConstructor() {
-	DbNode node1(this->db, key1, true);
-	CPPUNIT_ASSERT_EQUAL(memcmp(node1.hash,key1,HASHSIZE),0);
-	CPPUNIT_ASSERT_EQUAL(memcmp(node1.prefix,key1,HASHSIZE),0);
+	DbNode node1(*trie, hashFunction_, this->db, key1, true);
+	CPPUNIT_ASSERT_EQUAL(memcmp(node1.hash,key1,hashFunction_.getHashSize()),0);
+	CPPUNIT_ASSERT_EQUAL(memcmp(node1.prefix,key1,hashFunction_.getHashSize()),0);
 	CPPUNIT_ASSERT_EQUAL(node1.hasParent_,false);
 	CPPUNIT_ASSERT_EQUAL(node1.hasChildren_,false);
 	node1.toDb();
-	DbNode node2(this->db, key1, false);
+	DbNode node2(*trie, hashFunction_, this->db, key1, false);
 	CPPUNIT_ASSERT(node1==node2);
-	DbNode node3(this->db, key1);
+	DbNode node3(*trie, hashFunction_, this->db, key1);
 	CPPUNIT_ASSERT(node2==node3);
 	DbNode node4 = node1;
 	CPPUNIT_ASSERT(node1==node4);
@@ -234,20 +255,20 @@ void DbNodeTest::testConstructor() {
 }
 
 void DbNodeTest::testEquals() {
-	DbNode node1(this->db, key1, true);
+	DbNode node1(*trie, hashFunction_, this->db, key1, true);
 	node1.toDb();
 	CPPUNIT_ASSERT(node1==node1);
-	DbNode node2(this->db, key1, true);
+	DbNode node2(*trie, hashFunction_, this->db, key1, true);
 	CPPUNIT_ASSERT(node1==node2);
-	DbNode node3(this->db, key1);
+	DbNode node3(*trie, hashFunction_, this->db, key1);
 	CPPUNIT_ASSERT(node1==node3);
 	CPPUNIT_ASSERT(node2==node3);
 }
 
 void DbNodeTest::testNotEquals() {
-	DbNode node1(this->db, key1, true);
-	DbNode node2(this->db, key2, true);
-	DbNode node3(this->db, key1, true);
+	DbNode node1(*trie, hashFunction_, this->db, key1, true);
+	DbNode node2(*trie, hashFunction_, this->db, key2, true);
+	DbNode node3(*trie, hashFunction_, this->db, key1, true);
 	CPPUNIT_ASSERT(node1!=node2);
 	CPPUNIT_ASSERT(node2!=node3);
 	CPPUNIT_ASSERT(!(node1!=node1));
@@ -255,9 +276,9 @@ void DbNodeTest::testNotEquals() {
 }
 
 void DbNodeTest::testLarger() {
-	DbNode node1(this->db, smaller, true);
+	DbNode node1(*trie, hashFunction_, this->db, smaller, true);
 	node1.prefix_mask = 1;
-	DbNode node2(this->db, larger, true);
+	DbNode node2(*trie, hashFunction_, this->db, larger, true);
 	node2.prefix_mask = 1;
 	CPPUNIT_ASSERT(node2 > node1);
 	CPPUNIT_ASSERT(node1.isLarger(node2));
@@ -270,22 +291,23 @@ void DbNodeTest::testLarger() {
 }
 
 void DbNodeTest::testUpdateHash() {
-	DbNode node1(this->db, key1, true);
-	memcpy(node1.smaller, smaller, HASHSIZE);
-	memcpy(node1.larger, larger, HASHSIZE);
+	DbNode node1(*trie, hashFunction_, this->db, key1, true);
+	memcpy(node1.smaller, smaller, hashFunction_.getHashSize());
+	memcpy(node1.larger, larger, hashFunction_.getHashSize());
 	node1.hasChildren_ = true;
 	node1.updateHash();
-	unsigned char scratch[HASHSIZE * 2];
-	memcpy(scratch, smaller, HASHSIZE);
-	memcpy(scratch + HASHSIZE, larger, HASHSIZE);
-	SHA1(scratch, HASHSIZE * 2, this->hash);
-	CPPUNIT_ASSERT_EQUAL(memcmp(node1.hash, this->hash, HASHSIZE), 0);
+	unsigned char scratch[hashFunction_.getHashSize() * 2];
+	memcpy(scratch, smaller, hashFunction_.getHashSize());
+	memcpy(scratch + hashFunction_.getHashSize(), larger,
+			hashFunction_.getHashSize());
+	hashFunction_(this->hash, scratch, hashFunction_.getHashSize() * 2);
+	CPPUNIT_ASSERT_EQUAL(memcmp(node1.hash, this->hash, hashFunction_.getHashSize()), 0);
 }
 
 void DbNodeTest::testInsert() {
-	DbNode rootnode(this->db, smaller, true);
+	DbNode rootnode(*trie, hashFunction_, this->db, smaller, true);
 	rootnode.toDb();
-	DbRootNode root(this->db);
+	DbRootNode root(*trie, hashFunction_, this->db);
 	root.set(smaller);
 	CPPUNIT_ASSERT(rootnode.hasChildren_ == false);
 	CPPUNIT_ASSERT(rootnode.hasChildren() == false);
@@ -314,7 +336,7 @@ void DbNodeTest::testInsert() {
 }
 
 void DbNodeTest::testErase() {
-	DBTrie trie1(this->db);
+	DBTrie trie1(hashFunction_, this->db);
 	// Inserting 30 entries
 	for (int i = 0; i < 30; i++) {
 		stringstream ss;
@@ -342,7 +364,7 @@ void DbNodeTest::testErase() {
 		CPPUNIT_ASSERT(success);
 	}
 
-	DBTrie trie2(this->db2);
+	DBTrie trie2(hashFunction_, this->db2);
 	CPPUNIT_ASSERT_MESSAGE("BOTH SHOULD BE EMPTY", trie1==trie2);
 	CPPUNIT_ASSERT_MESSAGE("adding bla1 to emtpy trie1 failed", trie1.Trie::add("bla1"));
 	CPPUNIT_ASSERT_MESSAGE("trie1: bla1 added", !(trie1==trie2));
@@ -359,20 +381,21 @@ void DbNodeTest::testErase() {
 }
 
 void DbNodeTest::testCommon() {
-	DbNode node1(this->db, key1, true);
-	DbNode node2(this->db, key1, true);
-	CPPUNIT_ASSERT(node1.commonPrefixSize(node2)==8*HASHSIZE);
-	DbNode node3(this->db, smaller, true);
-	DbNode node4(this->db, larger, true);
+	DbNode node1(*trie, hashFunction_, this->db, key1, true);
+	DbNode node2(*trie, hashFunction_, this->db, key1, true);
+	CPPUNIT_ASSERT(node1.commonPrefixSize(node2)==8*hashFunction_.getHashSize());
+	DbNode node3(*trie, hashFunction_, this->db, smaller, true);
+	DbNode node4(*trie, hashFunction_, this->db, larger, true);
 	CPPUNIT_ASSERT(node3.commonPrefixSize(node4)==0);
-	DbNode node5(this->db, smaller, true);
-	memset(node5.prefix + HASHSIZE / 2, 0x1, HASHSIZE / 2);
-	CPPUNIT_ASSERT(node3.commonPrefixSize(node5)==4*HASHSIZE);
+	DbNode node5(*trie, hashFunction_, this->db, smaller, true);
+	memset(node5.prefix + hashFunction_.getHashSize() / 2, 0x1,
+			hashFunction_.getHashSize() / 2);
+	CPPUNIT_ASSERT(node3.commonPrefixSize(node5)==4*hashFunction_.getHashSize());
 }
 
 void DbNodeTest::testSimilar() {
-	DbNode smaller(this->db, this->smaller, true);
-	DbNode larger(this->db, this->larger, true);
+	DbNode smaller(*trie, hashFunction_, this->db, this->smaller, true);
+	DbNode larger(*trie, hashFunction_, this->db, this->larger, true);
 	smaller.prefix_mask = 0;
 	larger.prefix_mask = 0;
 	CPPUNIT_ASSERT(smaller.similar(larger));
@@ -389,10 +412,10 @@ void DbNodeTest::testSimilar() {
 }
 
 void DbNodeTest::testToDb() {
-	DbNode node1(this->db, key1, true);
-	DbNode node2(this->db, key2, true);
-	DbNode node3(this->db, key3, true);
-	DbNode node4(this->db, key4, true);
+	DbNode node1(*trie, hashFunction_, this->db, key1, true);
+	DbNode node2(*trie, hashFunction_, this->db, key2, true);
+	DbNode node3(*trie, hashFunction_, this->db, key3, true);
+	DbNode node4(*trie, hashFunction_, this->db, key4, true);
 	node1.dirty_ = true;
 	node2.hasChildren_ = true;
 	node3.hasParent_ = true;
@@ -401,10 +424,10 @@ void DbNodeTest::testToDb() {
 	CPPUNIT_ASSERT(node2.toDb());
 	CPPUNIT_ASSERT(node3.toDb());
 	CPPUNIT_ASSERT(node4.toDb());
-	DbNode node5(this->db, key1);
-	DbNode node6(this->db, key2);
-	DbNode node7(this->db, key3);
-	DbNode node8(this->db, key4);
+	DbNode node5(*trie, hashFunction_, this->db, key1);
+	DbNode node6(*trie, hashFunction_, this->db, key2);
+	DbNode node7(*trie, hashFunction_, this->db, key3);
+	DbNode node8(*trie, hashFunction_, this->db, key4);
 	CPPUNIT_ASSERT(node1 == node5);
 	CPPUNIT_ASSERT(node2 == node6);
 	CPPUNIT_ASSERT(node3 == node7);
@@ -419,10 +442,10 @@ void DbNodeTest::testToString() {
 	//	cout << endl;
 	//	cout << "KEY1: " << utils::OutputFunctions::CryptoHashtoString(key1) << endl;
 	//	cout << "KEY2: " << utils::OutputFunctions::CryptoHashtoString(key2) << endl;
-	DbNode node1(this->db, smaller, true);
+	DbNode node1(*trie, hashFunction_, this->db, smaller, true);
 	node1.toDb();
 	//	cout << node1.toString();
-	DbRootNode root(this->db);
+	DbRootNode root(*trie, hashFunction_, this->db);
 	root.set(smaller);
 	node1 = root.get();
 	//	cout << node1.toString();
@@ -440,10 +463,6 @@ void DbRootNodeTest::setUp(void) {
 	this->db2 = new Db(NULL, 0);
 	db2->open(NULL, "trierootnode2.db", trie::DBTrie::getLogicalDatabaseName(),
 			trie::DBTrie::getTableType(), DB_CREATE, 0);
-	SHA1((unsigned char*) "bla1", 4, this->key1);
-	SHA1((unsigned char*) "bla2", 4, this->key2);
-	SHA1((unsigned char*) "bla3", 4, this->key3);
-	SHA1((unsigned char*) "bla4", 4, this->key4);
 }
 
 void DbRootNodeTest::tearDown(void) {
@@ -468,7 +487,8 @@ void DbRootNodeTest::testConstructor() {
 }
 
 void DbRootNodeTest::testToString() {
-	DbRootNode root(this->db);
+	DBTrie trie(hash, db);
+	DbRootNode root(trie, hash, this->db);
 	root.toString();
 	//	std::cout << root.toString() << std::endl;
 }

@@ -3,7 +3,9 @@
  */
 #include "CryptoHash.h"
 #include <string.h>
-
+#ifdef HAVE_OPENSSL
+#include <openssl/sha.h>
+#endif
 namespace utils {
 
 CryptoHash::CryptoHash(const char * name) {

@@ -12,7 +12,6 @@
 #include <string.h>
 #include <math.h>
 #include <list>
-#include <setsync/sha1.h>
 #include <stdlib.h>
 
 using namespace std;
@@ -20,12 +19,12 @@ namespace bloom {
 
 /*=== BEGIN tests for class 'DBBloomFilter' ===*/
 void DBBloomFilterTest::testConstructor() {
-	bloom::DBBloomFilter Filter1(db1, 10, false, 0.01);
+	bloom::DBBloomFilter Filter1(hashFunction_, db1, 10, false, 0.01);
 	Filter1.AbstractBloomFilter::add("bla1");
 	Filter1.AbstractBloomFilter::add("bla2");
 	Filter1.AbstractBloomFilter::add("bla3");
 	Filter1.AbstractBloomFilter::add("bla4");
-	bloom::DBBloomFilter Filter2(db1, 10, false, 0.01);
+	bloom::DBBloomFilter Filter2(hashFunction_, db1, 10, false, 0.01);
 	CPPUNIT_ASSERT(Filter1.AbstractBloomFilter::contains("bla1"));
 	CPPUNIT_ASSERT(Filter2.AbstractBloomFilter::contains("bla1"));
 	CPPUNIT_ASSERT(Filter2.AbstractBloomFilter::contains("bla2"));
@@ -34,8 +33,8 @@ void DBBloomFilterTest::testConstructor() {
 }
 
 void DBBloomFilterTest::testLoad() {
-	bloom::DBBloomFilter Filter1(db1, 10, false, 0.01);
-	bloom::DBBloomFilter Filter2(db2, 10, false, 0.01);
+	bloom::DBBloomFilter Filter1(hashFunction_, db1, 10, false, 0.01);
+	bloom::DBBloomFilter Filter2(hashFunction_, db2, 10, false, 0.01);
 	Filter1.AbstractBloomFilter::add("hello");
 	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains("hello"));
 	CPPUNIT_ASSERT_EQUAL(false, Filter2.AbstractBloomFilter::contains("hello"));
@@ -50,12 +49,12 @@ void DBBloomFilterTest::testLoad() {
 }
 
 void DBBloomFilterTest::testInsert() {
-	bloom::DBBloomFilter Filter1(db1, 10, false, 0.01);
+	bloom::DBBloomFilter Filter1(hashFunction_, db1, 10, false, 0.01);
 
 	//	 test signature (const unsigned char* key)
 
-	unsigned char cad1[SHA_DIGEST_LENGTH];
-	SHA1((const unsigned char*) "ejemplo", 7, cad1);
+	unsigned char cad1[hashFunction_.getHashSize()];
+	hashFunction_(cad1,"ejemplo");
 	Filter1.add(cad1);
 	CPPUNIT_ASSERT_EQUAL(true, Filter1.contains(cad1));
 
@@ -72,12 +71,12 @@ void DBBloomFilterTest::testInsert() {
 }
 
 void DBBloomFilterTest::testRemove() {
-	bloom::DBBloomFilter Filter1(db1, 10, false, 0.01);
+	bloom::DBBloomFilter Filter1(hashFunction_, db1, 10, false, 0.01);
 
 	//	 test signature (const unsigned char* key)
 
-	unsigned char cad1[SHA_DIGEST_LENGTH];
-	SHA1((const unsigned char*) "ejemplo", 7, cad1);
+	unsigned char cad1[hashFunction_.getHashSize()];
+	hashFunction_(cad1, "ejemplo");
 	CPPUNIT_ASSERT(!Filter1.remove(cad1));
 	Filter1.add(cad1);
 	CPPUNIT_ASSERT_EQUAL(true, Filter1.contains(cad1));
@@ -110,7 +109,7 @@ void DBBloomFilterTest::testRemove() {
 void DBBloomFilterTest::testContains() {
 	/* test signature (const std::string& key) const */
 	/* test signature (const char* data, const std::size_t& length) const */
-	bloom::DBBloomFilter Filter1(db1, 8196);
+	bloom::DBBloomFilter Filter1(hashFunction_, db1, 8196);
 	char word[8];
 	for (int j = 0; j <= 127; j++) {
 		for (int i = 0; i <= 7; i++) {
@@ -125,17 +124,17 @@ void DBBloomFilterTest::testContains() {
 }
 
 void DBBloomFilterTest::testContainsAll() {
-	bloom::DBBloomFilter Filter2(db1, 8196);
-	unsigned char hashes[100 * SHA_DIGEST_LENGTH];
+	bloom::DBBloomFilter Filter2(hashFunction_, db1, 8196);
+	unsigned char hashes[100 * hashFunction_.getHashSize()];
 	for (int j = 0; j < 100; j++) {
 		unsigned char word[8];
 		for (int i = 0; i <= 7; i++) {
 			word[i] = 33 + rand() % (126 - 23);
 		}
-		SHA1(word, 8, hashes + SHA_DIGEST_LENGTH * j);
+		hashFunction_(hashes + hashFunction_.getHashSize() * j, word, 8);
 	}
 	for (int i = 0; i < 100; i++) {
-		Filter2.add(hashes + i * SHA_DIGEST_LENGTH);
+		Filter2.add(hashes + i * hashFunction_.getHashSize());
 	}
 	Filter2.containsAll(hashes, 100);
 	CPPUNIT_ASSERT(Filter2.containsAll(hashes, 100));
@@ -143,8 +142,8 @@ void DBBloomFilterTest::testContainsAll() {
 
 void DBBloomFilterTest::testOperatorAndAndAssign() {
 	/* test signature (const BloomFilter& filter) */
-	bloom::DBBloomFilter FilterA(db1, 8196);
-	bloom::DBBloomFilter FilterB(db2, 8196);
+	bloom::DBBloomFilter FilterA(hashFunction_, db1, 8196);
+	bloom::DBBloomFilter FilterB(hashFunction_, db2, 8196);
 
 	string strin1, strin2, strin3, strin4;
 	strin1 = "hello";
@@ -171,8 +170,8 @@ void DBBloomFilterTest::testOperatorAndAndAssign() {
 
 void DBBloomFilterTest::testOperatorInclusiveOrAndAssign() {
 	/* test signature (const BloomFilter& filter) */
-	bloom::DBBloomFilter FilterA(db1, 8196);
-	bloom::DBBloomFilter FilterB(db2, 8196);
+	bloom::DBBloomFilter FilterA(hashFunction_, db1, 8196);
+	bloom::DBBloomFilter FilterB(hashFunction_, db2, 8196);
 
 	string strin1, strin2, strin3, strin4;
 	strin1 = "hello";
@@ -199,8 +198,8 @@ void DBBloomFilterTest::testOperatorInclusiveOrAndAssign() {
 
 void DBBloomFilterTest::testOperatorXorAndAssign() {
 	/* test signature (const BloomFilter& filter) */
-	bloom::DBBloomFilter FilterA(db1, 8196);
-	bloom::DBBloomFilter FilterB(db2, 8196);
+	bloom::DBBloomFilter FilterA(hashFunction_, db1, 8196);
+	bloom::DBBloomFilter FilterB(hashFunction_, db2, 8196);
 
 	string strin1, strin2, strin3, strin4;
 	strin1 = "hello";
@@ -254,8 +253,8 @@ void DBBloomFilterTest::testSavingAndLoadingSettings() {
 }
 
 void DBBloomFilterTest::testDiff() {
-	bloom::DBBloomFilter FilterA(db1, 8196);
-	bloom::DBBloomFilter FilterB(db2, 8196);
+	bloom::DBBloomFilter FilterA(hashFunction_, db1, 8196);
+	bloom::DBBloomFilter FilterB(hashFunction_, db2, 8196);
 	FilterA.AbstractBloomFilter::add("bla1");
 	FilterA.AbstractBloomFilter::add("bla2");
 	FilterA.AbstractBloomFilter::add("bla3");
@@ -283,11 +282,11 @@ void DBBloomFilterTest::testDiff() {
 		offset += length;
 	}
 	CPPUNIT_ASSERT(handler.size()==2);
-	unsigned char sha[SHA_DIGEST_LENGTH];
-	SHA1((unsigned char*)"bla3",strlen("bla3"),sha);
-	CPPUNIT_ASSERT(memcmp(handler[0],sha,SHA_DIGEST_LENGTH)==0);
-	SHA1((unsigned char*)"bla4",strlen("bla4"),sha);
-	CPPUNIT_ASSERT(memcmp(handler[1],sha,SHA_DIGEST_LENGTH)==0);
+	unsigned char sha[hashFunction_.getHashSize()];
+	hashFunction_(sha,"bla3");
+	CPPUNIT_ASSERT(memcmp(handler[0],sha,hashFunction_.getHashSize())==0);
+	hashFunction_(sha, "bla4");
+	CPPUNIT_ASSERT(memcmp(handler[1],sha,hashFunction_.getHashSize())==0);
 }
 
 /*=== END   tests for class 'DBBloomFilter' ===*/

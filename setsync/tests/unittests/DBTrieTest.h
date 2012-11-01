@@ -8,6 +8,7 @@
 #define FSTRIETEST_H_
 #include <cppunit/extensions/HelperMacros.h>
 #include "setsync/trie/DBTrie.h"
+#include <setsync/utils/CryptoHash.h>
 
 namespace trie {
 
@@ -30,8 +31,9 @@ public:
 private:
 	Db * db;
 	Db * db2;
-	unsigned char smaller[HASHSIZE];
-	unsigned char larger[HASHSIZE];
+	utils::CryptoHash hash;
+	unsigned char * smaller;
+	unsigned char * larger;
 protected:
 	void testAdding();
 	void testAddingAndErasingElements();
@@ -67,13 +69,15 @@ public:
 private:
 	Db * db;
 	Db * db2;
-	unsigned char key1[HASHSIZE];
-	unsigned char key2[HASHSIZE];
-	unsigned char key3[HASHSIZE];
-	unsigned char key4[HASHSIZE];
-	unsigned char smaller[HASHSIZE];
-	unsigned char larger[HASHSIZE];
-	unsigned char hash[HASHSIZE];
+	utils::CryptoHash hashFunction_;
+	DBTrie * trie;
+	unsigned char * key1;
+	unsigned char * key2;
+	unsigned char * key3;
+	unsigned char * key4;
+	unsigned char * smaller;
+	unsigned char * larger;
+	unsigned char * hash;
 protected:
 	void testConstructor();
 	void testEquals();
@@ -103,11 +107,7 @@ public:
 private:
 	Db * db;
 	Db * db2;
-	unsigned char key1[HASHSIZE];
-	unsigned char key2[HASHSIZE];
-	unsigned char key3[HASHSIZE];
-	unsigned char key4[HASHSIZE];
-	unsigned char hash[HASHSIZE];
+	utils::CryptoHash hash;
 protected:
 	void testConstructor();
 	void testToDb();

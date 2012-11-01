@@ -6,7 +6,7 @@
 
 #include "SQLiteIndexTest.h"
 #include "setsync/index/SQLiteDatabase.h"
-#include "setsync/sha1.h"
+
 namespace sqlite{
 void SQLiteIndexTest::setUp(void) {
 	std::string filename = "test.db";
@@ -24,8 +24,8 @@ void SQLiteIndexTest::testAddingAndErasingElements() {
 }
 void SQLiteIndexTest::testAddingAndCleaningElements() {
 	bloom::SaltedHashFunction f(10);
-	unsigned char md[20];
-	SHA1((const unsigned char *) "hello", 5, md);
+	unsigned char md[hash.getHashSize()];
+	hash(md,"hello");
 	for (std::size_t i = 0; i < f.count(); i++) {
 		this->index->insert(f.hash(md, 20, i), md, 20);
 	}
