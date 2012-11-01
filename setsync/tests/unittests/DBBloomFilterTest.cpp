@@ -49,28 +49,44 @@ void DBBloomFilterTest::testLoad() {
 }
 
 void DBBloomFilterTest::testInsert() {
+	DB_BTREE_STAT *dbstat;
+	unsigned int nrecords;
+	db1->stat(NULL, &dbstat, 0);
+	nrecords = dbstat->bt_ndata;
+	free(dbstat);
+	CPPUNIT_ASSERT(nrecords == 0);
 	bloom::DBBloomFilter Filter1(hashFunction_, db1, 10, false, 0.01);
-
 	//	 test signature (const unsigned char* key)
-
 	unsigned char cad1[hashFunction_.getHashSize()];
-	hashFunction_(cad1,"ejemplo");
+	hashFunction_(cad1, "ejemplo");
 	Filter1.add(cad1);
+	db1->stat(NULL, &dbstat, 0);
+	nrecords = dbstat->bt_ndata;
+	free(dbstat);
+	CPPUNIT_ASSERT(nrecords == Filter1.functionCount_);
 	CPPUNIT_ASSERT_EQUAL(true, Filter1.contains(cad1));
 
 	//	 test signature (const std::string& key)
 	Filter1.AbstractBloomFilter::add(string("hello"));
 	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains(string("hello")));
-
+	db1->stat(NULL, &dbstat, 0);
+	nrecords = dbstat->bt_ndata;
+	free(dbstat);
+	CPPUNIT_ASSERT(nrecords == Filter1.functionCount_*2);
 	//	 test signature (const char* key)
 
 	Filter1.AbstractBloomFilter::add("bye");
 	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains("bye"));
-	//std::cout << std::endl << Filter1.toString() << std::endl;
+	db1->stat(NULL, &dbstat, 0);
+	nrecords = dbstat->bt_ndata;
+	free(dbstat);
+	CPPUNIT_ASSERT(nrecords == Filter1.functionCount_*3);
 
 }
 
 void DBBloomFilterTest::testRemove() {
+	DB_BTREE_STAT *dbstat;
+	unsigned int nrecords;
 	bloom::DBBloomFilter Filter1(hashFunction_, db1, 10, false, 0.01);
 
 	//	 test signature (const unsigned char* key)
@@ -79,32 +95,83 @@ void DBBloomFilterTest::testRemove() {
 	hashFunction_(cad1, "ejemplo");
 	CPPUNIT_ASSERT(!Filter1.remove(cad1));
 	Filter1.add(cad1);
+	db1->stat(NULL, &dbstat, 0);
+	nrecords = dbstat->bt_ndata;
+	free(dbstat);
+	CPPUNIT_ASSERT(nrecords == Filter1.functionCount_);
 	CPPUNIT_ASSERT_EQUAL(true, Filter1.contains(cad1));
 	bool removed = Filter1.remove(cad1);
 	CPPUNIT_ASSERT(removed);
+	db1->stat(NULL, &dbstat, 0);
+	nrecords = dbstat->bt_ndata;
+	free(dbstat);
+	CPPUNIT_ASSERT(nrecords == 0);
 	CPPUNIT_ASSERT_EQUAL(false, Filter1.contains(cad1));
 	CPPUNIT_ASSERT(!Filter1.remove(cad1));
 	//	 test signature (const std::string& key)
 	Filter1.AbstractBloomFilter::add(string("hello"));
 	Filter1.AbstractBloomFilter::add(string("hello"));
+	db1->stat(NULL, &dbstat, 0);
+	nrecords = dbstat->bt_ndata;
+	free(dbstat);
+	CPPUNIT_ASSERT(nrecords == Filter1.functionCount_);
 	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains(string("hello")));
 	CPPUNIT_ASSERT(Filter1.CountingBloomFilter::remove(string("hello")));
+	db1->stat(NULL, &dbstat, 0);
+	nrecords = dbstat->bt_ndata;
+	free(dbstat);
+	CPPUNIT_ASSERT(nrecords == 0);
 	CPPUNIT_ASSERT(!Filter1.AbstractBloomFilter::contains(string("hello")));
 	//	 test signature (const char* key)
 	CPPUNIT_ASSERT(!Filter1.CountingBloomFilter::remove("bye"));
+	db1->stat(NULL, &dbstat, 0);
+	nrecords = dbstat->bt_ndata;
+	free(dbstat);
+	CPPUNIT_ASSERT(nrecords == 0);
 	Filter1.AbstractBloomFilter::add("bye");
+	db1->stat(NULL, &dbstat, 0);
+	nrecords = dbstat->bt_ndata;
+	free(dbstat);
+	CPPUNIT_ASSERT(nrecords == Filter1.functionCount_);
 	CPPUNIT_ASSERT(Filter1.AbstractBloomFilter::contains("bye"));
 	CPPUNIT_ASSERT(Filter1.CountingBloomFilter::remove("bye"));
+	db1->stat(NULL, &dbstat, 0);
+	nrecords = dbstat->bt_ndata;
+	free(dbstat);
+	CPPUNIT_ASSERT(nrecords == 0);
 	CPPUNIT_ASSERT(!Filter1.CountingBloomFilter::remove("bye"));
 	//std::cout << std::endl << Filter1.toString() << std::endl;
 	Filter1.AbstractBloomFilter::add("bla1");
+	db1->stat(NULL, &dbstat, 0);
+	nrecords = dbstat->bt_ndata;
+	free(dbstat);
+	CPPUNIT_ASSERT(nrecords == Filter1.functionCount_);
 	Filter1.AbstractBloomFilter::add("bla2");
+	db1->stat(NULL, &dbstat, 0);
+	nrecords = dbstat->bt_ndata;
+	free(dbstat);
+	CPPUNIT_ASSERT(nrecords == Filter1.functionCount_*2);
 	Filter1.AbstractBloomFilter::add("bla3");
+	db1->stat(NULL, &dbstat, 0);
+	nrecords = dbstat->bt_ndata;
+	free(dbstat);
+	CPPUNIT_ASSERT(nrecords == Filter1.functionCount_*3);
 	CPPUNIT_ASSERT(Filter1.CountingBloomFilter::remove("bla1"));
+	db1->stat(NULL, &dbstat, 0);
+	nrecords = dbstat->bt_ndata;
+	free(dbstat);
+	CPPUNIT_ASSERT(nrecords == Filter1.functionCount_*2);
 	CPPUNIT_ASSERT(Filter1.CountingBloomFilter::remove("bla2"));
+	db1->stat(NULL, &dbstat, 0);
+	nrecords = dbstat->bt_ndata;
+	free(dbstat);
+	CPPUNIT_ASSERT(nrecords == Filter1.functionCount_);
 	CPPUNIT_ASSERT(Filter1.AbstractBloomFilter::contains("bla3"));
 	CPPUNIT_ASSERT(Filter1.CountingBloomFilter::remove("bla3"));
-	//std::cout << std::endl << Filter1.toString() << std::endl;
+	db1->stat(NULL, &dbstat, 0);
+	nrecords = dbstat->bt_ndata;
+	free(dbstat);
+	CPPUNIT_ASSERT(nrecords == 0);
 }
 
 void DBBloomFilterTest::testContains() {
@@ -284,7 +351,7 @@ void DBBloomFilterTest::testDiff() {
 	}
 	CPPUNIT_ASSERT(handler.size()==2);
 	unsigned char sha[hashFunction_.getHashSize()];
-	hashFunction_(sha,"bla3");
+	hashFunction_(sha, "bla3");
 	CPPUNIT_ASSERT(memcmp(handler[0],sha,hashFunction_.getHashSize())==0);
 	hashFunction_(sha, "bla4");
 	CPPUNIT_ASSERT(memcmp(handler[1],sha,hashFunction_.getHashSize())==0);
