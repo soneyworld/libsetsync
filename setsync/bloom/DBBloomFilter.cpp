@@ -101,12 +101,12 @@ void DBBloomFilter::add(const unsigned char * key) {
 	// Insert the given key once per hash function
 	for (int i = 0; i < this->functionCount_; i++) {
 		// calculate the db key
-		uint64_t pos = this->hashFunction_->hash(key,
+		uint64_t pos = this->hashFunction_->operator ()(key,
 				this->cryptoHashFunction_.getHashSize(), i);
 		pos = pos % this->filterSize_;
 		Dbt db_key(&pos, sizeof(uint64_t));
 		// putting <pos/key> as key/value pair to berkeley db
-		int ret = this->db_->put(NULL, &db_key, &value, DB_OVERWRITE_DUP);
+		int ret = this->db_->put(NULL, &db_key, &value, DB_NODUPDATA);
 		if (ret == DB_KEYEXIST) {
 			// Abort: given key already exists in the db
 			return;
@@ -137,22 +137,21 @@ bool DBBloomFilter::remove(const unsigned char * key) {
 	unsigned char hash[this->cryptoHashFunction_.getHashSize()];
 	// position in the bloom filter
 	uint64_t pos;
-	uint64_t temphash;
 	Dbt db_key, db_data;
 	db_data.set_data(hash);
 	db_data.set_ulen(this->cryptoHashFunction_.getHashSize());
 	db_data.set_flags(DB_DBT_USERMEM);
+	// create new cursor
+	this->db_->cursor(NULL, &cursorp, 0);
 	// Getting crypto key entries for all hash functions
 	for (int func = 0; func < functionCount_; func++) {
 		// The searched crypto hash has been found
 		bool hash_found = false;
 		// Another crypto hash has been found
 		bool other_hash_found = false;
-		// create new cursor
-		this->db_->cursor(NULL, &cursorp, 0);
-		temphash = this->hashFunction_->hash(key,
+		pos = this->hashFunction_->operator ()(key,
 				this->cryptoHashFunction_.getHashSize(), func);
-		pos = temphash % this->filterSize_;
+		pos = pos % this->filterSize_;
 		db_key.set_data(&pos);
 		db_key.set_size(sizeof(uint64_t));
 		// db request for the set of crypto keys saved for pos
@@ -199,13 +198,11 @@ bool DBBloomFilter::remove(const unsigned char * key) {
 			// significant errors occur, so by default this if block
 			// can never be reached.
 		}
-		// close the db cursor
-		cursorp->close();
 		// delete the bloom filter bit only if the found set of entries is now 0
 		if (hash_found && !other_hash_found) {
 			std::size_t bit_index = 0;
 			std::size_t bit = 0;
-			compute_indices(temphash, bit_index, bit);
+			compute_indices(pos, bit_index, bit);
 			// sets bloom filter bit to 0
 			this->bitArray_[bit_index] ^= bit_mask[bit];
 		}
@@ -214,6 +211,8 @@ bool DBBloomFilter::remove(const unsigned char * key) {
 			result = true;
 		}
 	}
+	// close the db cursor
+	cursorp->close();
 	return result;
 }
 

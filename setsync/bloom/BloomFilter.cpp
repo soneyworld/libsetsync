@@ -224,7 +224,7 @@ void BloomFilter::add(const unsigned char *key) {
 	std::size_t bit_index = 0;
 	std::size_t bit = 0;
 	for (int i = 0; i < this->functionCount_; i++) {
-		uint64_t pos = this->hashFunction_->hash(key,
+		uint64_t pos = this->hashFunction_->operator ()(key,
 				this->cryptoHashFunction_.getHashSize(), i);
 		compute_indices(pos, bit_index, bit);
 		this->bitArray_[bit_index / BYTESIZE] |= bit_mask[bit];
@@ -239,7 +239,7 @@ void BloomFilter::addAll(const unsigned char *keys, const std::size_t count) {
 	uint64_t hashes[count * this->functionCount_];
 	for (int i = 0; i < count; i++) {
 		for (int j = 0; j < this->functionCount_; j++) {
-			hashes[i * this->functionCount_ + j] = this->hashFunction_->hash(
+			hashes[i * this->functionCount_ + j] = this->hashFunction_->operator ()(
 					keys + (this->cryptoHashFunction_.getHashSize() * i),
 					this->cryptoHashFunction_.getHashSize(), j);
 		}
@@ -280,7 +280,7 @@ bool BloomFilter::contains(const unsigned char *key) const {
 	std::size_t bit = 0;
 
 	for (int i = 0; i < this->functionCount_; i++) {
-		uint64_t pos = this->hashFunction_->hash(key,
+		uint64_t pos = this->hashFunction_->operator ()(key,
 				this->cryptoHashFunction_.getHashSize(), i);
 		compute_indices(pos, bit_index, bit);
 		if ((this->bitArray_[bit_index / BYTESIZE] & bit_mask[bit])

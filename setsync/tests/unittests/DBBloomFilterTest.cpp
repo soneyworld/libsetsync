@@ -102,6 +102,7 @@ void DBBloomFilterTest::testRemove() {
 	Filter1.AbstractBloomFilter::add("bla3");
 	CPPUNIT_ASSERT(Filter1.CountingBloomFilter::remove("bla1"));
 	CPPUNIT_ASSERT(Filter1.CountingBloomFilter::remove("bla2"));
+	CPPUNIT_ASSERT(Filter1.AbstractBloomFilter::contains("bla3"));
 	CPPUNIT_ASSERT(Filter1.CountingBloomFilter::remove("bla3"));
 	//std::cout << std::endl << Filter1.toString() << std::endl;
 }

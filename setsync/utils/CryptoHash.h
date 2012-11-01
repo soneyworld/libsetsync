@@ -27,7 +27,7 @@ private:
 	int hash(unsigned char * target_md, const std::string& str) const;
 	int hash(unsigned char * target_md, std::istream& in) const;
 public:
-	CryptoHash(const char * name = "sha1");
+	CryptoHash(const char * name = "md5");
 	virtual ~CryptoHash();
 	const std::size_t getHashSize() const;
 	static std::size_t getDefaultDigitLength();

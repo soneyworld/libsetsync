@@ -17,6 +17,16 @@ HashFunction * HashFunctionFactory::createHashFunction(std::string function) {
 	return new SaltedHashFunction(64);
 }
 
+uint64_t HashFunction::operator ()(const unsigned char * input,
+		const std::size_t length) const {
+	return this->hash(input, length, 0);
+}
+
+uint64_t HashFunction::operator ()(const unsigned char * input,
+		const std::size_t length, const std::size_t function) const {
+	return this->hash(input, length, function);
+}
+
 SplittingMDHashFunction::SplittingMDHashFunction(
 		const std::size_t outputLength, const utils::CryptoHash& hash) :
 	hash_(hash), outputLength_(outputLength) {
@@ -29,11 +39,6 @@ SplittingMDHashFunction::~SplittingMDHashFunction() {
 size_t SplittingMDHashFunction::count() const {
 	//TODO
 	throw "MUST BE IMPLEMENTED";
-}
-
-uint64_t SplittingMDHashFunction::hash(const unsigned char * input,
-		const std::size_t length) const {
-	return hash(input, length, 0);
 }
 
 uint64_t SplittingMDHashFunction::hash(const unsigned char * input,
@@ -53,11 +58,6 @@ SaltedHashFunction::~SaltedHashFunction() {
 
 size_t SaltedHashFunction::count() const {
 	return _salt.size();
-}
-
-uint64_t SaltedHashFunction::hash(const unsigned char * input,
-		const std::size_t length) const {
-	return hash(input, length, 0);
 }
 
 uint64_t SaltedHashFunction::hash(const unsigned char * input,

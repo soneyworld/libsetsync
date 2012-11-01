@@ -29,14 +29,10 @@ uint64_t DoubleHashingScheme::hash(const unsigned char * input,
 		const std::size_t length, const std::size_t function) const {
 	if (hashsize_ < sizeof(uint64_t) * 2 || this->hashsize_ != length)
 		throw "Must be implemented";
-	uint64_t f1 = 0;
-	uint64_t f2 = 0;
-	for (int i = 0; i < sizeof(uint64_t); i++) {
-		f1 = f1 << 8;
-		f2 = f2 << 8;
-		f1 = f1 | *(input + i);
-		f2 = f2 | *(input + i + sizeof(uint64_t));
-	}
+	uint64_t f1;
+	uint64_t f2;
+	memcpy(&f1, input, sizeof(uint64_t));
+	memcpy(&f2, input + sizeof(uint64_t), sizeof(uint64_t));
 	return f1 + (function + 1) * f2;
 }
 size_t DoubleHashingScheme::count() const {

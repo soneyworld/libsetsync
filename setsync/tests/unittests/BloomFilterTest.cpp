@@ -42,16 +42,16 @@ void BloomFilterTest::testHash() {
 	std::string s2 = "sample";
 	for (std::size_t i = 0; i < ProviderA.count(); i++) {
 		CPPUNIT_ASSERT(
-				ProviderA.hash(cad1, hash.getHashSize(), i) == ProviderB.hash(
+				ProviderA(cad1, hash.getHashSize(), i) == ProviderB(
 						cad1, hash.getHashSize(), i));
 		CPPUNIT_ASSERT(
-				ProviderA.hash(cad1, hash.getHashSize(), i) != ProviderC.hash(
+				ProviderA(cad1, hash.getHashSize(), i) != ProviderC(
 						cad2, hash.getHashSize(), i));
 	}
 	// Check, if all generated hash functions are different
 	for (std::size_t i = 1; i < ProviderA.count(); i++) {
 		CPPUNIT_ASSERT(
-				ProviderA.hash(cad1, hash.getHashSize(), 0) != ProviderB.hash(
+				ProviderA(cad1, hash.getHashSize(), 0) != ProviderB(
 						cad1, hash.getHashSize(), i));
 	}
 }
