@@ -204,7 +204,7 @@ bool DBBloomFilter::remove(const unsigned char * key) {
 			std::size_t bit = 0;
 			compute_indices(pos, bit_index, bit);
 			// sets bloom filter bit to 0
-			this->bitArray_[bit_index] ^= bit_mask[bit];
+			BITCLEAR(this->bitArray_, bit_index * BYTESIZE + bit);
 		}
 		if (hash_found) {
 			// Operation has been successful
