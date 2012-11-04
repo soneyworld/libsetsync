@@ -157,6 +157,9 @@ bool DBBloomFilter::remove(const unsigned char * key) {
 		// db request for the set of crypto keys saved for pos
 		ret = cursorp->get(&db_key, &db_data, DB_SET);
 		if (ret == 0) {
+			// Size of the set of saved crypto key for pos
+			db_recno_t counter;
+			int r = cursorp->count(&counter, 0);
 			// Prove, if the returned crypto key is equal to the given key
 			memcpy(hash, db_data.get_data(),
 					this->cryptoHashFunction_.getHashSize());
@@ -168,9 +171,7 @@ bool DBBloomFilter::remove(const unsigned char * key) {
 				// There are possibly multiple entries for pos
 				other_hash_found = true;
 			}
-			// Size of the set of saved crypto key for pos
-			db_recno_t counter;
-			int r = cursorp->count(&counter, 0);
+
 			if (counter > 1 && !hash_found) {
 				// Iterating over the set to find the correct entry
 				while ((ret = cursorp->get(&db_key, &db_data, DB_NEXT_DUP))
