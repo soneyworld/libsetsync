@@ -17,6 +17,8 @@ class DBBloomFilterTest: public CppUnit::TestFixture {
 private:
 	Db * db1;
 	Db * db2;
+	DbEnv * env1;
+	Db * db3;
 	utils::CryptoHash hashFunction_;
 public:
 	/*=== BEGIN tests for class 'DBBloomFilter' ===*/

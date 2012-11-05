@@ -6,6 +6,7 @@
 
 #include "DBBloomFilterTest.h"
 #include <setsync/bloom/DBBloomFilter.h>
+#include <setsync/utils/FileSystem.h>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -13,6 +14,8 @@
 #include <math.h>
 #include <list>
 #include <stdlib.h>
+#include <stdio.h>
+#include <sys/stat.h>
 
 using namespace std;
 namespace bloom {
@@ -82,6 +85,12 @@ void DBBloomFilterTest::testInsert() {
 	free(dbstat);
 	CPPUNIT_ASSERT(nrecords == Filter1.functionCount_*3);
 
+	/// Testing transaction code
+	bloom::DBBloomFilter Filter3(hashFunction_, db3, 10, false, 0.01);
+	Filter3.AbstractBloomFilter::add("bla1");
+	Filter3.AbstractBloomFilter::add("bla2");
+	Filter3.AbstractBloomFilter::add("bla3");
+	CPPUNIT_ASSERT(Filter3.itemCount_== 3);
 }
 
 void DBBloomFilterTest::testRemove() {
@@ -90,7 +99,7 @@ void DBBloomFilterTest::testRemove() {
 	unsigned int nrecords;
 	bloom::DBBloomFilter Filter1(hashFunction_, db1, 10, false, 0.01);
 	bloom::DBBloomFilter Filter2(hashFunction_, db2, 10, false, 0.01);
-
+	bloom::DBBloomFilter Filter3(hashFunction_, db3, 10, false, 0.01);
 	//	 test signature (const unsigned char* key)
 
 	unsigned char cad1[hashFunction_.getHashSize()];
@@ -179,7 +188,7 @@ void DBBloomFilterTest::testRemove() {
 	db1->stat(NULL, &dbstat, 0);
 	nrecords = dbstat->bt_ndata;
 	free(dbstat);
-//	cout << Filter1.toString() << " bla3"<< endl;
+	//	cout << Filter1.toString() << " bla3"<< endl;
 	CPPUNIT_ASSERT(nrecords == Filter1.functionCount_);
 	CPPUNIT_ASSERT(Filter1.AbstractBloomFilter::contains("bla3"));
 	CPPUNIT_ASSERT(Filter1.CountingBloomFilter::remove("bla3"));
@@ -187,6 +196,15 @@ void DBBloomFilterTest::testRemove() {
 	nrecords = dbstat->bt_ndata;
 	free(dbstat);
 	CPPUNIT_ASSERT(nrecords == 0);
+
+	/// Testing transaction code
+	Filter3.AbstractBloomFilter::add("bla1");
+	Filter3.AbstractBloomFilter::add("bla2");
+	Filter3.AbstractBloomFilter::add("bla3");
+	CPPUNIT_ASSERT(Filter3.CountingBloomFilter::remove("bla1"));
+	CPPUNIT_ASSERT(Filter3.CountingBloomFilter::remove("bla2"));
+	CPPUNIT_ASSERT(Filter3.CountingBloomFilter::remove("bla3"));
+
 }
 
 void DBBloomFilterTest::testContains() {
@@ -385,7 +403,20 @@ void DBBloomFilterTest::setUp() {
 	db2->open(NULL, "table2.db",
 			bloom::DBBloomFilter::getLogicalDatabaseName(),
 			bloom::DBBloomFilter::getTableType(), DB_CREATE, 0);
-
+	int ret = 0;
+	this->env1 = new DbEnv(0);
+	mkdir("table3", 0700);
+	try {
+		ret = this->env1->open("table3", DB_INIT_MPOOL | DB_CREATE, 0);
+	} catch (DbException e) {
+		cout << endl << ret << endl;
+		cout << e.what() << endl;
+		cout << e.get_errno() << endl;
+	}
+	this->db3 = new Db(this->env1, 0);
+	ret = db3->set_flags(bloom::DBBloomFilter::getTableFlags());
+	ret = db3->open(NULL, "bf", bloom::DBBloomFilter::getLogicalDatabaseName(),
+			bloom::DBBloomFilter::getTableType(), DB_CREATE, 0);
 }
 
 void DBBloomFilterTest::tearDown() {
@@ -398,6 +429,9 @@ void DBBloomFilterTest::tearDown() {
 		this->db2 = new Db(NULL, 0);
 		db1->remove("table1.db", NULL, 0);
 		db2->remove("table2.db", NULL, 0);
+		this->db3->close(0);
+		this->env1->close(0);
+		utils::FileSystem::rmDirRecursive("table3");
 	}
 	// Must catch both DbException and std::exception
 	catch (DbException &e) {
@@ -411,7 +445,8 @@ void DBBloomFilterTest::tearDown() {
 	}
 	delete this->db1;
 	delete this->db2;
-
+	delete this->db3;
+	delete this->env1;
 }
 }
 ;

@@ -123,6 +123,13 @@ void DBBloomFilter::addAll(const unsigned char* keys, const std::size_t count) {
 }
 
 bool DBBloomFilter::remove(const unsigned char * key) {
+	DbEnv * env = this->db_->get_env();
+	DbTxn * tid = NULL;
+	u_int32_t env_flags;
+	env->get_open_flags(&env_flags);
+	if ((env_flags & DB_INIT_TXN) == DB_INIT_TXN) {
+		env->txn_begin(NULL, &tid, 0);
+	}
 	// Check, if the key has been added to the filter
 	if (!contains(key)) {
 		// Abort: key doesn't exists in bloom filter
@@ -142,7 +149,7 @@ bool DBBloomFilter::remove(const unsigned char * key) {
 	db_data.set_ulen(this->cryptoHashFunction_.getHashSize());
 	db_data.set_flags(DB_DBT_USERMEM);
 	// create new cursor
-	this->db_->cursor(NULL, &cursorp, 0);
+	this->db_->cursor(tid, &cursorp, 0);
 	// Getting crypto key entries for all hash functions
 	for (int func = 0; func < functionCount_; func++) {
 		// The searched crypto hash has been found
@@ -214,6 +221,12 @@ bool DBBloomFilter::remove(const unsigned char * key) {
 	}
 	// close the db cursor
 	cursorp->close();
+	if (tid != NULL) {
+		if (result)
+			tid->commit(0);
+		else
+			tid->abort();
+	}
 	return result;
 }
 
