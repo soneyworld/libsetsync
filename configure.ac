@@ -161,12 +161,12 @@ AC_ARG_WITH(sqlite,
 
 AM_CONDITIONAL(OPENSSL, test x$use_openssl = xyes)
 AM_CONDITIONAL(SQLITE, test x$use_sqlite = xyes)
-AC_ARG_ENABLE(hashgenerator,
-  [AS_HELP_STRING([--enable-hashgenerator], [enable hashgenerator (default: no)])],
+AC_ARG_ENABLE(evaluation,
+  [AS_HELP_STRING([--enable-evaluation], [enable evaluation (default: no)])],
   [], [])
-AC_MSG_RESULT($enable_hashgenerator)
+AC_MSG_RESULT($enable_evaluation)
 
-AM_CONDITIONAL(GENERATE_HASHES, test x$enable_hashgenerator = xyes)
+AM_CONDITIONAL(EVALUATION, test x$enable_evaluation = xyes)
 
 AC_CONFIG_FILES([Makefile \
 	setsync/Makefile \
@@ -176,6 +176,6 @@ AC_CONFIG_FILES([Makefile \
 	setsync/utils/Makefile \
 	setsync/tests/Makefile \
 	setsync/tests/unittests/Makefile \
-	setsync/tests/hash_generator/Makefile \
+	setsync/tests/evaluation/Makefile \
 	setsync.pc])
 AC_OUTPUT

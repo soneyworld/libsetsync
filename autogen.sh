@@ -3,8 +3,8 @@
 #Copy Changelog and copyright file to debian folders
 cp ChangeLog debian/changelog
 cp COPYING debian/copyright
-# create version file
-. mkversion.sh $
+## create version file
+##. mkversion.sh $
 # create version file
 . mkversion.sh $@@
 if [ ! -d "m4" ]; then

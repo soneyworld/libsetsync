@@ -1,5 +1,5 @@
 
-generator_SOURCES = \
+evaluation_SOURCES = \
 	Main.cpp \
 	SHA1Generator.h	\
 	SHA1Generator.cpp \
@@ -21,13 +21,13 @@ endif
 if SQLITE
 AM_CPPFLAGS += @SQLITE_CFLAGS@
 AM_LDFLAGS += @SQLITE_LIBS@
-generator_SOURCES += SQLiteTest.h
-generator_SOURCES += SQLiteTest.cpp
+evaluation_SOURCES += SQLiteTest.h
+evaluation_SOURCES += SQLiteTest.cpp
 endif
 
 
-noinst_PROGRAMS=generator
-generator_CXXFLAGS = ${AM_CPPFLAGS}
-generator_LDFLAGS = ${AM_LDFLAGS}
-generator_LDADD = @top_srcdir@/setsync/libsetsync.la
-INCLUDES = -I@top_srcdir@/setsync
+noinst_PROGRAMS=evaluation
+evaluation_CXXFLAGS = ${AM_CPPFLAGS}
+evaluation_LDFLAGS = ${AM_LDFLAGS}
+evaluation_LDADD = @top_srcdir@/setsync/libsetsync.la
+INCLUDES = -I@top_srcdir@
