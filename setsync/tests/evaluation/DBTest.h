@@ -12,6 +12,8 @@
 
 class DBTest: public Test {
 private:
+	void runDbSizeTest(const DBTYPE type, const size_t keysize, const size_t valuesize);
+	void runDbSizeTest();
 	void runMemDb();
 	void runFsDb();
 	void runTrie(Db * db);

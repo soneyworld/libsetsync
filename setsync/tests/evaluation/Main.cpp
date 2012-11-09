@@ -16,7 +16,7 @@
 int main(int ac, char **av) {
 	std::set<std::string> args;
 	std::set<std::string>::iterator iter;
-	for (int i = 0; i < ac; i++) {
+	for (int i = 1; i < ac; i++) {
 		std::string arg(av[i]);
 		args.insert(arg);
 	}
