@@ -1,0 +1,7 @@
+Requirements to build this library:
+
+Ubuntu 12.04:
+apt-get install build-essential libdb++-dev autoconf libtool libcppunit-dev pkg-config
+ 
+optional:
+apt-get install libsqlite3-dev libssl-dev
