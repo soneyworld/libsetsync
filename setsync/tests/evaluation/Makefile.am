@@ -7,6 +7,8 @@ evaluation_SOURCES = \
 	BFTest.cpp \
 	DBTest.h \
 	DBTest.cpp \
+	BDBInsertRemoveTest.h \
+	BDBInsertRemoveTest.cpp \
 	Test.h
 
 # what flags you want to pass to the C compiler & linker

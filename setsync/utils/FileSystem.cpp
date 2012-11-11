@@ -53,4 +53,10 @@ int FileSystem::rmDirRecursive(const char *path) {
 	}
 	return r;
 }
+
+uint64_t FileSystem::fileSize(const char* file){
+	struct stat filestatus;
+	stat(file, &filestatus);
+	return filestatus.st_size;
+}
 }

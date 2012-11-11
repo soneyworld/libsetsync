@@ -6,6 +6,7 @@
 #include "config.h"
 #include "BFTest.h"
 #include "DBTest.h"
+#include "BDBInsertRemoveTest.h"
 #include <string>
 #include <set>
 
@@ -24,23 +25,36 @@ int main(int ac, char **av) {
 		std::cout << "Possible parameter tests are: "<< std::endl;
 		std::cout << "--bf-test"<< std::endl;
 		std::cout << "--bdb-test"<< std::endl;
+		std::cout << "--bdb-insert-remove-test" << std::endl;
+#ifdef HAVE_SQLITE
 		std::cout << "--sql-test"<< std::endl;
+#endif
 		std::cout << "--all-tests"<< std::endl;
 		return 0;
 	}
 	bool bdb = !(args.find(std::string("--bdb-test"))==args.end());
 	bool bf = !(args.find(std::string("--bf-test"))==args.end());
+	bool bdbinsert = !(args.find(std::string("--bdb-insert-remove-test"))==args.end());
 	bool all = !(args.find(std::string("--all-tests"))==args.end());
 #ifdef HAVE_SQLITE
 	bool sqlite = !(args.find(std::string("--sql-test"))==args.end());
 #endif
 
-
 	if (bf || all) {
 		BFTest bftest;
 		bftest.run();
 	}
+	if (bdbinsert || all) {
+		{
+			BDBInsertRemoveTest bdbtest(DB_HASH);
+			bdbtest.run();
+		}
+		{
+			BDBInsertRemoveTest bdbtest(DB_BTREE);
+			bdbtest.run();
+		}
 
+	}
 	if (bdb || all) {
 		DBTest dbtest;
 		dbtest.run();
