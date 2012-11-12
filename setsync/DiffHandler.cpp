@@ -95,4 +95,9 @@ UniqueFilterDiffHandler::~UniqueFilterDiffHandler() {
 		free(*iter);
 	}
 }
+
+UniqueFilterDiffHandler::UniqueFilterDiffHandler(diff_callback * callback,
+		void * closure) :
+	C_DiffHandler(callback, closure) {
+}
 }

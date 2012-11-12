@@ -167,6 +167,16 @@ private:
 	std::vector<unsigned char *> list_;
 public:
 	/**
+	 * Constructor of a filtered version of the C_DiffHandler.
+	 * The given callback function will be called by the handle method and
+	 * the given closure will be added as parameter to the diff_callback function.
+	 *
+	 * \param callback to be called by handler method
+	 * \param closure pointer to the calling instance
+	 */
+	UniqueFilterDiffHandler(diff_callback *callback, void *closure);
+
+	/**
 	 * Default destructor cleans the list
 	 */
 	virtual ~UniqueFilterDiffHandler();
