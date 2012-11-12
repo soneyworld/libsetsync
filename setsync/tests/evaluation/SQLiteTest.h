@@ -12,6 +12,7 @@ class SQLiteTest : public Test{
 private:
 	void testInMemory();
 	void testOnFS();
+	void testTransactions();
 public:
 	SQLiteTest();
 	virtual void run();

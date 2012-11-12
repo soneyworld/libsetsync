@@ -6,6 +6,8 @@
 
 #include "SQLiteTest.h"
 #include <setsync/utils/CryptoHash.h>
+#include <sstream>
+using namespace std;
 
 SQLiteTest::SQLiteTest() {
 	// TODO Auto-generated constructor stub
@@ -99,7 +101,41 @@ void SQLiteTest::testOnFS() {
 			counter / duration);
 }
 
+void SQLiteTest::testTransactions() {
+	cout << "running SQLite DB transaction test:" << endl;
+	cout << "notrans,interval,duration" << endl;
+	remove("generated.db");
+	std::string dbname = "generated.db";
+	sqlite::SQLiteDatabase * db = new sqlite::SQLiteDatabase(dbname);
+	sqlite3 * db_ = db->getConnection();
+	int rc =
+			sqlite3_exec(db_,
+					"CREATE TABLE IF NOT EXISTS test (hash INTEGER);", NULL,
+					NULL, NULL);
+	int count = 0;
+	clock_t start, stop, duration, iduration;
+	duration = iduration = 0;
+	for (uint64_t i = 0; i < ITERATIONS; i++) {
+		stringstream ss;
+		ss << "INSERT INTO test VALUES (" << i << ");";
+		start = clock();
+		sqlite3_exec(db_, ss.str().c_str(), 0, 0, 0);
+		stop = clock();
+		duration += stop - start;
+		iduration += stop - start;
+		if (count == ITEMS_PER_LOOPS) {
+			cout << i << "," << iduration << "," << duration << endl;
+			count = 0;
+			iduration = 0;
+		}
+		count++;
+	}
+	cout << ITERATIONS << "," << iduration <<"," << duration << endl;
+	remove("generated.db");
+}
+
 void SQLiteTest::run() {
+	testTransactions();
 	testInMemory();
 	testOnFS();
 

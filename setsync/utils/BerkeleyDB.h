@@ -38,6 +38,8 @@ public:
 	 * \return number of data entries in the given db
 	 */
 	static uint64_t numberOfData(Db * db);
+
+	static std::string tableTypeToString(Db * db);
 };
 
 }

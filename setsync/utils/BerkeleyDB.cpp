@@ -79,4 +79,28 @@ uint64_t BerkeleyDB::numberOfData(Db * db) {
 	return numberOfData(db, NULL, 0);
 }
 
+std::string BerkeleyDB::tableTypeToString(Db * db) {
+	DBTYPE type;
+	db->get_type(&type);
+	std::string t;
+	switch (type) {
+	case DB_HASH:
+		t = "DB_HASH";
+		break;
+	case DB_BTREE:
+		t = "DB_BTREE";
+		break;
+	case DB_QUEUE:
+		t = "DB_QUEUE";
+		break;
+	case DB_RECNO:
+		t = "DB_RECNO";
+		break;
+	default:
+		t = "unknown type";
+		break;
+	}
+	return t;
+}
+
 }

@@ -6,6 +6,7 @@
 
 #include "BDBInsertRemoveTest.h"
 #include <setsync/utils/FileSystem.h>
+#include <setsync/utils/BerkeleyDB.h>
 
 using namespace std;
 
@@ -23,32 +24,20 @@ BDBInsertRemoveTest::~BDBInsertRemoveTest() {
 }
 
 void BDBInsertRemoveTest::run() {
-	string t;
-	switch (type_) {
-	case DB_HASH:
-		t = "DB_HASH";
-		break;
-	case DB_BTREE:
-		t = "DB_BTREE";
-		break;
-	default:
-		t = "unknown type";
-		break;
-	}
-	cout << "running Berkeley DB insert delete file size test (" << t << ")"
-			<< endl;
+	cout << "running Berkeley DB insert delete file size test ("
+			<< utils::BerkeleyDB::tableTypeToString(db) << ")" << endl;
 	fillDB();
 	cout << ITERATIONS << " inserts done:\nITEMS_PER_LOOP=" << ITEMS_PER_LOOPS
 			<< endl;
-	cout << "LOOP_ITERATIONS="<<LOOP_ITERATIONS<< endl;
+	cout << "LOOP_ITERATIONS=" << LOOP_ITERATIONS << endl;
 	insertRemove();
 }
 
 void BDBInsertRemoveTest::insertRemove() {
 	cout << "loop,noentries,filesize" << endl;
 	Dbt value(NULL, 0);
-	cout << "0," << getNumberOfEntries() << "," << utils::FileSystem::fileSize(
-			"temp-table.db") << endl;
+	cout << "0," << utils::BerkeleyDB::numberOfKeys(db) << ","
+			<< utils::FileSystem::fileSize("temp-table.db") << endl;
 	for (uint64_t loop = 0; loop < LOOP_ITERATIONS; loop++) {
 		for (uint64_t item = 0; item < ITEMS_PER_LOOPS; item++) {
 			uint64_t d = loop * ITEMS_PER_LOOPS + item;
@@ -59,7 +48,7 @@ void BDBInsertRemoveTest::insertRemove() {
 			this->db->put(NULL, &ikey, &value, 0);
 		}
 		this->db->sync(0);
-		cout << loop + 1 << "," << getNumberOfEntries() << ","
+		cout << loop + 1 << "," << utils::BerkeleyDB::numberOfKeys(db) << ","
 				<< utils::FileSystem::fileSize("temp-table.db") << endl;
 	}
 	for (uint64_t loop = 0; loop < LOOP_ITERATIONS; loop++) {
@@ -68,10 +57,11 @@ void BDBInsertRemoveTest::insertRemove() {
 			Dbt dkey(&d, sizeof(uint64_t));
 			this->db->del(NULL, &dkey, 0);
 		}
-		this->db->compact(NULL,NULL,NULL,NULL,DB_FREE_SPACE,NULL);
+		this->db->compact(NULL, NULL, NULL, NULL, DB_FREE_SPACE, NULL);
 		this->db->sync(0);
-		cout << loop + 1 + LOOP_ITERATIONS << "," << getNumberOfEntries()
-				<< "," << utils::FileSystem::fileSize("temp-table.db") << endl;
+		cout << loop + 1 + LOOP_ITERATIONS << ","
+				<< utils::BerkeleyDB::numberOfKeys(db) << ","
+				<< utils::FileSystem::fileSize("temp-table.db") << endl;
 	}
 }
 
@@ -82,26 +72,5 @@ void BDBInsertRemoveTest::fillDB() {
 		this->db->put(NULL, &key, &value, 0);
 	}
 	this->db->sync(0);
-}
-
-unsigned int BDBInsertRemoveTest::getNumberOfEntries() {
-	unsigned int nrecords;
-	switch (type_) {
-	case DB_HASH:
-		DB_HASH_STAT * hashstat;
-		db->stat(NULL, &hashstat, 0);
-		nrecords = hashstat->hash_nkeys;
-		free(hashstat);
-		break;
-	case DB_BTREE:
-		DB_BTREE_STAT *dbstat;
-		db->stat(NULL, &dbstat, 0);
-		nrecords = dbstat->bt_nkeys;
-		free(dbstat);
-		break;
-	default:
-		exit(-1);
-	}
-	return nrecords;
 }
 

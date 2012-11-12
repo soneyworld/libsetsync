@@ -15,7 +15,6 @@ private:
 	void fillDB();
 	void insertRemove();
 	const DBTYPE type_;
-	unsigned int getNumberOfEntries();
 public:
 	BDBInsertRemoveTest(const DBTYPE type);
 	virtual ~BDBInsertRemoveTest();
