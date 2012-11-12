@@ -121,7 +121,7 @@ public:
  * this class is used to wrap the way a callback is implemented in C.
  */
 class C_DiffHandler: public AbstractDiffHandler {
-private:
+protected:
 	/// Pointer to the calling instance
 	void *closure_;
 	/// Callback function pointer to be called by handle
@@ -145,6 +145,34 @@ public:
 
 	/**
 	 * Calls directly the diff_callback with the given hash and hashsize.
+	 * Also the closure will be added to the diff_callback function as
+	 * parameter.
+	 *
+	 * \param hash
+	 * \param hashsize
+	 */
+	virtual void handle(const unsigned char * hash, const std::size_t hashsize);
+};
+/**
+ * A filtered version of the simple wrapper for c callbacks. A handled
+ * hash will only be reported once. So duplicated hashes will be filtered.
+ *
+ * This implementation should only be chosen, if the difference is small
+ * and the list of hashes fits into the memory. Otherwise, the normal
+ * C_DiffHandler should be used, because it is stateless.
+ */
+class UniqueFilterDiffHandler: public C_DiffHandler {
+private:
+	/// list of hashes to which has been handled already
+	std::vector<unsigned char *> list_;
+public:
+	/**
+	 * Default destructor cleans the list
+	 */
+	virtual ~UniqueFilterDiffHandler();
+	/**
+	 * Calls the diff_callback with the given hash and hashsize, if it is
+	 * a new unhandled hash.
 	 * Also the closure will be added to the diff_callback function as
 	 * parameter.
 	 *

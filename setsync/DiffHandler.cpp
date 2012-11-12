@@ -14,8 +14,9 @@ namespace setsync {
 ListDiffHandler::ListDiffHandler() {
 }
 
-void AbstractDiffHandler::operator()(const unsigned char * hash, const std::size_t hashsize){
-	this->handle(hash,hashsize);
+void AbstractDiffHandler::operator()(const unsigned char * hash,
+		const std::size_t hashsize) {
+	this->handle(hash, hashsize);
 }
 void ListDiffHandler::handle(const unsigned char * hash,
 		const std::size_t hashsize) {
@@ -71,5 +72,27 @@ C_DiffHandler::~C_DiffHandler() {
 void C_DiffHandler::handle(const unsigned char * hash,
 		const std::size_t hashsize) {
 	(this->callback_)(this->closure_, hash, hashsize);
+}
+
+void UniqueFilterDiffHandler::handle(const unsigned char * hash,
+		const std::size_t hashsize) {
+	std::vector<unsigned char *>::iterator iter;
+	for (iter = this->list_.begin(); iter != this->list_.end(); iter++) {
+		if (memcmp(*iter, hash, hashsize) == 0) {
+			// skip duplicated entry
+			return;
+		}
+	}
+	unsigned char * h = (unsigned char*) malloc(hashsize);
+	memcpy(h, hash, hashsize);
+	this->list_.push_back(h);
+	C_DiffHandler::handle(hash, hashsize);
+}
+
+UniqueFilterDiffHandler::~UniqueFilterDiffHandler() {
+	std::vector<unsigned char *>::iterator iter;
+	for (iter = this->list_.begin(); iter != this->list_.end(); iter++) {
+		free(*iter);
+	}
 }
 }
