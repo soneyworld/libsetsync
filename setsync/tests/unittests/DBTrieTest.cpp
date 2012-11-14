@@ -193,6 +193,25 @@ void DbTrieTest::testToString() {
 	//	cout << dot;
 }
 
+void DbTrieTest::testSubTrie() {
+	trie::DBTrie trie1(hash, db);
+	unsigned char h[hash.getHashSize()];
+	hash(h,"bla1");
+	trie1.add(h,true);
+	hash(h,"bla2");
+	trie1.add(h,true);
+	hash(h,"bla3");
+	trie1.add(h,true);
+	hash(h,"bla4");
+	trie1.add(h,true);
+	size_t buffersize = 100*hash.getHashSize();
+	unsigned char buffer[buffersize];
+	unsigned char root[hash.getHashSize()];
+	CPPUNIT_ASSERT(trie1.getRoot(root));
+	size_t subtrie = trie1.getSubTrie(root,buffer,buffersize);
+	CPPUNIT_ASSERT(subtrie == 4);
+}
+
 void DbNodeTest::setUp(void) {
 	this->db = new Db(NULL, 0);
 	db->open(NULL, "trienode1.db", trie::DBTrie::getLogicalDatabaseName(),

@@ -469,7 +469,8 @@ DbNode& DbNode::operator=(const DbNode& rhs) {
 
 DbNode DbNode::getSmaller() const {
 	if (hasChildren_) {
-		DbNode result = DbNode(this->trie_, this->hashfunction_, this->db_, this->smaller);
+		DbNode result = DbNode(this->trie_, this->hashfunction_, this->db_,
+				this->smaller);
 		return result;
 	} else {
 		throw DbTrieException("THERE ARE NO CHILDREN");
@@ -477,7 +478,8 @@ DbNode DbNode::getSmaller() const {
 }
 DbNode DbNode::getLarger() const {
 	if (hasChildren_) {
-		DbNode result = DbNode(this->trie_, this->hashfunction_, this->db_, this->larger);
+		DbNode result = DbNode(this->trie_, this->hashfunction_, this->db_,
+				this->larger);
 		return result;
 	} else {
 		throw DbTrieException("THERE ARE NO CHILDREN");
@@ -485,7 +487,8 @@ DbNode DbNode::getLarger() const {
 }
 DbNode DbNode::getParent() const {
 	if (hasParent_) {
-		DbNode result = DbNode(this->trie_, this->hashfunction_, this->db_, this->parent);
+		DbNode result = DbNode(this->trie_, this->hashfunction_, this->db_,
+				this->parent);
 		return result;
 	} else {
 		throw DbTrieException("THERE IS NO PARENT");
@@ -493,7 +496,8 @@ DbNode DbNode::getParent() const {
 }
 
 bool DbNode::insert(const unsigned char * hash, bool performHash) {
-	DbNode newnode = DbNode(this->trie_, this->hashfunction_, this->db_, hash, true);
+	DbNode newnode = DbNode(this->trie_, this->hashfunction_, this->db_, hash,
+			true);
 	return this->insert(newnode, performHash);
 }
 
@@ -821,5 +825,35 @@ std::string DBTrie::toString() const {
 	}
 	ss << "}" << std::endl;
 	return ss.str();
+}
+
+size_t DBTrie::getSubTrie(const unsigned char * hash, void * buffer,
+		const size_t buffersize) {
+	//TODO
+	DbNode subtrieroot(*this, this->hash_, this->db_, hash, false);
+	unsigned int maxNumberOfHashes = buffersize / this->hash_.getHashSize();
+	if (maxNumberOfHashes < 2) {
+		throw "buffer is too small!";
+	}
+	unsigned int depth = 0;
+	unsigned int temp = maxNumberOfHashes;
+	while ((unsigned int) (temp / 2) > 0) {
+		temp = (unsigned int) temp / 2;
+		depth++;
+	}
+
+	return 0;
+}
+
+bool DBTrie::getRoot(unsigned char * hash) {
+	if (this->getSize() == 0)
+		return false;
+	try{
+		DbNode root = this->root_.get();
+		memcpy(hash, root.hash, this->hash_.getHashSize());
+		return true;
+	}catch(DbException e){
+		return false;
+	}
 }
 }

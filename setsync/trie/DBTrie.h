@@ -304,7 +304,8 @@ public:
 	 *
 	 * \param db pointer to berkeley db to be used
 	 */
-	DbRootNode(const DBTrie& trie, const utils::CryptoHash& hashfunction, Db * db);
+	DbRootNode(const DBTrie& trie, const utils::CryptoHash& hashfunction,
+			Db * db);
 	/**
 	 * Loads the hash of the DbNode, which is saved as root node. Throws a
 	 * DbNoRootFoundException if no root is available on this db.
@@ -345,6 +346,26 @@ public:
 	static const DBTYPE getTableType();
 	virtual bool operator ==(const Trie& other) const;
 	virtual std::string toString() const;
+	/**
+	 * Copies a subtrie into the given buffer with a maximum size
+	 * of buffersize. The root of the subtrie must be passed by the
+	 * first argument.
+	 *
+	 * \param hash of the root of the requested subtrie
+	 * \param buffer where the subtrie will by copied to
+	 * \param buffersize for the subtrie
+	 * \return used buffer size in bytes
+	 */
+	virtual size_t getSubTrie(const unsigned char * hash, void * buffer,
+			const size_t buffersize);
+	/**
+	 * Copies the root of the trie into the given memory
+	 *
+	 * \param hash memory space, where the root should be copied to
+	 * \return true if a root is available, false otherwise
+	 *
+	 */
+	virtual bool getRoot(unsigned char * hash);
 };
 
 }

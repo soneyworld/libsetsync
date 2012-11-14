@@ -205,4 +205,14 @@ bool MemTrie::operator ==(const Trie& other) const {
 	return false;
 }
 
+size_t MemTrie::getSubTrie(const unsigned char * hash, void * buffer,
+		const size_t buffersize) {
+	//TODO
+	return 0;
+}
+bool MemTrie::getRoot(unsigned char * hash){
+	//TODO
+	return false;
+}
+
 }
