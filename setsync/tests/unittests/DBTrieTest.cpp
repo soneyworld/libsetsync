@@ -184,26 +184,28 @@ void DbTrieTest::testSavingAndLoading() {
 void DbTrieTest::testToString() {
 	//	cout << endl;
 	trie::DBTrie trie1(hash, db);
-	for (unsigned int i = 1; i <= 20; i++) {
+	for (unsigned int i = 1; i <= 10; i++) {
 		stringstream ss;
-		ss << "bla" << i;
+		ss << "test" << i;
 		CPPUNIT_ASSERT(trie1.Trie::add(ss.str()));
 	}
 	string dot = trie1.toString();
-	//	cout << dot;
+	//cout << dot;
 }
 
 void DbTrieTest::testSubTrie() {
 	trie::DBTrie trie1(hash, db);
-	unsigned char h[hash.getHashSize()];
-	hash(h,"bla1");
-	trie1.add(h,true);
-	hash(h,"bla2");
-	trie1.add(h,true);
-	hash(h,"bla3");
-	trie1.add(h,true);
-	hash(h,"bla4");
-	trie1.add(h,true);
+	trie::DBTrie trie2(hash, db2);
+	trie1.Trie::add("bla1");
+	trie2.Trie::add("bla1");
+	trie1.Trie::add("bla2");
+	trie2.Trie::add("bla2");
+	trie1.Trie::add("bla3");
+	trie2.Trie::add("bla3");
+	trie2.Trie::add("bla4");
+//	cout << endl;
+//	cout << trie1.toString() << endl;
+//	cout << trie2.toString() << endl;
 	size_t buffersize = 100*hash.getHashSize();
 	unsigned char buffer[buffersize];
 	unsigned char root[hash.getHashSize()];
