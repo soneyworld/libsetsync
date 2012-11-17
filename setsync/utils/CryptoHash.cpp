@@ -113,11 +113,8 @@ CryptoHash::~CryptoHash() {
 }
 
 std::size_t CryptoHash::getDefaultDigitLength() {
-#ifdef HAVE_OPENSSL
-	return SHA_DIGEST_LENGTH;
-#else
-	return 20;
-#endif
+	const CryptoHash hash;
+	return hash.getHashSize();
 }
 
 int CryptoHash::operator()(unsigned char * target_md, const char * str) const {
