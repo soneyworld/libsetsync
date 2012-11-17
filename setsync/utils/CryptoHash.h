@@ -34,10 +34,11 @@ private:
 public:
 	/**
 	 * Possible hash algorithms are: md2, md4, md5, sha1, sha224, sha256, sha384, sha512
+	 * The default algorithm is sha1
 	 *
 	 * \param name of the hash algorithm
 	 */
-	CryptoHash(const char * name = "md5");
+	CryptoHash(const char * name = "sha1");
 	/**
 	 * default destructor
 	 */
@@ -47,7 +48,7 @@ public:
 	 */
 	const std::size_t getHashSize() const;
 	/**
-	 * \return 20
+	 * \return the length of the default digit algorithm
 	 */
 	static std::size_t getDefaultDigitLength();
 	int operator()(unsigned char * target_md, const char * str) const;
