@@ -136,7 +136,7 @@ void SQLiteTest::testTransactions() {
 
 void SQLiteTest::run() {
 	testTransactions();
-	testInMemory();
-	testOnFS();
+	//testInMemory();
+	//testOnFS();
 
 }
