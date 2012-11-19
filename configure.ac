@@ -81,10 +81,16 @@ AC_FUNC_MMAP
 AC_CHECK_FUNCS([memset])
 AC_CHECK_FUNCS([munmap])
 AC_CHECK_FUNCS([pow])
+AC_CHECK_FUNCS([strcasecmp])
+AC_CHECK_FUNCS([rmdir])
 
 AC_OPENMP
 
 AC_CHECK_LIB([m], [log])
+
+# Check for inline support
+AC_C_INLINE
+
 
 # BerkeleyDB c++
 AM_CONDITIONAL(BERKELEY_DB, true)
@@ -163,7 +169,10 @@ AM_CONDITIONAL(OPENSSL, test x$use_openssl = xyes)
 AM_CONDITIONAL(SQLITE, test x$use_sqlite = xyes)
 AC_ARG_ENABLE(evaluation,
   [AS_HELP_STRING([--enable-evaluation], [enable evaluation (default: no)])],
-  [], [])
+  [
+  	AC_CHECK_FUNCS([mkdir])
+  	AC_CHECK_FUNCS([clock_gettime])
+  ], [])
 AC_MSG_RESULT($enable_evaluation)
 
 AM_CONDITIONAL(EVALUATION, test x$enable_evaluation = xyes)
