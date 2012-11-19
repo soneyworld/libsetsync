@@ -33,6 +33,7 @@ public:
 	void testOperatorXorAndAssign();
 	void testSavingAndLoadingSettings();
 	void testDiff();
+	void testToString();
 	/*=== END   tests for class 'DBBloomFilter' ===*/
 
 	void setUp();
@@ -50,6 +51,7 @@ CPPUNIT_TEST_SUITE(DBBloomFilterTest);
 		CPPUNIT_TEST(testOperatorXorAndAssign);
 		CPPUNIT_TEST(testSavingAndLoadingSettings);
 		CPPUNIT_TEST(testDiff);
+		CPPUNIT_TEST(testToString);
 	CPPUNIT_TEST_SUITE_END();
 };
 CPPUNIT_TEST_SUITE_REGISTRATION( DBBloomFilterTest);
