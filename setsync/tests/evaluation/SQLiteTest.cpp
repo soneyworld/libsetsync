@@ -8,6 +8,8 @@
 #include <setsync/utils/CryptoHash.h>
 #include <sstream>
 #include <time.h>
+#include "StopWatch.h"
+
 using namespace std;
 
 SQLiteTest::SQLiteTest() {
@@ -115,33 +117,26 @@ void SQLiteTest::testTransactions() {
 					"CREATE TABLE IF NOT EXISTS test (hash INTEGER);", NULL,
 					NULL, NULL);
 	int count = 0;
-	clock_t start, stop, duration, iduration;
-	duration = iduration = 0;
-	timespec ts_start, ts_stop;
-	double ts_duration = 0.0;
+	double duration = 0;
+	StopWatch stopwatch;
 	for (uint64_t i = 0; i < ITERATIONS; i++) {
 		stringstream ss;
 		ss << "INSERT INTO test VALUES (" << i << ");";
-		clock_gettime(CLOCK_REALTIME, &ts_start);
-		start = clock();
+		stopwatch.start();
 		sqlite3_exec(db_, ss.str().c_str(), 0, 0, 0);
-		stop = clock();
-		clock_gettime(CLOCK_REALTIME, &ts_stop);
-		duration += stop - start;
-		iduration += stop - start;
-		ts_duration += (ts_stop.tv_sec - ts_start.tv_sec) * 1000000000;
-		ts_duration += (ts_stop.tv_nsec - ts_start.tv_nsec);
+		stopwatch.stop();
 		if (count == ITEMS_PER_LOOPS) {
-			cout << i << "," << ((double)iduration)/CLOCKS_PER_SEC  << "," << ts_duration / 1000000000
-					<< "," << duration << endl;
+			duration += stopwatch.getDuration();
+			cout << i << "," << stopwatch.getCPUDuration() << ","
+					<< stopwatch.getDuration() << "," << duration << endl;
 			count = 0;
-			iduration = 0;
-			ts_duration = 0;
+			stopwatch.reset();
 		}
 		count++;
 	}
-	cout << ITERATIONS << "," << ((double)iduration)/CLOCKS_PER_SEC << "," << ts_duration / 1000000000
-			<< "," << duration << endl;
+	duration += stopwatch.getDuration();
+	cout << ITERATIONS << "," << stopwatch.getCPUDuration() << ","
+			<< stopwatch.getDuration() << "," << duration << endl;
 	remove("generated.db");
 }
 
