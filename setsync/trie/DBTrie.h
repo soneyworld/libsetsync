@@ -11,6 +11,7 @@
 #include <db_cxx.h>
 #include <setsync/BerkeleyDBTableUserInterface.h>
 #include <exception>
+#include <vector>
 
 namespace trie {
 
@@ -87,6 +88,7 @@ class DbNode {
 	friend class DBValue;
 	friend class DbNodeTest;
 	friend class DBTrie;
+	friend class DbTrieTest;
 private:
 	/// Pointer to the Berkeley DB where the node (should) exist
 	Db * db_;
@@ -335,6 +337,7 @@ class DBTrie: public trie::Trie,
 private:
 	Db * db_;
 	DbRootNode root_;
+	size_t getSubTrie(const DbNode& root, const size_t numberOfNodes, std::vector<DbNode>& inner_nodes, std::vector<DbNode>& child_nodes);
 public:
 	DBTrie(const utils::CryptoHash& hash, Db * db);
 	virtual ~DBTrie();

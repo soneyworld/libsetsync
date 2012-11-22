@@ -203,15 +203,85 @@ void DbTrieTest::testSubTrie() {
 	trie1.Trie::add("bla3");
 	trie2.Trie::add("bla3");
 	trie2.Trie::add("bla4");
-//	cout << endl;
-//	cout << trie1.toString() << endl;
-//	cout << trie2.toString() << endl;
-	size_t buffersize = 100*hash.getHashSize();
+	//	cout << endl;
+	//	cout << trie1.toString() << endl;
+	//	cout << trie2.toString() << endl;
+	size_t buffersize = 100 * hash.getHashSize();
 	unsigned char buffer[buffersize];
 	unsigned char root[hash.getHashSize()];
 	CPPUNIT_ASSERT(trie1.getRoot(root));
-	size_t subtrie = trie1.getSubTrie(root,buffer,buffersize);
-	CPPUNIT_ASSERT(subtrie == 4);
+	size_t subtrie = trie1.getSubTrie(root, buffer, buffersize);
+	CPPUNIT_ASSERT(subtrie == 3 * hash.getHashSize());
+	CPPUNIT_ASSERT(trie2.getRoot(root));
+	subtrie = trie2.getSubTrie(root, buffer, buffersize);
+	CPPUNIT_ASSERT(subtrie == 4 * hash.getHashSize());
+	unsigned char temphash[hash.getHashSize()];
+	hash(temphash, "bla1");
+	bool found = false;
+	for (size_t i = 0; i < subtrie / hash.getHashSize(); i++) {
+		if (memcmp(buffer + (i * hash.getHashSize()), temphash,
+				hash.getHashSize()) == 0) {
+			found = true;
+			break;
+		}
+	}
+	CPPUNIT_ASSERT(found);
+	hash(temphash, "bla2");
+	found = false;
+	for (size_t i = 0; i < subtrie / hash.getHashSize(); i++) {
+		if (memcmp(buffer + (i * hash.getHashSize()), temphash,
+				hash.getHashSize()) == 0) {
+			found = true;
+			break;
+		}
+	}
+	CPPUNIT_ASSERT(found);
+	hash(temphash, "bla3");
+	found = false;
+	for (size_t i = 0; i < subtrie / hash.getHashSize(); i++) {
+		if (memcmp(buffer + (i * hash.getHashSize()), temphash,
+				hash.getHashSize()) == 0) {
+			found = true;
+			break;
+		}
+	}
+	CPPUNIT_ASSERT(found);
+	hash(temphash, "bla4");
+	found = false;
+	for (size_t i = 0; i < subtrie / hash.getHashSize(); i++) {
+		if (memcmp(buffer + (i * hash.getHashSize()), temphash,
+				hash.getHashSize()) == 0) {
+			found = true;
+			break;
+		}
+	}
+	CPPUNIT_ASSERT(found);
+	subtrie = trie2.getSubTrie(root, buffer, 2 * hash.getHashSize());
+	DbNode rootnode(trie2, hash, db2, root, false);
+//	cout << endl << trie2.toString() << endl;
+//	cout << utils::OutputFunctions::CryptoHashtoString(buffer) << endl;
+//	cout << utils::OutputFunctions::CryptoHashtoString(
+//			buffer + hash.getHashSize()) << endl;
+	CPPUNIT_ASSERT(subtrie == 2 * hash.getHashSize());
+	found = false;
+	for (size_t i = 0; i < subtrie / hash.getHashSize(); i++) {
+		if (memcmp(buffer + (i * hash.getHashSize()), rootnode.smaller,
+				hash.getHashSize()) == 0) {
+			found = true;
+			break;
+		}
+	}
+	CPPUNIT_ASSERT(found);
+	found = false;
+	for (size_t i = 0; i < subtrie / hash.getHashSize(); i++) {
+		if (memcmp(buffer + (i * hash.getHashSize()), rootnode.larger,
+				hash.getHashSize()) == 0) {
+			found = true;
+			break;
+		}
+	}
+	CPPUNIT_ASSERT(found);
+
 }
 
 void DbNodeTest::setUp(void) {

@@ -827,32 +827,69 @@ std::string DBTrie::toString() const {
 	return ss.str();
 }
 
+size_t DBTrie::getSubTrie(const DbNode& root, const size_t numberOfNodes,
+		std::vector<DbNode>& inner_nodes, std::vector<DbNode>& child_nodes) {
+	if (root.hasChildren_ && numberOfNodes >= 2) {
+		DbNode smaller = root.getSmaller();
+		DbNode larger = root.getLarger();
+		size_t smallercount = numberOfNodes / 2;
+		smallercount = getSubTrie(smaller, smallercount, inner_nodes,
+				child_nodes);
+		size_t largercount = numberOfNodes - smallercount;
+		largercount = getSubTrie(larger, largercount, inner_nodes, child_nodes);
+		size_t sum = smallercount + largercount;
+		while (sum < numberOfNodes && inner_nodes.size() > 0) {
+			DbNode innerNode = inner_nodes.back();
+			inner_nodes.pop_back();
+			sum += getSubTrie(innerNode, numberOfNodes - sum, inner_nodes,
+					child_nodes);
+		}
+		return sum;
+	} else {
+		if (root.hasChildren_) {
+			inner_nodes.push_back(root);
+		} else {
+			child_nodes.push_back(root);
+		}
+		return 1;
+	}
+}
+
 size_t DBTrie::getSubTrie(const unsigned char * hash, void * buffer,
 		const size_t buffersize) {
-	//TODO
-	DbNode subtrieroot(*this, this->hash_, this->db_, hash, false);
-	unsigned int maxNumberOfHashes = buffersize / this->hash_.getHashSize();
+	size_t maxNumberOfHashes = buffersize / this->hash_.getHashSize();
 	if (maxNumberOfHashes < 2) {
 		throw "buffer is too small!";
 	}
-	unsigned int depth = 0;
-	unsigned int temp = maxNumberOfHashes;
-	while ((unsigned int) (temp / 2) > 0) {
-		temp = (unsigned int) temp / 2;
-		depth++;
+	std::vector<DbNode> inner_nodes;
+	std::vector<DbNode> child_nodes;
+	DbNode root(*this, hash_, this->db_, hash, false);
+	size_t subtriesize = getSubTrie(root, maxNumberOfHashes, inner_nodes,
+			child_nodes);
+	unsigned char * pos = (unsigned char *) buffer;
+	while (inner_nodes.size() > 0) {
+		DbNode back = inner_nodes.back();
+		memcpy(pos, back.hash, this->hash_.getHashSize());
+		pos += this->hash_.getHashSize();
+		inner_nodes.pop_back();
 	}
-
-	return 0;
+	while (child_nodes.size() > 0) {
+		DbNode back = child_nodes.back();
+		memcpy(pos, back.hash, this->hash_.getHashSize());
+		pos += this->hash_.getHashSize();
+		child_nodes.pop_back();
+	}
+	return subtriesize * this->hash_.getHashSize();
 }
 
 bool DBTrie::getRoot(unsigned char * hash) {
 	if (this->getSize() == 0)
 		return false;
-	try{
+	try {
 		DbNode root = this->root_.get();
 		memcpy(hash, root.hash, this->hash_.getHashSize());
 		return true;
-	}catch(DbException e){
+	} catch (DbException e) {
 		return false;
 	}
 }
