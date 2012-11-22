@@ -267,13 +267,13 @@ void DBBloomFilter::diff(const unsigned char * externalBF,
 					throw DbException(ret);
 				} else {
 					handler((unsigned char*) data.get_data(),
-							this->cryptoHashFunction_.getHashSize());
+							this->cryptoHashFunction_.getHashSize(), true);
 				}
 				// Iterate over duplicated entries
 				while ((ret = cursorp->get(&key, &data, DB_NEXT_DUP)) == 0) {
 					// Call handler for the found hash
 					handler((unsigned char*) data.get_data(),
-							this->cryptoHashFunction_.getHashSize());
+							this->cryptoHashFunction_.getHashSize(), true);
 				}
 				if (ret != DB_NOTFOUND) {
 					// ret should be DB_NOTFOUND upon exiting the loop.

@@ -15,11 +15,12 @@ ListDiffHandler::ListDiffHandler() {
 }
 
 void AbstractDiffHandler::operator()(const unsigned char * hash,
-		const std::size_t hashsize) {
-	this->handle(hash, hashsize);
+		const std::size_t hashsize, const bool existsLocally) {
+	this->handle(hash, hashsize, existsLocally);
 }
 void ListDiffHandler::handle(const unsigned char * hash,
-		const std::size_t hashsize) {
+		const std::size_t hashsize,
+		const bool existsLocally) {
 	std::vector<unsigned char *>::iterator iter;
 	for (iter = this->list_.begin(); iter != this->list_.end(); iter++) {
 		if (memcmp(*iter, hash, hashsize) == 0) {
@@ -51,7 +52,8 @@ const std::size_t ListDiffHandler::size() {
 }
 
 void OutputStreamDiffHandler::handle(const unsigned char * hash,
-		const std::size_t hashsize) {
+		const std::size_t hashsize,
+		const bool existsLocally) {
 	this->out_ << utils::OutputFunctions::CryptoHashtoString(hash, hashsize);
 }
 
@@ -70,12 +72,14 @@ C_DiffHandler::~C_DiffHandler() {
 }
 
 void C_DiffHandler::handle(const unsigned char * hash,
-		const std::size_t hashsize) {
-	(this->callback_)(this->closure_, hash, hashsize);
+		const std::size_t hashsize,
+		const bool existsLocally) {
+	(this->callback_)(this->closure_, hash, hashsize, existsLocally);
 }
 
 void UniqueFilterDiffHandler::handle(const unsigned char * hash,
-		const std::size_t hashsize) {
+		const std::size_t hashsize,
+		const bool existsLocally) {
 	std::vector<unsigned char *>::iterator iter;
 	for (iter = this->list_.begin(); iter != this->list_.end(); iter++) {
 		if (memcmp(*iter, hash, hashsize) == 0) {
@@ -86,7 +90,7 @@ void UniqueFilterDiffHandler::handle(const unsigned char * hash,
 	unsigned char * h = (unsigned char*) malloc(hashsize);
 	memcpy(h, hash, hashsize);
 	this->list_.push_back(h);
-	C_DiffHandler::handle(hash, hashsize);
+	C_DiffHandler::handle(hash, hashsize, existsLocally);
 }
 
 UniqueFilterDiffHandler::~UniqueFilterDiffHandler() {
