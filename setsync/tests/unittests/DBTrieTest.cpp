@@ -308,7 +308,58 @@ void DbTrieTest::testDiff() {
 	trie1.diff(treecut, treecutsize, difflist);
 	CPPUNIT_ASSERT( difflist.size() <= 2);
 	CPPUNIT_ASSERT( difflist.size() > 0);
+	difflist.clear();
 	trie1.Trie::add("bla4");
+	// Both Tries are equal
+	CPPUNIT_ASSERT( trie1 == trie2);
+
+	trie1.Trie::add("bla5");
+	trie1.Trie::add("bla6");
+	trie1.Trie::add("bla8");
+	trie1.Trie::add("bla9");
+	trie1.Trie::add("bla10");
+
+	trie2.Trie::add("bla7");
+	trie2.Trie::add("bla11");
+	trie2.Trie::add("bla12");
+	trie2.Trie::add("bla13");
+	trie2.Trie::add("bla14");
+
+	trie1.getRoot(root);
+	trie1.getSubTrie(root, treecut, treecutsize);
+	trie2.diff(treecut, treecutsize, difflist);
+	for (size_t i = 0; i < difflist.size(); i++) {
+		unsigned char subtrie[treecutsize];
+		size_t entries = trie1.getSubTrie(difflist[i].first, subtrie,
+				treecutsize) / hash.getHashSize();
+		if (entries == 1) {
+			trie2.add(subtrie, true);
+		} else {
+			trie2.diff(subtrie, treecutsize, difflist);
+		}
+	}
+	unsigned char temphash[hash.getHashSize()];
+	hash(temphash, "bla5");
+	CPPUNIT_ASSERT(trie2.contains(temphash));
+	difflist.clear();
+	trie2.getRoot(root);
+	trie2.getSubTrie(root, treecut, treecutsize);
+	trie1.diff(treecut, treecutsize, difflist);
+	for (size_t i = 0; i < difflist.size(); i++) {
+		unsigned char subtrie[treecutsize];
+		size_t entries = trie2.getSubTrie(difflist[i].first, subtrie,
+				treecutsize) / hash.getHashSize();
+		if (entries == 1) {
+			trie1.add(subtrie, true);
+		} else {
+			trie1.diff(subtrie, treecutsize, difflist);
+		}
+	}
+	hash(temphash, "bla6");
+	CPPUNIT_ASSERT(trie1.contains(temphash));
+	hash(temphash, "bla7");
+	CPPUNIT_ASSERT(trie1.contains(temphash));
+	CPPUNIT_ASSERT(trie1 == trie2);
 }
 
 void DbNodeTest::setUp(void) {

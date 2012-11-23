@@ -7,8 +7,10 @@ namespace setsync {
 
 class MemSet: public Set {
 public:
-	MemSet(const utils::CryptoHash& hash, const uint64_t maxSize = 1000, const bool hardMaximum = false);
+	MemSet(const utils::CryptoHash& hash, const uint64_t maxSize = 1000,
+			const bool hardMaximum = false);
 	virtual ~MemSet();
+	virtual SynchronizationStrategy createSyncStrategy(void);
 };
 
 }

@@ -63,4 +63,14 @@ void DbSetTest::testErasing() {
 	CPPUNIT_ASSERT(set1.erase("bla1"));
 	CPPUNIT_ASSERT(!set1.erase("bla1"));
 }
+
+void DbSetTest::testSync(){
+	DbSet set1(hash);
+	DbSet set2(hash);
+	set1.insert("bla1");
+	set1.insert("bla2");
+	set2.insert("bla1");
+	set2.insert("bla2");
+//	throw "not yet implemented";
+}
 }
