@@ -25,15 +25,19 @@ void DiffHandlerTest::testListHandle() {
 	ListDiffHandler handler;
 	CPPUNIT_ASSERT(handler.size() == 0);
 	hash_(hash, "bla1");
-	handler.handle(hash, hash_.getHashSize(),true);
+	handler.handle(hash, hash_.getHashSize(), true);
 	CPPUNIT_ASSERT(handler.size() == 1);
-	CPPUNIT_ASSERT(memcmp(hash,handler[0],hash_.getHashSize())==0);
+	CPPUNIT_ASSERT(memcmp(hash,handler[0].first,hash_.getHashSize())==0);
+	CPPUNIT_ASSERT(handler[0].second == true);
 	hash_(hash, "bla2");
-	handler.handle(hash, hash_.getHashSize(),true);
+	handler.handle(hash, hash_.getHashSize(), false);
 	CPPUNIT_ASSERT(handler.size() == 2);
-	handler.handle(hash, hash_.getHashSize(),true);
+	handler.handle(hash, hash_.getHashSize(), false);
 	CPPUNIT_ASSERT(handler.size() == 2);
-	CPPUNIT_ASSERT(memcmp(hash,handler[1],hash_.getHashSize())==0);
+	CPPUNIT_ASSERT(memcmp(hash,handler[1].first,hash_.getHashSize())==0);
+	CPPUNIT_ASSERT(handler[1].second == false);
+	handler.clear();
+	CPPUNIT_ASSERT(handler.size() == 0);
 }
 
 void DiffHandlerTest::testOutputStreamHandle() {

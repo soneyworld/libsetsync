@@ -385,9 +385,9 @@ void DBBloomFilterTest::testDiff() {
 	CPPUNIT_ASSERT(handler.size()==2);
 	unsigned char sha[hashFunction_.getHashSize()];
 	hashFunction_(sha, "bla3");
-	CPPUNIT_ASSERT(memcmp(handler[0],sha,hashFunction_.getHashSize())==0);
+	CPPUNIT_ASSERT(memcmp(handler[0].first,sha,hashFunction_.getHashSize())==0);
 	hashFunction_(sha, "bla4");
-	CPPUNIT_ASSERT(memcmp(handler[1],sha,hashFunction_.getHashSize())==0);
+	CPPUNIT_ASSERT(memcmp(handler[1].first,sha,hashFunction_.getHashSize())==0);
 }
 
 void DBBloomFilterTest::testToString() {

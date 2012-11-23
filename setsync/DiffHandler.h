@@ -54,7 +54,7 @@ public:
 class ListDiffHandler: public AbstractDiffHandler {
 private:
 	/// list of hashes to be sent to remote set
-	std::vector<unsigned char *> list_;
+	std::vector<std::pair<unsigned char *, bool> > list_;
 public:
 	/**
 	 * Creates a simple DiffHandler which saves all distinct hashes, which should be
@@ -81,12 +81,18 @@ public:
 	 * \param index
 	 * \return pointer to the hash or NULL if index is larger then returned hashes
 	 */
-	virtual const unsigned char * operator[](unsigned int const& index) const;
+	virtual const std::pair<unsigned char *, bool> operator[](
+			unsigned int const& index) const;
 
 	/**
 	 * \return the count of the distinct hashes to be sent to remote
 	 */
 	virtual const std::size_t size();
+
+	/**
+	 * Removes all entries from list
+	 */
+	virtual void clear(void);
 };
 
 /**

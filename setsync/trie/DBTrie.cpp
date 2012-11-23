@@ -893,4 +893,15 @@ bool DBTrie::getRoot(unsigned char * hash) {
 		return false;
 	}
 }
+
+void DBTrie::diff(const void * subtrie, const std::size_t length,
+		setsync::AbstractDiffHandler& handler) const {
+	unsigned char * subtrie_ = (unsigned char *) subtrie;
+	for (int i = 0; i < length / hash_.getHashSize(); i++) {
+		if (!contains(subtrie_ + i * hash_.getHashSize())) {
+			handler(subtrie_ + i * hash_.getHashSize(), hash_.getHashSize(),
+					false);
+		}
+	}
+}
 }

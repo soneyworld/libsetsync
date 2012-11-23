@@ -8,6 +8,7 @@
 #include <sstream>
 #include <setsync/utils/OutputFunctions.h>
 #include <stdlib.h>
+#include <setsync/DiffHandler.h>
 using namespace std;
 
 namespace trie {
@@ -258,10 +259,10 @@ void DbTrieTest::testSubTrie() {
 	CPPUNIT_ASSERT(found);
 	subtrie = trie2.getSubTrie(root, buffer, 2 * hash.getHashSize());
 	DbNode rootnode(trie2, hash, db2, root, false);
-//	cout << endl << trie2.toString() << endl;
-//	cout << utils::OutputFunctions::CryptoHashtoString(buffer) << endl;
-//	cout << utils::OutputFunctions::CryptoHashtoString(
-//			buffer + hash.getHashSize()) << endl;
+	//	cout << endl << trie2.toString() << endl;
+	//	cout << utils::OutputFunctions::CryptoHashtoString(buffer) << endl;
+	//	cout << utils::OutputFunctions::CryptoHashtoString(
+	//			buffer + hash.getHashSize()) << endl;
 	CPPUNIT_ASSERT(subtrie == 2 * hash.getHashSize());
 	found = false;
 	for (size_t i = 0; i < subtrie / hash.getHashSize(); i++) {
@@ -282,6 +283,32 @@ void DbTrieTest::testSubTrie() {
 	}
 	CPPUNIT_ASSERT(found);
 
+}
+
+void DbTrieTest::testDiff() {
+	trie::DBTrie trie1(hash, db);
+	trie::DBTrie trie2(hash, db2);
+	trie1.Trie::add("bla1");
+	trie2.Trie::add("bla1");
+	trie1.Trie::add("bla2");
+	trie2.Trie::add("bla2");
+	trie1.Trie::add("bla3");
+	trie2.Trie::add("bla3");
+	trie2.Trie::add("bla4");
+	setsync::ListDiffHandler difflist;
+	size_t treecutsize = 2 * this->hash.getHashSize();
+	unsigned char treecut[treecutsize];
+	unsigned char root[this->hash.getHashSize()];
+	trie1.getRoot(root);
+	trie1.getSubTrie(root, treecut, treecutsize);
+	trie2.diff(treecut, treecutsize, difflist);
+	CPPUNIT_ASSERT( difflist.size() == 0);
+	trie2.getRoot(root);
+	trie2.getSubTrie(root, treecut, treecutsize);
+	trie1.diff(treecut, treecutsize, difflist);
+	CPPUNIT_ASSERT( difflist.size() <= 2);
+	CPPUNIT_ASSERT( difflist.size() > 0);
+	trie1.Trie::add("bla4");
 }
 
 void DbNodeTest::setUp(void) {

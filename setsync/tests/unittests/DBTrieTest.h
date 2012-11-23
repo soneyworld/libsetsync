@@ -24,6 +24,7 @@ CPPUNIT_TEST_SUITE( DbTrieTest);
 		CPPUNIT_TEST( testSavingAndLoading);
 		CPPUNIT_TEST( testToString);
 		CPPUNIT_TEST( testSubTrie);
+		CPPUNIT_TEST( testDiff);
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -45,6 +46,7 @@ protected:
 	void testSavingAndLoading();
 	void testToString();
 	void testSubTrie();
+	void testDiff();
 
 };
 CPPUNIT_TEST_SUITE_REGISTRATION(DbTrieTest);
