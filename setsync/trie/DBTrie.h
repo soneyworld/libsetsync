@@ -435,7 +435,7 @@ public:
 	 * \param hash to be checked
 	 * \return true if the hash is available
 	 */
-	virtual bool contains(const unsigned char * hash) const;
+	virtual enum TrieNodeType contains(const unsigned char * hash) const;
 	/**
 	 * Clears the complete Trie
 	 */

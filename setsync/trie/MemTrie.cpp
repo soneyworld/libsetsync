@@ -172,8 +172,8 @@ bool MemTrie::remove(const unsigned char * hash, bool performhash) {
 	}
 }
 
-bool MemTrie::contains(const unsigned char * hash) const {
-	return false;
+TrieNodeType MemTrie::contains(const unsigned char * hash) const {
+	return NOT_FOUND;
 }
 
 void MemTrie::clear(MemTrieNode * node) {

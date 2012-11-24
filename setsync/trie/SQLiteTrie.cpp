@@ -29,8 +29,8 @@ bool SQLiteTrie::remove(const unsigned char * hash) {
 bool SQLiteTrie::remove(const unsigned char * hash, bool performhash) {
 
 }
-bool SQLiteTrie::contains(const unsigned char * hash) const {
-	return false;
+TrieNodeType SQLiteTrie::contains(const unsigned char * hash) const {
+	return NOT_FOUND;
 }
 void SQLiteTrie::clear(void) {
 

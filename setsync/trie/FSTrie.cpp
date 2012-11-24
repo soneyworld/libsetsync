@@ -30,8 +30,8 @@ bool FSTrie::remove(const unsigned char * hash, bool performhash) {
 	return false;
 }
 
-bool FSTrie::contains(const unsigned char * hash) const {
-	return false;
+enum TrieNodeType FSTrie::contains(const unsigned char * hash) const {
+	return NOT_FOUND;
 }
 void FSTrie::clear(void) {
 

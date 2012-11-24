@@ -759,18 +759,18 @@ bool DBTrie::remove(const unsigned char * hash, bool performhash) {
 	}
 }
 
-bool DBTrie::contains(const unsigned char * hash) const {
+TrieNodeType DBTrie::contains(const unsigned char * hash) const {
 	unsigned char k[this->hash_.getHashSize()];
 	memcpy(k, hash, this->hash_.getHashSize());
 	Dbt key(k, this->hash_.getHashSize());
 	Dbt data(NULL, 0);
 	int ret = this->db_->get(NULL, &key, &data, 0);
 	if (ret == DB_NOTFOUND) {
-		return false;
+		return NOT_FOUND;
 	} else if (ret == 0) {
-		return true;
+		return NOT_SPECIFIED;
 	}
-	return false;
+	return NOT_FOUND;
 }
 
 void DBTrie::clear(void) {
