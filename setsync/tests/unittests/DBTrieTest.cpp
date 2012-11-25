@@ -89,12 +89,17 @@ void DbTrieTest::testAddingAndCleaningElements() {
 void DbTrieTest::testContains() {
 	trie::DBTrie trie(hash, db);
 	CPPUNIT_ASSERT(!trie.Trie::contains("bla1"));
+	CPPUNIT_ASSERT(trie.Trie::contains("bla1")==NOT_FOUND);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie.Trie::contains("bla1"));
+	CPPUNIT_ASSERT(trie.Trie::contains("bla1")==LEAF_NODE);
 	CPPUNIT_ASSERT(!trie.Trie::contains("bla2"));
 	CPPUNIT_ASSERT(trie.Trie::add("bla2"));
 	CPPUNIT_ASSERT(trie.Trie::contains("bla1"));
 	CPPUNIT_ASSERT(trie.Trie::contains("bla2"));
+	unsigned char root[hash.getHashSize()];
+	trie.getRoot(root);
+	CPPUNIT_ASSERT(trie.contains(root)==INNER_NODE);
 	CPPUNIT_ASSERT(trie.Trie::remove("bla1"));
 	CPPUNIT_ASSERT(!trie.Trie::contains("bla1"));
 }
