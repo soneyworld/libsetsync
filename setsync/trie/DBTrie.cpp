@@ -760,15 +760,15 @@ bool DBTrie::remove(const unsigned char * hash, bool performhash) {
 }
 
 TrieNodeType DBTrie::contains(const unsigned char * hash) const {
-	unsigned char k[this->hash_.getHashSize()];
-	memcpy(k, hash, this->hash_.getHashSize());
-	Dbt key(k, this->hash_.getHashSize());
-	Dbt data(NULL, 0);
-	int ret = this->db_->get(NULL, &key, &data, 0);
-	if (ret == DB_NOTFOUND) {
+	try {
+		DbNode node(*this, this->hash_, this->db_, hash, false);
+		if (node.hasChildren_) {
+			return INNER_NODE;
+		} else {
+			return LEAF_NODE;
+		}
+	} catch (...) {
 		return NOT_FOUND;
-	} else if (ret == 0) {
-		return NOT_SPECIFIED;
 	}
 	return NOT_FOUND;
 }
