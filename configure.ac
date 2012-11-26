@@ -177,6 +177,13 @@ AC_MSG_RESULT($enable_evaluation)
 
 AM_CONDITIONAL(EVALUATION, test x$enable_evaluation = xyes)
 
+AC_ARG_ENABLE(tools,
+  [AS_HELP_STRING([--enable-tools], [enable tools (default: no)])],
+  [], [])
+AC_MSG_RESULT($enable_tools)
+
+AM_CONDITIONAL(TOOLS, test x$enable_tools = xyes)
+
 AC_CONFIG_FILES([Makefile \
 	setsync/Makefile \
 	setsync/bloom/Makefile \
@@ -186,5 +193,6 @@ AC_CONFIG_FILES([Makefile \
 	setsync/tests/Makefile \
 	setsync/tests/unittests/Makefile \
 	setsync/tests/evaluation/Makefile \
+	tools/Makefile \
 	setsync.pc])
 AC_OUTPUT
