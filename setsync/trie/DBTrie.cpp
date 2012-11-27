@@ -847,6 +847,7 @@ size_t DBTrie::getSubTrie(const DbNode& root, const size_t numberOfNodes,
 		while (sum < numberOfNodes && inner_nodes.size() > 0) {
 			DbNode innerNode = inner_nodes.back();
 			inner_nodes.pop_back();
+			sum--;
 			sum += getSubTrie(innerNode, numberOfNodes - sum, inner_nodes,
 					child_nodes);
 		}
