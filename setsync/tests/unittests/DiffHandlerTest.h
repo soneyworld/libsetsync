@@ -13,21 +13,25 @@
 namespace setsync {
 
 class DiffHandlerTest: public CPPUNIT_NS::TestCase {
-	CPPUNIT_TEST_SUITE( DiffHandlerTest);
-	CPPUNIT_TEST( testListHandle );
-	CPPUNIT_TEST( testOutputStreamHandle );
-	CPPUNIT_TEST( testC_Handle );
-	CPPUNIT_TEST( testFilteredHandle );
+CPPUNIT_TEST_SUITE( DiffHandlerTest);
+		CPPUNIT_TEST( testListHandle );
+		CPPUNIT_TEST( testOutputStreamHandle );
+		CPPUNIT_TEST( testC_Handle );
+		CPPUNIT_TEST( testFilteredHandle );
 	CPPUNIT_TEST_SUITE_END();
 
-friend void callback(void *closure, const unsigned char * hash, const size_t hashsize);
+	friend void callback(void *closure, const unsigned char * hash,
+			const size_t hashsize, const size_t existsLocally);
 
 private:
 	utils::CryptoHash hash_;
 	unsigned int counts;
 public:
-	void setUp(void){counts = 0;}
-	void tearDown(void){}
+	void setUp(void) {
+		counts = 0;
+	}
+	void tearDown(void) {
+	}
 protected:
 	void testListHandle();
 	void testOutputStreamHandle();

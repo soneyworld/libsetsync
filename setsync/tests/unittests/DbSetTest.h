@@ -11,15 +11,16 @@
 #include "setsync/DbSet.h"
 
 namespace setsync {
-class DbSetTest : public CPPUNIT_NS::TestCase{
+class DbSetTest: public CPPUNIT_NS::TestCase {
 
 CPPUNIT_TEST_SUITE(DbSetTest);
-CPPUNIT_TEST(testAdding);
-CPPUNIT_TEST(testSize);
-CPPUNIT_TEST(testErasing);
-CPPUNIT_TEST(testAddingAndErasingElements);
-CPPUNIT_TEST(testAddingAndCleaningElements);
-CPPUNIT_TEST_SUITE_END();
+		CPPUNIT_TEST(testAdding);
+		CPPUNIT_TEST(testSize);
+		CPPUNIT_TEST(testErasing);
+		CPPUNIT_TEST(testAddingAndErasingElements);
+		CPPUNIT_TEST(testAddingAndCleaningElements);
+		CPPUNIT_TEST(testSync);
+	CPPUNIT_TEST_SUITE_END();
 
 public:
 	void setUp(void);
@@ -34,8 +35,10 @@ protected:
 	void testErasing();
 	void testAddingAndErasingElements();
 	void testAddingAndCleaningElements();
+	void testSync();
 
 };
 CPPUNIT_TEST_SUITE_REGISTRATION(DbSetTest);
-};
+}
+;
 #endif /* MEMSETTEST_H_ */

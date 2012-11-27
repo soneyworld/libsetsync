@@ -11,11 +11,13 @@ evaluation_SOURCES = \
 	BDBInsertRemoveTest.cpp \
 	BDBTransactionsTest.h \
 	BDBTransactionsTest.cpp \
+	StopWatch.h \
+	StopWatch.cpp \
 	Test.h
 
 # what flags you want to pass to the C compiler & linker
 AM_CPPFLAGS = -fopenmp
-AM_LDFLAGS = 
+AM_LDFLAGS = -lrt
 
 if OPENSSL
 AM_CPPFLAGS += @OPENSSL_CFLAGS@

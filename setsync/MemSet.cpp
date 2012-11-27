@@ -8,7 +8,8 @@
 
 namespace setsync {
 
-MemSet::MemSet(const utils::CryptoHash& hash, const uint64_t maxSize, const bool hardMaximum) :
+MemSet::MemSet(const utils::CryptoHash& hash, const uint64_t maxSize,
+		const bool hardMaximum) :
 	setsync::Set(hash, maxSize, hardMaximum) {
 	this->bf_ = new bloom::BloomFilter(hash, maxSize, hardMaximum);
 	this->trie_ = new trie::MemTrie(hash);
@@ -21,4 +22,7 @@ MemSet::~MemSet() {
 	delete &memtrie_;
 }
 
+SynchronizationStrategy MemSet::createSyncStrategy() {
+
+}
 }

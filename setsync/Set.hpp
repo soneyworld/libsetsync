@@ -11,6 +11,7 @@
 #include <setsync/bloom/BloomFilter.h>
 #include <setsync/trie/Trie.h>
 #include <setsync/utils/CryptoHash.h>
+#include <setsync/SyncStrategy.h>
 
 namespace setsync {
 
@@ -42,6 +43,8 @@ public:
 	virtual bool erase(const char * str);
 	virtual bool erase(const std::string& str);
 	virtual void clear();
+	// Synchronization Strategy
+	virtual SynchronizationStrategy createSyncStrategy(void);
 
 	virtual ~Set();
 

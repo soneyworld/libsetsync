@@ -21,16 +21,18 @@ class AbstractDiffHandler {
 public:
 	/**
 	 * This method will be called if the given hash exists only on the local
-	 * set, not on the remote one. This can be called multiple times with the
+	 * set or on the remote one. This can be called multiple times with the
 	 * same key, if the bloom filter has multiple positions found where this
 	 * hash hasn't been found. So duplicated calls must be handled by the
 	 * implementation of the AbstractDiffHandler of the using instance.
 	 *
 	 * \param hash to be handled by a DiffHandler
 	 * \param hashsize of the given hash in bytes
+	 * \param existsLocally is true, if the returned hash has to be send to the remote set, false if it exists only on the remote side
 	 */
 	virtual void
-	handle(const unsigned char * hash, const std::size_t hashsize) = 0;
+	handle(const unsigned char * hash, const std::size_t hashsize,
+			const bool existsLocally) = 0;
 
 	/**
 	 * All instances can be called directly like a function. This calls
@@ -39,7 +41,8 @@ public:
 	 * \param hash to be handled by this DiffHandler
 	 * \param hashsize of the given hash in bytes
 	 */
-	void operator()(const unsigned char * hash, const std::size_t hashsize);
+	void operator()(const unsigned char * hash, const std::size_t hashsize,
+			const bool existsLocally);
 };
 
 /**
@@ -51,7 +54,7 @@ public:
 class ListDiffHandler: public AbstractDiffHandler {
 private:
 	/// list of hashes to be sent to remote set
-	std::vector<unsigned char *> list_;
+	std::vector<std::pair<unsigned char *, bool> > list_;
 public:
 	/**
 	 * Creates a simple DiffHandler which saves all distinct hashes, which should be
@@ -66,7 +69,8 @@ public:
 	 * \param hash which has to be sent to remote set
 	 * \param hashsize of the given hash
 	 */
-	virtual void handle(const unsigned char * hash, const std::size_t hashsize);
+	virtual void handle(const unsigned char * hash, const std::size_t hashsize,
+			const bool existsLocally);
 
 	/**
 	 * Destroys all allocated and copied hashes in the list
@@ -77,12 +81,18 @@ public:
 	 * \param index
 	 * \return pointer to the hash or NULL if index is larger then returned hashes
 	 */
-	virtual const unsigned char * operator[](unsigned int const& index) const;
+	virtual const std::pair<unsigned char *, bool> operator[](
+			unsigned int const& index) const;
 
 	/**
 	 * \return the count of the distinct hashes to be sent to remote
 	 */
 	virtual const std::size_t size();
+
+	/**
+	 * Removes all entries from list
+	 */
+	virtual void clear(void);
 };
 
 /**
@@ -113,7 +123,8 @@ public:
 	 * \param hash to be written to out
 	 * \param hashsize of the given hash
 	 */
-	virtual void handle(const unsigned char * hash, const std::size_t hashsize);
+	virtual void handle(const unsigned char * hash, const std::size_t hashsize,
+			const bool existsLocally);
 };
 
 /**
@@ -151,7 +162,8 @@ public:
 	 * \param hash
 	 * \param hashsize
 	 */
-	virtual void handle(const unsigned char * hash, const std::size_t hashsize);
+	virtual void handle(const unsigned char * hash, const std::size_t hashsize,
+			const bool existsLocally);
 };
 /**
  * A filtered version of the simple wrapper for c callbacks. A handled
@@ -189,7 +201,8 @@ public:
 	 * \param hash
 	 * \param hashsize
 	 */
-	virtual void handle(const unsigned char * hash, const std::size_t hashsize);
+	virtual void handle(const unsigned char * hash, const std::size_t hashsize,
+			const bool existsLocally);
 };
 }
 

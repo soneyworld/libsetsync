@@ -20,7 +20,7 @@ typedef struct {
 } SET;
 
 typedef void diff_callback(void *closure, const unsigned char * hash,
-		const size_t hashsize);
+		const size_t hashsize, const size_t existsLocally);
 
 // Init and Free
 int set_init(SET *set, const char * path, const size_t maxSize,

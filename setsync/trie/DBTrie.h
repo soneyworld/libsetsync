@@ -11,6 +11,8 @@
 #include <db_cxx.h>
 #include <setsync/BerkeleyDBTableUserInterface.h>
 #include <exception>
+#include <vector>
+#include <setsync/DiffHandler.h>
 
 namespace trie {
 
@@ -87,6 +89,7 @@ class DbNode {
 	friend class DBValue;
 	friend class DbNodeTest;
 	friend class DBTrie;
+	friend class DbTrieTest;
 private:
 	/// Pointer to the Berkeley DB where the node (should) exist
 	Db * db_;
@@ -224,6 +227,11 @@ private:
 	bool isEqualToLarger(const DbNode& node) const;
 public:
 	DbNode(const DBTrie& trie, const utils::CryptoHash& hashfunction, Db * db);
+	/**
+	 * Copies all member variables of other to the new instance
+	 *
+	 * \param other to be copied
+	 */
 	DbNode(const DbNode& other);
 	/**
 	 * \return true if node has children, otherwise false
@@ -263,11 +271,55 @@ public:
 	DbNode getParent() const;
 	bool isSmaller(const DbNode& smaller) const;
 	bool isLarger(const DbNode& larger) const;
+	/**
+	 * Inserts a given hash to this node, or it's children and updates
+	 * all parent nodes hashes.
+	 *
+	 * \param hash to be added to the Trie
+	 * \return true on success, otherwise false
+	 */
 	bool insert(const unsigned char * hash);
+	/**
+	 * Inserts a given hash to this node, or it's children and updates
+	 * the parents hash. If performHash is false, this method will only
+	 * update the hash of the direct parent, not all parents.
+	 *
+	 * \param hash to be added to the Trie
+	 * \return true on success, otherwise false
+	 */
 	bool insert(const unsigned char * hash, bool performHash);
+	/**
+	 * Deletes the given hash from the Trie, starting on this node.
+	 * Also updates all parents hashes of this node.
+	 *
+	 * \param hash to be deleted.
+	 * \return true on success, false otherwise
+	 */
 	bool erase(const unsigned char * hash);
+	/**
+	 * Deletes the given hash from the Trie, starting on this node.
+	 * If performHash is false, only the direct parents hash will be
+	 * updated. If performHash is true, all parents of the deleted hash
+	 * will be updated.
+	 *
+	 * \param hash to be deleted
+	 * \param performHash shows, if parents got to be updated
+	 * \return true on success, false otherwise
+	 */
 	bool erase(const unsigned char * hash, bool performHash);
+	/**
+	 * Proofs, if the other node has got the same entries
+	 *
+	 * \param other node to check equality
+	 * \return true, if both nodes are equal
+	 */
 	bool operator ==(const DbNode& other) const;
+	/**
+	 * Proofs, if the other node has got a different entry
+	 *
+	 * \param other node to check for no equality
+	 * \return true, if both nodes are different
+	 */
 	bool operator !=(const DbNode& other) const;
 	bool operator >(const DbNode& other) const;
 	bool operator <(const DbNode& other) const;
@@ -293,8 +345,9 @@ private:
 	Db * db_;
 	/// The key of the <key,value> pair in the DB, where the root hash is saved as value
 	static const char root_name[];
-	///
+	/// Reference to the used cryptographic hash function
 	const utils::CryptoHash& hashfunction_;
+	/// Reference to the DBTrie, which should be used for operations
 	const DBTrie& trie_;
 public:
 	/**
@@ -304,7 +357,8 @@ public:
 	 *
 	 * \param db pointer to berkeley db to be used
 	 */
-	DbRootNode(const DBTrie& trie, const utils::CryptoHash& hashfunction, Db * db);
+	DbRootNode(const DBTrie& trie, const utils::CryptoHash& hashfunction,
+			Db * db);
 	/**
 	 * Loads the hash of the DbNode, which is saved as root node. Throws a
 	 * DbNoRootFoundException if no root is available on this db.
@@ -327,24 +381,122 @@ public:
 	 */
 	virtual std::string toString() const;
 };
-
+/**
+ * DBTrie instances are using a berkeley db to save a Trie data
+ * structure with <key,value> pairs. The hash of a node will be
+ * saved as key and the value are the other data of a Trie node.
+ */
 class DBTrie: public trie::Trie,
 		public virtual berkeley::BerkeleyDBTableUserInferface {
 	friend class DbNode;
 private:
+	/// Pointer to the used berkeley DB
 	Db * db_;
+	/// Instance of root node methods
 	DbRootNode root_;
+	/**
+	 * Adds a cut through the subtree of the given root node.
+	 * The numberOfNodes is the maximum number of nodes, to be
+	 * added to the cut.
+	 *
+	 * \param root node of the requested subtree
+	 * \param numberOfNodes to be added to the subtree
+	 * \param innerNodes is a vector to save an inner node to the cut
+	 * \param leafNodes is a vector to save leaf nodes to the cut
+	 * \return the number of found nodes in the subtree
+	 */
+	size_t getSubTrie(const DbNode& root, const size_t numberOfNodes,
+			std::vector<DbNode>& innerNodes, std::vector<DbNode>& leafNodes);
 public:
+	/**
+	 * Creates a new DBTrie instance which uses the given cryptographic
+	 * hash algorithm. The given pointer to a berkeley DB will be used
+	 * to operate on the database.
+	 */
 	DBTrie(const utils::CryptoHash& hash, Db * db);
+	/**
+	 * Destroys the instance but doesn't destroy the database. It also
+	 * don't close the database, this has to be done after this call.
+	 */
 	virtual ~DBTrie();
+	/**
+	 * \param hash to be added
+	 * \param performhash
+	 * \return true on success
+	 */
 	virtual bool add(const unsigned char * hash, bool performhash);
+	/**
+	 * \param hash to be removed
+	 * \param performhash
+	 * \return true on success
+	 */
 	virtual bool remove(const unsigned char * hash, bool performhash);
-	virtual bool contains(const unsigned char * hash) const;
+	/**
+	 * \param hash to be checked
+	 * \return true if the hash is available
+	 */
+	virtual enum TrieNodeType contains(const unsigned char * hash) const;
+	/**
+	 * Clears the complete Trie
+	 */
 	virtual void clear(void);
+	/**
+	 * \return the name of the database
+	 */
 	static const char * getLogicalDatabaseName();
+	/**
+	 * \return the type of the table, used for this Trie
+	 */
 	static const DBTYPE getTableType();
+	/**
+	 * \return true if both root elements hashes are equal
+	 */
 	virtual bool operator ==(const Trie& other) const;
+	/**
+	 * Generates a dump of the trie into a string. This string
+	 * is in dot language. It can be used to draw a directed graph
+	 * of the Trie
+	 *
+	 * \return dot string
+	 */
 	virtual std::string toString() const;
+	/**
+	 * Copies a subtrie into the given buffer with a maximum size
+	 * of buffersize. The root of the subtrie must be passed by the
+	 * first argument.
+	 *
+	 * \param hash of the root of the requested subtrie
+	 * \param buffer where the subtrie will by copied to
+	 * \param buffersize for the subtrie
+	 * \return used buffer size in bytes
+	 */
+	virtual size_t getSubTrie(const unsigned char * hash, void * buffer,
+			const size_t buffersize);
+	/**
+	 * Copies the root of the trie into the given memory
+	 *
+	 * \param hash memory space, where the root should be copied to
+	 * \return true if a root is available, false otherwise
+	 *
+	 */
+	virtual bool getRoot(unsigned char * hash);
+
+	/**
+	 *
+	 * \param subtrie
+	 * \param length
+	 * \param handler
+	 */
+	virtual void diff(const void * subtrie, const std::size_t length,
+			setsync::AbstractDiffHandler& handler) const;
+	/**
+	 * Generates a string, containing a graph in the dot language.
+	 * Only generates the Nodes and its properties, not the surrounding
+	 * (directed) graph or a sub graph/sub cluster properties.
+	 *
+	 * \return dot string containing the whole trie
+	 */
+	virtual std::string toDotString() const;
 };
 
 }

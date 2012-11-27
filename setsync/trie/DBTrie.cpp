@@ -469,7 +469,8 @@ DbNode& DbNode::operator=(const DbNode& rhs) {
 
 DbNode DbNode::getSmaller() const {
 	if (hasChildren_) {
-		DbNode result = DbNode(this->trie_, this->hashfunction_, this->db_, this->smaller);
+		DbNode result = DbNode(this->trie_, this->hashfunction_, this->db_,
+				this->smaller);
 		return result;
 	} else {
 		throw DbTrieException("THERE ARE NO CHILDREN");
@@ -477,7 +478,8 @@ DbNode DbNode::getSmaller() const {
 }
 DbNode DbNode::getLarger() const {
 	if (hasChildren_) {
-		DbNode result = DbNode(this->trie_, this->hashfunction_, this->db_, this->larger);
+		DbNode result = DbNode(this->trie_, this->hashfunction_, this->db_,
+				this->larger);
 		return result;
 	} else {
 		throw DbTrieException("THERE ARE NO CHILDREN");
@@ -485,7 +487,8 @@ DbNode DbNode::getLarger() const {
 }
 DbNode DbNode::getParent() const {
 	if (hasParent_) {
-		DbNode result = DbNode(this->trie_, this->hashfunction_, this->db_, this->parent);
+		DbNode result = DbNode(this->trie_, this->hashfunction_, this->db_,
+				this->parent);
 		return result;
 	} else {
 		throw DbTrieException("THERE IS NO PARENT");
@@ -493,7 +496,8 @@ DbNode DbNode::getParent() const {
 }
 
 bool DbNode::insert(const unsigned char * hash, bool performHash) {
-	DbNode newnode = DbNode(this->trie_, this->hashfunction_, this->db_, hash, true);
+	DbNode newnode = DbNode(this->trie_, this->hashfunction_, this->db_, hash,
+			true);
 	return this->insert(newnode, performHash);
 }
 
@@ -755,18 +759,18 @@ bool DBTrie::remove(const unsigned char * hash, bool performhash) {
 	}
 }
 
-bool DBTrie::contains(const unsigned char * hash) const {
-	unsigned char k[this->hash_.getHashSize()];
-	memcpy(k, hash, this->hash_.getHashSize());
-	Dbt key(k, this->hash_.getHashSize());
-	Dbt data(NULL, 0);
-	int ret = this->db_->get(NULL, &key, &data, 0);
-	if (ret == DB_NOTFOUND) {
-		return false;
-	} else if (ret == 0) {
-		return true;
+TrieNodeType DBTrie::contains(const unsigned char * hash) const {
+	try {
+		DbNode node(*this, this->hash_, this->db_, hash, false);
+		if (node.hasChildren_) {
+			return INNER_NODE;
+		} else {
+			return LEAF_NODE;
+		}
+	} catch (...) {
+		return NOT_FOUND;
 	}
-	return false;
+	return NOT_FOUND;
 }
 
 void DBTrie::clear(void) {
@@ -809,9 +813,8 @@ bool DBTrie::operator ==(const Trie& other) const {
 	}
 }
 
-std::string DBTrie::toString() const {
+std::string DBTrie::toDotString() const {
 	std::stringstream ss;
-	ss << "digraph trie {" << std::endl;
 	ss << this->root_.toString();
 	try {
 		DbNode node = this->root_.get();
@@ -819,7 +822,93 @@ std::string DBTrie::toString() const {
 	} catch (DbTrieException e) {
 
 	}
+	return ss.str();
+}
+
+std::string DBTrie::toString() const {
+	std::stringstream ss;
+	ss << "digraph trie {" << std::endl;
+	ss << toDotString();
 	ss << "}" << std::endl;
 	return ss.str();
+}
+
+size_t DBTrie::getSubTrie(const DbNode& root, const size_t numberOfNodes,
+		std::vector<DbNode>& inner_nodes, std::vector<DbNode>& child_nodes) {
+	if (root.hasChildren_ && numberOfNodes >= 2) {
+		DbNode smaller = root.getSmaller();
+		DbNode larger = root.getLarger();
+		size_t smallercount = numberOfNodes / 2;
+		smallercount = getSubTrie(smaller, smallercount, inner_nodes,
+				child_nodes);
+		size_t largercount = numberOfNodes - smallercount;
+		largercount = getSubTrie(larger, largercount, inner_nodes, child_nodes);
+		size_t sum = smallercount + largercount;
+		while (sum < numberOfNodes && inner_nodes.size() > 0) {
+			DbNode innerNode = inner_nodes.back();
+			inner_nodes.pop_back();
+			sum--;
+			sum += getSubTrie(innerNode, numberOfNodes - sum, inner_nodes,
+					child_nodes);
+		}
+		return sum;
+	} else {
+		if (root.hasChildren_) {
+			inner_nodes.push_back(root);
+		} else {
+			child_nodes.push_back(root);
+		}
+		return 1;
+	}
+}
+
+size_t DBTrie::getSubTrie(const unsigned char * hash, void * buffer,
+		const size_t buffersize) {
+	size_t maxNumberOfHashes = buffersize / this->hash_.getHashSize();
+	if (maxNumberOfHashes < 2) {
+		throw "buffer is too small!";
+	}
+	std::vector<DbNode> inner_nodes;
+	std::vector<DbNode> child_nodes;
+	DbNode root(*this, hash_, this->db_, hash, false);
+	size_t subtriesize = getSubTrie(root, maxNumberOfHashes, inner_nodes,
+			child_nodes);
+	unsigned char * pos = (unsigned char *) buffer;
+	while (inner_nodes.size() > 0) {
+		DbNode back = inner_nodes.back();
+		memcpy(pos, back.hash, this->hash_.getHashSize());
+		pos += this->hash_.getHashSize();
+		inner_nodes.pop_back();
+	}
+	while (child_nodes.size() > 0) {
+		DbNode back = child_nodes.back();
+		memcpy(pos, back.hash, this->hash_.getHashSize());
+		pos += this->hash_.getHashSize();
+		child_nodes.pop_back();
+	}
+	return subtriesize * this->hash_.getHashSize();
+}
+
+bool DBTrie::getRoot(unsigned char * hash) {
+	if (this->getSize() == 0)
+		return false;
+	try {
+		DbNode root = this->root_.get();
+		memcpy(hash, root.hash, this->hash_.getHashSize());
+		return true;
+	} catch (DbException e) {
+		return false;
+	}
+}
+
+void DBTrie::diff(const void * subtrie, const std::size_t length,
+		setsync::AbstractDiffHandler& handler) const {
+	unsigned char * subtrie_ = (unsigned char *) subtrie;
+	for (int i = 0; i < length / hash_.getHashSize(); i++) {
+		if (!contains(subtrie_ + i * hash_.getHashSize())) {
+			handler(subtrie_ + i * hash_.getHashSize(), hash_.getHashSize(),
+					false);
+		}
+	}
 }
 }

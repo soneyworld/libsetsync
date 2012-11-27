@@ -172,8 +172,8 @@ bool MemTrie::remove(const unsigned char * hash, bool performhash) {
 	}
 }
 
-bool MemTrie::contains(const unsigned char * hash) const {
-	return false;
+TrieNodeType MemTrie::contains(const unsigned char * hash) const {
+	return NOT_FOUND;
 }
 
 void MemTrie::clear(MemTrieNode * node) {
@@ -203,6 +203,20 @@ void MemTrie::performHash() {
 bool MemTrie::operator ==(const Trie& other) const {
 	//TODO
 	return false;
+}
+
+size_t MemTrie::getSubTrie(const unsigned char * hash, void * buffer,
+		const size_t buffersize) {
+	//TODO
+	return 0;
+}
+bool MemTrie::getRoot(unsigned char * hash) {
+	//TODO
+	return false;
+}
+
+std::string MemTrie::toDotString() const {
+	return "";
 }
 
 }

@@ -104,6 +104,10 @@ void Set::clear() {
 	this->bf_->clear();
 }
 
+SynchronizationStrategy Set::createSyncStrategy(){
+
+}
+
 }
 
 int set_free(SET *set) {

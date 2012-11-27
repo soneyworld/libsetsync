@@ -94,13 +94,13 @@ bool Trie::add(const std::string& str) {
 	return add(str, true);
 }
 
-bool Trie::contains(const char * str) const {
+TrieNodeType Trie::contains(const char * str) const {
 	unsigned char c[this->hash_.getHashSize()];
 	this->hash_(c,str);
 	return contains(c);
 }
 
-bool Trie::contains(const std::string& str) const {
+TrieNodeType Trie::contains(const std::string& str) const {
 	unsigned char c[this->hash_.getHashSize()];
 	this->hash_(c,str);
 	return contains(c);

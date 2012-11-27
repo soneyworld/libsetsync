@@ -49,6 +49,11 @@ public:
 			const uint64_t maxSize = 1000, const bool hardMaximum = false,
 			const float falsePositiveRate = 0.01);
 	/**
+	 *
+	 */
+	//TODO Documentation
+	virtual SynchronizationStrategy createSyncStrategy(void);
+	/**
 	 * Destroys the set and if db_home has been NULL, the temporary created folder
 	 * will be removed. Otherwise db_home will stay untouched.
 	 */

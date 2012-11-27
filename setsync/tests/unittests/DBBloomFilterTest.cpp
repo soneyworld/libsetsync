@@ -385,9 +385,27 @@ void DBBloomFilterTest::testDiff() {
 	CPPUNIT_ASSERT(handler.size()==2);
 	unsigned char sha[hashFunction_.getHashSize()];
 	hashFunction_(sha, "bla3");
-	CPPUNIT_ASSERT(memcmp(handler[0],sha,hashFunction_.getHashSize())==0);
+	CPPUNIT_ASSERT(memcmp(handler[0].first,sha,hashFunction_.getHashSize())==0);
 	hashFunction_(sha, "bla4");
-	CPPUNIT_ASSERT(memcmp(handler[1],sha,hashFunction_.getHashSize())==0);
+	CPPUNIT_ASSERT(memcmp(handler[1].first,sha,hashFunction_.getHashSize())==0);
+}
+
+void DBBloomFilterTest::testToString() {
+	//cout << endl;
+	bloom::DBBloomFilter FilterA(hashFunction_, db1, 10);
+	bloom::DBBloomFilter FilterB(hashFunction_, db2, 10);
+	//cout << FilterA.toString() << endl;
+	for (unsigned int i = 1; i <= 10; i++) {
+		stringstream ss;
+		ss << "test" << i;
+		FilterA.AbstractBloomFilter::add(ss.str());
+		FilterB.AbstractBloomFilter::add(ss.str());
+		FilterB.toString();
+		//cout << FilterB.toString() << " " << ss.str() << endl;
+		FilterB.clear();
+	}
+	FilterA.toString();
+	//cout << FilterA.toString() << endl;
 }
 
 /*=== END   tests for class 'DBBloomFilter' ===*/
