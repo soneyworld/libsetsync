@@ -50,4 +50,8 @@ bool FSTrie::getRoot(unsigned char * hash){
 	//TODO
 	return false;
 }
+
+std::string FSTrie::toDotString() const {
+	return "";
+}
 }

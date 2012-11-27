@@ -175,7 +175,7 @@ public:
 	 *
 	 * \return dot string containing the whole trie
 	 */
-	virtual std::string toDotString() = 0;
+	virtual std::string toDotString() const = 0;
 };
 
 }

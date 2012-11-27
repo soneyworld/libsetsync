@@ -210,9 +210,13 @@ size_t MemTrie::getSubTrie(const unsigned char * hash, void * buffer,
 	//TODO
 	return 0;
 }
-bool MemTrie::getRoot(unsigned char * hash){
+bool MemTrie::getRoot(unsigned char * hash) {
 	//TODO
 	return false;
+}
+
+std::string MemTrie::toDotString() const {
+	return "";
 }
 
 }

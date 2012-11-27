@@ -489,6 +489,14 @@ public:
 	 */
 	virtual void diff(const void * subtrie, const std::size_t length,
 			setsync::AbstractDiffHandler& handler) const;
+	/**
+	 * Generates a string, containing a graph in the dot language.
+	 * Only generates the Nodes and its properties, not the surrounding
+	 * (directed) graph or a sub graph/sub cluster properties.
+	 *
+	 * \return dot string containing the whole trie
+	 */
+	virtual std::string toDotString() const;
 };
 
 }

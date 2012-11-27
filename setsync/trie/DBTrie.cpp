@@ -813,9 +813,8 @@ bool DBTrie::operator ==(const Trie& other) const {
 	}
 }
 
-std::string DBTrie::toString() const {
+std::string DBTrie::toDotString() const {
 	std::stringstream ss;
-	ss << "digraph trie {" << std::endl;
 	ss << this->root_.toString();
 	try {
 		DbNode node = this->root_.get();
@@ -823,6 +822,13 @@ std::string DBTrie::toString() const {
 	} catch (DbTrieException e) {
 
 	}
+	return ss.str();
+}
+
+std::string DBTrie::toString() const {
+	std::stringstream ss;
+	ss << "digraph trie {" << std::endl;
+	ss << toDotString();
 	ss << "}" << std::endl;
 	return ss.str();
 }

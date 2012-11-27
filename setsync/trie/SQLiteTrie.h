@@ -9,8 +9,7 @@
 #include "Trie.h"
 #include <setsync/utils/CryptoHash.h>
 
-
-namespace trie{
+namespace trie {
 class SQLiteTrie: public Trie {
 public:
 	SQLiteTrie(const utils::CryptoHash& hash);
@@ -42,6 +41,14 @@ public:
 	 *
 	 */
 	virtual bool getRoot(unsigned char * hash);
+	/**
+	 * Generates a string, containing a graph in the dot language.
+	 * Only generates the Nodes and its properties, not the surrounding
+	 * (directed) graph or a sub graph/sub cluster properties.
+	 *
+	 * \return dot string containing the whole trie
+	 */
+	virtual std::string toDotString() const;
 };
 
 }
