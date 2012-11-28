@@ -175,7 +175,18 @@ public:
 	 *
 	 * \return dot string containing the whole trie
 	 */
-	virtual std::string toDotString() const = 0;
+	virtual std::string toDotString() const;
+	/**
+	 * Generates a string, containing a graph in the dot language.
+	 * Only generates the Nodes and its properties, not the surrounding
+	 * (directed) graph or a sub graph/sub cluster properties. The given
+	 * prefix is used as prefix for the dot nodes. It can be useful for
+	 * different tries in the same dot file.
+	 *
+	 * \param nodePrefix of the dot nodes
+	 * \return dot string containing the whole trie
+	 */
+	virtual std::string toDotString(const std::string nodePrefix) const = 0;
 };
 
 }

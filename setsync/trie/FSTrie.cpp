@@ -51,7 +51,7 @@ bool FSTrie::getRoot(unsigned char * hash){
 	return false;
 }
 
-std::string FSTrie::toDotString() const {
+std::string FSTrie::toDotString(const std::string nodePrefix) const {
 	return "";
 }
 }

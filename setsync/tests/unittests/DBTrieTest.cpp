@@ -701,7 +701,7 @@ void DbRootNodeTest::testConstructor() {
 void DbRootNodeTest::testToString() {
 	DBTrie trie(hash, db);
 	DbRootNode root(trie, hash, this->db);
-	root.toString();
+	root.toString("N");
 	//	std::cout << root.toString() << std::endl;
 }
 }

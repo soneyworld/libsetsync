@@ -49,7 +49,7 @@ public:
 	 *
 	 * \return dot string containing the whole trie
 	 */
-	virtual std::string toDotString() const;
+	virtual std::string toDotString(const std::string nodePrefix) const;
 };
 
 }

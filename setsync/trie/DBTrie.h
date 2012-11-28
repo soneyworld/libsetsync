@@ -327,7 +327,7 @@ public:
 	/**
 	 * \return dot code of this node and its children
 	 */
-	virtual std::string toString() const;
+	virtual std::string toString(const std::string nodePrefix) const;
 	/**
 	 * Saves the node to berkeley db. The member vars will be marshaled
 	 * by using DBValue and the hash will be used as key for the db
@@ -379,7 +379,7 @@ public:
 	/**
 	 * \return dot string
 	 */
-	virtual std::string toString() const;
+	virtual std::string toString(const std::string nodePrefix) const;
 };
 /**
  * DBTrie instances are using a berkeley db to save a Trie data
@@ -496,7 +496,7 @@ public:
 	 *
 	 * \return dot string containing the whole trie
 	 */
-	virtual std::string toDotString() const;
+	virtual std::string toDotString(const std::string nodePrefix) const;
 };
 
 }

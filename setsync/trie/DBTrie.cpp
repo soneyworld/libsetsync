@@ -655,9 +655,10 @@ bool DbNode::deleteFromDb() {
 	return this->db_->del(NULL, &key, 0) == 0;
 }
 
-std::string DbNode::toString() const {
+std::string DbNode::toString(const std::string nodePrefix) const {
 	std::stringstream ss;
-	ss << "N" << utils::OutputFunctions::CryptoHashtoString(hash) << " [";
+	ss << nodePrefix << utils::OutputFunctions::CryptoHashtoString(hash)
+			<< " [";
 	ss << "label=\"";
 	if (hasChildren_)
 		ss << "{{";
@@ -682,39 +683,44 @@ std::string DbNode::toString() const {
 	}
 	ss << "];" << std::endl;
 	if (hasParent_) {
-		ss << "N" << utils::OutputFunctions::CryptoHashtoString(hash) << " -> "
-				<< "N" << utils::OutputFunctions::CryptoHashtoString(parent);
+		ss << nodePrefix << utils::OutputFunctions::CryptoHashtoString(hash)
+				<< " -> " << nodePrefix
+				<< utils::OutputFunctions::CryptoHashtoString(parent);
 		ss << " [style=dotted];" << std::endl;
 	}
 	if (hasChildren_) {
-		ss << "N" << utils::OutputFunctions::CryptoHashtoString(hash) << " -> "
-				<< "N" << utils::OutputFunctions::CryptoHashtoString(smaller)
+		ss << nodePrefix << utils::OutputFunctions::CryptoHashtoString(hash)
+				<< " -> " << nodePrefix
+				<< utils::OutputFunctions::CryptoHashtoString(smaller)
 				<< " [label=\"smaller\"];" << std::endl;
-		ss << "N" << utils::OutputFunctions::CryptoHashtoString(hash) << " -> "
-				<< "N" << utils::OutputFunctions::CryptoHashtoString(larger)
+		ss << nodePrefix << utils::OutputFunctions::CryptoHashtoString(hash)
+				<< " -> " << nodePrefix
+				<< utils::OutputFunctions::CryptoHashtoString(larger)
 				<< " [label=\"larger\"];" << std::endl;
 	}
 	std::string result = ss.str();
 	if (hasChildren_) {
 		DbNode smaller = this->getSmaller();
-		ss << smaller.toString();
+		ss << smaller.toString(nodePrefix);
 		DbNode larger = this->getLarger();
-		ss << larger.toString();
+		ss << larger.toString(nodePrefix);
 	}
 	return ss.str();
 }
 
-std::string DbRootNode::toString() const {
+std::string DbRootNode::toString(const std::string nodePrefix) const {
 	try {
 		std::stringstream ss;
 		DbNode n(get());
-		ss << "ROOT -> N" << utils::OutputFunctions::CryptoHashtoString(n.hash);
-		ss << " [shape=plaintext]";
-		ss << ";" << std::endl;
+		ss << nodePrefix << "ROOT [label=\"ROOT\"];" << std::endl;
+		ss << nodePrefix << "ROOT -> " << nodePrefix
+				<< utils::OutputFunctions::CryptoHashtoString(n.hash);
+		ss << " [shape=plaintext];" << std::endl;
 		return ss.str();
 	} catch (...) {
 		std::stringstream ss;
-		ss << "ROOT [shape=plaintext];" << std::endl;
+		ss << nodePrefix << "ROOT [label=\"ROOT\";shape=plaintext];"
+				<< std::endl;
 		return ss.str();
 	}
 }
@@ -813,12 +819,12 @@ bool DBTrie::operator ==(const Trie& other) const {
 	}
 }
 
-std::string DBTrie::toDotString() const {
+std::string DBTrie::toDotString(const std::string nodePrefix) const {
 	std::stringstream ss;
-	ss << this->root_.toString();
+	ss << this->root_.toString(nodePrefix);
 	try {
 		DbNode node = this->root_.get();
-		ss << node.toString();
+		ss << node.toString(nodePrefix);
 	} catch (DbTrieException e) {
 
 	}
@@ -828,7 +834,7 @@ std::string DBTrie::toDotString() const {
 std::string DBTrie::toString() const {
 	std::stringstream ss;
 	ss << "digraph trie {" << std::endl;
-	ss << toDotString();
+	ss << this->Trie::toDotString();
 	ss << "}" << std::endl;
 	return ss.str();
 }

@@ -49,7 +49,7 @@ bool SQLiteTrie::getRoot(unsigned char * hash){
 	//TODO
 	return false;
 }
-std::string SQLiteTrie::toDotString() const {
+std::string SQLiteTrie::toDotString(const std::string nodePrefix) const {
 	return "";
 }
 }

@@ -12,9 +12,11 @@
 
 class Trie2Dot {
 private:
-	Db * db_;
+	Db * db1_;
+	Db * db2_;
 	utils::CryptoHash hash_;
-	trie::DBTrie * trie_;
+	trie::DBTrie * trie1_;
+	trie::DBTrie * trie2_;
 public:
 	Trie2Dot();
 	virtual void out();
