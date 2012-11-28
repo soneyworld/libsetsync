@@ -34,7 +34,7 @@ void Trie2Dot::out() {
 	}
 	cout << trie_->toDotString();
 
-	int max_cut_size = 20;
+	int max_cut_size = 10;
 	unsigned char buffer[max_cut_size * hash_.getHashSize()];
 	unsigned char root[hash_.getHashSize()];
 	trie_->getRoot(root);
@@ -46,12 +46,17 @@ void Trie2Dot::out() {
 		size_t cutsize = trie_->getSubTrie(root, buffer,
 				hash_.getHashSize() * i);
 		for (size_t j = 0; j < cutsize / hash_.getHashSize(); j++) {
+			string color = "yellow";
+			if (trie_->contains(buffer + j * hash_.getHashSize()) == LEAF_NODE) {
+				color = "green";
+			}
 			cout << "N" << utils::OutputFunctions::CryptoHashtoString(
 					buffer + j * hash_.getHashSize())
-					<< " [style=filled color=\"red\"];" << endl;
+					<< " [style=filled color=\"" << color << "\"];" << endl;
 		}
 		//		cout << "}" << endl;
 	}
+
 	cout << "}" << endl;
 }
 
