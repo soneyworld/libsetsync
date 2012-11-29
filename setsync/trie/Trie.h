@@ -175,6 +175,7 @@ public:
 	 *
 	 * \return dot string containing the whole trie
 	 */
+
 	virtual std::string toDotString() const;
 	/**
 	 * Generates a string, containing a graph in the dot language.

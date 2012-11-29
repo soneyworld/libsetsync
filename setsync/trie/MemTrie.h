@@ -46,6 +46,7 @@ public:
 	enum TrieNodeType contains(const unsigned char * hash) const;
 	void clear(void);
 	virtual bool operator ==(const Trie& other) const;
+
 	/**
 	 * Copies a subtrie into the given buffer with a maximum size
 	 * of buffersize. The root of the subtrie must be passed by the
@@ -66,11 +67,15 @@ public:
 	 *
 	 */
 	virtual bool getRoot(unsigned char * hash);
+
 	/**
 	 * Generates a string, containing a graph in the dot language.
 	 * Only generates the Nodes and its properties, not the surrounding
-	 * (directed) graph or a sub graph/sub cluster properties.
+	 * (directed) graph or a sub graph/sub cluster properties. The given
+	 * prefix is used as prefix for the dot nodes. It can be useful for
+	 * different tries in the same dot file.
 	 *
+	 * \param nodePrefix of the dot nodes
 	 * \return dot string containing the whole trie
 	 */
 	virtual std::string toDotString(const std::string nodePrefix) const;

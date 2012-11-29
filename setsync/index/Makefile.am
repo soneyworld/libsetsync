@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 
-h_sources = 
-cpp_sources = 
+h_sources = AbstractSetIndex.h MemIndex.h DbIndex.h
+cpp_sources = AbstractSetIndex.cpp MemIndex.cpp DbIndex.cpp
 
 if SQLITE
 AM_CFLAGS = @SQLITE_CFLAGS@

@@ -726,7 +726,8 @@ std::string DbRootNode::toString(const std::string nodePrefix) const {
 }
 
 DBTrie::DBTrie(const utils::CryptoHash& hash, Db * db) :
-	Trie(hash), root_(*this, hash, db), db_(db) {
+	Trie(hash), root_(*this, hash, db),
+			berkeley::BerkeleyDBTableUserInferface(db), db_(db) {
 	// Loading root, if available
 }
 

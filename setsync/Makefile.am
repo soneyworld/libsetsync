@@ -14,7 +14,7 @@ cpp_sources = Set.cpp MemSet.cpp Configuration.cpp DiffHandler.cpp SyncStrategy.
 if BERKELEY_DB
 h_sources += BerkeleyDBTableUserInterface.h
 h_sources += DbSet.h
-cpp_sources += DbSet.cpp 
+cpp_sources += DbSet.cpp BerkeleyDBTableUserInterface.cpp
 endif
 
 if OPENSSL

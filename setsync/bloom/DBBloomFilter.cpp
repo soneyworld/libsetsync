@@ -56,7 +56,8 @@ DBBloomFilter::DBBloomFilter(const utils::CryptoHash& hash, Db * db,
 		const float falsePositiveRate) :
 			AbstractBloomFilter(hash),
 			FSBloomFilter(hash, maxNumberOfElements, hardMaximum,
-					falsePositiveRate), CountingBloomFilter(hash), db_(db) {
+					falsePositiveRate), CountingBloomFilter(hash),
+			berkeley::BerkeleyDBTableUserInferface(db), db_(db) {
 	/*
 	 * Loading all set bloom filter bits from db
 	 */
