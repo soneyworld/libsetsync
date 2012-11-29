@@ -49,12 +49,12 @@ void BFTest::runDBBF() {
 	 db1.close(0);*/
 	cout << "running Berkeley DBBloomFilter(FS) test:" << endl;
 	Db db2(NULL, 0);
-	db2.set_flags(bloom::DBBloomFilter::getTableFlags());
+	db2.set_flags(bloom::BdbBloomFilter::getTableFlags());
 	db2.open(NULL, "temp-table.db",
-			bloom::DBBloomFilter::getLogicalDatabaseName(),
-			bloom::DBBloomFilter::getTableType(), DB_CREATE, 0);
+			bloom::BdbBloomFilter::getLogicalDatabaseName(),
+			bloom::BdbBloomFilter::getTableType(), DB_CREATE, 0);
 
-	bloom::DBBloomFilter bf2(sha1 , &db2, ITERATIONS);
+	bloom::BdbBloomFilter bf2(sha1 , &db2, ITERATIONS);
 	runBF(&bf2);
 	db2.close(0);
 	remove("temp-table.db");

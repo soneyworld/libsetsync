@@ -7,7 +7,7 @@
 #ifndef DBINDEX_H_
 #define DBINDEX_H_
 
-#include <setsync/BerkeleyDBTableUserInterface.h>
+#include <setsync/BdbTableUser.h>
 #include "AbstractSetIndex.h"
 #include <db_cxx.h>
 
@@ -19,7 +19,7 @@ namespace index {
  * AbstractSetIndex. It puts the given key as key to a berkeley
  * DB hash map and stores the data as value.
  */
-class DbIndex: public berkeley::BerkeleyDBTableUserInferface,
+class DbIndex: public berkeley::AbstractBdbTableUser,
 		public setsync::index::AbstractSetIndex {
 	friend class DbIndexTest;
 private:

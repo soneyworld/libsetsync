@@ -9,7 +9,7 @@
 
 #include "Trie.h"
 #include <db_cxx.h>
-#include <setsync/BerkeleyDBTableUserInterface.h>
+#include <setsync/BdbTableUser.h>
 #include <exception>
 #include <vector>
 #include <setsync/DiffHandler.h>
@@ -18,7 +18,7 @@ namespace trie {
 
 class DbRootNode;
 class DbNode;
-class DBTrie;
+class BdbTrie;
 /**
  * This exception should be thrown, if a consistency failure happens
  */
@@ -88,8 +88,8 @@ class DbNode {
 	friend class DbRootNode;
 	friend class DBValue;
 	friend class DbNodeTest;
-	friend class DBTrie;
-	friend class DbTrieTest;
+	friend class BdbTrie;
+	friend class BdbTrieTest;
 private:
 	/// Pointer to the Berkeley DB where the node (should) exist
 	Db * db_;
@@ -128,7 +128,7 @@ private:
 
 	const utils::CryptoHash& hashfunction_;
 
-	const DBTrie& trie_;
+	const BdbTrie& trie_;
 	/**
 	 * Constructor of a node, which could exist in the given DB, or should be
 	 * created to be saved in the given DB. The given hash could be the default
@@ -138,7 +138,7 @@ private:
 	 * \param hash of the node, which should be created or loaded
 	 * \param newone if true, a new node will be created, otherwise load the node with this hash from the given DB
 	 */
-	DbNode(const DBTrie& trie, const utils::CryptoHash& hashfunction, Db * db,
+	DbNode(const BdbTrie& trie, const utils::CryptoHash& hashfunction, Db * db,
 			const unsigned char * hash, bool newone = false);
 	/**
 	 * Sets the given parent as new parent and overwrites the old one.
@@ -226,7 +226,7 @@ private:
 	 */
 	bool isEqualToLarger(const DbNode& node) const;
 public:
-	DbNode(const DBTrie& trie, const utils::CryptoHash& hashfunction, Db * db);
+	DbNode(const BdbTrie& trie, const utils::CryptoHash& hashfunction, Db * db);
 	/**
 	 * Copies all member variables of other to the new instance
 	 *
@@ -348,7 +348,7 @@ private:
 	/// Reference to the used cryptographic hash function
 	const utils::CryptoHash& hashfunction_;
 	/// Reference to the DBTrie, which should be used for operations
-	const DBTrie& trie_;
+	const BdbTrie& trie_;
 public:
 	/**
 	 * Initializes this class with the given pointer to the Berkeley DB, which should
@@ -357,7 +357,7 @@ public:
 	 *
 	 * \param db pointer to berkeley db to be used
 	 */
-	DbRootNode(const DBTrie& trie, const utils::CryptoHash& hashfunction,
+	DbRootNode(const BdbTrie& trie, const utils::CryptoHash& hashfunction,
 			Db * db);
 	/**
 	 * Loads the hash of the DbNode, which is saved as root node. Throws a
@@ -386,8 +386,8 @@ public:
  * structure with <key,value> pairs. The hash of a node will be
  * saved as key and the value are the other data of a Trie node.
  */
-class DBTrie: public trie::Trie,
-		public virtual berkeley::BerkeleyDBTableUserInferface {
+class BdbTrie: public trie::Trie,
+		public virtual berkeley::AbstractBdbTableUser {
 	friend class DbNode;
 private:
 	/// Pointer to the used berkeley DB
@@ -413,12 +413,12 @@ public:
 	 * hash algorithm. The given pointer to a berkeley DB will be used
 	 * to operate on the database.
 	 */
-	DBTrie(const utils::CryptoHash& hash, Db * db);
+	BdbTrie(const utils::CryptoHash& hash, Db * db);
 	/**
 	 * Destroys the instance but doesn't destroy the database. It also
 	 * don't close the database, this has to be done after this call.
 	 */
-	virtual ~DBTrie();
+	virtual ~BdbTrie();
 	/**
 	 * \param hash to be added
 	 * \param performhash

@@ -1,5 +1,5 @@
 /*
- * DbIndexTest.h
+ * BdbIndexTest.h
  *
  *      Author: Till Lorentzen
  */
@@ -8,7 +8,7 @@
 #define DBINDEXTEST_H_
 #include <cppunit/extensions/HelperMacros.h>
 #include <setsync/utils/CryptoHash.h>
-#include <setsync/index/DbIndex.h>
+#include <setsync/index/BdbIndex.h>
 
 namespace setsync {
 

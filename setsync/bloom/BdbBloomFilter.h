@@ -9,24 +9,24 @@
 #include <db_cxx.h>
 #include "CountingBloomFilter.h"
 #include "FSBloomFilter.h"
-#include <setsync/BerkeleyDBTableUserInterface.h>
+#include <setsync/BdbTableUser.h>
 #include <setsync/DiffHandler.h>
 #include "ComparableBloomFilter.h"
 
 namespace bloom {
 
-class DBBloomFilter;
+class BdbBloomFilter;
 /**
  * An object which is used to save and load the bloom filter settings to and
  * from the berkeley DB.
  */
-class DbBloomFilterSetting {
-	friend class DBBloomFilter;
+class BdbBloomFilterSetting {
+	friend class BdbBloomFilter;
 private:
 	/**
 	 * Constructs an object and sets the member variables
 	 */
-	DbBloomFilterSetting(const uint64_t maxNumberOfElements,
+	BdbBloomFilterSetting(const uint64_t maxNumberOfElements,
 			const bool hardMaximum, const float falsePositiveRate,
 			const std::size_t hashsize);
 	/**
@@ -34,7 +34,7 @@ private:
 	 *
 	 * \param toLoad pointer to the loaded array
 	 */
-	DbBloomFilterSetting(void * toLoad);
+	BdbBloomFilterSetting(void * toLoad);
 	/**
 	 * Returns the size of the marshalled array containing all member variables in bytes
 	 *
@@ -51,7 +51,7 @@ private:
 	 * \param toBeMarshalled reference to the setting object which should be marshalled
 	 */
 	static void marshall(void * target,
-			const DbBloomFilterSetting& toBeMarshalled);
+			const BdbBloomFilterSetting& toBeMarshalled);
 public:
 	/// maximum number of elements, which should be saved
 	uint64_t maxNumberOfElements;
@@ -71,11 +71,11 @@ public:
  * So it could happen, that more than one crypto hash is saved for one position
  * in the bloom filter. That is possible by saving multiple values per key.
  */
-class DBBloomFilter: public CountingBloomFilter,
+class BdbBloomFilter: public CountingBloomFilter,
 		public FSBloomFilter,
 		public ComparableBloomFilterInterface,
-		public berkeley::BerkeleyDBTableUserInferface {
-	friend class DBBloomFilterTest;
+		public berkeley::AbstractBdbTableUser {
+	friend class BdbBloomFilterTest;
 private:
 	/// Given Berkeley DB pointer
 	Db * db_;
@@ -97,7 +97,7 @@ public:
 	 * \param hardMaximum will be passed to FSBloomFilter
 	 * \param falsePositiveRate will be passed to FSBloomFilter
 	 */
-	DBBloomFilter(const utils::CryptoHash& hash, Db * db,
+	BdbBloomFilter(const utils::CryptoHash& hash, Db * db,
 			const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
 			const float falsePositiveRate = 0.001);
@@ -131,7 +131,7 @@ public:
 	/**
 	 * Default destructor
 	 */
-	virtual ~DBBloomFilter();
+	virtual ~BdbBloomFilter();
 	/**
 	 *  \return the name of the database table: "bloom"
 	 */
@@ -156,7 +156,7 @@ public:
 	 * \param db pointer to the DB, in which the settings are saved
 	 * \return loaded settings
 	 */
-	static const DbBloomFilterSetting loadSettings(Db * db);
+	static const BdbBloomFilterSetting loadSettings(Db * db);
 	/**
 	 * Saves the given settings to the given DB
 	 * \param db pointer to the DB

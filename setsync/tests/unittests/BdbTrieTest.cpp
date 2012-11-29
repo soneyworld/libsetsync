@@ -4,7 +4,7 @@
  *      Author: Till Lorentzen
  */
 
-#include "DBTrieTest.h"
+#include "BdbTrieTest.h"
 #include <sstream>
 #include <setsync/utils/OutputFunctions.h>
 #include <stdlib.h>
@@ -13,20 +13,20 @@ using namespace std;
 
 namespace trie {
 
-void DbTrieTest::setUp(void) {
+void BdbTrieTest::setUp(void) {
 	this->db = new Db(NULL, 0);
-	db->open(NULL, "trie.db", trie::DBTrie::getLogicalDatabaseName(),
-			trie::DBTrie::getTableType(), DB_CREATE, 0);
+	db->open(NULL, "trie.db", trie::BdbTrie::getLogicalDatabaseName(),
+			trie::BdbTrie::getTableType(), DB_CREATE, 0);
 	this->db2 = new Db(NULL, 0);
-	db2->open(NULL, "trie2.db", trie::DBTrie::getLogicalDatabaseName(),
-			trie::DBTrie::getTableType(), DB_CREATE, 0);
+	db2->open(NULL, "trie2.db", trie::BdbTrie::getLogicalDatabaseName(),
+			trie::BdbTrie::getTableType(), DB_CREATE, 0);
 	this->smaller = (unsigned char *) malloc(this->hash.getHashSize());
 	this->larger = (unsigned char *) malloc(this->hash.getHashSize());
 	memset(this->smaller, 0, hash.getHashSize());
 	memset(this->larger, 0xFF, hash.getHashSize());
 }
 
-void DbTrieTest::tearDown(void) {
+void BdbTrieTest::tearDown(void) {
 	db->close(0);
 	db2->close(0);
 	delete this->db;
@@ -42,8 +42,8 @@ void DbTrieTest::tearDown(void) {
 	free(this->larger);
 }
 
-void DbTrieTest::testAdding() {
-	trie::DBTrie trie(hash, db);
+void BdbTrieTest::testAdding() {
+	trie::BdbTrie trie(hash, db);
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie.getSize() == 1);
@@ -54,8 +54,8 @@ void DbTrieTest::testAdding() {
 	CPPUNIT_ASSERT(trie.getSize() == 2);
 }
 
-void DbTrieTest::testAddingAndErasingElements() {
-	trie::DBTrie trie(hash, db);
+void BdbTrieTest::testAddingAndErasingElements() {
+	trie::BdbTrie trie(hash, db);
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie.getSize() == 1);
@@ -75,8 +75,8 @@ void DbTrieTest::testAddingAndErasingElements() {
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 }
 
-void DbTrieTest::testAddingAndCleaningElements() {
-	trie::DBTrie trie(hash, db);
+void BdbTrieTest::testAddingAndCleaningElements() {
+	trie::BdbTrie trie(hash, db);
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie.Trie::add("bla2"));
@@ -86,8 +86,8 @@ void DbTrieTest::testAddingAndCleaningElements() {
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 }
 
-void DbTrieTest::testContains() {
-	trie::DBTrie trie(hash, db);
+void BdbTrieTest::testContains() {
+	trie::BdbTrie trie(hash, db);
 	CPPUNIT_ASSERT(!trie.Trie::contains("bla1"));
 	CPPUNIT_ASSERT(trie.Trie::contains("bla1") == NOT_FOUND);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
@@ -104,8 +104,8 @@ void DbTrieTest::testContains() {
 	CPPUNIT_ASSERT(!trie.Trie::contains("bla1"));
 }
 
-void DbTrieTest::testSize() {
-	trie::DBTrie trie(hash, db);
+void BdbTrieTest::testSize() {
+	trie::BdbTrie trie(hash, db);
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie.getSize() == 1);
@@ -141,9 +141,9 @@ void DbTrieTest::testSize() {
 	}
 }
 
-void DbTrieTest::testEquals() {
-	trie::DBTrie trie1(hash, db);
-	trie::DBTrie trie2(hash, db2);
+void BdbTrieTest::testEquals() {
+	trie::BdbTrie trie1(hash, db);
+	trie::BdbTrie trie2(hash, db2);
 	CPPUNIT_ASSERT(trie1 == trie2);
 	CPPUNIT_ASSERT(trie1.Trie::add("bla1"));
 	CPPUNIT_ASSERT(!(trie1 == trie2));
@@ -164,20 +164,20 @@ void DbTrieTest::testEquals() {
 	CPPUNIT_ASSERT(trie1 == trie2);
 }
 
-void DbTrieTest::testSavingAndLoading() {
+void BdbTrieTest::testSavingAndLoading() {
 	Db * dbcopy = new Db(NULL, 0);
-	dbcopy->open(NULL, "trieCopy.db", trie::DBTrie::getLogicalDatabaseName(),
-			trie::DBTrie::getTableType(), DB_CREATE, 0);
-	trie::DBTrie * trie = new trie::DBTrie(hash, dbcopy);
+	dbcopy->open(NULL, "trieCopy.db", trie::BdbTrie::getLogicalDatabaseName(),
+			trie::BdbTrie::getTableType(), DB_CREATE, 0);
+	trie::BdbTrie * trie = new trie::BdbTrie(hash, dbcopy);
 	CPPUNIT_ASSERT(trie->Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie->Trie::add("bla2"));
 	delete trie;
 	dbcopy->close(0);
 	delete dbcopy;
 	dbcopy = new Db(NULL, 0);
-	dbcopy->open(NULL, "trieCopy.db", trie::DBTrie::getLogicalDatabaseName(),
-			trie::DBTrie::getTableType(), DB_CREATE, 0);
-	trie = new trie::DBTrie(hash, dbcopy);
+	dbcopy->open(NULL, "trieCopy.db", trie::BdbTrie::getLogicalDatabaseName(),
+			trie::BdbTrie::getTableType(), DB_CREATE, 0);
+	trie = new trie::BdbTrie(hash, dbcopy);
 	CPPUNIT_ASSERT(trie->Trie::contains("bla1"));
 	CPPUNIT_ASSERT(trie->Trie::contains("bla2"));
 	delete trie;
@@ -187,9 +187,9 @@ void DbTrieTest::testSavingAndLoading() {
 	dbcopy->remove("trieCopy.db", NULL, 0);
 }
 
-void DbTrieTest::testToString() {
+void BdbTrieTest::testToString() {
 	//	cout << endl;
-	trie::DBTrie trie1(hash, db);
+	trie::BdbTrie trie1(hash, db);
 	for (unsigned int i = 1; i <= 10; i++) {
 		stringstream ss;
 		ss << "test" << i;
@@ -199,9 +199,9 @@ void DbTrieTest::testToString() {
 	//cout << dot;
 }
 
-void DbTrieTest::testSubTrie() {
-	trie::DBTrie trie1(hash, db);
-	trie::DBTrie trie2(hash, db2);
+void BdbTrieTest::testSubTrie() {
+	trie::BdbTrie trie1(hash, db);
+	trie::BdbTrie trie2(hash, db2);
 	trie1.Trie::add("bla1");
 	trie2.Trie::add("bla1");
 	trie1.Trie::add("bla2");
@@ -306,10 +306,10 @@ void DbTrieTest::testSubTrie() {
 
 }
 
-void DbTrieTest::testDiff() {
+void BdbTrieTest::testDiff() {
 	for (int iter = 2; iter <= 128; iter = iter * 2) {
-		trie::DBTrie trie1(hash, db);
-		trie::DBTrie trie2(hash, db2);
+		trie::BdbTrie trie1(hash, db);
+		trie::BdbTrie trie2(hash, db2);
 		trie1.Trie::add("bla1");
 		trie2.Trie::add("bla1");
 		trie1.Trie::add("bla2");
@@ -395,12 +395,12 @@ void DbTrieTest::testDiff() {
 
 void DbNodeTest::setUp(void) {
 	this->db = new Db(NULL, 0);
-	db->open(NULL, "trienode1.db", trie::DBTrie::getLogicalDatabaseName(),
-			trie::DBTrie::getTableType(), DB_CREATE, 0);
+	db->open(NULL, "trienode1.db", trie::BdbTrie::getLogicalDatabaseName(),
+			trie::BdbTrie::getTableType(), DB_CREATE, 0);
 	this->db2 = new Db(NULL, 0);
-	db2->open(NULL, "trienode2.db", trie::DBTrie::getLogicalDatabaseName(),
-			trie::DBTrie::getTableType(), DB_CREATE, 0);
-	this->trie = new DBTrie(hashFunction_, this->db);
+	db2->open(NULL, "trienode2.db", trie::BdbTrie::getLogicalDatabaseName(),
+			trie::BdbTrie::getTableType(), DB_CREATE, 0);
+	this->trie = new BdbTrie(hashFunction_, this->db);
 	this->key1 = (unsigned char*) malloc(hashFunction_.getHashSize());
 	this->key2 = (unsigned char*) malloc(hashFunction_.getHashSize());
 	this->key3 = (unsigned char*) malloc(hashFunction_.getHashSize());
@@ -539,7 +539,7 @@ void DbNodeTest::testInsert() {
 }
 
 void DbNodeTest::testErase() {
-	DBTrie trie1(hashFunction_, this->db);
+	BdbTrie trie1(hashFunction_, this->db);
 	// Inserting 30 entries
 	for (int i = 0; i < 30; i++) {
 		stringstream ss;
@@ -567,7 +567,7 @@ void DbNodeTest::testErase() {
 		CPPUNIT_ASSERT(success);
 	}
 
-	DBTrie trie2(hashFunction_, this->db2);
+	BdbTrie trie2(hashFunction_, this->db2);
 	CPPUNIT_ASSERT_MESSAGE("BOTH SHOULD BE EMPTY", trie1 == trie2);
 	CPPUNIT_ASSERT_MESSAGE("adding bla1 to emtpy trie1 failed",
 			trie1.Trie::add("bla1"));
@@ -670,11 +670,11 @@ void DbNodeTest::testToString() {
 
 void DbRootNodeTest::setUp(void) {
 	this->db = new Db(NULL, 0);
-	db->open(NULL, "trierootnode1.db", trie::DBTrie::getLogicalDatabaseName(),
-			trie::DBTrie::getTableType(), DB_CREATE, 0);
+	db->open(NULL, "trierootnode1.db", trie::BdbTrie::getLogicalDatabaseName(),
+			trie::BdbTrie::getTableType(), DB_CREATE, 0);
 	this->db2 = new Db(NULL, 0);
-	db2->open(NULL, "trierootnode2.db", trie::DBTrie::getLogicalDatabaseName(),
-			trie::DBTrie::getTableType(), DB_CREATE, 0);
+	db2->open(NULL, "trierootnode2.db", trie::BdbTrie::getLogicalDatabaseName(),
+			trie::BdbTrie::getTableType(), DB_CREATE, 0);
 }
 
 void DbRootNodeTest::tearDown(void) {
@@ -699,7 +699,7 @@ void DbRootNodeTest::testConstructor() {
 }
 
 void DbRootNodeTest::testToString() {
-	DBTrie trie(hash, db);
+	BdbTrie trie(hash, db);
 	DbRootNode root(trie, hash, this->db);
 	root.toString("N");
 	//	std::cout << root.toString() << std::endl;

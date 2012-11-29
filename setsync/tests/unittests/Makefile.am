@@ -23,16 +23,9 @@ unittest_SOURCES = \
 AM_CPPFLAGS = @CPPUNIT_CFLAGS@ -Wall
 AM_LDFLAGS = @CPPUNIT_LIBS@
 
-if SQLITE
-AM_CPPFLAGS += @SQLITE_CFLAGS@
-AM_LDFLAGS += @SQLITE_LIBS@
-unittest_SOURCES += SQLiteIndexTest.cpp
-noinst_HEADERS += SQLiteIndexTest.h
-endif
-
 if BERKELEY_DB
-unittest_SOURCES += DBTrieTest.cpp DBBloomFilterTest.cpp DbSetTest.cpp DbIndexTest.cpp
-noinst_HEADERS += DBTrieTest.h DBBloomFilterTest.h DbSetTest.h DbIndexTest.h
+unittest_SOURCES += BdbTrieTest.cpp BdbBloomFilterTest.cpp BdbSetTest.cpp BdbIndexTest.cpp
+noinst_HEADERS += BdbTrieTest.h BdbBloomFilterTest.h BdbSetTest.h BdbIndexTest.h
 endif
 
 INCLUDES = -I@top_srcdir@ -I@top_srcdir@/setsync/tests/unittests

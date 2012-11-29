@@ -16,16 +16,10 @@ cpp_sources = BloomFilter.cpp \
 			HashFunction.cpp \
 			FSBloomFilter.cpp \
 			DoubleHashingScheme.cpp
-if SQLITE
-AM_CPPFLAGS += @SQLITE_CFLAGS@
-AM_LDFLAGS += @SQLITE_LIBS@
-h_sources += 
-cpp_sources +=
-endif
 
 if BERKELEY_DB
-h_sources += DBBloomFilter.h
-cpp_sources += DBBloomFilter.cpp
+h_sources += BdbBloomFilter.h
+cpp_sources += BdbBloomFilter.cpp
 endif
 
 noinst_LTLIBRARIES = libbloom.la

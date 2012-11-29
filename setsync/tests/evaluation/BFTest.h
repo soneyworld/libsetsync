@@ -10,7 +10,7 @@
 #include "SHA1Generator.h"
 #include <setsync/bloom/BloomFilter.h>
 #include <setsync/bloom/FSBloomFilter.h>
-#include <setsync/bloom/DBBloomFilter.h>
+#include <setsync/bloom/BdbBloomFilter.h>
 #include <setsync/bloom/HashFunction.h>
 #include <db_cxx.h>
 

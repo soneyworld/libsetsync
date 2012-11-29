@@ -4,7 +4,7 @@
  *      Author: Till Lorentzen
  */
 
-#include "DbIndex.h"
+#include "BdbIndex.h"
 #include <setsync/utils/BerkeleyDB.h>
 
 namespace setsync {
@@ -12,7 +12,7 @@ namespace setsync {
 namespace index {
 
 DbIndex::DbIndex(const utils::CryptoHash& hash, Db * db) :
-	AbstractSetIndex(hash), berkeley::BerkeleyDBTableUserInferface(db), db_(db) {
+	AbstractSetIndex(hash), berkeley::AbstractBdbTableUser(db), db_(db) {
 
 }
 

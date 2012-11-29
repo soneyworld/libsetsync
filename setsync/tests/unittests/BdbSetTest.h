@@ -1,19 +1,19 @@
 /*
- * MemSetTest.h
+ * BdbSetTest.h
  *
  *      Author: Till Lorentzen
  */
 
-#ifndef MEMSETTEST_H_
-#define MEMSETTEST_H_
+#ifndef BDBSETTEST_H_
+#define BDBSETTEST_H_
 #include <cppunit/extensions/HelperMacros.h>
 #include "setsync/Set.hpp"
 #include "setsync/DbSet.h"
 
 namespace setsync {
-class DbSetTest: public CPPUNIT_NS::TestCase {
+class BdbSetTest: public CPPUNIT_NS::TestCase {
 
-CPPUNIT_TEST_SUITE(DbSetTest);
+CPPUNIT_TEST_SUITE(BdbSetTest);
 		CPPUNIT_TEST(testAdding);
 		CPPUNIT_TEST(testSize);
 		CPPUNIT_TEST(testErasing);
@@ -38,7 +38,7 @@ protected:
 	void testSync();
 
 };
-CPPUNIT_TEST_SUITE_REGISTRATION(DbSetTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(BdbSetTest);
 }
 ;
-#endif /* MEMSETTEST_H_ */
+#endif /* BDBSETTEST_H_ */

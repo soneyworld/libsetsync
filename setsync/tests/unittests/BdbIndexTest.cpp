@@ -1,10 +1,10 @@
 /*
- * DbIndexTest.cpp
+ * BdbIndexTest.cpp
  *
  *      Author: Till Lorentzen
  */
 
-#include "DbIndexTest.h"
+#include "BdbIndexTest.h"
 
 namespace setsync {
 

@@ -7,7 +7,6 @@
 #ifndef SQLITETEST_H_
 #define SQLITETEST_H_
 #include "Test.h"
-#include <setsync/index/SQLiteIndex.h>
 class SQLiteTest : public Test{
 private:
 	void testInMemory();

@@ -9,8 +9,8 @@ AM_LDFLAGS = @SQLITE_LIBS@
 endif
 
 if BERKELEY_DB
-h_sources += DBTrie.h
-cpp_sources += DBTrie.cpp
+h_sources += BdbTrie.h
+cpp_sources += BdbTrie.cpp
 endif
 
 noinst_LTLIBRARIES = libtrie.la

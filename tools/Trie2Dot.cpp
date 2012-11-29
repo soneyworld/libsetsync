@@ -7,7 +7,7 @@
 #include "Trie2Dot.h"
 #include <setsync/utils/CryptoHash.h>
 #include <setsync/trie/Trie.h>
-#include <setsync/trie/DBTrie.h>
+#include <setsync/trie/BdbTrie.h>
 #include <setsync/utils/OutputFunctions.h>
 #include <sstream>
 #include <iomanip>
@@ -17,15 +17,15 @@ using namespace trie;
 
 Trie2Dot::Trie2Dot() {
 	this->db1_ = new Db(NULL, 0);
-	db1_->set_flags(trie::DBTrie::getTableFlags());
-	db1_->open(NULL, NULL, trie::DBTrie::getLogicalDatabaseName(),
-			trie::DBTrie::getTableType(), DB_CREATE, 0);
-	trie1_ = new DBTrie(hash_, db1_);
+	db1_->set_flags(trie::BdbTrie::getTableFlags());
+	db1_->open(NULL, NULL, trie::BdbTrie::getLogicalDatabaseName(),
+			trie::BdbTrie::getTableType(), DB_CREATE, 0);
+	trie1_ = new BdbTrie(hash_, db1_);
 	this->db2_ = new Db(NULL, 0);
-	db2_->set_flags(trie::DBTrie::getTableFlags());
-	db2_->open(NULL, NULL, trie::DBTrie::getLogicalDatabaseName(),
-			trie::DBTrie::getTableType(), DB_CREATE, 0);
-	trie2_ = new DBTrie(hash_, db2_);
+	db2_->set_flags(trie::BdbTrie::getTableFlags());
+	db2_->open(NULL, NULL, trie::BdbTrie::getLogicalDatabaseName(),
+			trie::BdbTrie::getTableType(), DB_CREATE, 0);
+	trie2_ = new BdbTrie(hash_, db2_);
 }
 
 void Trie2Dot::out() {

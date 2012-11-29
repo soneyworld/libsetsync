@@ -1,22 +1,22 @@
 /*
- * DbSetTest.cpp
+ * BdbSetTest.cpp
  *
  *      Author: Till Lorentzen
  */
 
-#include "DbSetTest.h"
+#include "BdbSetTest.h"
 
 namespace setsync {
-void DbSetTest::setUp(void) {
+void BdbSetTest::setUp(void) {
 	this->key_1 = new unsigned char[20];
 
 }
 
-void DbSetTest::tearDown(void) {
+void BdbSetTest::tearDown(void) {
 	delete this->key_1;
 }
 
-void DbSetTest::testAddingAndErasingElements() {
+void BdbSetTest::testAddingAndErasingElements() {
 	DbSet set1(hash);
 	CPPUNIT_ASSERT(set1.getSize() == 0);
 	set1.insert(key_1);
@@ -27,7 +27,7 @@ void DbSetTest::testAddingAndErasingElements() {
 	CPPUNIT_ASSERT(set1.getSize() == 1);
 }
 
-void DbSetTest::testAddingAndCleaningElements() {
+void BdbSetTest::testAddingAndCleaningElements() {
 	DbSet set1(hash);
 	CPPUNIT_ASSERT(set1.getSize() == 0);
 	set1.insert(key_1);
@@ -35,7 +35,7 @@ void DbSetTest::testAddingAndCleaningElements() {
 	set1.clear();
 	CPPUNIT_ASSERT(set1.getSize() == 0);
 }
-void DbSetTest::testAdding() {
+void BdbSetTest::testAdding() {
 	DbSet set1(hash, NULL, 10, true, 0.1);
 	CPPUNIT_ASSERT(set1.insert("bla1"));
 	CPPUNIT_ASSERT(set1.insert("bla2"));
@@ -48,7 +48,7 @@ void DbSetTest::testAdding() {
 	CPPUNIT_ASSERT(!set1.insert("bla4"));
 	CPPUNIT_ASSERT(!set1.insert("bla5"));
 }
-void DbSetTest::testSize() {
+void BdbSetTest::testSize() {
 	DbSet set1(hash,NULL,10, true, 0.1);
 	CPPUNIT_ASSERT(set1.getSize() == 0);
 	CPPUNIT_ASSERT(set1.insert("bla1"));
@@ -56,7 +56,7 @@ void DbSetTest::testSize() {
 	CPPUNIT_ASSERT(!set1.insert("bla1"));
 	CPPUNIT_ASSERT(set1.getSize() == 1);
 }
-void DbSetTest::testErasing() {
+void BdbSetTest::testErasing() {
 	DbSet set1(hash,NULL,10, true, 0.1);
 	CPPUNIT_ASSERT(!set1.erase("bla1"));
 	CPPUNIT_ASSERT(set1.insert("bla1"));
@@ -64,7 +64,7 @@ void DbSetTest::testErasing() {
 	CPPUNIT_ASSERT(!set1.erase("bla1"));
 }
 
-void DbSetTest::testSync(){
+void BdbSetTest::testSync(){
 	DbSet set1(hash);
 	DbSet set2(hash);
 	set1.insert("bla1");
