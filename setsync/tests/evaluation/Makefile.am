@@ -27,8 +27,8 @@ endif
 if SQLITE
 AM_CPPFLAGS += @SQLITE_CFLAGS@
 AM_LDFLAGS += @SQLITE_LIBS@
-evaluation_SOURCES += SQLiteTest.h
-evaluation_SOURCES += SQLiteTest.cpp
+evaluation_SOURCES += SQLiteTest.h SQLiteDatabase.h SQLiteException.h
+evaluation_SOURCES += SQLiteTest.cpp SQLiteDatabase.cpp SQLiteException.cpp
 endif
 
 

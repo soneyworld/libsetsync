@@ -6,6 +6,7 @@
 
 #include "SQLiteDatabase.h"
 #include "SQLiteException.h"
+
 namespace sqlite{
 
 SQLiteDatabase::SQLiteDatabase() {
