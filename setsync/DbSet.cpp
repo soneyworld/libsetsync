@@ -5,8 +5,8 @@
  */
 #include <stdlib.h>
 #include "DbSet.h"
-#include <setsync/bloom/DBBloomFilter.h>
-#include <setsync/trie/DBTrie.h>
+#include <setsync/bloom/BdbBloomFilter.h>
+#include <setsync/trie/BdbTrie.h>
 #include <setsync/utils/FileSystem.h>
 
 namespace setsync {
@@ -35,23 +35,23 @@ DbSet::DbSet(const utils::CryptoHash& hash, const char * db_home,
 
 	this->bfdb = new Db(this->env_, 0);
 	this->triedb = new Db(this->env_, 0);
-	this->bfdb->set_flags(bloom::DBBloomFilter::getTableFlags());
+	this->bfdb->set_flags(bloom::BdbBloomFilter::getTableFlags());
 	this->bfdb->open(NULL, "set",
-			bloom::DBBloomFilter::getLogicalDatabaseName(),
-			bloom::DBBloomFilter::getTableType(), DB_CREATE, 0);
-	this->triedb->set_flags(trie::DBTrie::getTableFlags());
-	this->triedb->open(NULL, "set", trie::DBTrie::getLogicalDatabaseName(),
-			trie::DBTrie::getTableType(), DB_CREATE, 0);
-	this->bf_ = new bloom::DBBloomFilter(this->hash_, this->bfdb, maxSize,
+			bloom::BdbBloomFilter::getLogicalDatabaseName(),
+			bloom::BdbBloomFilter::getTableType(), DB_CREATE, 0);
+	this->triedb->set_flags(trie::BdbTrie::getTableFlags());
+	this->triedb->open(NULL, "set", trie::BdbTrie::getLogicalDatabaseName(),
+			trie::BdbTrie::getTableType(), DB_CREATE, 0);
+	this->bf_ = new bloom::BdbBloomFilter(this->hash_, this->bfdb, maxSize,
 			hardMaximum, falsePositiveRate);
-	this->trie_ = new trie::DBTrie(this->hash_, this->triedb);
+	this->trie_ = new trie::BdbTrie(this->hash_, this->triedb);
 }
 
 DbSet::~DbSet() {
-	bloom::DBBloomFilter& f_ = dynamic_cast<bloom::DBBloomFilter&> (*bf_);
-	f_.~DBBloomFilter();
-	trie::DBTrie& t_ = dynamic_cast<trie::DBTrie&> (*trie_);
-	t_.~DBTrie();
+	bloom::BdbBloomFilter& f_ = dynamic_cast<bloom::BdbBloomFilter&> (*bf_);
+	f_.~BdbBloomFilter();
+	trie::BdbTrie& t_ = dynamic_cast<trie::BdbTrie&> (*trie_);
+	t_.~BdbTrie();
 	this->bfdb->close(0);
 	this->triedb->close(0);
 	this->env_->close(0);

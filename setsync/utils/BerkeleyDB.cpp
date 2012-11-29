@@ -103,4 +103,18 @@ std::string BerkeleyDB::tableTypeToString(Db * db) {
 	return t;
 }
 
+bool BerkeleyDB::isTransactionEnabled(Db * db) {
+	DbEnv * env = db->get_env();
+	if (env == NULL) {
+		return false;
+	}
+	u_int32_t flags;
+	env->get_flags(&flags);
+	if (flags & DB_INIT_TXN == DB_INIT_TXN) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 }

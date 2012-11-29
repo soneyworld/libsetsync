@@ -7,7 +7,7 @@
 #include "Set.hpp"
 #include <setsync/DbSet.h>
 #include <setsync/bloom/CountingBloomFilter.h>
-#include <setsync/trie/DBTrie.h>
+#include <setsync/trie/BdbTrie.h>
 #include <typeinfo>
 #include <string.h>
 #include <iostream>

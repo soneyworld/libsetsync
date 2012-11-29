@@ -215,7 +215,7 @@ bool MemTrie::getRoot(unsigned char * hash) {
 	return false;
 }
 
-std::string MemTrie::toDotString() const {
+std::string MemTrie::toDotString(const std::string nodePrefix) const {
 	return "";
 }
 

@@ -4,17 +4,17 @@
  *      Author: Till Lorentzen
  */
 
-#ifndef FSTRIETEST_H_
-#define FSTRIETEST_H_
+#ifndef BDBTRIETEST_H_
+#define BDBTRIETEST_H_
 #include <cppunit/extensions/HelperMacros.h>
-#include "setsync/trie/DBTrie.h"
+#include "setsync/trie/BdbTrie.h"
 #include <setsync/utils/CryptoHash.h>
 
 namespace trie {
 
-class DbTrieTest: public CPPUNIT_NS::TestCase {
+class BdbTrieTest: public CPPUNIT_NS::TestCase {
 
-CPPUNIT_TEST_SUITE( DbTrieTest);
+CPPUNIT_TEST_SUITE( BdbTrieTest);
 		CPPUNIT_TEST( testAddingAndErasingElements);
 		CPPUNIT_TEST( testAddingAndCleaningElements);
 		CPPUNIT_TEST( testAdding);
@@ -49,7 +49,7 @@ protected:
 	void testDiff();
 
 };
-CPPUNIT_TEST_SUITE_REGISTRATION(DbTrieTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(BdbTrieTest);
 
 class DbNodeTest: public CPPUNIT_NS::TestCase {
 
@@ -74,7 +74,7 @@ private:
 	Db * db;
 	Db * db2;
 	utils::CryptoHash hashFunction_;
-	DBTrie * trie;
+	BdbTrie * trie;
 	unsigned char * key1;
 	unsigned char * key2;
 	unsigned char * key3;
@@ -120,4 +120,4 @@ protected:
 CPPUNIT_TEST_SUITE_REGISTRATION(DbRootNodeTest);
 
 }//end namespace trie
-#endif /* FSTRIETEST_H_ */
+#endif /* BDBTRIETEST_H_ */

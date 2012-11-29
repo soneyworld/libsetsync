@@ -4,8 +4,8 @@
 /// @author      Till Lorentzen (lorentze@ibr.cs.tu-bs.de)
 /// 
 
-#include "DBBloomFilterTest.h"
-#include <setsync/bloom/DBBloomFilter.h>
+#include "BdbBloomFilterTest.h"
+#include <setsync/bloom/BdbBloomFilter.h>
 #include <setsync/utils/FileSystem.h>
 #include <iostream>
 #include <vector>
@@ -21,13 +21,13 @@ using namespace std;
 namespace bloom {
 
 /*=== BEGIN tests for class 'DBBloomFilter' ===*/
-void DBBloomFilterTest::testConstructor() {
-	bloom::DBBloomFilter Filter1(hashFunction_, db1, 10, false, 0.01);
+void BdbBloomFilterTest::testConstructor() {
+	bloom::BdbBloomFilter Filter1(hashFunction_, db1, 10, false, 0.01);
 	Filter1.AbstractBloomFilter::add("bla1");
 	Filter1.AbstractBloomFilter::add("bla2");
 	Filter1.AbstractBloomFilter::add("bla3");
 	Filter1.AbstractBloomFilter::add("bla4");
-	bloom::DBBloomFilter Filter2(hashFunction_, db1, 10, false, 0.01);
+	bloom::BdbBloomFilter Filter2(hashFunction_, db1, 10, false, 0.01);
 	CPPUNIT_ASSERT(Filter1.AbstractBloomFilter::contains("bla1"));
 	CPPUNIT_ASSERT(Filter2.AbstractBloomFilter::contains("bla1"));
 	CPPUNIT_ASSERT(Filter2.AbstractBloomFilter::contains("bla2"));
@@ -35,9 +35,9 @@ void DBBloomFilterTest::testConstructor() {
 	CPPUNIT_ASSERT(Filter2.AbstractBloomFilter::contains("bla4"));
 }
 
-void DBBloomFilterTest::testLoad() {
-	bloom::DBBloomFilter Filter1(hashFunction_, db1, 10, false, 0.01);
-	bloom::DBBloomFilter Filter2(hashFunction_, db2, 10, false, 0.01);
+void BdbBloomFilterTest::testLoad() {
+	bloom::BdbBloomFilter Filter1(hashFunction_, db1, 10, false, 0.01);
+	bloom::BdbBloomFilter Filter2(hashFunction_, db2, 10, false, 0.01);
 	Filter1.AbstractBloomFilter::add("hello");
 	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains("hello"));
 	CPPUNIT_ASSERT_EQUAL(false, Filter2.AbstractBloomFilter::contains("hello"));
@@ -51,14 +51,14 @@ void DBBloomFilterTest::testLoad() {
 	CPPUNIT_ASSERT(Filter2.AbstractBloomFilter::contains("hello"));
 }
 
-void DBBloomFilterTest::testInsert() {
+void BdbBloomFilterTest::testInsert() {
 	DB_BTREE_STAT *dbstat;
 	unsigned int nrecords;
 	db1->stat(NULL, &dbstat, 0);
 	nrecords = dbstat->bt_ndata;
 	free(dbstat);
 	CPPUNIT_ASSERT(nrecords == 0);
-	bloom::DBBloomFilter Filter1(hashFunction_, db1, 10, false, 0.01);
+	bloom::BdbBloomFilter Filter1(hashFunction_, db1, 10, false, 0.01);
 	//	 test signature (const unsigned char* key)
 	unsigned char cad1[hashFunction_.getHashSize()];
 	hashFunction_(cad1, "ejemplo");
@@ -86,20 +86,20 @@ void DBBloomFilterTest::testInsert() {
 	CPPUNIT_ASSERT(nrecords == Filter1.functionCount_*3);
 
 	/// Testing transaction code
-	bloom::DBBloomFilter Filter3(hashFunction_, db3, 10, false, 0.01);
+	bloom::BdbBloomFilter Filter3(hashFunction_, db3, 10, false, 0.01);
 	Filter3.AbstractBloomFilter::add("bla1");
 	Filter3.AbstractBloomFilter::add("bla2");
 	Filter3.AbstractBloomFilter::add("bla3");
 	CPPUNIT_ASSERT(Filter3.itemCount_== 3);
 }
 
-void DBBloomFilterTest::testRemove() {
+void BdbBloomFilterTest::testRemove() {
 	//cout << endl;
 	DB_BTREE_STAT *dbstat;
 	unsigned int nrecords;
-	bloom::DBBloomFilter Filter1(hashFunction_, db1, 10, false, 0.01);
-	bloom::DBBloomFilter Filter2(hashFunction_, db2, 10, false, 0.01);
-	bloom::DBBloomFilter Filter3(hashFunction_, db3, 10, false, 0.01);
+	bloom::BdbBloomFilter Filter1(hashFunction_, db1, 10, false, 0.01);
+	bloom::BdbBloomFilter Filter2(hashFunction_, db2, 10, false, 0.01);
+	bloom::BdbBloomFilter Filter3(hashFunction_, db3, 10, false, 0.01);
 	//	 test signature (const unsigned char* key)
 
 	unsigned char cad1[hashFunction_.getHashSize()];
@@ -207,10 +207,10 @@ void DBBloomFilterTest::testRemove() {
 
 }
 
-void DBBloomFilterTest::testContains() {
+void BdbBloomFilterTest::testContains() {
 	/* test signature (const std::string& key) const */
 	/* test signature (const char* data, const std::size_t& length) const */
-	bloom::DBBloomFilter Filter1(hashFunction_, db1, 8196);
+	bloom::BdbBloomFilter Filter1(hashFunction_, db1, 8196);
 	char word[8];
 	for (int j = 0; j <= 127; j++) {
 		for (int i = 0; i <= 7; i++) {
@@ -224,8 +224,8 @@ void DBBloomFilterTest::testContains() {
 
 }
 
-void DBBloomFilterTest::testContainsAll() {
-	bloom::DBBloomFilter Filter2(hashFunction_, db1, 8196);
+void BdbBloomFilterTest::testContainsAll() {
+	bloom::BdbBloomFilter Filter2(hashFunction_, db1, 8196);
 	unsigned char hashes[100 * hashFunction_.getHashSize()];
 	for (int j = 0; j < 100; j++) {
 		unsigned char word[8];
@@ -241,10 +241,10 @@ void DBBloomFilterTest::testContainsAll() {
 	CPPUNIT_ASSERT(Filter2.containsAll(hashes, 100));
 }
 
-void DBBloomFilterTest::testOperatorAndAndAssign() {
+void BdbBloomFilterTest::testOperatorAndAndAssign() {
 	/* test signature (const BloomFilter& filter) */
-	bloom::DBBloomFilter FilterA(hashFunction_, db1, 8196);
-	bloom::DBBloomFilter FilterB(hashFunction_, db2, 8196);
+	bloom::BdbBloomFilter FilterA(hashFunction_, db1, 8196);
+	bloom::BdbBloomFilter FilterB(hashFunction_, db2, 8196);
 
 	string strin1, strin2, strin3, strin4;
 	strin1 = "hello";
@@ -269,10 +269,10 @@ void DBBloomFilterTest::testOperatorAndAndAssign() {
 
 }
 
-void DBBloomFilterTest::testOperatorInclusiveOrAndAssign() {
+void BdbBloomFilterTest::testOperatorInclusiveOrAndAssign() {
 	/* test signature (const BloomFilter& filter) */
-	bloom::DBBloomFilter FilterA(hashFunction_, db1, 8196);
-	bloom::DBBloomFilter FilterB(hashFunction_, db2, 8196);
+	bloom::BdbBloomFilter FilterA(hashFunction_, db1, 8196);
+	bloom::BdbBloomFilter FilterB(hashFunction_, db2, 8196);
 
 	string strin1, strin2, strin3, strin4;
 	strin1 = "hello";
@@ -297,10 +297,10 @@ void DBBloomFilterTest::testOperatorInclusiveOrAndAssign() {
 
 }
 
-void DBBloomFilterTest::testOperatorXorAndAssign() {
+void BdbBloomFilterTest::testOperatorXorAndAssign() {
 	/* test signature (const BloomFilter& filter) */
-	bloom::DBBloomFilter FilterA(hashFunction_, db1, 8196);
-	bloom::DBBloomFilter FilterB(hashFunction_, db2, 8196);
+	bloom::BdbBloomFilter FilterA(hashFunction_, db1, 8196);
+	bloom::BdbBloomFilter FilterB(hashFunction_, db2, 8196);
 
 	string strin1, strin2, strin3, strin4;
 	strin1 = "hello";
@@ -325,15 +325,15 @@ void DBBloomFilterTest::testOperatorXorAndAssign() {
 
 }
 
-void DBBloomFilterTest::testSavingAndLoadingSettings() {
-	CPPUNIT_ASSERT_THROW(bloom::DBBloomFilter::loadSettings(this->db1),DbException);
+void BdbBloomFilterTest::testSavingAndLoadingSettings() {
+	CPPUNIT_ASSERT_THROW(bloom::BdbBloomFilter::loadSettings(this->db1),DbException);
 	uint64_t maxElements = 10000;
 	bool hardMax = false;
 	float rate = 0.001;
 	std::size_t hashsize = 20;
-	bloom::DBBloomFilter::saveSettings(this->db1, maxElements, hardMax, rate,
+	bloom::BdbBloomFilter::saveSettings(this->db1, maxElements, hardMax, rate,
 			hashsize);
-	bloom::DbBloomFilterSetting loaded = bloom::DBBloomFilter::loadSettings(
+	bloom::BdbBloomFilterSetting loaded = bloom::BdbBloomFilter::loadSettings(
 			this->db1);
 	CPPUNIT_ASSERT_EQUAL(loaded.maxNumberOfElements, maxElements);
 	CPPUNIT_ASSERT_EQUAL(loaded.hardMaximum,hardMax);
@@ -344,18 +344,18 @@ void DBBloomFilterTest::testSavingAndLoadingSettings() {
 	hardMax = true;
 	rate = 0.01;
 	hashsize = 40;
-	bloom::DBBloomFilter::saveSettings(this->db1, maxElements, hardMax, rate,
+	bloom::BdbBloomFilter::saveSettings(this->db1, maxElements, hardMax, rate,
 			hashsize);
-	loaded = bloom::DBBloomFilter::loadSettings(this->db1);
+	loaded = bloom::BdbBloomFilter::loadSettings(this->db1);
 	CPPUNIT_ASSERT_EQUAL(loaded.maxNumberOfElements, maxElements);
 	CPPUNIT_ASSERT_EQUAL(loaded.hardMaximum,hardMax);
 	CPPUNIT_ASSERT_EQUAL(loaded.falsePositiveRate,rate);
 	CPPUNIT_ASSERT_EQUAL(loaded.hashSize, hashsize);
 }
 
-void DBBloomFilterTest::testDiff() {
-	bloom::DBBloomFilter FilterA(hashFunction_, db1, 8196);
-	bloom::DBBloomFilter FilterB(hashFunction_, db2, 8196);
+void BdbBloomFilterTest::testDiff() {
+	bloom::BdbBloomFilter FilterA(hashFunction_, db1, 8196);
+	bloom::BdbBloomFilter FilterB(hashFunction_, db2, 8196);
 	FilterA.AbstractBloomFilter::add("bla1");
 	FilterA.AbstractBloomFilter::add("bla2");
 	FilterA.AbstractBloomFilter::add("bla3");
@@ -390,10 +390,10 @@ void DBBloomFilterTest::testDiff() {
 	CPPUNIT_ASSERT(memcmp(handler[1].first,sha,hashFunction_.getHashSize())==0);
 }
 
-void DBBloomFilterTest::testToString() {
+void BdbBloomFilterTest::testToString() {
 	//cout << endl;
-	bloom::DBBloomFilter FilterA(hashFunction_, db1, 10);
-	bloom::DBBloomFilter FilterB(hashFunction_, db2, 10);
+	bloom::BdbBloomFilter FilterA(hashFunction_, db1, 10);
+	bloom::BdbBloomFilter FilterB(hashFunction_, db2, 10);
 	//cout << FilterA.toString() << endl;
 	for (unsigned int i = 1; i <= 10; i++) {
 		stringstream ss;
@@ -410,17 +410,17 @@ void DBBloomFilterTest::testToString() {
 
 /*=== END   tests for class 'DBBloomFilter' ===*/
 
-void DBBloomFilterTest::setUp() {
+void BdbBloomFilterTest::setUp() {
 	this->db1 = new Db(NULL, 0);
 	this->db2 = new Db(NULL, 0);
-	db1->set_flags(bloom::DBBloomFilter::getTableFlags());
+	db1->set_flags(bloom::BdbBloomFilter::getTableFlags());
 	db1->open(NULL, "table1.db",
-			bloom::DBBloomFilter::getLogicalDatabaseName(),
-			bloom::DBBloomFilter::getTableType(), DB_CREATE, 0);
-	db2->set_flags(bloom::DBBloomFilter::getTableFlags());
+			bloom::BdbBloomFilter::getLogicalDatabaseName(),
+			bloom::BdbBloomFilter::getTableType(), DB_CREATE, 0);
+	db2->set_flags(bloom::BdbBloomFilter::getTableFlags());
 	db2->open(NULL, "table2.db",
-			bloom::DBBloomFilter::getLogicalDatabaseName(),
-			bloom::DBBloomFilter::getTableType(), DB_CREATE, 0);
+			bloom::BdbBloomFilter::getLogicalDatabaseName(),
+			bloom::BdbBloomFilter::getTableType(), DB_CREATE, 0);
 	int ret = 0;
 	this->env1 = new DbEnv(0);
 	mkdir("table3", 0700);
@@ -432,12 +432,12 @@ void DBBloomFilterTest::setUp() {
 		cout << e.get_errno() << endl;
 	}
 	this->db3 = new Db(this->env1, 0);
-	ret = db3->set_flags(bloom::DBBloomFilter::getTableFlags());
-	ret = db3->open(NULL, "bf", bloom::DBBloomFilter::getLogicalDatabaseName(),
-			bloom::DBBloomFilter::getTableType(), DB_CREATE, 0);
+	ret = db3->set_flags(bloom::BdbBloomFilter::getTableFlags());
+	ret = db3->open(NULL, "bf", bloom::BdbBloomFilter::getLogicalDatabaseName(),
+			bloom::BdbBloomFilter::getTableType(), DB_CREATE, 0);
 }
 
-void DBBloomFilterTest::tearDown() {
+void BdbBloomFilterTest::tearDown() {
 	try {
 		this->db1->close(0);
 		this->db2->close(0);

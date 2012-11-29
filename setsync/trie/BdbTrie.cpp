@@ -4,7 +4,7 @@
  *      Author: Till Lorentzen
  */
 
-#include "DBTrie.h"
+#include "BdbTrie.h"
 #include <setsync/utils/bitset.h>
 #include <setsync/utils/OutputFunctions.h>
 #include <stdexcept>
@@ -91,7 +91,7 @@ bool DBValue::hasParent() const {
 
 const char DbRootNode::root_name[] = "root";
 
-DbRootNode::DbRootNode(const DBTrie& trie,
+DbRootNode::DbRootNode(const BdbTrie& trie,
 		const utils::CryptoHash& hashfunction, Db * db) :
 	trie_(trie), hashfunction_(hashfunction), db_(db) {
 
@@ -128,7 +128,7 @@ void DbRootNode::del() {
 	}
 }
 
-DbNode::DbNode(const DBTrie& trie, const utils::CryptoHash& hashfunction,
+DbNode::DbNode(const BdbTrie& trie, const utils::CryptoHash& hashfunction,
 		Db * db, const unsigned char * hash, bool newone) :
 	trie_(trie), db_(db), hashfunction_(hashfunction) {
 	this->hash = (unsigned char*) malloc(hashfunction_.getHashSize() * 5);
@@ -655,9 +655,10 @@ bool DbNode::deleteFromDb() {
 	return this->db_->del(NULL, &key, 0) == 0;
 }
 
-std::string DbNode::toString() const {
+std::string DbNode::toString(const std::string nodePrefix) const {
 	std::stringstream ss;
-	ss << "N" << utils::OutputFunctions::CryptoHashtoString(hash) << " [";
+	ss << nodePrefix << utils::OutputFunctions::CryptoHashtoString(hash)
+			<< " [";
 	ss << "label=\"";
 	if (hasChildren_)
 		ss << "{{";
@@ -682,52 +683,58 @@ std::string DbNode::toString() const {
 	}
 	ss << "];" << std::endl;
 	if (hasParent_) {
-		ss << "N" << utils::OutputFunctions::CryptoHashtoString(hash) << " -> "
-				<< "N" << utils::OutputFunctions::CryptoHashtoString(parent);
+		ss << nodePrefix << utils::OutputFunctions::CryptoHashtoString(hash)
+				<< " -> " << nodePrefix
+				<< utils::OutputFunctions::CryptoHashtoString(parent);
 		ss << " [style=dotted];" << std::endl;
 	}
 	if (hasChildren_) {
-		ss << "N" << utils::OutputFunctions::CryptoHashtoString(hash) << " -> "
-				<< "N" << utils::OutputFunctions::CryptoHashtoString(smaller)
+		ss << nodePrefix << utils::OutputFunctions::CryptoHashtoString(hash)
+				<< " -> " << nodePrefix
+				<< utils::OutputFunctions::CryptoHashtoString(smaller)
 				<< " [label=\"smaller\"];" << std::endl;
-		ss << "N" << utils::OutputFunctions::CryptoHashtoString(hash) << " -> "
-				<< "N" << utils::OutputFunctions::CryptoHashtoString(larger)
+		ss << nodePrefix << utils::OutputFunctions::CryptoHashtoString(hash)
+				<< " -> " << nodePrefix
+				<< utils::OutputFunctions::CryptoHashtoString(larger)
 				<< " [label=\"larger\"];" << std::endl;
 	}
 	std::string result = ss.str();
 	if (hasChildren_) {
 		DbNode smaller = this->getSmaller();
-		ss << smaller.toString();
+		ss << smaller.toString(nodePrefix);
 		DbNode larger = this->getLarger();
-		ss << larger.toString();
+		ss << larger.toString(nodePrefix);
 	}
 	return ss.str();
 }
 
-std::string DbRootNode::toString() const {
+std::string DbRootNode::toString(const std::string nodePrefix) const {
 	try {
 		std::stringstream ss;
 		DbNode n(get());
-		ss << "ROOT -> N" << utils::OutputFunctions::CryptoHashtoString(n.hash);
-		ss << " [shape=plaintext]";
-		ss << ";" << std::endl;
+		ss << nodePrefix << "ROOT [label=\"ROOT\"];" << std::endl;
+		ss << nodePrefix << "ROOT -> " << nodePrefix
+				<< utils::OutputFunctions::CryptoHashtoString(n.hash);
+		ss << " [shape=plaintext];" << std::endl;
 		return ss.str();
 	} catch (...) {
 		std::stringstream ss;
-		ss << "ROOT [shape=plaintext];" << std::endl;
+		ss << nodePrefix << "ROOT [label=\"ROOT\";shape=plaintext];"
+				<< std::endl;
 		return ss.str();
 	}
 }
 
-DBTrie::DBTrie(const utils::CryptoHash& hash, Db * db) :
-	Trie(hash), root_(*this, hash, db), db_(db) {
+BdbTrie::BdbTrie(const utils::CryptoHash& hash, Db * db) :
+	Trie(hash), root_(*this, hash, db),
+			berkeley::AbstractBdbTableUser(db), db_(db) {
 	// Loading root, if available
 }
 
-DBTrie::~DBTrie() {
+BdbTrie::~BdbTrie() {
 }
 
-bool DBTrie::add(const unsigned char * hash, bool performhash) {
+bool BdbTrie::add(const unsigned char * hash, bool performhash) {
 	try {
 		DbNode root = this->root_.get();
 		bool inserted = root.insert(hash, performhash);
@@ -744,7 +751,7 @@ bool DBTrie::add(const unsigned char * hash, bool performhash) {
 	}
 }
 
-bool DBTrie::remove(const unsigned char * hash, bool performhash) {
+bool BdbTrie::remove(const unsigned char * hash, bool performhash) {
 	try {
 		DbNode root = this->root_.get();
 		bool removed = root.erase(hash, performhash);
@@ -759,7 +766,7 @@ bool DBTrie::remove(const unsigned char * hash, bool performhash) {
 	}
 }
 
-TrieNodeType DBTrie::contains(const unsigned char * hash) const {
+TrieNodeType BdbTrie::contains(const unsigned char * hash) const {
 	try {
 		DbNode node(*this, this->hash_, this->db_, hash, false);
 		if (node.hasChildren_) {
@@ -773,23 +780,23 @@ TrieNodeType DBTrie::contains(const unsigned char * hash) const {
 	return NOT_FOUND;
 }
 
-void DBTrie::clear(void) {
+void BdbTrie::clear(void) {
 	u_int32_t count;
 	this->db_->truncate(NULL, &count, 0);
 	this->setSize(0);
 }
 
-const char * DBTrie::getLogicalDatabaseName() {
+const char * BdbTrie::getLogicalDatabaseName() {
 	return "trie";
 }
 
-const DBTYPE DBTrie::getTableType() {
+const DBTYPE BdbTrie::getTableType() {
 	return DB_HASH;
 }
 
-bool DBTrie::operator ==(const Trie& other) const {
+bool BdbTrie::operator ==(const Trie& other) const {
 	try {
-		const DBTrie& other_ = dynamic_cast<const DBTrie&> (other);
+		const BdbTrie& other_ = dynamic_cast<const BdbTrie&> (other);
 		try {
 			root_.get();
 		} catch (DbNoRootFoundException e) {
@@ -813,27 +820,27 @@ bool DBTrie::operator ==(const Trie& other) const {
 	}
 }
 
-std::string DBTrie::toDotString() const {
+std::string BdbTrie::toDotString(const std::string nodePrefix) const {
 	std::stringstream ss;
-	ss << this->root_.toString();
+	ss << this->root_.toString(nodePrefix);
 	try {
 		DbNode node = this->root_.get();
-		ss << node.toString();
+		ss << node.toString(nodePrefix);
 	} catch (DbTrieException e) {
 
 	}
 	return ss.str();
 }
 
-std::string DBTrie::toString() const {
+std::string BdbTrie::toString() const {
 	std::stringstream ss;
 	ss << "digraph trie {" << std::endl;
-	ss << toDotString();
+	ss << this->Trie::toDotString();
 	ss << "}" << std::endl;
 	return ss.str();
 }
 
-size_t DBTrie::getSubTrie(const DbNode& root, const size_t numberOfNodes,
+size_t BdbTrie::getSubTrie(const DbNode& root, const size_t numberOfNodes,
 		std::vector<DbNode>& inner_nodes, std::vector<DbNode>& child_nodes) {
 	if (root.hasChildren_ && numberOfNodes >= 2) {
 		DbNode smaller = root.getSmaller();
@@ -862,7 +869,7 @@ size_t DBTrie::getSubTrie(const DbNode& root, const size_t numberOfNodes,
 	}
 }
 
-size_t DBTrie::getSubTrie(const unsigned char * hash, void * buffer,
+size_t BdbTrie::getSubTrie(const unsigned char * hash, void * buffer,
 		const size_t buffersize) {
 	size_t maxNumberOfHashes = buffersize / this->hash_.getHashSize();
 	if (maxNumberOfHashes < 2) {
@@ -889,7 +896,7 @@ size_t DBTrie::getSubTrie(const unsigned char * hash, void * buffer,
 	return subtriesize * this->hash_.getHashSize();
 }
 
-bool DBTrie::getRoot(unsigned char * hash) {
+bool BdbTrie::getRoot(unsigned char * hash) {
 	if (this->getSize() == 0)
 		return false;
 	try {
@@ -901,7 +908,7 @@ bool DBTrie::getRoot(unsigned char * hash) {
 	}
 }
 
-void DBTrie::diff(const void * subtrie, const std::size_t length,
+void BdbTrie::diff(const void * subtrie, const std::size_t length,
 		setsync::AbstractDiffHandler& handler) const {
 	unsigned char * subtrie_ = (unsigned char *) subtrie;
 	for (int i = 0; i < length / hash_.getHashSize(); i++) {
