@@ -120,7 +120,6 @@ fi
 AC_ARG_ENABLE(cppunit,
   [AS_HELP_STRING([--enable-cppunit], [enable unit testing with cppunit (default: no)])],
   [], [])
-#AC_MSG_RESULT($enable_cppunit)
 AM_CONDITIONAL(CPPUNIT, test "$enable_cppunit" = yes)
 if test "$enable_cppunit" = yes; then
   AM_PATH_CPPUNIT(1.10.2,
@@ -173,14 +172,12 @@ AC_ARG_ENABLE(evaluation,
   	AC_CHECK_FUNCS([mkdir])
   	AC_CHECK_FUNCS([clock_gettime])
   ], [])
-#AC_MSG_RESULT($enable_evaluation)
 
 AM_CONDITIONAL(EVALUATION, test x$enable_evaluation = xyes)
 
 AC_ARG_ENABLE(tools,
   [AS_HELP_STRING([--enable-tools], [enable tools (default: no)])],
   [], [])
-#AC_MSG_RESULT($enable_tools)
 
 AM_CONDITIONAL(TOOLS, test x$enable_tools = xyes)
 
@@ -200,7 +197,6 @@ AS_IF([test "x$with_leveldb" != xno],
 AS_IF([test "x$with_leveldb" = xyes],
 	AC_DEFINE(HAVE_LEVELDB, [1], ["leveldb library is available"])
 )
-#AC_MSG_RESULT($with_leveldb)
 AM_CONDITIONAL(LEVELDB, test x$with_leveldb = xyes)
 
 

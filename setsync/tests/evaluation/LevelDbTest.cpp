@@ -15,13 +15,13 @@ LevelDbTest::LevelDbTest(const utils::CryptoHash& hash) :
 	leveldb::Options options;
 	options.create_if_missing = true;
 	options.error_if_exists = true;
-	leveldb::Status status = leveldb::DB::Open(options, "/tmp/testdb", &db);
+	leveldb::Status status = leveldb::DB::Open(options, "testdb", &db);
 	assert(status.ok());
 }
 
 LevelDbTest::~LevelDbTest() {
 	delete db;
-	utils::FileSystem::rmDirRecursive("/tmp/testdb");
+	utils::FileSystem::rmDirRecursive("testdb");
 }
 
 void LevelDbTest::run() {
