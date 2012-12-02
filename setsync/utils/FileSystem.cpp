@@ -15,6 +15,10 @@
 
 namespace utils {
 
+int FileSystem::rmDirRecursive(const std::string& path) {
+	return rmDirRecursive(path.c_str());
+}
+
 int FileSystem::rmDirRecursive(const char *path) {
 	DIR *d = opendir(path);
 	size_t path_len = strlen(path);
@@ -53,8 +57,10 @@ int FileSystem::rmDirRecursive(const char *path) {
 	}
 	return r;
 }
-
-uint64_t FileSystem::fileSize(const char* file){
+uint64_t FileSystem::fileSize(const std::string& file) {
+	return fileSize(file.c_str());
+}
+uint64_t FileSystem::fileSize(const char* file) {
 	struct stat filestatus;
 	stat(file, &filestatus);
 	return filestatus.st_size;

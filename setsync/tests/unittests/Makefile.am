@@ -28,6 +28,11 @@ unittest_SOURCES += BdbTrieTest.cpp BdbBloomFilterTest.cpp BdbSetTest.cpp BdbInd
 noinst_HEADERS += BdbTrieTest.h BdbBloomFilterTest.h BdbSetTest.h BdbIndexTest.h
 endif
 
+if LEVELDB
+noinst_HEADERS += LevelDbStorageTest.h
+unittest_SOURCES += LevelDbStorageTest.cpp
+endif
+
 INCLUDES = -I@top_srcdir@ -I@top_srcdir@/setsync/tests/unittests
 
 check_PROGRAMS = unittest

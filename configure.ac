@@ -206,6 +206,7 @@ AC_CONFIG_FILES([Makefile \
 	setsync/trie/Makefile \
 	setsync/index/Makefile \
 	setsync/utils/Makefile \
+	setsync/storage/Makefile \
 	setsync/tests/Makefile \
 	setsync/tests/unittests/Makefile \
 	setsync/tests/evaluation/Makefile \
