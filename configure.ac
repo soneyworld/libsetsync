@@ -198,7 +198,7 @@ AS_IF([test "x$with_leveldb" != xno],
 			with_leveldb=no
 		])
 	)
-
+AC_MSG_RESULT($with_leveldb)
 AM_CONDITIONAL(LEVELDB, test x$with_leveldb = xyes)
 
 
