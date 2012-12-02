@@ -8,7 +8,8 @@
 #endif
 namespace utils {
 
-CryptoHash::CryptoHash(const char * name) {
+CryptoHash::CryptoHash(const char * name) :
+	name_(name) {
 #ifdef HAVE_OPENSSL
 	OpenSSL_add_all_digests();
 	digit = EVP_get_digestbyname(name);
@@ -129,5 +130,9 @@ int CryptoHash::operator()(unsigned char * target_md, const std::string& str) co
 }
 int CryptoHash::operator()(unsigned char * target_md, std::istream& in) const {
 	return hash(target_md, in);
+}
+
+std::string CryptoHash::getName() const {
+	return std::string(name_);
 }
 }

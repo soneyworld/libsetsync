@@ -1,5 +1,5 @@
 #!/bin/bash
 #
 
-CONF_PARAMS="--with-openssl --with-sqlite --enable-cppunit --enable-evaluation --enable-tools"
+CONF_PARAMS="--with-openssl --with-sqlite --with-leveldb --enable-cppunit --enable-evaluation --enable-tools"
 	./configure $CONF_PARAMS $@

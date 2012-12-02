@@ -31,6 +31,12 @@ evaluation_SOURCES += SQLiteTest.h SQLiteDatabase.h SQLiteException.h
 evaluation_SOURCES += SQLiteTest.cpp SQLiteDatabase.cpp SQLiteException.cpp
 endif
 
+if LEVELDB
+AM_CPPFLAGS += @LEVELDB_CFLAGS@
+AM_LDFLAGS += @LEVELDB_LIBS@
+evaluation_SOURCES += LevelDbTest.h LevelDbTest.cpp
+endif
+
 
 noinst_PROGRAMS=evaluation
 evaluation_CXXFLAGS = ${AM_CPPFLAGS}

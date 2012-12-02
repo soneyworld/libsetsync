@@ -19,6 +19,7 @@ namespace utils {
  */
 class CryptoHash {
 private:
+	std::string name_;
 #ifdef HAVE_OPENSSL
 	/// Hash algorithm properties of OPENSSL
 	const EVP_MD *digit;
@@ -56,6 +57,10 @@ public:
 			const std::size_t length) const;
 	int operator()(unsigned char * target_md, const std::string& str) const;
 	int operator()(unsigned char * target_md, std::istream& in) const;
+	/**
+	 * \return the name of the chosen crypto hash algorithm
+	 */
+	std::string getName(void) const;
 };
 
 }

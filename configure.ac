@@ -184,6 +184,26 @@ AC_MSG_RESULT($enable_tools)
 
 AM_CONDITIONAL(TOOLS, test x$enable_tools = xyes)
 
+AC_ARG_WITH(leveldb,
+  [AS_HELP_STRING([--with-leveldb], [with level db evaluation (@<:@default=no@:>@)])],
+  	if test "x$with_leveldb" = "xyes"; then
+  		[ AC_CHECK_HEADERS([leveldb/db.h snappy.h],[
+  			AC_DEFINE(HAVE_LEVELDB, [1], ["leveldb library is available"])
+	  		AC_SUBST(LEVELDB_CFLAGS,[])
+			AC_SUBST(LEVELDB_LIBS,["-lleveldb -lsnappy"])
+			with_leveldb="yes"
+		],[
+			with_leveldb="no"
+		])
+	else
+  		with_leveldb="no"
+  	fi	
+  ], [])
+AC_MSG_RESULT($with_leveldb)
+
+AM_CONDITIONAL(LEVELDB, test x$with_leveldb = xyes)
+
+
 AC_CONFIG_FILES([Makefile \
 	setsync/Makefile \
 	setsync/bloom/Makefile \
