@@ -8,7 +8,9 @@
 #include "DBTest.h"
 #include "BDBInsertRemoveTest.h"
 #include "BDBTransactionsTest.h"
+#ifdef HAVE_LEVELDB
 #include "LevelDbTest.h"
+#endif
 #include <string>
 #include <set>
 
