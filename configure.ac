@@ -191,14 +191,16 @@ AC_ARG_WITH([leveldb],
             [with_leveldb=no])
 AS_IF([test "x$with_leveldb" != xno],
   		AC_CHECK_HEADERS([leveldb/db.h snappy.h],[
-			AC_DEFINE(HAVE_LEVELDB, [1], ["leveldb library is available"])
 			AC_SUBST(LEVELDB_CFLAGS,[])
 			AC_SUBST(LEVELDB_LIBS,["-lleveldb -lsnappy"])
 		],[
 			with_leveldb=no
 		])
 	)
-AC_MSG_RESULT($with_leveldb)
+AS_IF([test "x$with_leveldb" = xyes],
+	AC_DEFINE(HAVE_LEVELDB, [1], ["leveldb library is available"])
+)
+#AC_MSG_RESULT($with_leveldb)
 AM_CONDITIONAL(LEVELDB, test x$with_leveldb = xyes)
 
 
