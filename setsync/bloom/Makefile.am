@@ -10,12 +10,14 @@ h_sources = BloomFilter.h \
 			HashFunction.h \
 			FSBloomFilter.h \
 			DoubleHashingScheme.h \
-			ComparableBloomFilter.h
+			ComparableBloomFilter.h \
+			KeyValueCountingBloomFilter.h
 cpp_sources = BloomFilter.cpp \
 			CountingBloomFilter.cpp \
 			HashFunction.cpp \
 			FSBloomFilter.cpp \
-			DoubleHashingScheme.cpp
+			DoubleHashingScheme.cpp \
+			KeyValueCountingBloomFilter.cpp
 
 if BERKELEY_DB
 h_sources += BdbBloomFilter.h

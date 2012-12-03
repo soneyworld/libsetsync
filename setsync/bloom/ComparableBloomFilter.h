@@ -6,6 +6,7 @@
 
 #ifndef COMPARABLEBLOOMFILTER_H_
 #define COMPARABLEBLOOMFILTER_H_
+#include <setsync/DiffHandler.h>
 
 namespace bloom {
 /**

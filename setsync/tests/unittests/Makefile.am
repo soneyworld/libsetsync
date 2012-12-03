@@ -29,8 +29,8 @@ noinst_HEADERS += BdbTrieTest.h BdbBloomFilterTest.h BdbSetTest.h BdbIndexTest.h
 endif
 
 if LEVELDB
-noinst_HEADERS += LevelDbStorageTest.h
-unittest_SOURCES += LevelDbStorageTest.cpp
+noinst_HEADERS += LevelDbStorageTest.h KeyValueCountingBloomFilterTest.h
+unittest_SOURCES += LevelDbStorageTest.cpp KeyValueCountingBloomFilterTest.cpp
 endif
 
 INCLUDES = -I@top_srcdir@ -I@top_srcdir@/setsync/tests/unittests
