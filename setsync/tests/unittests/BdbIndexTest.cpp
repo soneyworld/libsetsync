@@ -12,9 +12,9 @@ namespace index {
 
 void DbIndexTest::setUp(void) {
 	this->db = new Db(NULL, 0);
-	db->open(NULL, "index.db", BdbIndex::getLogicalDatabaseName(),
-			BdbIndex::getTableType(), DB_CREATE, 0);
-	index = new BdbIndex(hash,db);
+	db->open(NULL, "index.db", DbIndex::getLogicalDatabaseName(),
+			DbIndex::getTableType(), DB_CREATE, 0);
+	index = new DbIndex(hash,db);
 }
 
 void DbIndexTest::tearDown(void) {

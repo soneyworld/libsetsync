@@ -9,6 +9,7 @@
 #include <setsync/utils/CryptoHash.h>
 #include <setsync/storage/LevelDbStorage.h>
 #include <setsync/storage/KeyValueStorage.h>
+#include <db_cxx.h>
 
 #ifndef KEYVALUECOUNTINGBLOOMFILTERTEST_H_
 #define KEYVALUECOUNTINGBLOOMFILTERTEST_H_
@@ -29,12 +30,14 @@ CPPUNIT_TEST_SUITE(KeyValueCountingBloomFilterTest);
 	CPPUNIT_TEST_SUITE_END();
 
 private:
+	Db * db1;
 	std::string path1;
 	std::string path2;
 	std::string path3;
 	setsync::storage::AbstractKeyValueStorage * storage1;
 	setsync::storage::AbstractKeyValueStorage * storage2;
 	setsync::storage::AbstractKeyValueStorage * storage3;
+	setsync::storage::AbstractKeyValueStorage * bdbstorage;
 	utils::CryptoHash hashFunction_;
 public:
 	void testConstructor();

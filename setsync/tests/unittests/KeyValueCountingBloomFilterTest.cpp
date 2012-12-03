@@ -6,20 +6,33 @@
 
 #include "KeyValueCountingBloomFilterTest.h"
 #include <setsync/utils/FileSystem.h>
+#include <setsync/storage/BdbStorage.h>
+#include <setsync/bloom/BdbBloomFilter.h>
 
 using namespace std;
 namespace bloom {
 
 void KeyValueCountingBloomFilterTest::setUp() {
+	this->db1 = new Db(NULL, 0);
+	db1->open(NULL, "table1.db",
+			bloom::BdbBloomFilter::getLogicalDatabaseName(),
+			bloom::BdbBloomFilter::getTableType(), DB_CREATE, 0);
+
 	path1 = "table1";
 	path2 = "table2";
 	path3 = "table3";
 	this->storage1 = new setsync::storage::LevelDbStorage(path1);
 	this->storage2 = new setsync::storage::LevelDbStorage(path2);
 	this->storage3 = new setsync::storage::LevelDbStorage(path3);
+	this->bdbstorage = new setsync::storage::BdbStorage(this->db1);
 }
 
 void KeyValueCountingBloomFilterTest::tearDown() {
+	this->db1->close(0);
+	delete this->db1;
+	this->db1 = new Db(NULL, 0);
+	db1->remove("table1.db", NULL, 0);
+	delete this->db1;
 	delete this->storage1;
 	delete this->storage2;
 	delete this->storage3;
@@ -85,6 +98,14 @@ void KeyValueCountingBloomFilterTest::testInsert() {
 	Filter3.AbstractBloomFilter::add("bla2");
 	Filter3.AbstractBloomFilter::add("bla3");
 	CPPUNIT_ASSERT(Filter3.itemCount_== 3);
+
+	/// Testing berkeley db code
+	bloom::KeyValueCountingBloomFilter Filter4(hashFunction_, *bdbstorage, 10,
+			false, 0.01);
+	Filter4.AbstractBloomFilter::add("bla1");
+	Filter4.AbstractBloomFilter::add("bla2");
+	Filter4.AbstractBloomFilter::add("bla3");
+	CPPUNIT_ASSERT(Filter4.itemCount_== 3);
 }
 void KeyValueCountingBloomFilterTest::testRemove() {
 	//cout << endl;
@@ -93,6 +114,8 @@ void KeyValueCountingBloomFilterTest::testRemove() {
 	bloom::KeyValueCountingBloomFilter Filter2(hashFunction_, *storage2, 10,
 			false, 0.01);
 	bloom::KeyValueCountingBloomFilter Filter3(hashFunction_, *storage3, 10,
+			false, 0.01);
+	bloom::KeyValueCountingBloomFilter Filter4(hashFunction_, *bdbstorage, 10,
 			false, 0.01);
 	//	 test signature (const unsigned char* key)
 
@@ -137,6 +160,13 @@ void KeyValueCountingBloomFilterTest::testRemove() {
 	CPPUNIT_ASSERT(Filter3.CountingBloomFilter::remove("bla1"));
 	CPPUNIT_ASSERT(Filter3.CountingBloomFilter::remove("bla2"));
 	CPPUNIT_ASSERT(Filter3.CountingBloomFilter::remove("bla3"));
+	/// Testing transaction code
+	Filter4.AbstractBloomFilter::add("bla1");
+	Filter4.AbstractBloomFilter::add("bla2");
+	Filter4.AbstractBloomFilter::add("bla3");
+	CPPUNIT_ASSERT(Filter4.CountingBloomFilter::remove("bla1"));
+	CPPUNIT_ASSERT(Filter4.CountingBloomFilter::remove("bla2"));
+	CPPUNIT_ASSERT(Filter4.CountingBloomFilter::remove("bla3"));
 }
 void KeyValueCountingBloomFilterTest::testContains() {
 	/* test signature (const std::string& key) const */

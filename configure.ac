@@ -183,19 +183,22 @@ AM_CONDITIONAL(TOOLS, test x$enable_tools = xyes)
 
 AC_ARG_WITH([leveldb],
             [AS_HELP_STRING([--with-leveldb],
-              [enable evaluation support for leveldb])],
+              [enable support for leveldb])],
             [],
             [with_leveldb=no])
 AS_IF([test "x$with_leveldb" != xno],
   		AC_CHECK_HEADERS([leveldb/db.h snappy.h],[
-			AC_SUBST(LEVELDB_CFLAGS,[])
-			AC_SUBST(LEVELDB_LIBS,["-lleveldb -lsnappy"])
+			AC_CHECK_LIB(leveldb, main, [], [with_leveldb=no], [])
+			AC_CHECK_LIB(snappy, main, [], [with_leveldb=no], [])
 		],[
 			with_leveldb=no
 		])
 	)
-AS_IF([test "x$with_leveldb" = xyes],
+AS_IF([test "x$with_leveldb" = xyes],[
+	AC_SUBST(LEVELDB_LIBS,["-lleveldb -lsnappy"])
+	AC_SUBST(LEVELDB_CFLAGS,[])
 	AC_DEFINE(HAVE_LEVELDB, [1], ["leveldb library is available"])
+	]
 )
 AM_CONDITIONAL(LEVELDB, test x$with_leveldb = xyes)
 

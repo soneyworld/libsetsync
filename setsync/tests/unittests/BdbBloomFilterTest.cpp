@@ -217,10 +217,10 @@ void BdbBloomFilterTest::testContains() {
 			word[i] = 33 + rand() % (126 - 23);
 		}
 		Filter1.AbstractBloomFilter::add(word);
-		CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains(word));
+		CPPUNIT_ASSERT(Filter1.AbstractBloomFilter::contains(word));
 	}
 	Filter1.clear();
-	CPPUNIT_ASSERT_EQUAL(false, Filter1.AbstractBloomFilter::contains(word));
+	CPPUNIT_ASSERT(!Filter1.AbstractBloomFilter::contains(word));
 
 }
 

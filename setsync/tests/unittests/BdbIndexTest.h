@@ -25,7 +25,7 @@ public:
 private:
 	Db * db;
 	utils::CryptoHash hash;
-	BdbIndex * index;
+	DbIndex * index;
 protected:
 	void testAdding();
 };
