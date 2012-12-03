@@ -8,14 +8,13 @@
 
 namespace trie {
 
-AbstractKeyValueTrie::AbstractKeyValueTrie(const utils::CryptoHash& hash) :
-	Trie(hash) {
-	// TODO Auto-generated constructor stub
+AbstractKeyValueTrie::AbstractKeyValueTrie(const utils::CryptoHash& hash,
+		setsync::storage::AbstractKeyValueStorage& storage) :
+	Trie(hash), storage_(storage) {
 
 }
 
 AbstractKeyValueTrie::~AbstractKeyValueTrie() {
-	// TODO Auto-generated destructor stub
 }
 
 }

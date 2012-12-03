@@ -8,12 +8,13 @@
 #define LEVELDBTRIE_H_
 
 #include "KeyValueTrie.h"
+#include <setsync/storage/LevelDbStorage.h>
 
 namespace trie {
 
 class LevelDbTrie: public trie::AbstractKeyValueTrie {
 public:
-	LevelDbTrie(const utils::CryptoHash& hash);
+	LevelDbTrie(const utils::CryptoHash& hash, setsync::storage::LevelDbStorage& storage);
 	virtual ~LevelDbTrie();
 };
 

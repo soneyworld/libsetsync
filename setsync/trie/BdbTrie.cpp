@@ -7,6 +7,7 @@
 #include "BdbTrie.h"
 #include <setsync/utils/bitset.h>
 #include <setsync/utils/OutputFunctions.h>
+#include <setsync/trie/TrieException.h>
 #include <stdexcept>
 #include <typeinfo>
 #include <sstream>
@@ -103,7 +104,7 @@ DbNode DbRootNode::get() const {
 	Dbt data(hash, hashfunction_.getHashSize());
 	int ret = this->db_->get(NULL, &key, &data, 0);
 	if (ret == DB_NOTFOUND) {
-		throw DbNoRootFoundException();
+		throw TrieRootNotFoundException();
 	} else if (ret != 0) {
 		throw DbException(ret);
 	}
@@ -799,17 +800,17 @@ bool BdbTrie::operator ==(const Trie& other) const {
 		const BdbTrie& other_ = dynamic_cast<const BdbTrie&> (other);
 		try {
 			root_.get();
-		} catch (DbNoRootFoundException e) {
+		} catch (TrieRootNotFoundException e) {
 			try {
 				other_.root_.get();
 				return false;
-			} catch (DbNoRootFoundException e) {
+			} catch (TrieRootNotFoundException e) {
 				return true;
 			}
 		}
 		try {
 			other_.root_.get();
-		} catch (DbNoRootFoundException e) {
+		} catch (TrieRootNotFoundException e) {
 			return false;
 		}
 		DbNode mynode = root_.get();

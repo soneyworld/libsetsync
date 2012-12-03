@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 
-h_sources = Trie.h MemTrie.h KeyValueTrie.h
+h_sources = Trie.h MemTrie.h KeyValueTrie.h TrieException.h
 cpp_sources = Trie.cpp MemTrie.cpp KeyValueTrie.cpp
 
 AM_CFLAGS = 

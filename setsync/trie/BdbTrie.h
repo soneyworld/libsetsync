@@ -19,41 +19,6 @@ namespace trie {
 class DbRootNode;
 class DbNode;
 class BdbTrie;
-/**
- * This exception should be thrown, if a consistency failure happens
- */
-class DbTrieException: public std::exception {
-private:
-	/// Message returned by calling what()
-	std::string what_;
-public:
-	/**
-	 * \param message Consistency fail message
-	 */
-	DbTrieException(const char * message) throw () {
-		what_ = std::string(message);
-	}
-	virtual ~DbTrieException() throw () {
-	}
-	/**
-	 * \return what consistency problem exists
-	 */
-	virtual const char* what() {
-		return what_.c_str();
-	}
-};
-/**
- * This exception should be thrown, if the root node of the trie
- * hasn't been found on the Berkeley DB
- */
-class DbNoRootFoundException: public DbTrieException {
-public:
-	DbNoRootFoundException() throw () :
-		DbTrieException("No root found") {
-	}
-	virtual ~DbNoRootFoundException() throw () {
-	}
-};
 
 class DBValue {
 private:

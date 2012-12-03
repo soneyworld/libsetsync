@@ -19,7 +19,7 @@ namespace index {
  * AbstractSetIndex. It puts the given key as key to a berkeley
  * DB hash map and stores the data as value.
  */
-class DbIndex: public berkeley::AbstractBdbTableUser,
+class BdbIndex: public berkeley::AbstractBdbTableUser,
 		public setsync::index::AbstractSetIndex {
 	friend class DbIndexTest;
 private:
@@ -34,8 +34,8 @@ public:
 	 * \param hash function to be used
 	 * \param db pointer to an opened berkeley db table
 	 */
-	DbIndex(const utils::CryptoHash& hash, Db * db);
-	virtual ~DbIndex();
+	BdbIndex(const utils::CryptoHash& hash, Db * db);
+	virtual ~BdbIndex();
 	/**
 	 * \return DB_HASH as table type
 	 */
@@ -63,7 +63,7 @@ public:
 
 	virtual size_t getSizeOf(const unsigned char * hash) const;
 	virtual bool get(const unsigned char * hash, void * buffer,
-			const size_t * buffersize) const;
+			size_t * buffersize) const;
 
 	virtual bool remove(const unsigned char * hash);
 

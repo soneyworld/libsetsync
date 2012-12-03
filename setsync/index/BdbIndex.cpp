@@ -11,28 +11,28 @@ namespace setsync {
 
 namespace index {
 
-DbIndex::DbIndex(const utils::CryptoHash& hash, Db * db) :
+BdbIndex::BdbIndex(const utils::CryptoHash& hash, Db * db) :
 	AbstractSetIndex(hash), berkeley::AbstractBdbTableUser(db), db_(db) {
 
 }
 
-DbIndex::~DbIndex() {
+BdbIndex::~BdbIndex() {
 }
 
-bool DbIndex::put(const unsigned char * hash, const void * data,
+bool BdbIndex::put(const unsigned char * hash, const void * data,
 		const std::size_t length) {
 	//TODO implement
 	throw "not yet implemented";
 	return false;
 }
 
-bool DbIndex::remove(const unsigned char * hash) {
+bool BdbIndex::remove(const unsigned char * hash) {
 	//TODO implement
 	throw "not yet implemented";
 	return false;
 }
 
-void DbIndex::clear(void) {
+void BdbIndex::clear(void) {
 	u_int32_t counter;
 	if (isTransactionEnabled()) {
 		DbTxn * txn;
@@ -50,14 +50,14 @@ void DbIndex::clear(void) {
 	}
 }
 
-size_t DbIndex::getSizeOf(const unsigned char * hash) const {
+size_t BdbIndex::getSizeOf(const unsigned char * hash) const {
 	//TODO implement
 	throw "not yet implemented";
 	return 0;
 }
 
-bool DbIndex::get(const unsigned char * hash, void * buffer,
-		const size_t * buffersize) const {
+bool BdbIndex::get(const unsigned char * hash, void * buffer,
+		size_t * buffersize) const {
 
 }
 } // namespace index

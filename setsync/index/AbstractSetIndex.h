@@ -82,7 +82,7 @@ public:
 	 * \return true, if value has been found
 	 */
 	virtual bool get(const unsigned char * hash, void * buffer,
-			const size_t * buffersize) const = 0;
+			size_t * buffersize) const = 0;
 
 	/**
 	 * Removes the entry in the index which has got the same

@@ -8,6 +8,7 @@
 #define KEYVALUETRIE_H_
 
 #include "Trie.h"
+#include <setsync/storage/KeyValueStorage.h>
 
 namespace trie {
 
@@ -20,10 +21,10 @@ class KeyValueStoreException : public std::exception{
 };
 
 class AbstractKeyValueTrie: public trie::Trie {
-protected:
-
+private:
+	setsync::storage::AbstractKeyValueStorage& storage_;
 public:
-	AbstractKeyValueTrie(const utils::CryptoHash& hash);
+	AbstractKeyValueTrie(const utils::CryptoHash& hash, setsync::storage::AbstractKeyValueStorage& storage);
 	virtual ~AbstractKeyValueTrie();
 };
 
