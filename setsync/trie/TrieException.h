@@ -11,18 +11,18 @@ namespace trie {
 /**
  * This exception should be thrown, if any consistency failure happens
  */
-class TrieException : public std::exception {
+class TrieException: public std::exception {
 private:
 	/// Message returned by calling what()
 	std::string what_;
 public:
-	TrieException(const char * message) throw() {
+	TrieException(const char * message) throw () {
 		what_ = std::string(message);
 	}
-	TrieException(const std::string& message) throw() {
+	TrieException(const std::string& message) throw () {
 		what_ = std::string(message);
 	}
-	virtual ~TrieException()throw (){
+	virtual ~TrieException() throw () {
 
 	}
 	/**
@@ -38,8 +38,24 @@ public:
  */
 class DbTrieException: public TrieException {
 public:
-	DbTrieException(const char * message) : TrieException(message) {}
-	DbTrieException(const std::string& message) : TrieException(message) {}
+	DbTrieException(const char * message) :
+		TrieException(message) {
+	}
+	DbTrieException(const std::string& message) :
+		TrieException(message) {
+	}
+};
+/**
+ * This exception should be thrown, if the a node of the trie
+ * hasn't been found
+ */
+class TrieNodeNotFoundException: public TrieException {
+public:
+	TrieNodeNotFoundException() throw () :
+		TrieException("Node not found") {
+	}
+	virtual ~TrieNodeNotFoundException() throw () {
+	}
 };
 /**
  * This exception should be thrown, if the root node of the trie
@@ -53,6 +69,7 @@ public:
 	virtual ~TrieRootNotFoundException() throw () {
 	}
 };
+
 }
 
 #endif /* TRIEEXCEPTION_H_ */

@@ -33,8 +33,8 @@ public:
 private:
 	std::string path1;
 	std::string path2;
-	setsync::storage::AbstractKeyValueStorage * storage1;
-	setsync::storage::AbstractKeyValueStorage * storage2;
+	setsync::storage::LevelDbStorage * storage1;
+	setsync::storage::LevelDbStorage * storage2;
 	utils::CryptoHash hash;
 	unsigned char * smaller;
 	unsigned char * larger;

@@ -158,7 +158,7 @@ void LevelDbTrieTest::testEquals() {
 
 void LevelDbTrieTest::testSavingAndLoading() {
 	string path = "trieCopy";
-	setsync::storage::AbstractKeyValueStorage * copy = new setsync::storage::LevelDbStorage(path);
+	setsync::storage::LevelDbStorage * copy = new setsync::storage::LevelDbStorage(path);
 	trie::LevelDbTrie * trie = new trie::LevelDbTrie(hash, *copy);
 	CPPUNIT_ASSERT(trie->Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie->Trie::add("bla2"));
@@ -249,7 +249,7 @@ void LevelDbTrieTest::testSubTrie() {
 	}
 	CPPUNIT_ASSERT(found);
 	subtrie = trie2.getSubTrie(root, buffer, 2 * hash.getHashSize());
-	DbNode rootnode(trie2, hash, db2, root, false);
+	TrieNode rootnode(trie2, hash, *storage2, root, false);
 	//	cout << endl << trie2.toString() << endl;
 	//	cout << utils::OutputFunctions::CryptoHashtoString(buffer) << endl;
 	//	cout << utils::OutputFunctions::CryptoHashtoString(
