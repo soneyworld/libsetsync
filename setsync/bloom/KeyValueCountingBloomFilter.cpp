@@ -18,6 +18,25 @@ KeyValueCountingBloomFilter::KeyValueCountingBloomFilter(
 			FSBloomFilter(hash, maxNumberOfElements, hardMaximum,
 					falsePositiveRate), CountingBloomFilter(hash),
 			storage_(storage) {
+	/*
+	 * Loading all set bloom filter bits from db
+	 */
+	// Cursor to read sequentially the db
+	setsync::storage::AbstractKeyValueIterator * iter = storage_.createIterator();
+	iter->seekToFirst();
+	uint64_t pos;
+	while(iter->valid()){
+		if(iter->keySize() == sizeof(uint64_t)){
+			iter->key((unsigned char *)&pos);
+			std::size_t bit_index = 0;
+			std::size_t bit = 0;
+			compute_indices(pos, bit_index, bit);
+			// Sets the found bit to the filter
+			this->bitArray_[bit_index] |= bit_mask[bit];
+		}
+		iter->next();
+	}
+	delete iter;
 }
 
 KeyValueCountingBloomFilter::~KeyValueCountingBloomFilter() {
@@ -40,7 +59,7 @@ void KeyValueCountingBloomFilter::diff(const unsigned char * externalBF,
 				unsigned char hash[this->cryptoHashFunction_.getHashSize()];
 				unsigned char * resultbuffer;
 				std::size_t resultSize;
-				if (storage_.get(hash, this->cryptoHashFunction_.getHashSize(),
+				if (storage_.get((unsigned char*) &pos, sizeof(uint64_t),
 						&resultbuffer, &resultSize)) {
 					int numberOfResults = resultSize
 							/ this->cryptoHashFunction_.getHashSize();
@@ -51,8 +70,6 @@ void KeyValueCountingBloomFilter::diff(const unsigned char * externalBF,
 						pos += this->cryptoHashFunction_.getHashSize();
 					}
 					free(resultbuffer);
-				} else {
-					throw "FAIL!";
 				}
 			}
 		}

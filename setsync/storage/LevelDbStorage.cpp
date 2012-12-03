@@ -11,6 +11,31 @@ namespace setsync {
 
 namespace storage {
 
+LevelDbIterator::LevelDbIterator(leveldb::Iterator* it) :
+	it(it) {
+
+}
+LevelDbIterator::~LevelDbIterator() {
+	delete it;
+}
+
+void LevelDbIterator::seekToFirst() {
+	it->SeekToFirst();
+}
+bool LevelDbIterator::valid() const {
+	return it->Valid();
+}
+void LevelDbIterator::next() {
+	it->Next();
+}
+size_t LevelDbIterator::keySize() const {
+	return it->key().size();
+}
+
+void LevelDbIterator::key(unsigned char * buffer) const {
+	memcpy(buffer, it->key().data(), it->key().size());
+}
+
 LevelDbStorage::LevelDbStorage(const std::string& path) :
 	path_(path) {
 	options_.create_if_missing = true;
@@ -58,6 +83,11 @@ void LevelDbStorage::clear(void) {
 	delete this->db_;
 	utils::FileSystem::rmDirRecursive(this->path_.c_str());
 	leveldb::Status s = leveldb::DB::Open(options_, path_, &(this->db_));
+}
+
+AbstractKeyValueIterator * LevelDbStorage::createIterator() {
+	leveldb::Iterator* it = this->db_->NewIterator(readOptions_);
+	return new LevelDbIterator(it);
 }
 
 }

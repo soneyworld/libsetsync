@@ -13,7 +13,12 @@
 #include <setsync/DiffHandler.h>
 
 namespace bloom {
-
+/**
+ * This BloomFilter is an implementation of a counting bloomfilter,
+ * which uses the given Key-Value store to load and safe the hashes
+ * added to the Filter. The filter itself remains in a memory mapped
+ * file.
+ */
 class KeyValueCountingBloomFilter: public CountingBloomFilter,
 		public FSBloomFilter,
 		public ComparableBloomFilterInterface {
@@ -21,17 +26,44 @@ class KeyValueCountingBloomFilter: public CountingBloomFilter,
 protected:
 	setsync::storage::AbstractKeyValueStorage& storage_;
 public:
+	/**
+	 * To create a new KeyValueCountingBloomFilter, create a new
+	 * AbstractKeyValueStorage and pass it as second parameter.
+	 * The storage will be used to save the bit position in the
+	 * bloom filter as key and the corresponding hashes as value.
+	 * If more then one cryptographic hash corresponds to one position,
+	 * all hashes are saved as an array
+	 *
+	 * \param hash the crypto hash function, used for keys
+	 * \param storage to load and save the bloom filter entries
+	 * \param maxNumberOfElements will be passed to FSBloomFilter
+	 * \param hardMaximum will be passed to FSBloomFilter
+	 * \param falsePositiveRate will be passed to FSBloomFilter
+	 */
 	KeyValueCountingBloomFilter(const utils::CryptoHash& hash,
 			setsync::storage::AbstractKeyValueStorage& storage,
 			const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
 			const float falsePositiveRate = 0.001);
 	virtual ~KeyValueCountingBloomFilter();
+	/**
+	 * Calculates the difference between the given part of the
+	 * external bloom filter and the local one. Each hash, which
+	 * is locally available, but is not set on the external bloom
+	 * filter, is passed to the given handler. The offset is given
+	 * to locate the local position of the given fragment of the
+	 * external bloom filter
+	 *
+	 * \param externalBF fragment
+	 * \param length of the bloom filter fragment
+	 * \param offset from the beginning of the bloom filter
+	 * \param handler to be informed about different hashes
+	 */
 	virtual void diff(const unsigned char * externalBF,
 			const std::size_t length, const std::size_t offset,
 			setsync::AbstractDiffHandler& handler) const;
 	/**
-	 *  adds this given key to bloom filter and berkeley db
+	 *  adds this given key to bloom filter and the key value storage
 	 *  \param key to be added
 	 */
 	void virtual add(const unsigned char * key);
@@ -48,7 +80,7 @@ public:
 	 */
 	virtual bool remove(const unsigned char * key);
 	/**
-	 * cleans the berkeley db and the bloom filter
+	 * cleans the key value storage and the bloom filter
 	 */
 	virtual void clear(void);
 };

@@ -83,10 +83,10 @@ private:
 	static const char setting_name[];
 public:
 	/**
-	 * To create a new DBBloomFilter, create a new Berkeley db with the
-	 * flags, statically given by DBBloomFilter::getTableFlags. Then open
-	 * the db with the statically available DBBloomFilter::getTableType and
-	 * the table name DBBloomFilter::getLogicalDatabaseName. Then give the
+	 * To create a new BdbBloomFilter, create a new Berkeley db with the
+	 * flags, statically given by BdbBloomFilter::getTableFlags. Then open
+	 * the db with the statically available BdbBloomFilter::getTableType and
+	 * the table name BdbBloomFilter::getLogicalDatabaseName. Then give the
 	 * pointer to the db to this constructor. The Berkeley DB will not be
 	 * closed on destroying this instance. It has to be closed manually after
 	 * destroying.
