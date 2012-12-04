@@ -6,6 +6,8 @@
 
 #include "LevelDbTest.h"
 #include <setsync/utils/FileSystem.h>
+#include <setsync/storage/LevelDbStorage.h>
+#include <leveldb/cache.h>
 #include "StopWatch.h"
 
 using namespace std;
@@ -31,6 +33,9 @@ void LevelDbTest::run() {
 	runRequestTest();
 	// delete all items
 	runDeletionTest();
+
+	// run size test
+	runDbSizeTestInSteps();
 }
 
 void LevelDbTest::runInsertTest() {
@@ -70,8 +75,7 @@ void LevelDbTest::runInsertTest() {
 			<< stopwatch.getDuration() << "," << duration << endl;
 }
 void LevelDbTest::runRequestTest() {
-	cout << "running Level DB request test (" << hash.getName() << ")"
-			<< endl;
+	cout << "running Level DB request test (" << hash.getName() << ")" << endl;
 	cout << "norequests,CPUintervalDuration,realtimeIntervalDuration,duration"
 			<< endl;
 	unsigned int count = 0;
@@ -115,4 +119,56 @@ void LevelDbTest::runDeletionTest() {
 }
 void LevelDbTest::runInsertDeletionTest() {
 
+}
+
+void LevelDbTest::runDbSizeTestInSteps(const size_t keysize,
+		const size_t valuesize) {
+	size_t keysize_;
+	if (keysize < sizeof(uint64_t))
+		keysize_ = sizeof(uint64_t);
+	else
+		keysize_ = keysize;
+	cout << "running Level DB Size test: " << endl;
+	std::string path = "temp_level_db_tests";
+	leveldb::Options leveldboptions;
+	leveldboptions.create_if_missing = true;
+	leveldboptions.error_if_exists = true;
+	leveldb::WriteOptions woptions;
+	woptions.sync = true;
+	setsync::storage::LevelDbStorage * storage;
+	storage = new setsync::storage::LevelDbStorage(path, leveldboptions,
+			woptions);
+	cout << "noentries,keysize,valuesize,filesize,sizePerEntry,sizePerByte"
+			<< endl;
+	unsigned char keybuf[keysize_];
+	unsigned char valuebuf[valuesize];
+	uint64_t i = 0;
+	for (uint64_t iter = 0; iter < LOOP_ITERATIONS; iter++) {
+		for (unsigned int j = 0; j < ITEMS_PER_LOOPS; j++) {
+			memcpy(keybuf, &i, sizeof(uint64_t));
+			storage->put(keybuf, keysize_, valuebuf, valuesize);
+			i++;
+		}
+		cout << i << "," << keysize_ << "," << valuesize << ",";
+		uint64_t dirsize = utils::FileSystem::dirSize(path);
+		double sizePerEntry = ((double) dirsize) / (double) (i);
+		double sizePerByte = ((double) dirsize) / (double) ((i) * (keysize_
+				+ valuesize));
+		cout << dirsize << "," << sizePerEntry << "," << sizePerByte << endl;
+	}
+	delete storage;
+	utils::FileSystem::rmDirRecursive(path);
+}
+
+void LevelDbTest::runDbSizeTestInSteps() {
+	runDbSizeTestInSteps( 8, 0);
+	runDbSizeTestInSteps( 8, 0);
+	runDbSizeTestInSteps(16, 0);
+	runDbSizeTestInSteps( 16, 0);
+	runDbSizeTestInSteps( 20, 0);
+	runDbSizeTestInSteps( 20, 0);
+	runDbSizeTestInSteps( 20, 100);
+	runDbSizeTestInSteps( 20, 100);
+	runDbSizeTestInSteps( 20, 200);
+	runDbSizeTestInSteps( 20, 200);
 }

@@ -15,6 +15,8 @@ class LevelDbTest: public Test {
 private:
 	leveldb::DB* db;
 	const utils::CryptoHash& hash;
+	virtual void runDbSizeTestInSteps(const size_t keysize,
+			const size_t valuesize);
 public:
 	LevelDbTest(const utils::CryptoHash& hash);
 	virtual ~LevelDbTest();
@@ -22,6 +24,7 @@ public:
 	virtual void runRequestTest();
 	virtual void runDeletionTest();
 	virtual void runInsertDeletionTest();
+	virtual void runDbSizeTestInSteps();
 	virtual void run();
 };
 

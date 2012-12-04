@@ -55,12 +55,40 @@ private:
 	leveldb::WriteOptions writeOptions_;
 	/// Options for read accesses
 	leveldb::ReadOptions readOptions_;
+	/**
+	 *
+	 */
+	void init();
 public:
 	/**
 	 * Creates a new key value store at the given path, or
 	 * loads an existing store.
 	 */
 	LevelDbStorage(const std::string& path);
+	/**
+	 * Creates a new key value store at the given path, or
+	 * loads an existing store.
+	 */
+	LevelDbStorage(const std::string& path, const leveldb::Options& options);
+	/**
+	 * Creates a new key value store at the given path, or
+	 * loads an existing store.
+	 */
+	LevelDbStorage(const std::string& path, const leveldb::Options& options,
+			const leveldb::WriteOptions& woptions);
+	/**
+	 * Creates a new key value store at the given path, or
+	 * loads an existing store.
+	 */
+	LevelDbStorage(const std::string& path, const leveldb::Options& options,
+			const leveldb::ReadOptions& roptions);
+	/**
+	 * Creates a new key value store at the given path, or
+	 * loads an existing store.
+	 */
+	LevelDbStorage(const std::string& path, const leveldb::Options& options,
+			const leveldb::ReadOptions& roptions,
+			const leveldb::WriteOptions& woptions);
 	/**
 	 * Closes the connection to the key value store
 	 */

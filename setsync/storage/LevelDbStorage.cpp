@@ -42,6 +42,33 @@ LevelDbStorage::LevelDbStorage(const std::string& path) :
 	leveldb::Status s = leveldb::DB::Open(options_, path_, &(this->db_));
 }
 
+LevelDbStorage::LevelDbStorage(const std::string& path,
+		const leveldb::Options& options) :
+	path_(path), options_(options) {
+	init();
+}
+LevelDbStorage::LevelDbStorage(const std::string& path,
+		const leveldb::Options& options, const leveldb::WriteOptions& woptions) :
+	path_(path), options_(options), writeOptions_(woptions) {
+	init();
+}
+
+LevelDbStorage::LevelDbStorage(const std::string& path,
+		const leveldb::Options& options, const leveldb::ReadOptions& roptions) :
+	path_(path), options_(options), readOptions_(roptions) {
+	init();
+}
+
+LevelDbStorage::LevelDbStorage(const std::string& path,
+		const leveldb::Options& options, const leveldb::ReadOptions& roptions,
+		const leveldb::WriteOptions& woptions) {
+	init();
+}
+
+void LevelDbStorage::init() {
+	leveldb::Status s = leveldb::DB::Open(options_, path_, &(this->db_));
+}
+
 LevelDbStorage::~LevelDbStorage() {
 	delete this->db_;
 }

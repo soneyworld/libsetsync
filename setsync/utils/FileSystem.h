@@ -38,6 +38,18 @@ public:
 	 * \return size of the given file
 	 */
 	static uint64_t fileSize(const char *file);
+	/**
+	 * Returns the sum of all files in the given directory
+	 * \param path which size should be returned
+	 * \return sum size of the files in the given path
+	 */
+	static uint64_t dirSize(const std::string& path);
+	/**
+	 * Returns the sum of all files in the given directory
+	 * \param path which size should be returned
+	 * \return sum size of the files in the given path
+	 */
+	static uint64_t dirSize(const char *path);
 };
 
 }
