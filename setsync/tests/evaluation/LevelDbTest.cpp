@@ -120,6 +120,7 @@ void LevelDbTest::runInsertDeletionTest() {
 
 void LevelDbTest::runDbSizeTestInSteps(const size_t keysize,
 		const size_t valuesize) {
+	unsigned char md[hash.getHashSize()];
 	size_t keysize_;
 	if (keysize < sizeof(uint64_t))
 		keysize_ = sizeof(uint64_t);
@@ -139,10 +140,12 @@ void LevelDbTest::runDbSizeTestInSteps(const size_t keysize,
 			<< endl;
 	unsigned char keybuf[keysize_];
 	unsigned char valuebuf[valuesize];
+	memset(valuebuf, 0, valuesize);
 	uint64_t i = 0;
 	for (uint64_t iter = 0; iter < LOOP_ITERATIONS; iter++) {
 		for (unsigned int j = 0; j < ITEMS_PER_LOOPS; j++) {
-			memcpy(keybuf, &i, sizeof(uint64_t));
+			hash(md, (unsigned char *) &i, sizeof(uint64_t));
+			memcpy(keybuf, md, std::min(hash.getHashSize(), keysize_));
 			storage->put(keybuf, keysize_, valuebuf, valuesize);
 			i++;
 		}
@@ -158,14 +161,14 @@ void LevelDbTest::runDbSizeTestInSteps(const size_t keysize,
 }
 
 void LevelDbTest::runDbSizeTestInSteps() {
-	runDbSizeTestInSteps( 8, 0);
-	runDbSizeTestInSteps( 8, 0);
+	runDbSizeTestInSteps(8, 0);
+	runDbSizeTestInSteps(8, 0);
 	runDbSizeTestInSteps(16, 0);
-	runDbSizeTestInSteps( 16, 0);
-	runDbSizeTestInSteps( 20, 0);
-	runDbSizeTestInSteps( 20, 0);
-	runDbSizeTestInSteps( 20, 100);
-	runDbSizeTestInSteps( 20, 100);
-	runDbSizeTestInSteps( 20, 200);
-	runDbSizeTestInSteps( 20, 200);
+	runDbSizeTestInSteps(16, 0);
+	runDbSizeTestInSteps(20, 0);
+	runDbSizeTestInSteps(20, 0);
+	runDbSizeTestInSteps(20, 100);
+	runDbSizeTestInSteps(20, 100);
+	runDbSizeTestInSteps(20, 200);
+	runDbSizeTestInSteps(20, 200);
 }
