@@ -36,6 +36,7 @@ int main(int ac, char **av) {
 #endif
 #ifdef HAVE_LEVELDB
 		std::cout << "--leveldb-test" << std::endl;
+		std::cout << "--leveldb-size-test" << std::endl;
 #endif
 		std::cout << "--all-tests" << std::endl;
 		return 0;
@@ -52,6 +53,7 @@ int main(int ac, char **av) {
 #endif
 #ifdef HAVE_LEVELDB
 	bool level = !(args.find(std::string("--leveldb-test")) == args.end());
+	bool levelsize = !(args.find(std::string("--leveldb-size-test")) == args.end());
 #endif
 
 	if (bf || all) {
@@ -105,5 +107,11 @@ int main(int ac, char **av) {
 			leveldb.run();
 		}
 	}
+	if(levelsize || all) {
+		utils::CryptoHash hash;
+		LevelDbTest leveldb(hash);
+		leveldb.runDbSizeTestInSteps();
+	}
+
 #endif
 }

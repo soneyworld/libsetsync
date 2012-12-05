@@ -33,9 +33,6 @@ void LevelDbTest::run() {
 	runRequestTest();
 	// delete all items
 	runDeletionTest();
-
-	// run size test
-	runDbSizeTestInSteps();
 }
 
 void LevelDbTest::runInsertTest() {
