@@ -162,13 +162,8 @@ void LevelDbTest::runDbSizeTestInSteps(const size_t keysize,
 
 void LevelDbTest::runDbSizeTestInSteps() {
 	runDbSizeTestInSteps(8, 0);
-	runDbSizeTestInSteps(8, 0);
-	runDbSizeTestInSteps(16, 0);
 	runDbSizeTestInSteps(16, 0);
 	runDbSizeTestInSteps(20, 0);
-	runDbSizeTestInSteps(20, 0);
 	runDbSizeTestInSteps(20, 100);
-	runDbSizeTestInSteps(20, 100);
-	runDbSizeTestInSteps(20, 200);
 	runDbSizeTestInSteps(20, 200);
 }

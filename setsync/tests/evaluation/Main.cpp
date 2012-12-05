@@ -37,6 +37,11 @@ int main(int ac, char **av) {
 #ifdef HAVE_LEVELDB
 		std::cout << "--leveldb-test" << std::endl;
 		std::cout << "--leveldb-size-test" << std::endl;
+		std::cout << "--leveldb-size-8-0-test" << std::endl;
+		std::cout << "--leveldb-size-16-0-test" << std::endl;
+		std::cout << "--leveldb-size-20-0-test" << std::endl;
+		std::cout << "--leveldb-size-20-100-test" << std::endl;
+		std::cout << "--leveldb-size-20-200-test" << std::endl;
 #endif
 		std::cout << "--all-tests" << std::endl;
 		return 0;
@@ -53,7 +58,20 @@ int main(int ac, char **av) {
 #endif
 #ifdef HAVE_LEVELDB
 	bool level = !(args.find(std::string("--leveldb-test")) == args.end());
-	bool levelsize = !(args.find(std::string("--leveldb-size-test")) == args.end());
+	bool levelsize = !(args.find(std::string("--leveldb-size-test"))
+			== args.end());
+	bool levelsize8 = !(args.find(std::string("--leveldb-size-8-0-test"))
+			== args.end());
+	bool levelsize16 = !(args.find(std::string("--leveldb-size-16-0-test"))
+			== args.end());
+	bool levelsize20 = !(args.find(std::string("--leveldb-size-20-0-test"))
+			== args.end());
+	bool levelsize20100 =
+			!(args.find(std::string("--leveldb-size-20-100-test"))
+					== args.end());
+	bool levelsize20200 =
+			!(args.find(std::string("--leveldb-size-20-200-test"))
+					== args.end());
 #endif
 
 	if (bf || all) {
@@ -107,10 +125,32 @@ int main(int ac, char **av) {
 			leveldb.run();
 		}
 	}
-	if(levelsize || all) {
+	if (levelsize || all) {
 		utils::CryptoHash hash;
 		LevelDbTest leveldb(hash);
 		leveldb.runDbSizeTestInSteps();
+	} else {
+		utils::CryptoHash hash;
+		if (levelsize8) {
+			LevelDbTest leveldb(hash);
+			leveldb.runDbSizeTestInSteps(8, 0);
+		}
+		if (levelsize16) {
+			LevelDbTest leveldb(hash);
+			leveldb.runDbSizeTestInSteps(16, 0);
+		}
+		if (levelsize20) {
+			LevelDbTest leveldb(hash);
+			leveldb.runDbSizeTestInSteps(20, 0);
+		}
+		if (levelsize20100) {
+			LevelDbTest leveldb(hash);
+			leveldb.runDbSizeTestInSteps(20, 100);
+		}
+		if (levelsize20200) {
+			LevelDbTest leveldb(hash);
+			leveldb.runDbSizeTestInSteps(20, 200);
+		}
 	}
 
 #endif
