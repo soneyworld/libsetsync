@@ -25,7 +25,8 @@ void KeyValueStorageTest::setUp(void) {
 	BdbStorage * bdb = new BdbStorage(this->db);
 	stores.push_back(bdb);
 #endif
-
+//	MemStorage * mem = new MemStorage();
+//	stores.push_back(mem);
 }
 void KeyValueStorageTest::tearDown(void) {
 #ifdef HAVE_LEVELDB
@@ -43,6 +44,8 @@ void KeyValueStorageTest::tearDown(void) {
 	this->db->remove(bdbpath.c_str(), NULL, 0);
 	delete this->db;
 #endif
+//	delete stores.front();
+//	stores.pop_front();
 }
 
 void KeyValueStorageTest::testPut() {

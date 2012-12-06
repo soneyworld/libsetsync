@@ -18,6 +18,7 @@
 #ifdef HAVE_SQLITE
 //#include <setsync/storage/SqliteStorage.h>
 #endif
+//#include <setsync/storage/MemStorage.h>
 
 namespace setsync {
 
