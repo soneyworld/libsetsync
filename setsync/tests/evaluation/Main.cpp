@@ -42,6 +42,7 @@ int main(int ac, char **av) {
 		std::cout << "--leveldb-size-20-0-test" << std::endl;
 		std::cout << "--leveldb-size-20-100-test" << std::endl;
 		std::cout << "--leveldb-size-20-200-test" << std::endl;
+		std::cout << "--leveldb-set-test" << std::endl;
 #endif
 		std::cout << "--all-tests" << std::endl;
 		return 0;
@@ -58,6 +59,7 @@ int main(int ac, char **av) {
 #endif
 #ifdef HAVE_LEVELDB
 	bool level = !(args.find(std::string("--leveldb-test")) == args.end());
+	bool levelset = !(args.find(std::string("--leveldb-set-test")) == args.end());
 	bool levelsize = !(args.find(std::string("--leveldb-size-test"))
 			== args.end());
 	bool levelsize8 = !(args.find(std::string("--leveldb-size-8-0-test"))

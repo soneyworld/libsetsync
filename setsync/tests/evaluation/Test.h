@@ -10,6 +10,7 @@
 #define ITERATIONS 10000000
 #define ITEMS_PER_LOOPS 1000
 #define LOOP_ITERATIONS ITERATIONS/ITEMS_PER_LOOPS
+#include "config.h"
 #include <time.h>
 #include <stdio.h>
 #include <iostream>
@@ -17,6 +18,7 @@
 #include <stdint.h>
 #include "SHA1Generator.h"
 #include <setsync/bloom/DoubleHashingScheme.h>
+
 class Test{
 public:
 	virtual void run() = 0;
