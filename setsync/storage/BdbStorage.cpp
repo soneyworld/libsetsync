@@ -101,9 +101,7 @@ void BdbStorage::put(const unsigned char * key, const std::size_t keySize,
 	int ret;
 	DbTxn * txn = NULL;
 	Dbt k((char*) key, keySize);
-	Dbt data;
-	data.set_data(const_cast<void *> ((void*) value));
-	data.set_ulen(valueSize);
+	Dbt data((char*)value,valueSize);
 	data.set_flags(DB_DBT_USERMEM);
 	if (this->isTransactionEnabled()) {
 		this->db_->get_env()->txn_begin(this->getParentTransaction(), &txn, 0);
