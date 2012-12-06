@@ -6,7 +6,7 @@
 
 #include "BdbStorage.h"
 #include <setsync/utils/BerkeleyDB.h>
-#include <string.h>
+#include <stdlib.h>
 
 namespace setsync {
 

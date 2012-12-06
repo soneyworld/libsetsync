@@ -6,6 +6,7 @@
 
 #include "KeyValueCountingBloomFilter.h"
 #include <setsync/utils/bitset.h>
+#include <stdlib.h>
 
 namespace bloom {
 

@@ -5,7 +5,7 @@
  */
 
 #include "KeyValueIndex.h"
-#include <string.h>
+#include <stdlib.h>
 
 namespace setsync {
 

@@ -115,8 +115,6 @@ void KeyValueCountingBloomFilterTest::testRemove() {
 			false, 0.01);
 	bloom::KeyValueCountingBloomFilter Filter3(hashFunction_, *storage3, 10,
 			false, 0.01);
-	bloom::KeyValueCountingBloomFilter Filter4(hashFunction_, *bdbstorage, 10,
-			false, 0.01);
 	//	 test signature (const unsigned char* key)
 
 	unsigned char cad1[hashFunction_.getHashSize()];
@@ -160,13 +158,6 @@ void KeyValueCountingBloomFilterTest::testRemove() {
 	CPPUNIT_ASSERT(Filter3.CountingBloomFilter::remove("bla1"));
 	CPPUNIT_ASSERT(Filter3.CountingBloomFilter::remove("bla2"));
 	CPPUNIT_ASSERT(Filter3.CountingBloomFilter::remove("bla3"));
-	/// Testing transaction code
-	Filter4.AbstractBloomFilter::add("bla1");
-	Filter4.AbstractBloomFilter::add("bla2");
-	Filter4.AbstractBloomFilter::add("bla3");
-	CPPUNIT_ASSERT(Filter4.CountingBloomFilter::remove("bla1"));
-	CPPUNIT_ASSERT(Filter4.CountingBloomFilter::remove("bla2"));
-	CPPUNIT_ASSERT(Filter4.CountingBloomFilter::remove("bla3"));
 }
 void KeyValueCountingBloomFilterTest::testContains() {
 	/* test signature (const std::string& key) const */

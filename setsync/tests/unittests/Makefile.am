@@ -6,6 +6,7 @@ noinst_HEADERS = \
 	FSBloomFilterTest.h \
 	DoubleHashingSchemeTest.h \
 	SetTest.h \
+	KeyValueStorageTest.h \
 	DiffHandlerTest.h
 
 unittest_SOURCES = \
@@ -16,6 +17,7 @@ unittest_SOURCES = \
 	FSBloomFilterTest.cpp \
 	DoubleHashingSchemeTest.cpp \
 	SetTest.cpp \
+	KeyValueStorageTest.cpp \
 	DiffHandlerTest.cpp
 	
 

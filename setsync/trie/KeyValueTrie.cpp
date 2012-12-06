@@ -11,6 +11,7 @@
 #include <setsync/utils/bitset.h>
 #include <setsync/utils/OutputFunctions.h>
 #include <setsync/trie/TrieException.h>
+#include <stdlib.h>
 
 namespace trie {
 const uint8_t TrieNode::HAS_PARENT = 0x01;
