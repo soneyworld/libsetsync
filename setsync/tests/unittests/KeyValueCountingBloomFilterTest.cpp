@@ -7,16 +7,13 @@
 #include "KeyValueCountingBloomFilterTest.h"
 #include <setsync/utils/FileSystem.h>
 #include <setsync/storage/BdbStorage.h>
-#include <setsync/bloom/BdbBloomFilter.h>
 
 using namespace std;
 namespace bloom {
 
 void KeyValueCountingBloomFilterTest::setUp() {
 	this->db1 = new Db(NULL, 0);
-	db1->open(NULL, "table1.db",
-			bloom::BdbBloomFilter::getLogicalDatabaseName(),
-			bloom::BdbBloomFilter::getTableType(), DB_CREATE, 0);
+	db1->open(NULL, "table1.db", NULL, DB_HASH, DB_CREATE, 0);
 
 	path1 = "table1";
 	path2 = "table2";

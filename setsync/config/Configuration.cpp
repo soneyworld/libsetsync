@@ -10,6 +10,29 @@ namespace setsync {
 
 namespace config {
 
+Configuration::Configuration(const std::string hashname) :
+	hashname(hashname), bfConfig_(BloomFilterConfig()),
+			trieConfig_(TrieConfig()), indexConfig_(IndexConfig()) {
+
+}
+
+Configuration::Configuration(const IndexConfig& index,
+		const std::string hashname) :
+	hashname(hashname), bfConfig_(BloomFilterConfig()),
+			trieConfig_(TrieConfig()), indexConfig_(index) {
+
+}
+Configuration::Configuration(const BloomFilterConfig& bf,
+		const std::string hashname) :
+	hashname(hashname), bfConfig_(bf), trieConfig_(TrieConfig()),
+			indexConfig_(IndexConfig()) {
+
+}
+Configuration::Configuration(const TrieConfig& trie, const std::string hashname) :
+	hashname(hashname), bfConfig_(BloomFilterConfig()), trieConfig_(trie),
+			indexConfig_(IndexConfig()) {
+
+}
 Configuration::Configuration(const BloomFilterConfig& bf,
 		const TrieConfig& trie, const IndexConfig& index,
 		const std::string hashname) :
@@ -48,7 +71,7 @@ const Configuration::TrieConfig& Configuration::getTrie() const {
 	return this->trieConfig_;
 }
 
-const std::string Configuration::getPath() const{
+const std::string Configuration::getPath() const {
 	return this->path_;
 }
 }

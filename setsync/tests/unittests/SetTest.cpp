@@ -13,7 +13,7 @@ void SetTest::testInsert() {
 	CPPUNIT_ASSERT(set.getSize() == 1);
 }
 void SetTest::testErase() {
-	setsync::Set set(hash);
+	setsync::Set set(config);
 	CPPUNIT_ASSERT(set.getSize() == 0);
 	CPPUNIT_ASSERT(!set.erase("hallo"));
 	CPPUNIT_ASSERT(set.getSize() == 0);
@@ -24,7 +24,7 @@ void SetTest::testErase() {
 	CPPUNIT_ASSERT(!set.erase("hallo"));
 }
 void SetTest::testClear() {
-	setsync::Set set(hash);
+	setsync::Set set(config);
 	CPPUNIT_ASSERT(set.getSize() == 0);
 	CPPUNIT_ASSERT(set.insert("hallo"));
 	CPPUNIT_ASSERT(set.getSize() == 1);
@@ -33,7 +33,7 @@ void SetTest::testClear() {
 }
 
 void SetTest::testFind() {
-	setsync::Set set(hash);
+	setsync::Set set(config);
 	CPPUNIT_ASSERT(set.getSize() == 0);
 	CPPUNIT_ASSERT(!set.find("hallo"));
 	CPPUNIT_ASSERT(set.insert("hallo"));
@@ -45,7 +45,11 @@ void SetTest::testFind() {
 }
 
 void SetTest::testMaximum() {
-	setsync::Set set(hash, 5, true);
+	config::Configuration::BloomFilterConfig bfconfig;
+	bfconfig.hardMaximum = true;
+	bfconfig.maxElements = 5;
+	config::Configuration maxConfig(bfconfig);
+	setsync::Set set(maxConfig);
 	CPPUNIT_ASSERT(set.getSize() == 0);
 	CPPUNIT_ASSERT(set.insert("1"));
 	CPPUNIT_ASSERT(set.getSize() == 1);

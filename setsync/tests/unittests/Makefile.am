@@ -1,6 +1,5 @@
 
 noinst_HEADERS = \
-	MemTrieTest.h \
 	BloomFilterTest.h \
 	FSBloomFilterTest.h \
 	DoubleHashingSchemeTest.h \
@@ -10,7 +9,6 @@ noinst_HEADERS = \
 
 unittest_SOURCES = \
 	Main.cpp \
-	MemTrieTest.cpp \
 	BloomFilterTest.cpp \
 	FSBloomFilterTest.cpp \
 	DoubleHashingSchemeTest.cpp \
@@ -23,15 +21,9 @@ unittest_SOURCES = \
 AM_CPPFLAGS = @CPPUNIT_CFLAGS@ -Wall
 AM_LDFLAGS = @CPPUNIT_LIBS@
 
-if BERKELEY_DB
-noinst_HEADERS += BdbTrieTest.h BdbBloomFilterTest.h BdbSetTest.h BdbIndexTest.h
-unittest_SOURCES += BdbTrieTest.cpp BdbBloomFilterTest.cpp BdbSetTest.cpp BdbIndexTest.cpp
-endif
 
-if LEVELDB
-noinst_HEADERS += LevelDbStorageTest.h KeyValueCountingBloomFilterTest.h KeyValueIndexTest.h LevelDbTrieTest.h
-unittest_SOURCES += LevelDbStorageTest.cpp KeyValueCountingBloomFilterTest.cpp KeyValueIndexTest.cpp LevelDbTrieTest.cpp
-endif
+noinst_HEADERS += KeyValueCountingBloomFilterTest.h KeyValueIndexTest.h
+unittest_SOURCES += KeyValueCountingBloomFilterTest.cpp KeyValueIndexTest.cpp
 
 INCLUDES = -I@top_srcdir@ -I@top_srcdir@/setsync/tests/unittests
 

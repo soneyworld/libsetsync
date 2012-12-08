@@ -6,6 +6,10 @@
 
 #include "BFTest.h"
 #include <db_cxx.h>
+#include <setsync/storage/BdbStorage.h>
+#include <setsync/bloom/FSBloomFilter.h>
+#include <setsync/bloom/HashFunction.h>
+#include <setsync/bloom/KeyValueCountingBloomFilter.h>
 using namespace std;
 
 BFTest::BFTest() {
@@ -49,12 +53,10 @@ void BFTest::runDBBF() {
 	 db1.close(0);*/
 	cout << "running Berkeley DBBloomFilter(FS) test:" << endl;
 	Db db2(NULL, 0);
-	db2.set_flags(bloom::BdbBloomFilter::getTableFlags());
-	db2.open(NULL, "temp-table.db",
-			bloom::BdbBloomFilter::getLogicalDatabaseName(),
-			bloom::BdbBloomFilter::getTableType(), DB_CREATE, 0);
-
-	bloom::BdbBloomFilter bf2(sha1 , &db2, ITERATIONS);
+	db2.set_flags(setsync::storage::BdbStorage::getTableFlags());
+	db2.open(NULL, "temp-table.db", NULL, DB_HASH, DB_CREATE, 0);
+	setsync::storage::BdbStorage storage(&db2);
+	bloom::KeyValueCountingBloomFilter bf2(sha1, storage, ITERATIONS);
 	runBF(&bf2);
 	db2.close(0);
 	remove("temp-table.db");

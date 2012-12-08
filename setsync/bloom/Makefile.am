@@ -19,10 +19,5 @@ cpp_sources = BloomFilter.cpp \
 			DoubleHashingScheme.cpp \
 			KeyValueCountingBloomFilter.cpp
 
-if BERKELEY_DB
-h_sources += BdbBloomFilter.h
-cpp_sources += BdbBloomFilter.cpp
-endif
-
 noinst_LTLIBRARIES = libbloom.la
 libbloom_la_SOURCES= $(h_sources) $(cpp_sources)
