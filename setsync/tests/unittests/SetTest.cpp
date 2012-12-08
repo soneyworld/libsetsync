@@ -47,7 +47,7 @@ void SetTest::testFind() {
 void SetTest::testMaximum() {
 	config::Configuration::BloomFilterConfig bfconfig;
 	bfconfig.hardMaximum = true;
-	bfconfig.maxElements = 5;
+	bfconfig.setMaxElements(5);
 	config::Configuration maxConfig(bfconfig);
 	setsync::Set set(maxConfig);
 	CPPUNIT_ASSERT(set.getSize() == 0);
@@ -70,7 +70,7 @@ void SetTest::testMaximum() {
 }
 
 void SetTest::setUp() {
-
+	this->config.setPath("temp");
 }
 void SetTest::tearDown() {
 

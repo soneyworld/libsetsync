@@ -23,18 +23,24 @@ namespace config {
 class Configuration {
 public:
 	class BloomFilterConfig {
+	private:
+		uint64_t maxElements;
 	public:
 		enum BloomFilterType {
 			NORMAL = 0, COMPRESSED = 1
 		};
 
-		uint64_t maxElements;
+		uint64_t getMaxElements() const;
+		void setMaxElements(uint64_t max);
 		bool hardMaximum;
 		float falsePositiveRate;
-
+		std::string storagePath;
+		std::string filterFile;
 	};
 	class TrieConfig {
-
+	public:
+		TrieConfig();
+		virtual ~TrieConfig();
 	};
 	class IndexConfig {
 	private:
@@ -46,8 +52,12 @@ public:
 	};
 private:
 	std::string path_;
+	std::string dbname_;
+	std::string hashname_;
 public:
 	const std::string getPath() const;
+	void setPath(const char * path);
+	void setPath(const std::string& path);
 	Configuration(
 			const std::string hashname = utils::CryptoHash::getDefaultName());
 	Configuration(const IndexConfig& index,
@@ -65,7 +75,7 @@ public:
 			const std::string hashname = utils::CryptoHash::getDefaultName());
 	Configuration(const SET_CONFIG config);
 	virtual ~Configuration();
-	const std::string hashname;
+	std::string getHashFunction() const;
 	const Configuration::IndexConfig& getIndex() const;
 	const Configuration::BloomFilterConfig& getBloomFilter() const;
 	const Configuration::TrieConfig& getTrie() const;

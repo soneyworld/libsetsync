@@ -10,38 +10,70 @@ namespace setsync {
 
 namespace config {
 
+Configuration::TrieConfig::TrieConfig() {
+
+}
+
+Configuration::TrieConfig::~TrieConfig() {
+
+}
+
+uint64_t Configuration::BloomFilterConfig::getMaxElements() const {
+	return this->maxElements;
+}
+
+void Configuration::BloomFilterConfig::setMaxElements(uint64_t max) {
+	this->maxElements = max;
+}
+
 Configuration::Configuration(const std::string hashname) :
-	hashname(hashname), bfConfig_(BloomFilterConfig()),
+	hashname_(hashname), bfConfig_(BloomFilterConfig()),
 			trieConfig_(TrieConfig()), indexConfig_(IndexConfig()) {
 
 }
 
 Configuration::Configuration(const IndexConfig& index,
 		const std::string hashname) :
-	hashname(hashname), bfConfig_(BloomFilterConfig()),
+	hashname_(hashname), bfConfig_(BloomFilterConfig()),
 			trieConfig_(TrieConfig()), indexConfig_(index) {
 
 }
 Configuration::Configuration(const BloomFilterConfig& bf,
 		const std::string hashname) :
-	hashname(hashname), bfConfig_(bf), trieConfig_(TrieConfig()),
+	hashname_(hashname), bfConfig_(bf), trieConfig_(TrieConfig()),
 			indexConfig_(IndexConfig()) {
 
 }
 Configuration::Configuration(const TrieConfig& trie, const std::string hashname) :
-	hashname(hashname), bfConfig_(BloomFilterConfig()), trieConfig_(trie),
+	hashname_(hashname), bfConfig_(BloomFilterConfig()), trieConfig_(trie),
 			indexConfig_(IndexConfig()) {
 
 }
 Configuration::Configuration(const BloomFilterConfig& bf,
 		const TrieConfig& trie, const IndexConfig& index,
 		const std::string hashname) :
-	hashname(hashname), bfConfig_(bf), trieConfig_(trie), indexConfig_(index) {
+	hashname_(hashname), bfConfig_(bf), trieConfig_(trie), indexConfig_(index) {
 
 }
 
 Configuration::Configuration(const SET_CONFIG config) {
 
+}
+
+std::string Configuration::getHashFunction() const {
+	try {
+		utils::CryptoHash hash(hashname_);
+	} catch (...) {
+		return utils::CryptoHash::getDefaultName();
+	}
+	return hashname_;
+}
+
+void Configuration::setPath(const char * path) {
+	this->path_ = path;
+}
+void Configuration::setPath(const std::string& path) {
+	setPath(path.c_str());
 }
 
 Configuration::~Configuration() {

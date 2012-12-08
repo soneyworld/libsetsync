@@ -12,7 +12,7 @@ void CryptoHash::init() {
 #ifdef HAVE_OPENSSL
 	OpenSSL_add_all_digests();
 	digit = EVP_get_digestbyname(name_.c_str());
-	if (!digit) {
+	if (digit == NULL) {
 		throw "Crypto hash algorithm not found";
 	}
 #else

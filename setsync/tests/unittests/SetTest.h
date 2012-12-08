@@ -34,6 +34,6 @@ protected:
 	void testFind();
 	void testMaximum();
 };
-//CPPUNIT_TEST_SUITE_REGISTRATION( SetTest);
+CPPUNIT_TEST_SUITE_REGISTRATION( SetTest);
 };
 #endif /* SETTEST_H_ */

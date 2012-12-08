@@ -10,11 +10,27 @@
 #include <typeinfo>
 #include <string.h>
 #include <iostream>
+#ifdef HAVE_LEVELDB
+#include <setsync/storage/LevelDbStorage.h>
+#endif
 
 namespace setsync {
 
 Set::Set(const config::Configuration& config) :
-	config_(config), hash_(config.hashname), indexStorage_(NULL), index_(NULL) {
+	config_(config), hash_(config.getHashFunction()), indexStorage_(NULL),
+			index_(NULL) {
+#ifdef HAVE_LEVELDB
+	std::string path = config_.getPath();
+	if (path.size() > 0 && path.at(path.size() - 1) != '/') {
+		path = path.append("/");
+	}
+	std::string triepath(path);
+	triepath.append("trie");
+	trieStorage_ = new storage::LevelDbStorage(triepath);
+	std::string bfpath(path);
+	bfpath.append("bloom");
+	bfStorage_ = new storage::LevelDbStorage(bfpath);
+#endif
 	trie_ = new trie::KeyValueTrie(hash_, *trieStorage_);
 	bf_ = new bloom::KeyValueCountingBloomFilter(hash_, *bfStorage_);
 
