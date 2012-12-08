@@ -7,7 +7,7 @@
 #ifndef SETTEST_H_
 #define SETTEST_H_
 #include <cppunit/extensions/HelperMacros.h>
-#include "setsync/Set.hpp"
+#include <setsync/Set.hpp>
 
 namespace setsync {
 class SetTest: public CPPUNIT_NS::TestCase {
@@ -22,7 +22,7 @@ CPPUNIT_TEST_SUITE( SetTest);
 CPPUNIT_TEST_SUITE_END();
 
 private:
-	utils::CryptoHash hash;
+	config::Configuration config;
 
 public:
 	void setUp(void);

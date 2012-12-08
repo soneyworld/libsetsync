@@ -65,7 +65,7 @@ DbSet::~DbSet() {
 
 }
 
-SynchronizationStrategy DbSet::createSyncStrategy(){
+SynchronizationStrategy DbSet::createSyncStrategy() {
 
 }
 

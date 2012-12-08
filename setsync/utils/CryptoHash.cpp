@@ -8,11 +8,10 @@
 #endif
 namespace utils {
 
-CryptoHash::CryptoHash(const char * name) :
-	name_(name) {
+void CryptoHash::init() {
 #ifdef HAVE_OPENSSL
 	OpenSSL_add_all_digests();
-	digit = EVP_get_digestbyname(name);
+	digit = EVP_get_digestbyname(name_.c_str());
 	if (!digit) {
 		throw "Crypto hash algorithm not found";
 	}
@@ -22,6 +21,16 @@ CryptoHash::CryptoHash(const char * name) :
 		throw "Crypto hash algorithm not found";
 	}
 #endif
+}
+
+CryptoHash::CryptoHash(const char * name) :
+	name_(name) {
+	init();
+}
+
+CryptoHash::CryptoHash(const std::string& name) :
+	name_(name) {
+	init();
 }
 
 const std::size_t CryptoHash::getHashSize() const {
@@ -111,6 +120,10 @@ int CryptoHash::hash(unsigned char * target_md, std::istream& in) const {
 }
 
 CryptoHash::~CryptoHash() {
+}
+
+std::string CryptoHash::getDefaultName() {
+	return std::string(DEFAULT_DIGIT_ALGORITHM);
 }
 
 std::size_t CryptoHash::getDefaultDigitLength() {

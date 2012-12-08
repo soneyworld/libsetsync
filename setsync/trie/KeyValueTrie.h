@@ -17,12 +17,12 @@
 
 namespace trie {
 
-class AbstractKeyValueTrie;
+class KeyValueTrie;
 class KeyValueRootNode;
 
 class TrieNode {
 	friend class KeyValueRootNode;
-	friend class AbstractKeyValueTrie;
+	friend class KeyValueTrie;
 	friend class TrieValue;
 #ifdef HAVE_LEVELDB
 	friend class LevelDbTrieTest;
@@ -71,7 +71,7 @@ private:
 
 	const utils::CryptoHash& hashfunction_;
 
-	const AbstractKeyValueTrie& trie_;
+	const KeyValueTrie& trie_;
 	/**
 	 * Constructor of a node, which could exist in the given DB, or should be
 	 * created to be saved in the given DB. The given hash could be the default
@@ -81,7 +81,7 @@ private:
 	 * \param hash of the node, which should be created or loaded
 	 * \param newone if true, a new node will be created, otherwise load the node with this hash from the given DB
 	 */
-	TrieNode(const AbstractKeyValueTrie& trie,
+	TrieNode(const KeyValueTrie& trie,
 			const utils::CryptoHash& hashfunction,
 			setsync::storage::AbstractKeyValueStorage& storage,
 			const unsigned char * hash, bool newone = false);
@@ -171,7 +171,7 @@ private:
 	 */
 	bool isEqualToLarger(const TrieNode& node) const;
 public:
-	TrieNode(const AbstractKeyValueTrie& trie,
+	TrieNode(const KeyValueTrie& trie,
 			const utils::CryptoHash& hashfunction,
 			setsync::storage::AbstractKeyValueStorage& storage);
 	/**
@@ -306,9 +306,9 @@ private:
 	/// Reference to the used cryptographic hash function
 	const utils::CryptoHash& hashfunction_;
 	/// Reference to the Trie, which should be used for operations
-	const AbstractKeyValueTrie& trie_;
+	const KeyValueTrie& trie_;
 public:
-	KeyValueRootNode(const AbstractKeyValueTrie& trie,
+	KeyValueRootNode(const KeyValueTrie& trie,
 			const utils::CryptoHash& hashfunction,
 			setsync::storage::AbstractKeyValueStorage& storage);
 	/**
@@ -334,7 +334,7 @@ public:
 	virtual std::string toString(const std::string nodePrefix) const;
 };
 
-class AbstractKeyValueTrie: public trie::Trie {
+class KeyValueTrie: public trie::Trie {
 private:
 	/// Instance of root node methods
 	KeyValueRootNode * root_;
@@ -356,9 +356,9 @@ private:
 					std::vector<TrieNode>& innerNodes,
 					std::vector<TrieNode>& leafNodes);
 public:
-	AbstractKeyValueTrie(const utils::CryptoHash& hash,
+	KeyValueTrie(const utils::CryptoHash& hash,
 			setsync::storage::AbstractKeyValueStorage& storage);
-	virtual ~AbstractKeyValueTrie();
+	virtual ~KeyValueTrie();
 	/**
 	 * \param hash to be added
 	 * \param performhash

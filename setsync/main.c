@@ -9,12 +9,12 @@
 
 #include <stdio.h>
 
-int main( int argc, const char* argv[] )
-{
+int main(int argc, const char* argv[]) {
 	int result = 0;
 	SET s;
-	result = set_init(&s, NULL,1000,1,0.01);
-
+	SET_CONFIG c;
+	strncpy(c.set_hash_function_name, "sha1", 5);
+	result = set_init(&s, c);
 	result = set_free(&s);
 	return result;
 }

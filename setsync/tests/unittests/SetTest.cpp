@@ -7,7 +7,7 @@
 #include "SetTest.h"
 namespace setsync {
 void SetTest::testInsert() {
-	setsync::Set set(hash);
+	setsync::Set set(config);
 	CPPUNIT_ASSERT(set.getSize() == 0);
 	CPPUNIT_ASSERT(set.insert("hallo"));
 	CPPUNIT_ASSERT(set.getSize() == 1);

@@ -12,7 +12,7 @@
 
 namespace trie {
 
-class LevelDbTrie: public trie::AbstractKeyValueTrie {
+class LevelDbTrie: public trie::KeyValueTrie {
 public:
 	LevelDbTrie(const utils::CryptoHash& hash, setsync::storage::LevelDbStorage& storage);
 	virtual ~LevelDbTrie();

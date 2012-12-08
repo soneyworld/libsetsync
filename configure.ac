@@ -92,6 +92,16 @@ AC_CHECK_LIB([m], [log])
 AC_C_INLINE
 
 
+#AM_CONDITIONAL(IBRCOMMON, true)
+#PKG_CHECK_MODULES(IBRCOMMON,[ibrcommon >= 0.8],[
+#	AC_SUBST(IBRCOMMON_CFLAGS)
+#	AC_SUBST(IBRCOMMON_LIBS)
+#	AC_DEFINE(HAVE_IBRCOMMON, [1], ["ibrcommon library is available"])
+#	],[
+#	AM_CONDITIONAL(IBRCOMMON, false)
+#	]
+#)
+
 # BerkeleyDB c++
 AM_CONDITIONAL(BERKELEY_DB, true)
 AC_ARG_WITH(bdb,
@@ -206,6 +216,7 @@ AM_CONDITIONAL(LEVELDB, test x$with_leveldb = xyes)
 AC_CONFIG_FILES([Makefile \
 	setsync/Makefile \
 	setsync/bloom/Makefile \
+	setsync/config/Makefile \
 	setsync/trie/Makefile \
 	setsync/index/Makefile \
 	setsync/utils/Makefile \

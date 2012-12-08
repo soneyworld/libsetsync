@@ -11,20 +11,31 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+#include "config.h"
 #include <string.h>
+#include <inttypes.h>
 
 typedef struct {
 	void *set;
-	void *hash;
 } SET;
+
+typedef struct {
+	char set_hash_function_name[20];
+	int index_enabled;
+	int bf_hard_max;
+	uint64_t bf_max_elements;
+	float false_positive_rate;
+} SET_CONFIG;
 
 typedef void diff_callback(void *closure, const unsigned char * hash,
 		const size_t hashsize, const size_t existsLocally);
 
+#ifdef HAVE_IBRCOMMON
+int set_config_load_file(SET_CONFIG * config);
+#endif
+
 // Init and Free
-int set_init(SET *set, const char * path, const size_t maxSize,
-		const int hardMaximum, const float falsePositiveRate);
+int set_init(SET *set, SET_CONFIG config);
 int set_init_with_path(SET *set, const char * path);
 int set_free(SET *set);
 

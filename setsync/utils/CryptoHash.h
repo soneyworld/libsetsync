@@ -5,6 +5,8 @@
 
 #ifndef CRYPTOHASH_H_
 #define CRYPTOHASH_H_
+
+#define DEFAULT_DIGIT_ALGORITHM "sha1"
 #include "config.h"
 #include <string>
 #include <istream>
@@ -32,14 +34,30 @@ private:
 			const std::size_t length) const;
 	int hash(unsigned char * target_md, const std::string& str) const;
 	int hash(unsigned char * target_md, std::istream& in) const;
+	void init(void);
 public:
+	/**
+	 * \return the length of the default digit algorithm
+	 */
+	static std::size_t getDefaultDigitLength();
+	/**
+	 * \return the name of the default digit algorithm
+	 */
+	static std::string getDefaultName();
 	/**
 	 * Possible hash algorithms are: md2, md4, md5, sha1, sha224, sha256, sha384, sha512
 	 * The default algorithm is sha1
 	 *
 	 * \param name of the hash algorithm
 	 */
-	CryptoHash(const char * name = "sha1");
+	CryptoHash(const char * name = DEFAULT_DIGIT_ALGORITHM);
+	/**
+	 * Possible hash algorithms are: md2, md4, md5, sha1, sha224, sha256, sha384, sha512
+	 * The default algorithm is sha1
+	 *
+	 * \param name of the hash algorithm
+	 */
+	CryptoHash(const std::string& name);
 	/**
 	 * default destructor
 	 */
@@ -48,10 +66,7 @@ public:
 	 * \return memory size of the hash digit in bytes
 	 */
 	const std::size_t getHashSize() const;
-	/**
-	 * \return the length of the default digit algorithm
-	 */
-	static std::size_t getDefaultDigitLength();
+
 	int operator()(unsigned char * target_md, const char * str) const;
 	int operator()(unsigned char * target_md, const unsigned char * data,
 			const std::size_t length) const;

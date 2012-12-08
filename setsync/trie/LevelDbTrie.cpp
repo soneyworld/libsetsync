@@ -9,7 +9,7 @@
 namespace trie {
 
 LevelDbTrie::LevelDbTrie(const utils::CryptoHash& hash, setsync::storage::LevelDbStorage& storage) :
-	AbstractKeyValueTrie(hash, storage) {
+	KeyValueTrie(hash, storage) {
 
 }
 

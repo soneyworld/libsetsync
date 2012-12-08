@@ -36,7 +36,7 @@ void TrieNode::marshall(const TrieNode& source,
 
 const char KeyValueRootNode::root_name[] = "root";
 
-KeyValueRootNode::KeyValueRootNode(const AbstractKeyValueTrie& trie,
+KeyValueRootNode::KeyValueRootNode(const KeyValueTrie& trie,
 		const utils::CryptoHash& hashfunction,
 		setsync::storage::AbstractKeyValueStorage& storage) :
 	trie_(trie), hashfunction_(hashfunction), storage_(storage) {
@@ -85,7 +85,7 @@ std::string KeyValueRootNode::toString(const std::string nodePrefix) const {
 	}
 }
 
-TrieNode::TrieNode(const AbstractKeyValueTrie& trie,
+TrieNode::TrieNode(const KeyValueTrie& trie,
 		const utils::CryptoHash& hashfunction,
 		setsync::storage::AbstractKeyValueStorage& storage,
 		const unsigned char * hash, bool newone) :
@@ -689,17 +689,17 @@ uint8_t TrieNode::getFlags() const {
 	return flags;
 }
 
-AbstractKeyValueTrie::AbstractKeyValueTrie(const utils::CryptoHash& hash,
+KeyValueTrie::KeyValueTrie(const utils::CryptoHash& hash,
 		setsync::storage::AbstractKeyValueStorage& storage) :
 	Trie(hash), storage_(storage) {
 	this->root_ = new KeyValueRootNode(*this, hash, storage);
 }
 
-AbstractKeyValueTrie::~AbstractKeyValueTrie() {
+KeyValueTrie::~KeyValueTrie() {
 	delete this->root_;
 }
 
-bool AbstractKeyValueTrie::add(const unsigned char * hash, bool performhash) {
+bool KeyValueTrie::add(const unsigned char * hash, bool performhash) {
 	try {
 		TrieNode root = this->root_->get();
 		bool inserted = root.insert(hash, performhash);
@@ -716,7 +716,7 @@ bool AbstractKeyValueTrie::add(const unsigned char * hash, bool performhash) {
 	}
 }
 
-bool AbstractKeyValueTrie::remove(const unsigned char * hash, bool performhash) {
+bool KeyValueTrie::remove(const unsigned char * hash, bool performhash) {
 	try {
 		TrieNode root = this->root_->get();
 		bool removed = root.erase(hash, performhash);
@@ -731,7 +731,7 @@ bool AbstractKeyValueTrie::remove(const unsigned char * hash, bool performhash) 
 	}
 }
 
-TrieNodeType AbstractKeyValueTrie::contains(const unsigned char * hash) const {
+TrieNodeType KeyValueTrie::contains(const unsigned char * hash) const {
 	try {
 		TrieNode node(*this, this->hash_, this->storage_, hash, false);
 		if (node.hasChildren_) {
@@ -745,15 +745,15 @@ TrieNodeType AbstractKeyValueTrie::contains(const unsigned char * hash) const {
 	return NOT_FOUND;
 }
 
-void AbstractKeyValueTrie::clear(void) {
+void KeyValueTrie::clear(void) {
 	this->storage_.clear();
 	this->setSize(0);
 }
 
-bool AbstractKeyValueTrie::operator ==(const Trie& other) const {
+bool KeyValueTrie::operator ==(const Trie& other) const {
 	try {
-		const AbstractKeyValueTrie& other_ =
-				dynamic_cast<const AbstractKeyValueTrie&> (other);
+		const KeyValueTrie& other_ =
+				dynamic_cast<const KeyValueTrie&> (other);
 		try {
 			root_->get();
 		} catch (TrieRootNotFoundException e) {
@@ -777,7 +777,7 @@ bool AbstractKeyValueTrie::operator ==(const Trie& other) const {
 	}
 }
 
-std::string AbstractKeyValueTrie::toDotString(const std::string nodePrefix) const {
+std::string KeyValueTrie::toDotString(const std::string nodePrefix) const {
 	std::stringstream ss;
 	ss << this->root_->toString(nodePrefix);
 	try {
@@ -789,7 +789,7 @@ std::string AbstractKeyValueTrie::toDotString(const std::string nodePrefix) cons
 	return ss.str();
 }
 
-std::string AbstractKeyValueTrie::toString() const {
+std::string KeyValueTrie::toString() const {
 	std::stringstream ss;
 	ss << "digraph trie {" << std::endl;
 	ss << this->Trie::toDotString();
@@ -797,7 +797,7 @@ std::string AbstractKeyValueTrie::toString() const {
 	return ss.str();
 }
 
-size_t AbstractKeyValueTrie::getSubTrie(const TrieNode& root,
+size_t KeyValueTrie::getSubTrie(const TrieNode& root,
 		const size_t numberOfNodes, std::vector<TrieNode>& inner_nodes,
 		std::vector<TrieNode>& child_nodes) {
 	if (root.hasChildren_ && numberOfNodes >= 2) {
@@ -827,7 +827,7 @@ size_t AbstractKeyValueTrie::getSubTrie(const TrieNode& root,
 	}
 }
 
-size_t AbstractKeyValueTrie::getSubTrie(const unsigned char * hash,
+size_t KeyValueTrie::getSubTrie(const unsigned char * hash,
 		void * buffer, const size_t buffersize) {
 	size_t maxNumberOfHashes = buffersize / this->hash_.getHashSize();
 	if (maxNumberOfHashes < 2) {
@@ -854,7 +854,7 @@ size_t AbstractKeyValueTrie::getSubTrie(const unsigned char * hash,
 	return subtriesize * this->hash_.getHashSize();
 }
 
-bool AbstractKeyValueTrie::getRoot(unsigned char * hash) {
+bool KeyValueTrie::getRoot(unsigned char * hash) {
 	if (this->getSize() == 0)
 		return false;
 	try {
@@ -866,7 +866,7 @@ bool AbstractKeyValueTrie::getRoot(unsigned char * hash) {
 	}
 }
 
-void AbstractKeyValueTrie::diff(const void * subtrie, const std::size_t length,
+void KeyValueTrie::diff(const void * subtrie, const std::size_t length,
 		setsync::AbstractDiffHandler& handler) const {
 	unsigned char * subtrie_ = (unsigned char *) subtrie;
 	for (int i = 0; i < length / hash_.getHashSize(); i++) {

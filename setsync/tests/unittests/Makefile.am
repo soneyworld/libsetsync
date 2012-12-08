@@ -1,6 +1,5 @@
 
 noinst_HEADERS = \
-	MemSetTest.h \
 	MemTrieTest.h \
 	BloomFilterTest.h \
 	FSBloomFilterTest.h \
@@ -11,7 +10,6 @@ noinst_HEADERS = \
 
 unittest_SOURCES = \
 	Main.cpp \
-	MemSetTest.cpp \
 	MemTrieTest.cpp \
 	BloomFilterTest.cpp \
 	FSBloomFilterTest.cpp \
