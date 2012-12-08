@@ -104,4 +104,54 @@ uint64_t FileSystem::fileSize(const char* file) {
 	stat(file, &filestatus);
 	return filestatus.st_size;
 }
+
+static std::string mkTempDir(const std::string& prefix) {
+	std::string path;
+	char p[prefix.size() + 7];
+	strncpy(p, prefix.c_str(), prefix.size());
+	strncpy(p + prefix.size(), "XXXXXX", 6);
+	p[prefix.size() + 6] = '\0';
+	char * tempdir = mkdtemp(p);
+	if (tempdir != NULL) {
+		path = tempdir;
+	} else {
+		throw "couldn't create temporary directory";
+	}
+}
+
+static std::string mkTempDir(const char * prefix) {
+	return mkTempDir(std::string(prefix));
+}
+
+void FileSystem::TemporaryDirectory::init() {
+	char p[this->path_.size() + 7];
+	strncpy(p, path_.c_str(), path_.size());
+	strncpy(p + path_.size(), "XXXXXX", 6);
+	p[this->path_.size() + 6] = '\0';
+	char * tempdir = mkdtemp(p);
+	if (tempdir != NULL) {
+		this->path_ = tempdir;
+	} else {
+		this->path_ = "";
+		throw "couldn't create temporary directory";
+	}
+}
+
+FileSystem::TemporaryDirectory::TemporaryDirectory(const std::string& prefix) :
+	path_(prefix) {
+	init();
+}
+
+FileSystem::TemporaryDirectory::TemporaryDirectory(const char * prefix) :
+	path_(prefix) {
+	init();
+}
+FileSystem::TemporaryDirectory::~TemporaryDirectory() {
+	if (path_.size() > 6) {
+		FileSystem::rmDirRecursive(path_);
+	}
+}
+std::string FileSystem::TemporaryDirectory::getPath() const {
+	return this->path_;
+}
 }

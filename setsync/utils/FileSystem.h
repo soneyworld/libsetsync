@@ -50,6 +50,62 @@ public:
 	 * \return sum size of the files in the given path
 	 */
 	static uint64_t dirSize(const char *path);
+	/**
+	 * Creates a directory with the given prefix and returns
+	 * the path of a unique created directory. It won't be
+	 * deleted on program exit.
+	 *
+	 * \param prefix of the new directory
+	 * \return the correct path of the newly created directory
+	 */
+	static std::string mkTempDir(const std::string& prefix);
+	/**
+	 * Creates a directory with the given prefix and returns
+	 * the path of a unique created directory. It won't be
+	 * deleted on program exit.
+	 *
+	 * \param prefix of the new directory
+	 * \return the correct path of the newly created directory
+	 */
+	static std::string mkTempDir(const char * prefix);
+	/**
+	 * A class for simple using temporary created directories.
+	 * All files and folder inside the newly created directory
+	 * will also be deleted on destroying this object.
+	 */
+	class TemporaryDirectory {
+	private:
+		/// Path to the created directory
+		std::string path_;
+		/**
+		 * Creates the new path from the prefix, saved in path
+		 */
+		void init();
+	public:
+		/**
+		 * Creates a new directory with the given prefix
+		 * and adds a 6 digit random number to it.
+		 *
+		 * \param prefix of the new folder
+		 */
+		TemporaryDirectory(const std::string& prefix);
+		/**
+		 * Creates a new directory with the given prefix
+		 * and adds a 6 digit random number to it.
+		 *
+		 * \param prefix of the new folder
+		 */
+		TemporaryDirectory(const char * prefix);
+		/**
+		 * Deletes all files and directories existing in the
+		 * temporary path, if creation has been successfully
+		 */
+		~TemporaryDirectory();
+		/**
+		 * \return the temporary directory path
+		 */
+		std::string getPath() const;
+	};
 };
 
 }
