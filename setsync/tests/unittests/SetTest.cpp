@@ -49,6 +49,7 @@ void SetTest::testMaximum() {
 	bfconfig.hardMaximum = true;
 	bfconfig.setMaxElements(5);
 	config::Configuration maxConfig(bfconfig);
+	maxConfig.setPath("temp");
 	setsync::Set set(maxConfig);
 	CPPUNIT_ASSERT(set.getSize() == 0);
 	CPPUNIT_ASSERT(set.insert("1"));

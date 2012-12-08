@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 
-h_sources = KeyValueStorage.h 
-cpp_sources = KeyValueStorage.cpp
+h_sources = KeyValueStorage.h StorageException.h
+cpp_sources = KeyValueStorage.cpp StorageException.cpp
 AM_CPPFLAGS = 
 AM_LDFLAGS =
 

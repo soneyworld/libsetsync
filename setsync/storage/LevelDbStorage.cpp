@@ -6,6 +6,7 @@
 
 #include "LevelDbStorage.h"
 #include <setsync/utils/FileSystem.h>
+#include <setsync/storage/StorageException.h>
 
 namespace setsync {
 
@@ -38,8 +39,7 @@ void LevelDbIterator::key(unsigned char * buffer) const {
 
 LevelDbStorage::LevelDbStorage(const std::string& path) :
 	path_(path) {
-	options_.create_if_missing = true;
-	leveldb::Status s = leveldb::DB::Open(options_, path_, &(this->db_));
+	init();
 }
 
 LevelDbStorage::LevelDbStorage(const std::string& path,
@@ -66,7 +66,11 @@ LevelDbStorage::LevelDbStorage(const std::string& path,
 }
 
 void LevelDbStorage::init() {
+	options_.create_if_missing = true;
 	leveldb::Status s = leveldb::DB::Open(options_, path_, &(this->db_));
+	if(!s.ok()){
+		throw StorageException("Failed to open db");
+	}
 }
 
 LevelDbStorage::~LevelDbStorage() {
@@ -95,14 +99,14 @@ void LevelDbStorage::put(const unsigned char * key, const std::size_t keySize,
 	leveldb::Slice v((char *) value, valueSize);
 	leveldb::Status s = this->db_->Put(this->writeOptions_, k, v);
 	if (!s.ok()) {
-		throw s.ToString();
+		throw StorageException(s.ToString());
 	}
 }
 void LevelDbStorage::del(const unsigned char * key, const std::size_t keySize) {
 	leveldb::Slice k((char*) key, keySize);
 	leveldb::Status s = this->db_->Delete(writeOptions_, k);
 	if (!s.ok()) {
-		throw s.ToString();
+		throw StorageException(s.ToString());
 	}
 }
 

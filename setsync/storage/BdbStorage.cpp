@@ -136,7 +136,7 @@ void BdbStorage::del(const unsigned char * key, const std::size_t keySize) {
 		ret = this->db_->del(NULL, &k, 0);
 	}
 	if (ret != 0) {
-		throw "Error on deleting root from db";
+		throw DbException(ret);
 	}
 
 }
