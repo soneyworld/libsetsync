@@ -45,7 +45,7 @@ void KeyValueCountingBloomFilterTest::tearDown() {
 	delete this->storage1;
 	delete this->storage2;
 	delete this->storage3;
-#ifdef LEVELDB
+#ifdef HAVE_LEVELDB
 	utils::FileSystem::rmDirRecursive( path1);
 	utils::FileSystem::rmDirRecursive( path2);
 	utils::FileSystem::rmDirRecursive( path3);

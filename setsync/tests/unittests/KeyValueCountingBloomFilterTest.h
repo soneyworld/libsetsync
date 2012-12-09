@@ -31,7 +31,7 @@ CPPUNIT_TEST_SUITE(KeyValueCountingBloomFilterTest);
 
 private:
 	Db * db1;
-#ifdef LEVELDB
+#ifdef HAVE_LEVELDB
 	std::string path1;
 	std::string path2;
 	std::string path3;
