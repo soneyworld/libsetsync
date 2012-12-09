@@ -19,11 +19,11 @@ Configuration::TrieConfig::~TrieConfig() {
 }
 
 uint64_t Configuration::BloomFilterConfig::getMaxElements() const {
-	return this->maxElements;
+	return this->maxElements_;
 }
 
 void Configuration::BloomFilterConfig::setMaxElements(uint64_t max) {
-	this->maxElements = max;
+	this->maxElements_ = max;
 }
 
 Configuration::Configuration(const std::string hashname) :
@@ -57,6 +57,9 @@ Configuration::Configuration(const BloomFilterConfig& bf,
 }
 
 Configuration::Configuration(const SET_CONFIG config) {
+	bfConfig_.falsePositiveRate = config.false_positive_rate;
+	bfConfig_.hardMaximum_ = config.bf_hard_max;
+	bfConfig_.maxElements_ = config.bf_max_elements;
 	throw "not yet implemented";
 }
 

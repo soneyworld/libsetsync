@@ -23,32 +23,43 @@ namespace config {
 class Configuration {
 public:
 	class BloomFilterConfig {
-	private:
-		uint64_t maxElements;
+		friend class Configuration;
 	public:
 		enum BloomFilterType {
 			NORMAL = 0, COMPRESSED = 1
 		};
+
+	private:
+		uint64_t maxElements_;
+		BloomFilterType type_;
+		bool hardMaximum_;
+	public:
 		BloomFilterConfig(const uint64_t maxNumberOfElements = 10000,
 				const bool hardMaximum = false,
 				const float falsePositiveRate = 0.001) :
-			maxElements(maxNumberOfElements), hardMaximum(hardMaximum),
+			maxElements_(maxNumberOfElements), hardMaximum_(hardMaximum),
 					falsePositiveRate(falsePositiveRate) {
 		}
 		virtual ~BloomFilterConfig() {
 		}
 		uint64_t getMaxElements() const;
 		void setMaxElements(uint64_t max);
-		bool hardMaximum;
+		bool isHardMaximum(void) const{
+			return this->hardMaximum_;
+		}
+		void setHardMaximum(bool isHardMax) {
+			this->hardMaximum_ = isHardMax;
+		}
 		float falsePositiveRate;
-		std::string filterFile;
 	};
 	class TrieConfig {
+		friend class Configuration;
 	public:
 		TrieConfig();
 		virtual ~TrieConfig();
 	};
 	class IndexConfig {
+		friend class Configuration;
 	private:
 		bool enabled_;
 	public:
@@ -57,27 +68,33 @@ public:
 		virtual bool enabled() const;
 	};
 	class StorageConfig {
+		friend class Configuration;
 	public:
 		enum StorageType {
 			BERKELEY_DB = 0, LEVELDB = 1
 		};
-		const StorageType type;
+	private:
+		StorageType type_;
+	public:
+
 #ifdef HAVE_LEVELDB
 		StorageConfig(const StorageType type = LEVELDB) :
-			type(type) {
+			type_(type) {
 #else
 #ifdef HAVE_DB_CXX_H
 		StorageConfig(const StorageType type = BERKELEY_DB) :
-			type(type) {
+			type_(type) {
 #endif
 #endif
 		}
 		virtual ~StorageConfig() {
 		}
+		StorageType getType(void) const {
+			return this->type_;
+		}
 	};
 private:
 	std::string path_;
-	std::string dbname_;
 	std::string hashname_;
 public:
 	const std::string getPath() const;

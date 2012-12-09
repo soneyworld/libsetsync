@@ -46,7 +46,7 @@ void SetTest::testFind() {
 
 void SetTest::testMaximum() {
 	config::Configuration::BloomFilterConfig bfconfig;
-	bfconfig.hardMaximum = true;
+	bfconfig.setHardMaximum(true);
 	bfconfig.setMaxElements(5);
 	config::Configuration maxConfig(bfconfig);
 	maxConfig.setPath(dir->getPath());
@@ -77,4 +77,5 @@ void SetTest::setUp() {
 void SetTest::tearDown() {
 	delete this->dir;
 }
-};
+}
+;

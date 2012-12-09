@@ -27,7 +27,7 @@ Set::Set(const config::Configuration& config) :
 	this->indexdb = NULL;
 	this->env_ = NULL;
 #endif
-	switch (config_.getStorage().type) {
+	switch (config_.getStorage().getType()) {
 #ifdef HAVE_LEVELDB
 	case config::Configuration::StorageConfig::LEVELDB: {
 		std::string path = config_.getPath();
@@ -72,12 +72,18 @@ Set::Set(const config::Configuration& config) :
 	trie_ = new trie::KeyValueTrie(hash_, *trieStorage_);
 	const config::Configuration::BloomFilterConfig& bfconfig =
 			config_.getBloomFilter();
+	std::string path = config_.getPath();
+	if (path.size() > 0 && path.at(path.size() - 1) != '/') {
+		path = path.append("/");
+	}
+	std::string bffile(path);
+	bffile.append("bloom.filter");
 	bf_ = new bloom::KeyValueCountingBloomFilter(hash_, *bfStorage_,
-			bfconfig.filterFile, bfconfig.getMaxElements(),
-			bfconfig.hardMaximum, bfconfig.falsePositiveRate);
+			bffile, bfconfig.getMaxElements(),
+			bfconfig.isHardMaximum(), bfconfig.falsePositiveRate);
 	index_ = new setsync::index::KeyValueIndex(hash_, *indexStorage_);
 	this->maxSize_ = bfconfig.getMaxElements();
-	this->hardMaximum_ = bfconfig.hardMaximum;
+	this->hardMaximum_ = bfconfig.isHardMaximum();
 }
 
 Set::~Set() {
