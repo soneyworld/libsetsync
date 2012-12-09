@@ -29,12 +29,15 @@ public:
 		enum BloomFilterType {
 			NORMAL = 0, COMPRESSED = 1
 		};
-
+		BloomFilterConfig() :
+			maxElements(1000), hardMaximum(false), falsePositiveRate(0.001) {
+		}
+		virtual ~BloomFilterConfig() {
+		}
 		uint64_t getMaxElements() const;
 		void setMaxElements(uint64_t max);
 		bool hardMaximum;
 		float falsePositiveRate;
-		std::string storagePath;
 		std::string filterFile;
 	};
 	class TrieConfig {

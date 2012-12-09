@@ -32,8 +32,13 @@ Set::Set(const config::Configuration& config) :
 	bfStorage_ = new storage::LevelDbStorage(bfpath);
 #endif
 	trie_ = new trie::KeyValueTrie(hash_, *trieStorage_);
-	bf_ = new bloom::KeyValueCountingBloomFilter(hash_, *bfStorage_);
-
+	const config::Configuration::BloomFilterConfig& bfconfig =
+			config_.getBloomFilter();
+	bf_ = new bloom::KeyValueCountingBloomFilter(hash_, *bfStorage_,
+			bfconfig.getMaxElements(), bfconfig.hardMaximum,
+			bfconfig.falsePositiveRate);
+	this->maxSize_ = bfconfig.getMaxElements();
+	this->hardMaximum_ = bfconfig.hardMaximum;
 }
 
 Set::~Set() {
