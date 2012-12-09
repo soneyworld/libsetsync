@@ -30,7 +30,7 @@ FSBloomFilter::FSBloomFilter(const utils::CryptoHash& hash, const char * file,
 		const float falsePositiveRate) :
 	AbstractBloomFilter(hash), filehandler_(NULL) {
 	if (file != NULL) {
-		// If file at the given path exists, just open it
+		// If file at the file path exists, just open it
 		filehandler_ = fopen(file, "r+");
 		// If file doesn't exist, try to create a new one
 		if (filehandler_ == NULL) {
@@ -78,7 +78,11 @@ void FSBloomFilter::init(const float falsePositiveRate, const bool hardMaximum,
 	}
 	int fd = fileno(this->filehandler_);
 	lseek(fd, this->mmapLength_ - 1, SEEK_SET);
-	write(fd, "", 1);
+	ssize_t filesize = write(fd, "", 1);
+	if (filesize == -1) {
+		std::cout << "writing to bloom filter file failed!" << std::endl;
+		throw std::runtime_error("writing to bloom filter file failed!");
+	}
 	this->bitArray_ = (unsigned char *) mmap(NULL, this->mmapLength_,
 			PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if (this->bitArray_ == NULL) {
@@ -91,8 +95,18 @@ void FSBloomFilter::init(const float falsePositiveRate, const bool hardMaximum,
 }
 
 FSBloomFilter::~FSBloomFilter() {
-	munmap(this->bitArray_, this->mmapLength_);
-	fclose(this->filehandler_);
+	int ret = munmap(this->bitArray_, this->mmapLength_);
+#ifdef DEBUG
+	if(ret==-1) {
+		throw "THIS SHOULD NEVER EVER HAPPEN!!!! OTHERWISE, THIS CLASS IS WRONG!!!";
+	}
+#endif
+	ret = fclose(this->filehandler_);
+#ifdef DEBUG
+	if(ret!=0) {
+		throw "closing file failed, this shouldn't happen, but it is not important";
+	}
+#endif
 }
 
 void FSBloomFilter::load(std::istream &in, const uint64_t numberOfElements) {

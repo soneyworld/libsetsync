@@ -15,18 +15,32 @@ class FSBloomFilter: public virtual bloom::AbstractBloomFilter {
 	friend class FSBloomFilterTest;
 public:
 	/**
+	 *
+	 * \param hash sets the used cryptographic hash function
+	 * \param file sets the path to a file to be used to contain the bloom filter, if NULL, a temporary file will be used
 	 * \param maxNumberOfElements which should be represented by the bloom filter
 	 * \param hardMaximum ensures that the the maximum of storable entries will never be exceeded
 	 * \param falsePositiveRate can be set to any value ]0,1[.
-	 * \param hashsize sets the size of the inserted keys. 20 bytes for SHA1 for example.
 	 */
 	FSBloomFilter(const utils::CryptoHash& hash, const char * file = NULL,
 			const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
 			const float falsePositiveRate = 0.001);
 	virtual ~FSBloomFilter();
+	/**
+	 * \param in inputstream to read the bloom filter from
+	 * \param numberOfElements saved in the loaded bloom filter
+	 */
 	virtual void load(std::istream &in, const uint64_t numberOfElements);
+	/**
+	 * \param out output stream where the bloom filter will be written to
+	 * \return number of elements in this bloom filter
+	 */
 	virtual uint64_t save(std::ostream &out);
+	/**
+	 * Sets all bits in the bloom filter file to zero. It also resets
+	 * the counter of elements.
+	 */
 	virtual void clear();
 	/**
 	 * Adds a given hash key to the bloom filter
