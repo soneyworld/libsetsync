@@ -7,6 +7,7 @@
 #include "LevelDbStorage.h"
 #include <setsync/utils/FileSystem.h>
 #include <setsync/storage/StorageException.h>
+#include <stdlib.h>
 
 namespace setsync {
 

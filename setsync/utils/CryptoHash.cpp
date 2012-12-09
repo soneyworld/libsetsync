@@ -16,7 +16,7 @@ void CryptoHash::init() {
 		throw "Crypto hash algorithm not found";
 	}
 #else
-	this->digit = md_info_from_string(name);
+	this->digit = md_info_from_string(name_.c_str());
 	if (this->digit == NULL) {
 		throw "Crypto hash algorithm not found";
 	}
@@ -30,6 +30,11 @@ CryptoHash::CryptoHash(const char * name) :
 
 CryptoHash::CryptoHash(const std::string& name) :
 	name_(name) {
+	init();
+}
+
+CryptoHash::CryptoHash(const CryptoHash& copy) :
+	name_(copy.getName()) {
 	init();
 }
 
@@ -111,7 +116,7 @@ int CryptoHash::hash(unsigned char * target_md, std::istream& in) const {
 	result = md_starts(&mdctx);
 	char ch;
 	while (in.get(ch) && result == 1) {
-		result = md_update(&mdctx,(unsigned char *) &ch, 1);
+		result = md_update(&mdctx, (unsigned char *) &ch, 1);
 	}
 	result = md_finish(&mdctx, target_md);
 	result = md_free_ctx(&mdctx);

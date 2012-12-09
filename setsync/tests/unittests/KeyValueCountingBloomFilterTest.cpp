@@ -7,6 +7,7 @@
 #include "KeyValueCountingBloomFilterTest.h"
 #include <setsync/utils/FileSystem.h>
 #include <setsync/storage/BdbStorage.h>
+#include <stdlib.h>
 
 using namespace std;
 namespace bloom {

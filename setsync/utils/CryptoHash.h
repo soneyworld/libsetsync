@@ -58,6 +58,8 @@ public:
 	 * \param name of the hash algorithm
 	 */
 	CryptoHash(const std::string& name);
+
+	CryptoHash(const CryptoHash& copy);
 	/**
 	 * default destructor
 	 */

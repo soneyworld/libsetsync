@@ -49,7 +49,7 @@ void SetTest::testMaximum() {
 	bfconfig.hardMaximum = true;
 	bfconfig.setMaxElements(5);
 	config::Configuration maxConfig(bfconfig);
-	maxConfig.setPath("temp");
+	maxConfig.setPath(dir->getPath());
 	setsync::Set set(maxConfig);
 	CPPUNIT_ASSERT(set.getSize() == 0);
 	CPPUNIT_ASSERT(set.insert("1"));
@@ -71,9 +71,10 @@ void SetTest::testMaximum() {
 }
 
 void SetTest::setUp() {
-	this->config.setPath("temp");
+	this->dir = new utils::FileSystem::TemporaryDirectory("temp_");
+	this->config.setPath(dir->getPath());
 }
 void SetTest::tearDown() {
-
+	delete this->dir;
 }
 };

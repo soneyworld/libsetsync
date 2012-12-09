@@ -22,7 +22,7 @@ class Set {
 private:
 	size_t maxSize_;
 	bool hardMaximum_;
-	const utils::CryptoHash& hash_;
+	const utils::CryptoHash hash_;
 	const config::Configuration& config_;
 	bloom::KeyValueCountingBloomFilter * bf_;
 	trie::KeyValueTrie * trie_;
