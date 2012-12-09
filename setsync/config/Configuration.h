@@ -29,8 +29,10 @@ public:
 		enum BloomFilterType {
 			NORMAL = 0, COMPRESSED = 1
 		};
-		BloomFilterConfig() :
-			maxElements(1000), hardMaximum(false), falsePositiveRate(0.001) {
+		BloomFilterConfig(const uint64_t maxNumberOfElements = 10000,
+				const bool hardMaximum = false,
+				const float falsePositiveRate = 0.001) :
+			maxElements(maxNumberOfElements), hardMaximum(hardMaximum), falsePositiveRate(falsePositiveRate) {
 		}
 		virtual ~BloomFilterConfig() {
 		}
