@@ -16,19 +16,20 @@ KeyValueCountingBloomFilter::KeyValueCountingBloomFilter(
 		const uint64_t maxNumberOfElements, const bool hardMaximum,
 		const float falsePositiveRate) :
 			AbstractBloomFilter(hash),
-			FSBloomFilter(hash, maxNumberOfElements, hardMaximum,
+			FSBloomFilter(hash, NULL, maxNumberOfElements, hardMaximum,
 					falsePositiveRate), CountingBloomFilter(hash),
 			storage_(storage) {
 	/*
 	 * Loading all set bloom filter bits from db
 	 */
 	// Cursor to read sequentially the db
-	setsync::storage::AbstractKeyValueIterator * iter = storage_.createIterator();
+	setsync::storage::AbstractKeyValueIterator * iter =
+			storage_.createIterator();
 	iter->seekToFirst();
 	uint64_t pos;
-	while(iter->valid()){
-		if(iter->keySize() == sizeof(uint64_t)){
-			iter->key((unsigned char *)&pos);
+	while (iter->valid()) {
+		if (iter->keySize() == sizeof(uint64_t)) {
+			iter->key((unsigned char *) &pos);
 			std::size_t bit_index = 0;
 			std::size_t bit = 0;
 			compute_indices(pos, bit_index, bit);

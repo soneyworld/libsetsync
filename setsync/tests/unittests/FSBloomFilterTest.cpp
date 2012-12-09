@@ -20,8 +20,8 @@ namespace bloom {
 
 /*=== BEGIN tests for class 'FSBloomFilter' ===*/
 void FSBloomFilterTest::testLoad() {
-	bloom::FSBloomFilter Filter1(hash, 10, false, 0.01);
-	bloom::FSBloomFilter Filter2(hash, 10, false, 0.01);
+	bloom::FSBloomFilter Filter1(hash, NULL, 10, false, 0.01);
+	bloom::FSBloomFilter Filter2(hash, NULL, 10, false, 0.01);
 	Filter1.AbstractBloomFilter::add("hello");
 	CPPUNIT_ASSERT_EQUAL(true, Filter1.AbstractBloomFilter::contains("hello"));
 	CPPUNIT_ASSERT_EQUAL(false, Filter2.AbstractBloomFilter::contains("hello"));
@@ -36,7 +36,7 @@ void FSBloomFilterTest::testLoad() {
 }
 
 void FSBloomFilterTest::testInsert() {
-	bloom::FSBloomFilter Filter1(hash, 10, false, 0.01);
+	bloom::FSBloomFilter Filter1(hash, NULL, 10, false, 0.01);
 
 	//	 test signature (const unsigned char* key)
 
@@ -61,7 +61,7 @@ void FSBloomFilterTest::testContains() {
 	/* test signature (const std::string& key) const */
 	/* test signature (const char* data, const std::size_t& length) const */
 
-	bloom::FSBloomFilter Filter1(hash, 8196);
+	bloom::FSBloomFilter Filter1(hash, NULL, 8196);
 	char word[8];
 	for (int j = 0; j <= 127; j++) {
 		for (int i = 0; i <= 7; i++) {
@@ -76,7 +76,7 @@ void FSBloomFilterTest::testContains() {
 }
 
 void FSBloomFilterTest::testContainsAll() {
-	bloom::FSBloomFilter Filter2(hash, 8196);
+	bloom::FSBloomFilter Filter2(hash, NULL, 8196);
 	unsigned char hashes[100 * hash.getHashSize()];
 	for (int j = 0; j < 100; j++) {
 		unsigned char word[8];
@@ -95,8 +95,8 @@ void FSBloomFilterTest::testContainsAll() {
 void FSBloomFilterTest::testOperatorAndAndAssign() {
 	/* test signature (const BloomFilter& filter) */
 
-	bloom::FSBloomFilter FilterA(hash, 8196);
-	bloom::FSBloomFilter FilterB(hash, 8196);
+	bloom::FSBloomFilter FilterA(hash, NULL, 8196);
+	bloom::FSBloomFilter FilterB(hash, NULL, 8196);
 
 	string strin1, strin2, strin3, strin4;
 	strin1 = "hello";
@@ -123,8 +123,8 @@ void FSBloomFilterTest::testOperatorAndAndAssign() {
 
 void FSBloomFilterTest::testOperatorInclusiveOrAndAssign() {
 	/* test signature (const BloomFilter& filter) */
-	bloom::FSBloomFilter FilterA(hash, 8196);
-	bloom::FSBloomFilter FilterB(hash, 8196);
+	bloom::FSBloomFilter FilterA(hash, NULL, 8196);
+	bloom::FSBloomFilter FilterB(hash, NULL, 8196);
 
 	string strin1, strin2, strin3, strin4;
 	strin1 = "hello";
@@ -152,8 +152,8 @@ void FSBloomFilterTest::testOperatorInclusiveOrAndAssign() {
 void FSBloomFilterTest::testOperatorXorAndAssign() {
 	/* test signature (const BloomFilter& filter) */
 
-	bloom::FSBloomFilter FilterA(hash, 8196);
-	bloom::FSBloomFilter FilterB(hash, 8196);
+	bloom::FSBloomFilter FilterA(hash, NULL, 8196);
+	bloom::FSBloomFilter FilterB(hash, NULL, 8196);
 
 	string strin1, strin2, strin3, strin4;
 	strin1 = "hello";

@@ -17,6 +17,7 @@
 #include "DoubleHashingScheme.h"
 #include <stdexcept>
 #include <setsync/utils/OutputFunctions.h>
+#include <unistd.h>
 
 #ifndef BYTESIZE
 #define BYTESIZE 8
@@ -24,23 +25,27 @@
 
 namespace bloom {
 
-FSBloomFilter::FSBloomFilter(const utils::CryptoHash& hash,
+FSBloomFilter::FSBloomFilter(const utils::CryptoHash& hash, const char * file,
 		const uint64_t maxNumberOfElements, const bool hardMaximum,
 		const float falsePositiveRate) :
 	AbstractBloomFilter(hash), filehandler_(NULL) {
+	if (file != NULL) {
+		// If file at the given path exists, just open it
+		filehandler_ = fopen(file, "r+");
+		// If file doesn't exist, try to create a new one
+		if (filehandler_ == NULL) {
+			filehandler_ = fopen(file, "w+");
+		}
+		// If creating a new one also failed, print out message and try to create temp file later
+		if (filehandler_ == NULL) {
+			std::cerr << "Fail on opening given file: " << file << std::endl;
+			std::cerr << "Trying to open and use temporary file instead!"
+					<< std::endl;
+		}
+	}
 	init(falsePositiveRate, hardMaximum, maxNumberOfElements);
 	this->hashFunction_ = new DoubleHashingScheme(
 			this->cryptoHashFunction_.getHashSize());
-}
-
-FSBloomFilter::FSBloomFilter(const utils::CryptoHash& hash,
-		const std::string hashFunction, const uint64_t maxNumberOfElements,
-		const bool hardMaximum, const float falsePositiveRate) :
-	AbstractBloomFilter(hash), filehandler_(NULL) {
-	init(falsePositiveRate, hardMaximum, maxNumberOfElements);
-	this->hashFunction_
-			= HashFunctionFactory::getInstance().createHashFunction(
-					hashFunction);
 }
 
 void FSBloomFilter::init(const float falsePositiveRate, const bool hardMaximum,
@@ -131,9 +136,12 @@ void FSBloomFilter::addAll(const unsigned char* keys, const std::size_t count) {
 	uint64_t hashes[count * this->functionCount_];
 	for (int i = 0; i < count; i++) {
 		for (int j = 0; j < this->functionCount_; j++) {
-			hashes[i * this->functionCount_ + j] = this->hashFunction_->operator ()(
-					keys + (this->cryptoHashFunction_.getHashSize() * i),
-					this->cryptoHashFunction_.getHashSize(), j);
+			hashes[i * this->functionCount_ + j]
+					= this->hashFunction_->operator ()(
+							keys
+									+ (this->cryptoHashFunction_.getHashSize()
+											* i),
+							this->cryptoHashFunction_.getHashSize(), j);
 		}
 	}
 	std::sort(hashes, hashes + (count * this->functionCount_));
@@ -170,10 +178,13 @@ std::size_t FSBloomFilter::containsAll(const unsigned char *keys,
 	uint64_t hashes[count * this->functionCount_];
 	for (int i = 0; i < count; i++) {
 		for (int j = 0; j < this->functionCount_; j++) {
-			hashes[i * this->functionCount_ + j] = this->hashFunction_->operator ()(
-					keys + (this->cryptoHashFunction_.getHashSize() * i),
-					this->cryptoHashFunction_.getHashSize(), j)
-					% this->filterSize_;
+			hashes[i * this->functionCount_ + j]
+					= this->hashFunction_->operator ()(
+							keys
+									+ (this->cryptoHashFunction_.getHashSize()
+											* i),
+							this->cryptoHashFunction_.getHashSize(), j)
+							% this->filterSize_;
 		}
 	}
 	std::sort(hashes, hashes + (count * this->functionCount_));

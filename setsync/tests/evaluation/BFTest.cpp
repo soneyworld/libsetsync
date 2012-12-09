@@ -35,7 +35,7 @@ void BFTest::runMemBF() {
 void BFTest::runFSBF() {
 	cout << "running FSBloomFilter test:" << endl;
 	utils::CryptoHash sha1;
-	bloom::FSBloomFilter bf(sha1, ITERATIONS);
+	bloom::FSBloomFilter bf(sha1, NULL, ITERATIONS);
 	runBF(&bf);
 }
 void BFTest::runDBBF() {
