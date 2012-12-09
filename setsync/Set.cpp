@@ -279,16 +279,38 @@ SynchronizationStrategy Set::createSyncStrategy() {
 
 }
 
-int set_free(SET *set) {
-	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
-	cppset->~Set();
+
+
+SET_CONFIG set_create_config(){
+	SET_CONFIG c;
+	c.bf_hard_max = false;
+	c.bf_max_elements = 10000;
+	c.false_positive_rate = 0.001;
+	c.function = SHA_1;
+#ifdef HAVE_LEVELDB
+	c.storage = LEVELDB;
+#else
+	c.storage = BERKELEY_DB;
+#endif
+	return c;
 }
 
 int set_init(SET *set, SET_CONFIG config) {
 	setsync::config::Configuration c(config);
 	setsync::Set * cppset = new setsync::Set(c);
 	set->set = (void *) cppset;
+}
 
+int set_init_with_path(SET *set, SET_CONFIG config, const char * path){
+	setsync::config::Configuration c(config);
+	c.setPath(path);
+	setsync::Set * cppset = new setsync::Set(c);
+	set->set = (void *) cppset;
+}
+
+int set_free(SET *set) {
+	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
+	cppset->~Set();
 }
 
 // Lookup

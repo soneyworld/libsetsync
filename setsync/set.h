@@ -25,7 +25,7 @@ typedef enum {
 
 typedef enum {
 	LEVELDB, BERKELEY_DB
-}SET_STORAGE_TYPE;
+} SET_STORAGE_TYPE;
 
 typedef struct {
 	SET_HASH_FUNCTION function;
@@ -42,10 +42,11 @@ typedef void diff_callback(void *closure, const unsigned char * hash,
 #ifdef HAVE_IBRCOMMON
 int set_config_load_file(SET_CONFIG * config);
 #endif
+SET_CONFIG set_create_config();
 
 // Init and Free
 int set_init(SET *set, SET_CONFIG config);
-int set_init_with_path(SET *set, const char * path);
+int set_init_with_path(SET *set, SET_CONFIG config, const char * path);
 int set_free(SET *set);
 
 // Capacity
