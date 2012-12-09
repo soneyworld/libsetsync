@@ -13,7 +13,7 @@ int main(int argc, const char* argv[]) {
 	int result = 0;
 	SET s;
 	SET_CONFIG c;
-	strncpy(c.set_hash_function_name, "sha1", 5);
+	c.function = SHA_1;
 	result = set_init(&s, c);
 	result = set_free(&s);
 	return result;

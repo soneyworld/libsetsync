@@ -20,7 +20,10 @@
 namespace setsync {
 
 Set::Set(const config::Configuration& config) :
-	config_(config), hash_(config.getHashFunction()) {
+	config_(config), hash_(config.getHashFunction()), tempDir(NULL) {
+	if (config_.getPath().size() == 0) {
+		tempDir = new utils::FileSystem::TemporaryDirectory("set_");
+	}
 #ifdef HAVE_DB_CXX_H
 	this->bfdb = NULL;
 	this->triedb = NULL;
@@ -30,7 +33,12 @@ Set::Set(const config::Configuration& config) :
 	switch (config_.getStorage().getType()) {
 #ifdef HAVE_LEVELDB
 	case config::Configuration::StorageConfig::LEVELDB: {
-		std::string path = config_.getPath();
+		std::string path;
+		if (tempDir != NULL) {
+			path = tempDir->getPath();
+		} else {
+			path = config_.getPath();
+		}
 		if (path.size() > 0 && path.at(path.size() - 1) != '/') {
 			path = path.append("/");
 		}
@@ -48,9 +56,14 @@ Set::Set(const config::Configuration& config) :
 #endif
 #ifdef HAVE_DB_CXX_H
 	case config::Configuration::StorageConfig::BERKELEY_DB: {
+		std::string path;
+		if (tempDir != NULL) {
+			path = tempDir->getPath();
+		} else {
+			path = config_.getPath();
+		}
 		this->env_ = new DbEnv(0);
-		if (this->env_->open(config.getPath().c_str(),
-				DB_INIT_MPOOL | DB_CREATE, 0) != 0) {
+		if (this->env_->open(path.c_str(), DB_INIT_MPOOL | DB_CREATE, 0) != 0) {
 			this->env_->close(0);
 			throw "";
 		}
@@ -72,15 +85,20 @@ Set::Set(const config::Configuration& config) :
 	trie_ = new trie::KeyValueTrie(hash_, *trieStorage_);
 	const config::Configuration::BloomFilterConfig& bfconfig =
 			config_.getBloomFilter();
-	std::string path = config_.getPath();
+	std::string path;
+	if (tempDir != NULL) {
+		path = tempDir->getPath();
+	} else {
+		path = config_.getPath();
+	}
 	if (path.size() > 0 && path.at(path.size() - 1) != '/') {
 		path = path.append("/");
 	}
 	std::string bffile(path);
 	bffile.append("bloom.filter");
-	bf_ = new bloom::KeyValueCountingBloomFilter(hash_, *bfStorage_,
-			bffile, bfconfig.getMaxElements(),
-			bfconfig.isHardMaximum(), bfconfig.falsePositiveRate);
+	bf_ = new bloom::KeyValueCountingBloomFilter(hash_, *bfStorage_, bffile,
+			bfconfig.getMaxElements(), bfconfig.isHardMaximum(),
+			bfconfig.falsePositiveRate);
 	index_ = new setsync::index::KeyValueIndex(hash_, *indexStorage_);
 	this->maxSize_ = bfconfig.getMaxElements();
 	this->hardMaximum_ = bfconfig.isHardMaximum();
@@ -123,6 +141,9 @@ Set::~Set() {
 		delete this->env_;
 	}
 #endif
+	if (this->tempDir != NULL) {
+		delete this->tempDir;
+	}
 }
 
 bool Set::isEmpty() const {

@@ -19,8 +19,17 @@ typedef struct {
 	void *set;
 } SET;
 
+typedef enum {
+	MD_2, MD_4, MD_5, SHA_1, SHA_224, SHA_256, SHA_384, SHA_512
+} SET_HASH_FUNCTION;
+
+typedef enum {
+	LEVELDB, BERKELEY_DB
+}SET_STORAGE_TYPE;
+
 typedef struct {
-	char set_hash_function_name[20];
+	SET_HASH_FUNCTION function;
+	SET_STORAGE_TYPE storage;
 	int index_enabled;
 	int bf_hard_max;
 	uint64_t bf_max_elements;

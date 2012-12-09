@@ -44,7 +44,7 @@ public:
 		}
 		uint64_t getMaxElements() const;
 		void setMaxElements(uint64_t max);
-		bool isHardMaximum(void) const{
+		bool isHardMaximum(void) const {
 			return this->hardMaximum_;
 		}
 		void setHardMaximum(bool isHardMax) {
@@ -82,9 +82,14 @@ public:
 			type_(type) {
 #else
 #ifdef HAVE_DB_CXX_H
-		StorageConfig(const StorageType type = BERKELEY_DB) :
+			StorageConfig(const StorageType type = BERKELEY_DB) :
 			type_(type) {
 #endif
+#endif
+#ifndef HAVE_LEVELDB
+			if (type_ == LEVELDB) {
+				throw "Leveldb is not supported!";
+			}
 #endif
 		}
 		virtual ~StorageConfig() {

@@ -15,6 +15,7 @@
 #include <setsync/utils/CryptoHash.h>
 #include <setsync/SyncStrategy.h>
 #include <setsync/config/Configuration.h>
+#include <setsync/utils/FileSystem.h>
 #ifdef HAVE_DB_CXX_H
 #include <db_cxx.h>
 #endif
@@ -33,6 +34,7 @@ private:
 	setsync::storage::AbstractKeyValueStorage * bfStorage_;
 	setsync::storage::AbstractKeyValueStorage * trieStorage_;
 	setsync::storage::AbstractKeyValueStorage * indexStorage_;
+	utils::FileSystem::TemporaryDirectory * tempDir;
 #ifdef HAVE_DB_CXX_H
 	/// The Berkeley DB environment used by bloom filter and trie
 	DbEnv * env_;
