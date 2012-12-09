@@ -35,6 +35,7 @@ private:
 	setsync::storage::AbstractKeyValueStorage * trieStorage_;
 	setsync::storage::AbstractKeyValueStorage * indexStorage_;
 	utils::FileSystem::TemporaryDirectory * tempDir;
+	bool indexInUse_;
 #ifdef HAVE_DB_CXX_H
 	/// The Berkeley DB environment used by bloom filter and trie
 	DbEnv * env_;

@@ -30,7 +30,6 @@ typedef enum {
 typedef struct {
 	SET_HASH_FUNCTION function;
 	SET_STORAGE_TYPE storage;
-	int index_enabled;
 	int bf_hard_max;
 	uint64_t bf_max_elements;
 	float false_positive_rate;
@@ -63,15 +62,7 @@ int set_insert(SET *set, const unsigned char * key);
 int set_insert_string(SET *set, const char * str);
 int set_erase(SET *set, const unsigned char * key);
 int set_erase_string(SET *set, const char * str);
-//int set_swap(SET *set);
 int set_clear(SET *set);
-
-// Iterators
-struct set_iterator {
-
-};
-struct set_iterator * set_iterator_begin();
-struct set_iterator * set_iterator_end();
 
 #ifdef __cplusplus
 }

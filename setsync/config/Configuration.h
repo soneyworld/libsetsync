@@ -58,15 +58,6 @@ public:
 		TrieConfig();
 		virtual ~TrieConfig();
 	};
-	class IndexConfig {
-		friend class Configuration;
-	private:
-		bool enabled_;
-	public:
-		IndexConfig();
-		virtual ~IndexConfig();
-		virtual bool enabled() const;
-	};
 	class StorageConfig {
 		friend class Configuration;
 	public:
@@ -105,30 +96,19 @@ public:
 	const std::string getPath() const;
 	void setPath(const char * path);
 	void setPath(const std::string& path);
-	Configuration(
-			const std::string hashname = utils::CryptoHash::getDefaultName());
-	Configuration(const IndexConfig& index,
-			const std::string hashname = utils::CryptoHash::getDefaultName());
-	Configuration(const BloomFilterConfig& bf,
-			const std::string hashname = utils::CryptoHash::getDefaultName());
-	Configuration(const TrieConfig& trie,
-			const std::string hashname = utils::CryptoHash::getDefaultName());
-	Configuration(const BloomFilterConfig& bf, const IndexConfig& index,
-			const std::string hashname = utils::CryptoHash::getDefaultName());
-	Configuration(const TrieConfig& trie, const IndexConfig& index,
-			const std::string hashname = utils::CryptoHash::getDefaultName());
+	Configuration(const std::string hashname = utils::CryptoHash::getDefaultName());
+	Configuration(const BloomFilterConfig& bf, const std::string hashname = utils::CryptoHash::getDefaultName());
+	Configuration(const TrieConfig& trie, const std::string hashname = utils::CryptoHash::getDefaultName());
 	Configuration(const BloomFilterConfig& bf, const TrieConfig& trie,
-			const IndexConfig& index,
+
 			const std::string hashname = utils::CryptoHash::getDefaultName());
 	Configuration(const SET_CONFIG config);
 	virtual ~Configuration();
 	std::string getHashFunction() const;
-	const Configuration::IndexConfig& getIndex() const;
 	const Configuration::BloomFilterConfig& getBloomFilter() const;
 	const Configuration::TrieConfig& getTrie() const;
 	const Configuration::StorageConfig& getStorage() const;
 private:
-	IndexConfig indexConfig_;
 	BloomFilterConfig bfConfig_;
 	TrieConfig trieConfig_;
 	StorageConfig storageConfig_;

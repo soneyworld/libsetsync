@@ -20,7 +20,8 @@
 namespace setsync {
 
 Set::Set(const config::Configuration& config) :
-	config_(config), hash_(config.getHashFunction()), tempDir(NULL) {
+	config_(config), hash_(config.getHashFunction()), tempDir(NULL),
+			indexInUse_(false) {
 	if (config_.getPath().size() == 0) {
 		tempDir = new utils::FileSystem::TemporaryDirectory("set_");
 	}
@@ -169,10 +170,10 @@ bool Set::erase(const std::string& str) {
 
 bool Set::erase(const unsigned char * key) {
 	try {
-		bloom::CountingBloomFilter& filter_ =
-				dynamic_cast<bloom::CountingBloomFilter&> (*bf_);
 		if (this->trie_->Trie::remove(key)) {
-			filter_.remove(key);
+			bf_->remove(key);
+			if (indexInUse_)
+				index_->remove(key);
 			return true;
 		} else {
 			return false;
@@ -212,23 +213,15 @@ bool Set::insert(const unsigned char * key) {
 }
 
 bool Set::insert(const void * data, const std::size_t length) {
-	if (config_.getIndex().enabled()) {
-		unsigned char k[this->hash_.getHashSize()];
-		this->hash_(k, (const unsigned char *) data, length);
-		if (this->index_ == NULL) {
-			if (this->indexStorage_ == NULL) {
-			}
-			this->index_ = new index::KeyValueIndex(hash_, *indexStorage_);
-		}
-		if (this->index_->put(k, data, length)) {
-			bool success = insert(k);
-			if (success) {
-				return success;
-			} else {
-				this->index_->remove(k);
-			}
-			return false;
+	unsigned char k[this->hash_.getHashSize()];
+	this->hash_(k, (const unsigned char *) data, length);
+	if (this->index_->put(k, data, length)) {
+		bool success = insert(k);
+		if (success) {
+			this->indexInUse_ = true;
+			return true;
 		} else {
+			this->index_->remove(k);
 			return false;
 		}
 	} else {
@@ -262,26 +255,17 @@ bool Set::find(const void * data, const std::size_t length) {
 void Set::clear() {
 	this->trie_->clear();
 	this->bf_->clear();
-	if (this->index_ != NULL) {
-		this->index_->clear();
-		delete this->index_;
-		this->index_ = NULL;
-		if (this->indexStorage_ != NULL) {
-			delete this->indexStorage_;
-			this->indexStorage_ = NULL;
-		}
-	}
+	this->index_->clear();
+	this->indexInUse_ = false;
 }
 
 SynchronizationStrategy Set::createSyncStrategy() {
 
 }
 
-}
+} // end of namespace setsync
 
-
-
-SET_CONFIG set_create_config(){
+SET_CONFIG set_create_config() {
 	SET_CONFIG c;
 	c.bf_hard_max = false;
 	c.bf_max_elements = 10000;
@@ -296,27 +280,47 @@ SET_CONFIG set_create_config(){
 }
 
 int set_init(SET *set, SET_CONFIG config) {
-	setsync::config::Configuration c(config);
-	setsync::Set * cppset = new setsync::Set(c);
-	set->set = (void *) cppset;
+	try {
+		setsync::config::Configuration c(config);
+		setsync::Set * cppset = new setsync::Set(c);
+		set->set = (void *) cppset;
+	} catch (...) {
+		return -1;
+	}
+	return 0;
 }
 
-int set_init_with_path(SET *set, SET_CONFIG config, const char * path){
-	setsync::config::Configuration c(config);
-	c.setPath(path);
-	setsync::Set * cppset = new setsync::Set(c);
-	set->set = (void *) cppset;
+int set_init_with_path(SET *set, SET_CONFIG config, const char * path) {
+	try {
+		setsync::config::Configuration c(config);
+		c.setPath(path);
+		setsync::Set * cppset = new setsync::Set(c);
+		set->set = (void *) cppset;
+	} catch (...) {
+		return -1;
+	}
+	return 0;
 }
 
 int set_free(SET *set) {
-	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
-	cppset->~Set();
+	try {
+		setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
+		cppset->~Set();
+	} catch (...) {
+		return -1;
+	}
+	return 0;
 }
 
 // Lookup
-int find(SET *set, const unsigned char * key) {
+int set_find(SET *set, const unsigned char * key) {
 	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
 	return cppset->find(key);
+}
+
+int set_find_string(SET *set, const char * str) {
+	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
+	return cppset->find(str);
 }
 
 // Modifiers
@@ -341,8 +345,11 @@ int set_erase(SET *set, const unsigned char * key) {
 }
 
 int set_clear(SET *set) {
-	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
-	cppset->clear();
+	try {
+		setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
+		cppset->clear();
+	} catch (...) {
+		return -1;
+	}
 	return 0;
-
 }

@@ -28,31 +28,23 @@ void Configuration::BloomFilterConfig::setMaxElements(uint64_t max) {
 
 Configuration::Configuration(const std::string hashname) :
 	hashname_(hashname), bfConfig_(BloomFilterConfig()),
-			trieConfig_(TrieConfig()), indexConfig_(IndexConfig()) {
+			trieConfig_(TrieConfig()) {
 
 }
 
-Configuration::Configuration(const IndexConfig& index,
-		const std::string hashname) :
-	hashname_(hashname), bfConfig_(BloomFilterConfig()),
-			trieConfig_(TrieConfig()), indexConfig_(index) {
-
-}
 Configuration::Configuration(const BloomFilterConfig& bf,
 		const std::string hashname) :
-	hashname_(hashname), bfConfig_(bf), trieConfig_(TrieConfig()),
-			indexConfig_(IndexConfig()) {
+	hashname_(hashname), bfConfig_(bf), trieConfig_(TrieConfig()) {
 
 }
 Configuration::Configuration(const TrieConfig& trie, const std::string hashname) :
-	hashname_(hashname), bfConfig_(BloomFilterConfig()), trieConfig_(trie),
-			indexConfig_(IndexConfig()) {
+	hashname_(hashname), bfConfig_(BloomFilterConfig()), trieConfig_(trie){
 
 }
 Configuration::Configuration(const BloomFilterConfig& bf,
-		const TrieConfig& trie, const IndexConfig& index,
+		const TrieConfig& trie,
 		const std::string hashname) :
-	hashname_(hashname), bfConfig_(bf), trieConfig_(trie), indexConfig_(index) {
+	hashname_(hashname), bfConfig_(bf), trieConfig_(trie) {
 
 }
 
@@ -122,22 +114,6 @@ Configuration::~Configuration() {
 
 }
 
-Configuration::IndexConfig::IndexConfig() :
-	enabled_(true) {
-
-}
-
-Configuration::IndexConfig::~IndexConfig() {
-
-}
-
-bool Configuration::IndexConfig::enabled() const {
-	return this->enabled_;
-}
-
-const Configuration::IndexConfig& Configuration::getIndex() const {
-	return this->indexConfig_;
-}
 const Configuration::BloomFilterConfig& Configuration::getBloomFilter() const {
 	return this->bfConfig_;
 }
