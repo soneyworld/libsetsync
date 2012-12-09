@@ -60,6 +60,8 @@ int set_find_string(SET *set, const char * str);
 // Modifiers
 int set_insert(SET *set, const unsigned char * key);
 int set_insert_string(SET *set, const char * str);
+int set_insert_data(SET *set, const void * data, const size_t length);
+
 int set_erase(SET *set, const unsigned char * key);
 int set_erase_string(SET *set, const char * str);
 int set_clear(SET *set);
