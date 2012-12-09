@@ -16,16 +16,17 @@ int main(int argc, const char* argv[]) {
 	result = set_init(&s, c);
 	result = set_insert_string(&s, "test");
 	if(!result) {
+		printf("adding \"test\" failed\n");
 		set_free(&s);
 		return result;
 	}
 	result = set_find_string(&s,"test");
 	if(!result) {
+		printf("finding \"test\" failed\n");
 		set_free(&s);
 		return result;
 	}
 	result = set_free(&s);
-	printf("bla\n");
 	return result;
 }
 
