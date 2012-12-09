@@ -56,7 +56,7 @@ void BFTest::runDBBF() {
 	db2.set_flags(setsync::storage::BdbStorage::getTableFlags());
 	db2.open(NULL, "temp-table.db", NULL, DB_HASH, DB_CREATE, 0);
 	setsync::storage::BdbStorage storage(&db2);
-	bloom::KeyValueCountingBloomFilter bf2(sha1, storage, ITERATIONS);
+	bloom::KeyValueCountingBloomFilter bf2(sha1, storage, "", ITERATIONS);
 	runBF(&bf2);
 	db2.close(0);
 	remove("temp-table.db");

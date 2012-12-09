@@ -42,6 +42,7 @@ public:
 	 */
 	KeyValueCountingBloomFilter(const utils::CryptoHash& hash,
 			setsync::storage::AbstractKeyValueStorage& storage,
+			const std::string& file,
 			const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
 			const float falsePositiveRate = 0.001);

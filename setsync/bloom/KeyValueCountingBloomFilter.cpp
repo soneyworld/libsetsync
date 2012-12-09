@@ -13,12 +13,12 @@ namespace bloom {
 KeyValueCountingBloomFilter::KeyValueCountingBloomFilter(
 		const utils::CryptoHash& hash,
 		setsync::storage::AbstractKeyValueStorage& storage,
-		const uint64_t maxNumberOfElements, const bool hardMaximum,
-		const float falsePositiveRate) :
+		const std::string& file, const uint64_t maxNumberOfElements,
+		const bool hardMaximum, const float falsePositiveRate) :
 			AbstractBloomFilter(hash),
-			FSBloomFilter(hash, NULL, maxNumberOfElements, hardMaximum,
-					falsePositiveRate), CountingBloomFilter(hash),
-			storage_(storage) {
+			FSBloomFilter(hash, (file.size() == 0) ? NULL : file.c_str(),
+					maxNumberOfElements, hardMaximum, falsePositiveRate),
+			CountingBloomFilter(hash), storage_(storage) {
 	/*
 	 * Loading all set bloom filter bits from db
 	 */

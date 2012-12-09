@@ -35,8 +35,8 @@ Set::Set(const config::Configuration& config) :
 	const config::Configuration::BloomFilterConfig& bfconfig =
 			config_.getBloomFilter();
 	bf_ = new bloom::KeyValueCountingBloomFilter(hash_, *bfStorage_,
-			bfconfig.getMaxElements(), bfconfig.hardMaximum,
-			bfconfig.falsePositiveRate);
+			bfconfig.filterFile, bfconfig.getMaxElements(),
+			bfconfig.hardMaximum, bfconfig.falsePositiveRate);
 	this->maxSize_ = bfconfig.getMaxElements();
 	this->hardMaximum_ = bfconfig.hardMaximum;
 }
