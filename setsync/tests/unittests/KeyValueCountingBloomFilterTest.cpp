@@ -15,13 +15,24 @@ namespace bloom {
 void KeyValueCountingBloomFilterTest::setUp() {
 	this->db1 = new Db(NULL, 0);
 	db1->open(NULL, "table1.db", NULL, DB_HASH, DB_CREATE, 0);
-
+#ifdef HAVE_LEVELDB
 	path1 = "table1";
 	path2 = "table2";
 	path3 = "table3";
 	this->storage1 = new setsync::storage::LevelDbStorage(path1);
 	this->storage2 = new setsync::storage::LevelDbStorage(path2);
 	this->storage3 = new setsync::storage::LevelDbStorage(path3);
+#else
+	this->db2 = new Db(NULL, 0);
+	db2->open(NULL, "table2.db", NULL, DB_HASH, DB_CREATE, 0);
+	this->db3 = new Db(NULL, 0);
+	db3->open(NULL, "table3.db", NULL, DB_HASH, DB_CREATE, 0);
+	this->db4 = new Db(NULL, 0);
+	db4->open(NULL, "table4.db", NULL, DB_HASH, DB_CREATE, 0);
+	this->storage1 = new setsync::storage::BdbStorage(this->db2);
+	this->storage2 = new setsync::storage::BdbStorage(this->db3);
+	this->storage3 = new setsync::storage::BdbStorage(this->db4);
+#endif
 	this->bdbstorage = new setsync::storage::BdbStorage(this->db1);
 }
 
@@ -34,9 +45,27 @@ void KeyValueCountingBloomFilterTest::tearDown() {
 	delete this->storage1;
 	delete this->storage2;
 	delete this->storage3;
-	utils::FileSystem::rmDirRecursive(path1);
-	utils::FileSystem::rmDirRecursive(path2);
-	utils::FileSystem::rmDirRecursive(path3);
+#ifdef LEVELDB
+	utils::FileSystem::rmDirRecursive( path1);
+	utils::FileSystem::rmDirRecursive( path2);
+	utils::FileSystem::rmDirRecursive( path3);
+#else
+	this->db2->close(0);
+	delete this->db2;
+	this->db2 = new Db(NULL, 0);
+	db2->remove("table2.db", NULL, 0);
+	delete this->db2;
+	this->db3->close(0);
+	delete this->db3;
+	this->db3 = new Db(NULL, 0);
+	db3->remove("table3.db", NULL, 0);
+	delete this->db3;
+	this->db4->close(0);
+	delete this->db4;
+	this->db4 = new Db(NULL, 0);
+	db4->remove("table4.db", NULL, 0);
+	delete this->db4;
+#endif
 }
 
 void KeyValueCountingBloomFilterTest::testConstructor() {

@@ -15,6 +15,9 @@
 #include <setsync/utils/CryptoHash.h>
 #include <setsync/SyncStrategy.h>
 #include <setsync/config/Configuration.h>
+#ifdef HAVE_DB_CXX_H
+#include <db_cxx.h>
+#endif
 
 namespace setsync {
 
@@ -30,6 +33,16 @@ private:
 	setsync::storage::AbstractKeyValueStorage * bfStorage_;
 	setsync::storage::AbstractKeyValueStorage * trieStorage_;
 	setsync::storage::AbstractKeyValueStorage * indexStorage_;
+#ifdef HAVE_DB_CXX_H
+	/// The Berkeley DB environment used by bloom filter and trie
+	DbEnv * env_;
+	/// DB pointer for the bloom filter
+	Db * bfdb;
+	/// DB pointer for the trie
+	Db * triedb;
+	/// DB pointer for the index
+	Db * indexdb;
+#endif
 protected:
 	void setSize(const size_t s);
 public:

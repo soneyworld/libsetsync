@@ -31,9 +31,15 @@ CPPUNIT_TEST_SUITE(KeyValueCountingBloomFilterTest);
 
 private:
 	Db * db1;
+#ifdef LEVELDB
 	std::string path1;
 	std::string path2;
 	std::string path3;
+#else
+	Db * db2;
+	Db * db3;
+	Db * db4;
+#endif
 	setsync::storage::AbstractKeyValueStorage * storage1;
 	setsync::storage::AbstractKeyValueStorage * storage2;
 	setsync::storage::AbstractKeyValueStorage * storage3;

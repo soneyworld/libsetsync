@@ -57,7 +57,7 @@ Configuration::Configuration(const BloomFilterConfig& bf,
 }
 
 Configuration::Configuration(const SET_CONFIG config) {
-
+	throw "not yet implemented";
 }
 
 std::string Configuration::getHashFunction() const {
@@ -101,6 +101,9 @@ const Configuration::BloomFilterConfig& Configuration::getBloomFilter() const {
 }
 const Configuration::TrieConfig& Configuration::getTrie() const {
 	return this->trieConfig_;
+}
+const Configuration::StorageConfig& Configuration::getStorage() const {
+	return this->storageConfig_;
 }
 
 const std::string Configuration::getPath() const {

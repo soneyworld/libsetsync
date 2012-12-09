@@ -10,6 +10,9 @@
 #include <setsync/utils/CryptoHash.h>
 #include <setsync/index/KeyValueIndex.h>
 #include <setsync/storage/KeyValueStorage.h>
+#ifdef HAVE_DB_CXX_H
+#include <setsync/storage/BdbStorage.h>
+#endif
 namespace setsync {
 
 namespace index {
@@ -24,6 +27,12 @@ public:
 	void tearDown(void);
 private:
 	std::string path;
+#ifndef HAVE_LEVELDB
+#ifdef HAVE_DB_CXX_H
+	std::string bdbpath;
+	Db * db;
+#endif
+#endif
 	setsync::storage::AbstractKeyValueStorage * storage;
 	utils::CryptoHash hash;
 	KeyValueIndex * index;

@@ -32,7 +32,8 @@ public:
 		BloomFilterConfig(const uint64_t maxNumberOfElements = 10000,
 				const bool hardMaximum = false,
 				const float falsePositiveRate = 0.001) :
-			maxElements(maxNumberOfElements), hardMaximum(hardMaximum), falsePositiveRate(falsePositiveRate) {
+			maxElements(maxNumberOfElements), hardMaximum(hardMaximum),
+					falsePositiveRate(falsePositiveRate) {
 		}
 		virtual ~BloomFilterConfig() {
 		}
@@ -54,6 +55,25 @@ public:
 		IndexConfig();
 		virtual ~IndexConfig();
 		virtual bool enabled() const;
+	};
+	class StorageConfig {
+	public:
+		enum StorageType {
+			BERKELEY_DB = 0, LEVELDB = 1
+		};
+		const StorageType type;
+#ifdef HAVE_LEVELDB
+		StorageConfig(const StorageType type = LEVELDB) :
+			type(type) {
+#else
+#ifdef HAVE_DB_CXX_H
+		StorageConfig(const StorageType type = BERKELEY_DB) :
+			type(type) {
+#endif
+#endif
+		}
+		virtual ~StorageConfig() {
+		}
 	};
 private:
 	std::string path_;
@@ -84,10 +104,12 @@ public:
 	const Configuration::IndexConfig& getIndex() const;
 	const Configuration::BloomFilterConfig& getBloomFilter() const;
 	const Configuration::TrieConfig& getTrie() const;
+	const Configuration::StorageConfig& getStorage() const;
 private:
 	IndexConfig indexConfig_;
 	BloomFilterConfig bfConfig_;
 	TrieConfig trieConfig_;
+	StorageConfig storageConfig_;
 };
 
 }

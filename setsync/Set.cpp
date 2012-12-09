@@ -13,35 +13,110 @@
 #ifdef HAVE_LEVELDB
 #include <setsync/storage/LevelDbStorage.h>
 #endif
+#ifdef HAVE_DB_CXX_H
+#include <setsync/storage/BdbStorage.h>
+#endif
 
 namespace setsync {
 
 Set::Set(const config::Configuration& config) :
-	config_(config), hash_(config.getHashFunction()), indexStorage_(NULL),
-			index_(NULL) {
-#ifdef HAVE_LEVELDB
-	std::string path = config_.getPath();
-	if (path.size() > 0 && path.at(path.size() - 1) != '/') {
-		path = path.append("/");
-	}
-	std::string triepath(path);
-	triepath.append("trie");
-	trieStorage_ = new storage::LevelDbStorage(triepath);
-	std::string bfpath(path);
-	bfpath.append("bloom");
-	bfStorage_ = new storage::LevelDbStorage(bfpath);
+	config_(config), hash_(config.getHashFunction()) {
+#ifdef HAVE_DB_CXX_H
+	this->bfdb = NULL;
+	this->triedb = NULL;
+	this->indexdb = NULL;
+	this->env_ = NULL;
 #endif
+	switch (config_.getStorage().type) {
+#ifdef HAVE_LEVELDB
+	case config::Configuration::StorageConfig::LEVELDB: {
+		std::string path = config_.getPath();
+		if (path.size() > 0 && path.at(path.size() - 1) != '/') {
+			path = path.append("/");
+		}
+		std::string triepath(path);
+		triepath.append("trie");
+		trieStorage_ = new storage::LevelDbStorage(triepath);
+		std::string bfpath(path);
+		bfpath.append("bloom");
+		bfStorage_ = new storage::LevelDbStorage(bfpath);
+		std::string indexpath(path);
+		indexpath.append("index");
+		indexStorage_ = new storage::LevelDbStorage(indexpath);
+	}
+		break;
+#endif
+#ifdef HAVE_DB_CXX_H
+	case config::Configuration::StorageConfig::BERKELEY_DB: {
+		this->env_ = new DbEnv(0);
+		if (this->env_->open(config.getPath().c_str(),
+				DB_INIT_MPOOL | DB_CREATE, 0) != 0) {
+			this->env_->close(0);
+			throw "";
+		}
+		this->bfdb = new Db(this->env_, 0);
+		this->triedb = new Db(this->env_, 0);
+		this->indexdb = new Db(this->env_, 0);
+		this->bfdb->open(NULL, "set", "bf", DB_HASH, DB_CREATE, 0);
+		this->triedb->open(NULL, "set", "trie", DB_HASH, DB_CREATE, 0);
+		this->indexdb->open(NULL, "set", "in", DB_HASH, DB_CREATE, 0);
+		trieStorage_ = new storage::BdbStorage(this->triedb);
+		bfStorage_ = new storage::BdbStorage(this->bfdb);
+		indexStorage_ = new storage::BdbStorage(this->indexdb);
+	}
+		break;
+#endif
+	default:
+		throw "No storage type found!";
+	}
 	trie_ = new trie::KeyValueTrie(hash_, *trieStorage_);
 	const config::Configuration::BloomFilterConfig& bfconfig =
 			config_.getBloomFilter();
 	bf_ = new bloom::KeyValueCountingBloomFilter(hash_, *bfStorage_,
 			bfconfig.filterFile, bfconfig.getMaxElements(),
 			bfconfig.hardMaximum, bfconfig.falsePositiveRate);
+	index_ = new setsync::index::KeyValueIndex(hash_, *indexStorage_);
 	this->maxSize_ = bfconfig.getMaxElements();
 	this->hardMaximum_ = bfconfig.hardMaximum;
 }
 
 Set::~Set() {
+	if (this->index_ != NULL) {
+		delete index_;
+	}
+	if (this->bf_ != NULL) {
+		delete bf_;
+	}
+	if (this->trie_ != NULL) {
+		delete trie_;
+	}
+	if (this->indexStorage_ != NULL) {
+		delete indexStorage_;
+	}
+	if (this->bfStorage_ != NULL) {
+		delete bfStorage_;
+	}
+	if (this->trieStorage_ != NULL) {
+		delete trieStorage_;
+	}
+#ifdef HAVE_DB_CXX_H
+	if (this->triedb != NULL) {
+		this->triedb->close(0);
+		delete this->triedb;
+	}
+	if (this->bfdb != NULL) {
+		this->bfdb->close(0);
+		delete this->bfdb;
+	}
+	if (this->indexdb != NULL) {
+		this->indexdb->close(0);
+		delete this->indexdb;
+	}
+	if (this->env_ != NULL) {
+		this->env_->close(0);
+		delete this->env_;
+	}
+#endif
 }
 
 bool Set::isEmpty() const {
