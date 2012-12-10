@@ -15,6 +15,7 @@
 #include <setsync/utils/CryptoHash.h>
 #include <setsync/config/Configuration.h>
 #include <setsync/utils/FileSystem.h>
+#include <setsync/Synchronization.h>
 #ifdef HAVE_DB_CXX_H
 #include <db_cxx.h>
 #endif
