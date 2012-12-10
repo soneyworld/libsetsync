@@ -13,7 +13,7 @@
 #include <setsync/utils/CryptoHash.h>
 #include <setsync/set.h>
 #ifdef HAVE_IBRCOMMON
-//#include <ibrcommon/data/ConfigFile.h>
+#include <ibrcommon/data/ConfigFile.h>
 #endif
 
 namespace setsync {
