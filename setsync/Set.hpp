@@ -13,7 +13,6 @@
 #include <setsync/index/KeyValueIndex.h>
 #include <setsync/trie/KeyValueTrie.h>
 #include <setsync/utils/CryptoHash.h>
-#include <setsync/SyncStrategy.h>
 #include <setsync/config/Configuration.h>
 #include <setsync/utils/FileSystem.h>
 #ifdef HAVE_DB_CXX_H
@@ -69,8 +68,6 @@ public:
 	virtual bool erase(const std::string& str);
 	virtual bool erase(const void * data, const std::size_t length);
 	virtual void clear();
-	// Synchronization Strategy
-	virtual SynchronizationStrategy createSyncStrategy(void);
 
 	virtual ~Set();
 

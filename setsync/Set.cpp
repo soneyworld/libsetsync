@@ -259,10 +259,6 @@ void Set::clear() {
 	this->indexInUse_ = false;
 }
 
-SynchronizationStrategy Set::createSyncStrategy() {
-
-}
-
 } // end of namespace setsync
 
 SET_CONFIG set_create_config() {

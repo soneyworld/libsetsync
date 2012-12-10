@@ -7,9 +7,9 @@ AM_CFLAGS = @CFLAGS@
 AM_LDFLAGS = @LIBS@
 
 include_h_sources = set.h Set.hpp
-h_sources = $(include_h_sources) DiffHandler.h SyncStrategy.h
+h_sources = $(include_h_sources) DiffHandler.h
 c_sources = 
-cpp_sources = Set.cpp DiffHandler.cpp SyncStrategy.cpp
+cpp_sources = Set.cpp DiffHandler.cpp
 
 if BERKELEY_DB
 h_sources += BdbTableUser.h
