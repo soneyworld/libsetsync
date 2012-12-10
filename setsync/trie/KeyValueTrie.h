@@ -24,9 +24,7 @@ class TrieNode {
 	friend class KeyValueRootNode;
 	friend class KeyValueTrie;
 	friend class TrieValue;
-#ifdef HAVE_LEVELDB
-	friend class LevelDbTrieTest;
-#endif
+	friend class KeyValueTrieTest;
 private:
 	static const uint8_t HAS_PARENT;
 	static const uint8_t HAS_CHILDREN;
@@ -342,6 +340,7 @@ public:
 
 class KeyValueTrie: public trie::Trie {
 	friend class TrieNode;
+	friend class KeyValueTrieTest;
 private:
 	/// Instance of root node methods
 	KeyValueRootNode * root_;

@@ -22,8 +22,8 @@ AM_CPPFLAGS = @CPPUNIT_CFLAGS@ -Wall
 AM_LDFLAGS = @CPPUNIT_LIBS@
 
 
-noinst_HEADERS += KeyValueCountingBloomFilterTest.h KeyValueIndexTest.h
-unittest_SOURCES += KeyValueCountingBloomFilterTest.cpp KeyValueIndexTest.cpp
+noinst_HEADERS += KeyValueCountingBloomFilterTest.h KeyValueIndexTest.h KeyValueTrieTest.h
+unittest_SOURCES += KeyValueCountingBloomFilterTest.cpp KeyValueIndexTest.cpp KeyValueTrieTest.cpp
 
 INCLUDES = -I@top_srcdir@ -I@top_srcdir@/setsync/tests/unittests
 
