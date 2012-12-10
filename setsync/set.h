@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 #include "config.h"
+#include <unistd.h>
 #include <string.h>
 #include <inttypes.h>
 
@@ -77,7 +78,7 @@ int set_clear(SET *set);
 size_t set_sync_calc_output_buffer_size(SET_SYNC_HANDLE * handle,
 		const size_t RTT, const size_t bandwidth);
 int set_sync_init_handle(SET * set, SET_SYNC_HANDLE * handle);
-int set_sync_step(SET_SYNC_HANDLE * handle, void * inbuf,
+ssize_t set_sync_step(SET_SYNC_HANDLE * handle, void * inbuf,
 		const size_t inlength, void * outbuf, const size_t maxoutlength,
 		diff_callback * callback, void * closure);
 int set_sync_free_handle(SET_SYNC_HANDLE * handle);

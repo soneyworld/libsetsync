@@ -34,18 +34,18 @@ public:
 	 * \param handler which should be called as default, if no other is given
 	 */
 	SynchronizationProcess(Set * set, AbstractDiffHandler * handler = NULL);
-	ssize_t step(void * inbuf, const std::size_t inlength, void * outbuf,
+	std::size_t step(void * inbuf, const std::size_t inlength, void * outbuf,
 			const std::size_t outlength, diff_callback * callback,
 			void * closure);
-	ssize_t step(void * inbuf, const std::size_t inlength, void * outbuf,
+	std::size_t step(void * inbuf, const std::size_t inlength, void * outbuf,
 			const std::size_t outlength, AbstractDiffHandler& diffhandler);
-	ssize_t step(void * inbuf, const std::size_t inlength, void * outbuf,
+	std::size_t step(void * inbuf, const std::size_t inlength, void * outbuf,
 			const std::size_t outlength);
 	virtual ~SynchronizationProcess();
 	/**
 	 * Calculates the optimal size of a sending buffer for the given network parameter.
 	 */
-	size_t
+	std::size_t
 	calcOutputBufferSize(const size_t RTT, const size_t bandwidth) const;
 };
 }
