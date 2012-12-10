@@ -20,6 +20,11 @@ typedef struct {
 	void *error;
 } SET;
 
+typedef struct {
+	void * process;
+	void * error;
+} SET_SYNC_HANDLE;
+
 typedef enum {
 	MD_2, MD_4, MD_5, SHA_1, SHA_224, SHA_256, SHA_384, SHA_512
 } SET_HASH_FUNCTION;
@@ -39,8 +44,9 @@ typedef struct {
 typedef void diff_callback(void *closure, const unsigned char * hash,
 		const size_t hashsize, const size_t existsLocally);
 
+// Set configuration
 #ifdef HAVE_IBRCOMMON
-int set_config_load_file(SET_CONFIG * config);
+int set_load_config_file(SET_CONFIG * config);
 #endif
 SET_CONFIG set_create_config();
 
@@ -66,6 +72,15 @@ int set_insert_data(SET *set, const void * data, const size_t length);
 int set_erase(SET *set, const unsigned char * key);
 int set_erase_string(SET *set, const char * str);
 int set_clear(SET *set);
+
+// Synchronization
+size_t set_sync_calc_output_buffer_size(SET_SYNC_HANDLE * handle,
+		const size_t RTT, const size_t bandwidth);
+int set_sync_init_handle(SET * set, SET_SYNC_HANDLE * handle);
+int set_sync_step(SET_SYNC_HANDLE * handle, void * inbuf,
+		const size_t inlength, void * outbuf, const size_t maxoutlength,
+		diff_callback * callback, void * closure);
+int set_sync_free_handle(SET_SYNC_HANDLE * handle);
 
 // Error Handling
 /**

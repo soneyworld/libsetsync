@@ -46,6 +46,18 @@ public:
 };
 
 /**
+ * A DiffHandler, which just ignores every diff and returns immediately.
+ */
+class IgnoringDiffHandler: public AbstractDiffHandler {
+	/**
+	 * Ignore all calls and return
+	 */
+	virtual void handle(const unsigned char * hash, const std::size_t hashsize,
+			const bool existsLocally) {
+	}
+};
+
+/**
  * Simple list implementation for a AbstractDiffHandler. All distinct hashes
  * which are given by the handle method, are saved in a vector. So the size
  * can be used to get the number of distinct hashes. There are no multiple

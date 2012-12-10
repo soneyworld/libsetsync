@@ -29,7 +29,7 @@ namespace setsync {
  * or find.
  */
 class Set {
-	friend class AbstractSynchronizationProcess;
+	friend class SynchronizationProcess;
 private:
 	/// maximum number of allowed set elements
 	size_t maxSize_;

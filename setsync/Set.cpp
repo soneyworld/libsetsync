@@ -342,7 +342,7 @@ int set_free(SET *set) {
 			msg->operator =(e.what());
 		}
 		return -1;
-	}  catch (...) {
+	} catch (...) {
 		std::cerr << "FATAL ERROR: FREE SET FAILED" << std::endl;
 		return -1;
 	}
@@ -403,6 +403,94 @@ int set_clear(SET *set) {
 		return -1;
 	}
 	return 0;
+}
+
+int set_sync_init_handle(SET * set, SET_SYNC_HANDLE * handle) {
+	handle->error = NULL;
+	try {
+		setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
+		handle->process = (void*) new setsync::SynchronizationProcess(cppset);
+	} catch (std::exception& e) {
+		if (set->error == NULL) {
+			set->error = (void *) new std::string(e.what());
+		} else {
+			std::string * msg = static_cast<std::string *> (set->error);
+			msg->operator =(e.what());
+		}
+		return -1;
+	} catch (...) {
+		if (set->error == NULL) {
+			set->error = (void *) new std::string("unknown error");
+		} else {
+			std::string * msg = static_cast<std::string *> (set->error);
+			msg->operator =("unknown error");
+		}
+		return -1;
+	}
+	return 0;
+}
+
+ssize_t set_sync_step(SET_SYNC_HANDLE * handle, void * inbuf,
+		const size_t inlength, void * outbuf, const size_t maxoutlength,
+		diff_callback * callback, void * closure) {
+	try {
+		setsync::SynchronizationProcess * process =
+				static_cast<setsync::SynchronizationProcess*> (handle->process);
+		return process->step(inbuf, inlength, outbuf, maxoutlength, callback,
+				closure);
+	} catch (std::exception& e) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string(e.what());
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =(e.what());
+		}
+		return -1;
+	} catch (...) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string("unknown error");
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =("unknown error");
+		}
+		return -1;
+	}
+}
+
+int set_sync_free_handle(SET_SYNC_HANDLE * handle) {
+	try {
+		setsync::SynchronizationProcess * process =
+				static_cast<setsync::SynchronizationProcess*> (handle->process);
+		delete process;
+		if (handle->error != NULL) {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			delete msg;
+		}
+	} catch (std::exception& e) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string(e.what());
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =(e.what());
+		}
+		return -1;
+	} catch (...) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string("unknown error");
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =("unknown error");
+		}
+		return -1;
+	}
+	return 0;
+}
+
+size_t set_sync_calc_output_buffer_size(SET_SYNC_HANDLE * handle,
+		const size_t RTT, const size_t bandwidth) {
+	setsync::SynchronizationProcess * process =
+			static_cast<setsync::SynchronizationProcess*> (handle->process);
+	return process->calcOutputBufferSize(RTT, bandwidth);
 }
 
 const char * set_last_error_to_string(SET * set) {
