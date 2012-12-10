@@ -13,8 +13,13 @@ int main(int argc, const char* argv[]) {
 	int result = 0;
 	SET s;
 	SET_CONFIG c = set_create_config();
-	c.storage = LEVELDB;
+	c.storage = BERKELEY_DB;
 	result = set_init(&s, c);
+	if (result != 0) {
+		printf("error on init berkeley db set: %s\n",
+				set_last_error_to_string(&s));
+		return -1;
+	}
 	result = set_insert_string(&s, "test");
 	if (!result) {
 		printf("adding \"test\" failed\n");
@@ -34,8 +39,13 @@ int main(int argc, const char* argv[]) {
 	}
 	SET s2;
 	SET_CONFIG c2 = set_create_config();
-	c2.storage = BERKELEY_DB;
+	c2.storage = LEVELDB;
 	result = set_init(&s2, c2);
+	if (result != 0) {
+		printf("error on init level db set: %s\n",
+				set_last_error_to_string(&s2));
+		return -1;
+	}
 	result = set_insert_string(&s2, "test");
 	if (!result) {
 		printf("adding \"test\" failed\n");

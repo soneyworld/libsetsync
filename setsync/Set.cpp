@@ -52,7 +52,7 @@ Set::Set(const config::Configuration& config) :
 		indexpath.append("index");
 		indexStorage_ = new storage::LevelDbStorage(indexpath);
 	}
-		break;
+	break;
 #endif
 #ifdef HAVE_DB_CXX_H
 	case config::Configuration::StorageConfig::BERKELEY_DB: {
@@ -275,11 +275,26 @@ SET_CONFIG set_create_config() {
 }
 
 int set_init(SET *set, SET_CONFIG config) {
+	set->error = NULL;
 	try {
 		setsync::config::Configuration c(config);
 		setsync::Set * cppset = new setsync::Set(c);
 		set->set = (void *) cppset;
+	} catch (std::exception& e) {
+		if (set->error == NULL) {
+			set->error = (void *) new std::string(e.what());
+		} else {
+			std::string * msg = static_cast<std::string *> (set->error);
+			msg->operator =(e.what());
+		}
+		return -1;
 	} catch (...) {
+		if (set->error == NULL) {
+			set->error = (void *) new std::string("unknown error");
+		} else {
+			std::string * msg = static_cast<std::string *> (set->error);
+			msg->operator =("unknown error");
+		}
 		return -1;
 	}
 	return 0;
@@ -291,7 +306,21 @@ int set_init_with_path(SET *set, SET_CONFIG config, const char * path) {
 		c.setPath(path);
 		setsync::Set * cppset = new setsync::Set(c);
 		set->set = (void *) cppset;
+	} catch (std::exception& e) {
+		if (set->error == NULL) {
+			set->error = (void *) new std::string(e.what());
+		} else {
+			std::string * msg = static_cast<std::string *> (set->error);
+			msg->operator =(e.what());
+		}
+		return -1;
 	} catch (...) {
+		if (set->error == NULL) {
+			set->error = (void *) new std::string("unknown error");
+		} else {
+			std::string * msg = static_cast<std::string *> (set->error);
+			msg->operator =("unknown error");
+		}
 		return -1;
 	}
 	return 0;
@@ -301,7 +330,20 @@ int set_free(SET *set) {
 	try {
 		setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
 		delete cppset;
-	} catch (...) {
+		if (set->error != NULL) {
+			std::string * msg = static_cast<std::string *> (set->error);
+			delete msg;
+		}
+	} catch (std::exception& e) {
+		if (set->error == NULL) {
+			set->error = (void *) new std::string(e.what());
+		} else {
+			std::string * msg = static_cast<std::string *> (set->error);
+			msg->operator =(e.what());
+		}
+		return -1;
+	}  catch (...) {
+		std::cerr << "FATAL ERROR: FREE SET FAILED" << std::endl;
 		return -1;
 	}
 	return 0;
@@ -343,8 +385,41 @@ int set_clear(SET *set) {
 	try {
 		setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
 		cppset->clear();
+	} catch (std::exception& e) {
+		if (set->error == NULL) {
+			set->error = (void *) new std::string(e.what());
+		} else {
+			std::string * msg = static_cast<std::string *> (set->error);
+			msg->operator =(e.what());
+		}
+		return -1;
 	} catch (...) {
+		if (set->error == NULL) {
+			set->error = (void *) new std::string("unknown error");
+		} else {
+			std::string * msg = static_cast<std::string *> (set->error);
+			msg->operator =("unknown error");
+		}
 		return -1;
 	}
 	return 0;
+}
+
+const char * set_last_error_to_string(SET * set) {
+	if (set->error != NULL) {
+		std::string * msg = static_cast<std::string *> (set->error);
+		return msg->c_str();
+	} else {
+		return NULL;
+	}
+}
+
+int set_last_error_printf(SET * set) {
+	if (set->error != NULL) {
+		std::string * msg = static_cast<std::string *> (set->error);
+		std::cout << (*msg);
+		return 0;
+	} else {
+		return -1;
+	}
 }

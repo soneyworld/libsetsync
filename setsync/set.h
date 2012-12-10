@@ -17,6 +17,7 @@ extern "C" {
 
 typedef struct {
 	void *set;
+	void *error;
 } SET;
 
 typedef enum {
@@ -65,6 +66,17 @@ int set_insert_data(SET *set, const void * data, const size_t length);
 int set_erase(SET *set, const unsigned char * key);
 int set_erase_string(SET *set, const char * str);
 int set_clear(SET *set);
+
+// Error Handling
+/**
+ * \return the last error message
+ */
+const char * set_last_error_to_string(SET * set);
+/**
+ * Prints the last error message to stdout
+ * \return 0 on success
+ */
+int set_last_error_printf(SET * set);
 
 #ifdef __cplusplus
 }
