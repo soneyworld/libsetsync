@@ -6,7 +6,6 @@
 
 #include "Set.hpp"
 #include <setsync/bloom/CountingBloomFilter.h>
-#include <setsync/trie/BdbTrie.h>
 #include <typeinfo>
 #include <string.h>
 #include <iostream>

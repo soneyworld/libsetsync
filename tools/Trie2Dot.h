@@ -6,7 +6,9 @@
 
 #ifndef TRIE2DOT_H_
 #define TRIE2DOT_H_
-#include <setsync/trie/BdbTrie.h>
+#include <setsync/trie/KeyValueTrie.h>
+#include <setsync/storage/KeyValueStorage.h>
+#include <setsync/storage/BdbStorage.h>
 #include <setsync/utils/CryptoHash.h>
 
 
@@ -15,8 +17,10 @@ private:
 	Db * db1_;
 	Db * db2_;
 	utils::CryptoHash hash_;
-	trie::BdbTrie * trie1_;
-	trie::BdbTrie * trie2_;
+	trie::KeyValueTrie * trie1_;
+	trie::KeyValueTrie * trie2_;
+	setsync::storage::AbstractKeyValueStorage * storage1;
+	setsync::storage::AbstractKeyValueStorage * storage2;
 public:
 	Trie2Dot();
 	virtual void out();

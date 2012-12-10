@@ -31,8 +31,10 @@ private:
 	static const uint8_t HAS_PARENT;
 	static const uint8_t HAS_CHILDREN;
 	static const uint8_t DIRTY;
-	static void unmarshall(TrieNode& target, const unsigned char * loadedValue, const std::size_t loadedSize);
-	static void marshall(const TrieNode& source, const unsigned char * targetBuffer);
+	static void unmarshall(TrieNode& target, const unsigned char * loadedValue,
+			const std::size_t loadedSize);
+	static void marshall(const TrieNode& source,
+			const unsigned char * targetBuffer);
 	static const std::size_t getMarshallBufferSize(const TrieNode& node);
 	/// Reference to the key value storage where the node (should) exist
 	setsync::storage::AbstractKeyValueStorage& storage_;
@@ -81,8 +83,7 @@ private:
 	 * \param hash of the node, which should be created or loaded
 	 * \param newone if true, a new node will be created, otherwise load the node with this hash from the given DB
 	 */
-	TrieNode(const KeyValueTrie& trie,
-			const utils::CryptoHash& hashfunction,
+	TrieNode(const KeyValueTrie& trie, const utils::CryptoHash& hashfunction,
 			setsync::storage::AbstractKeyValueStorage& storage,
 			const unsigned char * hash, bool newone = false);
 	/**
@@ -171,8 +172,7 @@ private:
 	 */
 	bool isEqualToLarger(const TrieNode& node) const;
 public:
-	TrieNode(const KeyValueTrie& trie,
-			const utils::CryptoHash& hashfunction,
+	TrieNode(const KeyValueTrie& trie, const utils::CryptoHash& hashfunction,
 			setsync::storage::AbstractKeyValueStorage& storage);
 	/**
 	 * Copies all member variables of other to the new instance
@@ -298,6 +298,7 @@ class KeyValueStoreException: public TrieException {
  * as the link to the root DbNode of the trie.
  */
 class KeyValueRootNode {
+	friend class KeyValueTrie;
 private:
 	/// The storage, which should be used
 	setsync::storage::AbstractKeyValueStorage& storage_;
@@ -307,10 +308,11 @@ private:
 	const utils::CryptoHash& hashfunction_;
 	/// Reference to the Trie, which should be used for operations
 	const KeyValueTrie& trie_;
-public:
 	KeyValueRootNode(const KeyValueTrie& trie,
 			const utils::CryptoHash& hashfunction,
 			setsync::storage::AbstractKeyValueStorage& storage);
+	virtual ~KeyValueRootNode(){};
+public:
 	/**
 	 * Loads the hash of the DbNode, which is saved as root node. Throws a
 	 * NoRootFoundException if no root is available on this storage.
@@ -335,6 +337,7 @@ public:
 };
 
 class KeyValueTrie: public trie::Trie {
+	friend class TrieNode;
 private:
 	/// Instance of root node methods
 	KeyValueRootNode * root_;

@@ -9,7 +9,7 @@
 
 #include "KeyValueStorage.h"
 #include <db_cxx.h>
-#include <setsync/BdbTableUser.h>
+#include <setsync/storage/BdbTableUser.h>
 
 namespace setsync {
 

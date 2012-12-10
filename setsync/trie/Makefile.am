@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 
-h_sources = Trie.h MemTrie.h KeyValueTrie.h TrieException.h
-cpp_sources = Trie.cpp MemTrie.cpp KeyValueTrie.cpp
+h_sources = Trie.h KeyValueTrie.h TrieException.h
+cpp_sources = Trie.cpp KeyValueTrie.cpp
 
 AM_CFLAGS = 
 AM_LDFLAGS =
@@ -11,16 +11,9 @@ AM_CFLAGS += @SQLITE_CFLAGS@
 AM_LDFLAGS += @SQLITE_LIBS@
 endif
 
-if BERKELEY_DB
-h_sources += BdbTrie.h
-cpp_sources += BdbTrie.cpp
-endif
-
 if LEVELDB
 AM_CFLAGS += @LEVELDB_CFLAGS@
 AM_LDFLAGS += @LEVELDB_LIBS@
-h_sources += LevelDbTrie.h
-cpp_sources += LevelDbTrie.cpp
 endif
 
 noinst_LTLIBRARIES = libtrie.la

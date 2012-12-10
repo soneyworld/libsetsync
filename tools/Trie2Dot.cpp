@@ -6,9 +6,8 @@
 
 #include "Trie2Dot.h"
 #include <setsync/utils/CryptoHash.h>
-#include <setsync/trie/Trie.h>
-#include <setsync/trie/BdbTrie.h>
 #include <setsync/utils/OutputFunctions.h>
+#include <setsync/storage/BdbStorage.h>
 #include <sstream>
 #include <iomanip>
 
@@ -17,15 +16,15 @@ using namespace trie;
 
 Trie2Dot::Trie2Dot() {
 	this->db1_ = new Db(NULL, 0);
-	db1_->set_flags(trie::BdbTrie::getTableFlags());
-	db1_->open(NULL, NULL, trie::BdbTrie::getLogicalDatabaseName(),
-			trie::BdbTrie::getTableType(), DB_CREATE, 0);
-	trie1_ = new BdbTrie(hash_, db1_);
+	db1_->open(NULL, NULL, "trie",
+			DB_HASH, DB_CREATE, 0);
+	this->storage1 = new setsync::storage::BdbStorage(db1_);
+	trie1_ = new KeyValueTrie(hash_, *storage1);
 	this->db2_ = new Db(NULL, 0);
-	db2_->set_flags(trie::BdbTrie::getTableFlags());
-	db2_->open(NULL, NULL, trie::BdbTrie::getLogicalDatabaseName(),
-			trie::BdbTrie::getTableType(), DB_CREATE, 0);
-	trie2_ = new BdbTrie(hash_, db2_);
+	db2_->open(NULL, NULL, "trie",
+			DB_HASH, DB_CREATE, 0);
+	this->storage2 = new setsync::storage::BdbStorage(db2_);
+	trie2_ = new KeyValueTrie(hash_, *storage2);
 }
 
 void Trie2Dot::out() {
@@ -75,6 +74,8 @@ void Trie2Dot::out() {
 }
 
 Trie2Dot::~Trie2Dot() {
+	delete this->storage1;
+	delete this->storage2;
 	delete trie1_;
 	db1_->close(0);
 	delete db1_;

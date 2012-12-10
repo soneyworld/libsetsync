@@ -5,12 +5,13 @@
  */
 
 #include "DBTest.h"
-#include <setsync/trie/BdbTrie.h>
 #include <sstream>
-
+#include <setsync/storage/BdbStorage.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <string.h>
+#include <setsync/trie/KeyValueTrie.h>
 using namespace std;
 DBTest::DBTest() {
 
@@ -108,7 +109,8 @@ void DBTest::runFsDb() {
 
 void DBTest::runTrie(Db * db) {
 	utils::CryptoHash sha1;
-	trie::BdbTrie trie(sha1, db);
+	setsync::storage::BdbStorage storage(db);
+	trie::KeyValueTrie trie(sha1, storage);
 	clock_t start, stop, duration, iduration;
 	duration = 0;
 	for (int iter = 0; iter < LOOP_ITERATIONS; iter++) {
@@ -138,8 +140,8 @@ void DBTest::runMemDbTrie() {
 	cout << "running Berkeley DB Trie(mem) test:" << endl;
 	Db db(NULL, 0);
 	db.set_cachesize(5, 0, 0);
-	db.open(NULL, NULL, trie::BdbTrie::getLogicalDatabaseName(),
-			trie::BdbTrie::getTableType(), DB_CREATE, 0);
+	db.open(NULL, NULL, "trie",
+			DB_HASH, DB_CREATE, 0);
 	runTrie(&db);
 	db.stat_print(0);
 	db.close(0);
@@ -149,8 +151,8 @@ void DBTest::runFsDbTrie() {
 	cout << "running Berkeley DB Trie(fs) test:" << endl;
 	Db db(NULL, 0);
 	db.set_cachesize(5, 0, 0);
-	db.open(NULL, "temp-table.db", trie::BdbTrie::getLogicalDatabaseName(),
-			trie::BdbTrie::getTableType(), DB_CREATE, 0);
+	db.open(NULL, "temp-table.db", "trie",
+			DB_HASH, DB_CREATE, 0);
 	runTrie(&db);
 	db.sync(0);
 	db.stat_print(0);

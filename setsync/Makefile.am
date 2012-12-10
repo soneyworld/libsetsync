@@ -12,9 +12,7 @@ c_sources =
 cpp_sources = Set.cpp DiffHandler.cpp
 
 if BERKELEY_DB
-h_sources += BdbTableUser.h
-h_sources +=
-cpp_sources += BdbTableUser.cpp
+
 endif
 
 if OPENSSL

@@ -305,8 +305,7 @@ bool TrieNode::insert(TrieNode& node, bool performHash) {
 			//			oldparent.deleteFromDb();
 		}
 		// Set the new root of the trie
-		KeyValueRootNode(this->trie_, this->hashfunction_, this->storage_).set(
-				roothash);
+		this->trie_.root_->set(roothash);
 		// Now delete all old and replaced parents
 		std::vector<TrieNode>::const_iterator iter;
 		for (iter = toBeDeleted.begin(); iter != toBeDeleted.end(); iter++) {
@@ -326,8 +325,7 @@ bool TrieNode::insert(TrieNode& node, bool performHash) {
 			}
 			parent.toDb();
 		} else {
-			KeyValueRootNode(this->trie_, this->hashfunction_, this->storage_).set(
-					intermediate.hash);
+			this->trie_.root_->set(intermediate.hash);
 		}
 		intermediate.toDb();
 	}
@@ -473,14 +471,10 @@ bool TrieNode::erase(const unsigned char * hash, bool performHash) {
 			throw DbTrieException("This node is not a leaf");
 		if (!toBeDeleted.hasParent_) {
 			// Root node should be deleted
-			KeyValueRootNode root(this->trie_, this->hashfunction_,
-					this->storage_);
-			root.del();
+			this->trie_.root_->del();
 			toBeDeleted.deleteFromDb();
 		} else {
 			TrieNode parent = toBeDeleted.getParent();
-			KeyValueRootNode root(this->trie_, this->hashfunction_,
-					this->storage_);
 			if (!parent.hasParent_) {
 				// Other Child has to become the new root
 				TrieNode childOfParent(*this);
@@ -491,7 +485,7 @@ bool TrieNode::erase(const unsigned char * hash, bool performHash) {
 				}
 				childOfParent.hasParent_ = false;
 				childOfParent.toDb();
-				root.set(childOfParent.hash);
+				this->trie_.root_->set(childOfParent.hash);
 				parent.deleteFromDb();
 				toBeDeleted.deleteFromDb();
 			} else {
@@ -529,7 +523,7 @@ bool TrieNode::erase(const unsigned char * hash, bool performHash) {
 				oldnodes.push_back(toBeDeleted);
 				if (!oldgrandparent.hasParent_) {
 					oldnodes.push_back(oldgrandparent);
-					root.set(newgrandparent.hash);
+					this->trie_.root_->set(newgrandparent.hash);
 				} else {
 					if (performHash) {
 						oldnodes.push_back(oldgrandparent);
@@ -560,7 +554,7 @@ bool TrieNode::erase(const unsigned char * hash, bool performHash) {
 							oldgrandparent = oldgrandgrandparent;
 							newgrandparent = newgrandgrandparent;
 						}
-						root.set(newgrandparent.hash);
+						this->trie_.root_->set(newgrandparent.hash);
 					} else {
 						TrieNode oldgrandgrandparent =
 								oldgrandparent.getParent();
@@ -692,7 +686,7 @@ uint8_t TrieNode::getFlags() const {
 KeyValueTrie::KeyValueTrie(const utils::CryptoHash& hash,
 		setsync::storage::AbstractKeyValueStorage& storage) :
 	Trie(hash), storage_(storage) {
-	this->root_ = new KeyValueRootNode(*this, hash, storage);
+	this->root_ = new KeyValueRootNode(*this, hash, storage_);
 }
 
 KeyValueTrie::~KeyValueTrie() {
@@ -752,8 +746,7 @@ void KeyValueTrie::clear(void) {
 
 bool KeyValueTrie::operator ==(const Trie& other) const {
 	try {
-		const KeyValueTrie& other_ =
-				dynamic_cast<const KeyValueTrie&> (other);
+		const KeyValueTrie& other_ = dynamic_cast<const KeyValueTrie&> (other);
 		try {
 			root_->get();
 		} catch (TrieRootNotFoundException e) {
@@ -827,8 +820,8 @@ size_t KeyValueTrie::getSubTrie(const TrieNode& root,
 	}
 }
 
-size_t KeyValueTrie::getSubTrie(const unsigned char * hash,
-		void * buffer, const size_t buffersize) {
+size_t KeyValueTrie::getSubTrie(const unsigned char * hash, void * buffer,
+		const size_t buffersize) {
 	size_t maxNumberOfHashes = buffersize / this->hash_.getHashSize();
 	if (maxNumberOfHashes < 2) {
 		throw "buffer is too small!";
