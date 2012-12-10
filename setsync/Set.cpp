@@ -300,7 +300,7 @@ int set_init_with_path(SET *set, SET_CONFIG config, const char * path) {
 int set_free(SET *set) {
 	try {
 		setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
-		cppset->~Set();
+		delete cppset;
 	} catch (...) {
 		return -1;
 	}

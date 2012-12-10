@@ -15,7 +15,7 @@ namespace storage {
 
 LevelDbIterator::LevelDbIterator(leveldb::Iterator* it) :
 	it(it) {
-
+	this->it->SeekToFirst();
 }
 LevelDbIterator::~LevelDbIterator() {
 	delete it;

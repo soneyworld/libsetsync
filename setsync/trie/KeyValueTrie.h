@@ -180,6 +180,8 @@ public:
 	 * \param other to be copied
 	 */
 	TrieNode(const TrieNode& other);
+
+	virtual ~TrieNode();
 	/**
 	 * \return true if node has children, otherwise false
 	 */
@@ -311,7 +313,9 @@ private:
 	KeyValueRootNode(const KeyValueTrie& trie,
 			const utils::CryptoHash& hashfunction,
 			setsync::storage::AbstractKeyValueStorage& storage);
-	virtual ~KeyValueRootNode(){};
+	virtual ~KeyValueRootNode() {
+	}
+	;
 public:
 	/**
 	 * Loads the hash of the DbNode, which is saved as root node. Throws a

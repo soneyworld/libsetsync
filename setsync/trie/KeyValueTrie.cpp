@@ -116,6 +116,10 @@ TrieNode::TrieNode(const KeyValueTrie& trie,
 	}
 }
 
+TrieNode::~TrieNode() {
+	free(this->hash);
+}
+
 void TrieNode::unmarshall(TrieNode& target, const unsigned char * loadedValue,
 		const std::size_t loadedSize) {
 	size_t hashsize = target.hashfunction_.getHashSize();
