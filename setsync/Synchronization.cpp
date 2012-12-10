@@ -8,7 +8,7 @@
 
 namespace setsync {
 
-AbstractSynchronizationProcess::AbstractSynchronizationProcess() {
+AbstractSynchronizationProcess::AbstractSynchronizationProcess(Set * set, AbstractDiffHandler& handler) : set_(set) {
 
 }
 

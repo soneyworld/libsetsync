@@ -6,12 +6,18 @@
 
 #ifndef SYNCHRONIZATION_H_
 #define SYNCHRONIZATION_H_
+#include <setsync/Set.hpp>
+#include <setsync/DiffHandler.h>
+
 
 namespace setsync {
+class Set;
 
 class AbstractSynchronizationProcess {
+private:
+	Set * set_;
 public:
-	AbstractSynchronizationProcess();
+	AbstractSynchronizationProcess(Set * set, AbstractDiffHandler& handler);
 	virtual ~AbstractSynchronizationProcess();
 	virtual void bloomfilterSync() = 0;
 	virtual void trieSync() = 0;

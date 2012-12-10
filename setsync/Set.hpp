@@ -29,6 +29,7 @@ namespace setsync {
  * or find.
  */
 class Set {
+	friend class AbstractSynchronizationProcess;
 private:
 	/// maximum number of allowed set elements
 	size_t maxSize_;
@@ -194,7 +195,6 @@ public:
 	 * new instance.
 	 */
 	virtual ~Set();
-
 };
 }
 
