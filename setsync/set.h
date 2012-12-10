@@ -81,6 +81,7 @@ int set_sync_init_handle(SET * set, SET_SYNC_HANDLE * handle);
 ssize_t set_sync_step(SET_SYNC_HANDLE * handle, void * inbuf,
 		const size_t inlength, void * outbuf, const size_t maxoutlength,
 		diff_callback * callback, void * closure);
+int set_sync_done(SET_SYNC_HANDLE * handle);
 int set_sync_free_handle(SET_SYNC_HANDLE * handle);
 
 // Error Handling

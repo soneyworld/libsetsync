@@ -52,7 +52,7 @@ Set::Set(const config::Configuration& config) :
 		indexpath.append("index");
 		indexStorage_ = new storage::LevelDbStorage(indexpath);
 	}
-	break;
+		break;
 #endif
 #ifdef HAVE_DB_CXX_H
 	case config::Configuration::StorageConfig::BERKELEY_DB: {
@@ -455,6 +455,12 @@ ssize_t set_sync_step(SET_SYNC_HANDLE * handle, void * inbuf,
 		}
 		return -1;
 	}
+}
+
+int set_sync_done(SET_SYNC_HANDLE * handle) {
+	setsync::SynchronizationProcess * process =
+			static_cast<setsync::SynchronizationProcess*> (handle->process);
+	return process->done();
 }
 
 int set_sync_free_handle(SET_SYNC_HANDLE * handle) {

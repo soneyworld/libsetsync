@@ -17,12 +17,17 @@ class Set;
  */
 class SynchronizationProcess {
 private:
+	enum status {
+		START, BF, TRIE, EQUAL
+	} stat_;
 	/// Local set instance
 	Set * set_;
-	/// Position state of the actual sync process
+	/// Position of bloom filter process
 	std::size_t pos_;
 	/// default handler, C++ interface only, NULL if the no diff handler should be used
 	AbstractDiffHandler * handler_;
+	/// hash of the other trie root
+	unsigned char * externalhash;
 public:
 	/**
 	 * Creates a new Synchronization Process for the given set. If a
@@ -44,9 +49,17 @@ public:
 	virtual ~SynchronizationProcess();
 	/**
 	 * Calculates the optimal size of a sending buffer for the given network parameter.
+	 *
+	 * \param RTT round trip time in nanoseconds
+	 * \param bandwidth in bits per second
+	 * \return the optimal size of a sending buffer
 	 */
 	std::size_t
 	calcOutputBufferSize(const size_t RTT, const size_t bandwidth) const;
+	/**
+	 * \return true, if sync is done
+	 */
+	virtual bool done() const;
 };
 }
 
