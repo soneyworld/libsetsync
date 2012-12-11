@@ -8,37 +8,41 @@
 #ifdef HAVE_LEVELDB
 #include <setsync/storage/LevelDbStorage.h>
 #endif
+using namespace std;
 namespace evaluation {
 
-SetTest::SetTest(StorageType type) {
-	switch (type) {
-#ifdef HAVE_LEVELDB
-	/*		case LEVELDB:
-			this->bfstore = new setsync::storage::LevelDbStorage();
-			this->triestore = new setsync::storage::LevelDbStorage();
-			this->indexstore = new setsync::storage::LevelDbStorage();
-			break;*/
-#endif
-		case BERKELEYDB:
-
-			break;
-		default:
-			this->bfstore = NULL;
-			this->triestore = NULL;
-			this->indexstore = NULL;
-			break;
+SetTest::SetTest(const setsync::config::Configuration& c) :
+	set_(c) {
+	switch (c.getStorage().getType()) {
+	case setsync::config::Configuration::StorageConfig::LEVELDB:
+		this->storage_ = "LEVELDB";
+		break;
+	case setsync::config::Configuration::StorageConfig::BERKELEY_DB:
+		this->storage_ = "BERKELEY_DB";
+		break;
 	}
 
 }
 
 SetTest::~SetTest() {
-	delete this->bfstore;
-	delete this->triestore;
-	delete this->indexstore;
+
 }
 
-void SetTest::run(){
+void SetTest::insert() {
 
+	cout << "running Set insertion test (" << storage_<< ")" << endl;
+	cout << "noinserts,CPUintervalDuration,realtimeIntervalDuration,duration"
+			<< endl;
+	for (uint64_t i = 0; i < ITERATIONS; i++) {
+		set_.insert((void *) &i, sizeof(uint64_t));
+		if ((i % ITEMS_PER_LOOPS) == 0) {
+			std::cout << i << "," << std::endl;
+		}
+	}
+}
+
+void SetTest::run() {
+	insert();
 }
 
 }
