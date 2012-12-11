@@ -15,7 +15,7 @@ Trie::Trie(const utils::CryptoHash& hash) :
 }
 
 Trie::~Trie() {
-	delete this->hashscratch;
+	delete[] this->hashscratch;
 }
 
 size_t Trie::getSize() const {
