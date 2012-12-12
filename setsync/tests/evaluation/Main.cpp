@@ -161,7 +161,11 @@ int main(int ac, char **av) {
 	if (settest || all) {
 #ifdef HAVE_LEVELDB
 		{
-			setsync::config::Configuration c;
+			SET_CONFIG cc = set_create_config();
+			cc.bf_max_elements = ITERATIONS;
+			cc.false_positive_rate = 0.001;
+			cc.storage = LEVELDB;
+			setsync::config::Configuration c(cc);
 			evaluation::SetTest settest(c);
 			settest.run();
 		}
@@ -169,6 +173,8 @@ int main(int ac, char **av) {
 #ifdef HAVE_DB_CXX_H
 		{
 			SET_CONFIG cc = set_create_config();
+			cc.bf_max_elements = ITERATIONS;
+			cc.false_positive_rate = 0.001;
 			cc.storage = BERKELEY_DB;
 			setsync::config::Configuration c(cc);
 			evaluation::SetTest settest(c);

@@ -7,7 +7,9 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <setsync/bloom/KeyValueCountingBloomFilter.h>
 #include <setsync/utils/CryptoHash.h>
+#ifdef HAVE_LEVELDB
 #include <setsync/storage/LevelDbStorage.h>
+#endif
 #include <setsync/storage/KeyValueStorage.h>
 #include <db_cxx.h>
 

@@ -7,6 +7,7 @@
 #include "KeyValueStorageTest.h"
 #include <setsync/utils/FileSystem.h>
 #include <stdlib.h>
+#include <string.h>
 
 namespace setsync {
 

@@ -21,6 +21,10 @@ unittest_SOURCES = \
 AM_CPPFLAGS = @CPPUNIT_CFLAGS@ -Wall
 AM_LDFLAGS = @CPPUNIT_LIBS@
 
+if IBRCOMMON
+AM_CPPFLAGS += $(IBRCOMMON_CFLAGS)
+AM_LDFLAGS += $(IBRCOMMON_LIBS)
+endif
 
 noinst_HEADERS += KeyValueCountingBloomFilterTest.h KeyValueIndexTest.h KeyValueTrieTest.h
 unittest_SOURCES += KeyValueCountingBloomFilterTest.cpp KeyValueIndexTest.cpp KeyValueTrieTest.cpp

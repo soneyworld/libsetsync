@@ -30,13 +30,13 @@ SetTest::~SetTest() {
 
 void SetTest::insert() {
 
-	cout << "running Set insertion test (" << storage_<< ")" << endl;
+	cout << "running Set insertion test (" << storage_ << ")" << endl;
 	cout << "noinserts,CPUintervalDuration,realtimeIntervalDuration,duration"
 			<< endl;
 	for (uint64_t i = 0; i < ITERATIONS; i++) {
 		set_.insert((void *) &i, sizeof(uint64_t));
-		if ((i % ITEMS_PER_LOOPS) == 0) {
-			std::cout << i << "," << std::endl;
+		if (((i + 1) % ITEMS_PER_LOOPS) == 0) {
+			std::cout << i + 1 << "," << std::endl;
 		}
 	}
 }
