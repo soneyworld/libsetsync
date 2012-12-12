@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 
-h_sources = bittest.h OutputFunctions.h CryptoHash.h FileSystem.h BerkeleyDB.h
+h_sources = bitset.h OutputFunctions.h CryptoHash.h FileSystem.h BerkeleyDB.h
 cpp_sources = OutputFunctions.cpp CryptoHash.cpp FileSystem.cpp BerkeleyDB.cpp
 
 if OPENSSL
