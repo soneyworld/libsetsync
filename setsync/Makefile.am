@@ -3,7 +3,7 @@ AUTOMAKE_OPTIONS = foreign
 SUBDIRS = utils config bloom trie index storage . tests
 
 # what flags you want to pass to the C compiler & linker
-AM_CFLAGS = @CFLAGS@ 
+AM_CPPFLAGS = @CFLAGS@ 
 AM_LDFLAGS = @LIBS@
 
 include_h_sources = set.h Set.hpp
@@ -16,17 +16,17 @@ if BERKELEY_DB
 endif
 
 if IBRCOMMON
-AM_CFLAGS += @IBRCOMMON_CFLAGS@ 
+AM_CPPFLAGS += @IBRCOMMON_CFLAGS@ 
 AM_LDFLAGS += @IBRCOMMON_LIBS@
 endif
 
 if OPENSSL
-AM_CFLAGS += $(OPENSSL_CFLAGS)
+AM_CPPFLAGS += $(OPENSSL_CFLAGS)
 AM_LDFLAGS += $(OPENSSL_LIBS)
 endif
 
 if SQLITE
-AM_CFLAGS += @SQLITE_CFLAGS@
+AM_CPPFLAGS += @SQLITE_CFLAGS@
 AM_LDFLAGS += @SQLITE_LIBS@
 endif
 

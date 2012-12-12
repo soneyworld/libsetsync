@@ -39,6 +39,11 @@ AM_LDFLAGS += @LEVELDB_LIBS@
 evaluation_SOURCES += LevelDbTest.h LevelDbTest.cpp
 endif
 
+if IBRCOMMON
+AM_CPPFLAGS += @IBRCOMMON_CFLAGS@
+AM_LDFLAGS += @IBRCOMMON_LIBS@
+endif
+
 
 noinst_PROGRAMS=evaluation
 evaluation_CXXFLAGS = ${AM_CPPFLAGS}
