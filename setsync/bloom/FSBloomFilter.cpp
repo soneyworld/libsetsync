@@ -107,6 +107,7 @@ FSBloomFilter::~FSBloomFilter() {
 		throw "closing file failed, this shouldn't happen, but it is not important";
 	}
 #endif
+	delete this->hashFunction_;
 }
 
 void FSBloomFilter::load(std::istream &in, const uint64_t numberOfElements) {

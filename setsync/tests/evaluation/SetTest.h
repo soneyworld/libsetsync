@@ -8,28 +8,21 @@
 #define SETTEST_H_
 
 #include "Test.h"
-#include <setsync/storage/KeyValueStorage.h>
 #include <setsync/Set.hpp>
-#include <setsync/bloom/KeyValueCountingBloomFilter.h>
-#include <setsync/trie/KeyValueTrie.h>
-#include <setsync/index/KeyValueIndex.h>
 #include <setsync/utils/CryptoHash.h>
+#include <setsync/config/Configuration.h>
 
 namespace evaluation {
 
-enum StorageType {
-	LEVELDB, BERKELEYDB
-};
-
 class SetTest: public Test {
 private:
-	setsync::storage::AbstractKeyValueStorage * bfstore;
-	setsync::storage::AbstractKeyValueStorage * triestore;
-	setsync::storage::AbstractKeyValueStorage * indexstore;
+	setsync::Set set_;
+	std::string storage_;
 public:
-	SetTest(StorageType type);
+	SetTest(const setsync::config::Configuration& c);
 	virtual ~SetTest();
 	virtual void run();
+	virtual void insert();
 };
 
 }

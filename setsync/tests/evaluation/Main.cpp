@@ -8,11 +8,14 @@
 #include "DBTest.h"
 #include "BDBInsertRemoveTest.h"
 #include "BDBTransactionsTest.h"
+#include "SetTest.h"
 #ifdef HAVE_LEVELDB
 #include "LevelDbTest.h"
 #endif
 #include <string>
 #include <set>
+#include <setsync/Set.hpp>
+#include <setsync/config/Configuration.h>
 
 #ifdef HAVE_SQLITE
 #include "SQLiteTest.h"
@@ -31,6 +34,7 @@ int main(int ac, char **av) {
 		std::cout << "--bdb-test" << std::endl;
 		std::cout << "--bdb-insert-remove-test" << std::endl;
 		std::cout << "--bdb-transaction-test" << std::endl;
+		std::cout << "--set-tests" << std::endl;
 #ifdef HAVE_SQLITE
 		std::cout << "--sql-test" << std::endl;
 #endif
@@ -42,7 +46,6 @@ int main(int ac, char **av) {
 		std::cout << "--leveldb-size-20-0-test" << std::endl;
 		std::cout << "--leveldb-size-20-100-test" << std::endl;
 		std::cout << "--leveldb-size-20-200-test" << std::endl;
-		std::cout << "--leveldb-set-test" << std::endl;
 #endif
 		std::cout << "--all-tests" << std::endl;
 		return 0;
@@ -54,12 +57,12 @@ int main(int ac, char **av) {
 	bool bdbtransaction = !(args.find(std::string("--bdb-transaction-test"))
 			== args.end());
 	bool all = !(args.find(std::string("--all-tests")) == args.end());
+	bool settest = !(args.find(std::string("--set-tests")) == args.end());
 #ifdef HAVE_SQLITE
 	bool sqlite = !(args.find(std::string("--sql-test")) == args.end());
 #endif
 #ifdef HAVE_LEVELDB
 	bool level = !(args.find(std::string("--leveldb-test")) == args.end());
-	bool levelset = !(args.find(std::string("--leveldb-set-test")) == args.end());
 	bool levelsize = !(args.find(std::string("--leveldb-size-test"))
 			== args.end());
 	bool levelsize8 = !(args.find(std::string("--leveldb-size-8-0-test"))
@@ -154,6 +157,24 @@ int main(int ac, char **av) {
 			leveldb.runDbSizeTestInSteps(20, 200);
 		}
 	}
-
 #endif
+	if (settest || all) {
+#ifdef HAVE_LEVELDB
+		{
+			setsync::config::Configuration c;
+			evaluation::SetTest settest(c);
+			settest.run();
+		}
+#endif
+#ifdef HAVE_DB_CXX_H
+		{
+			SET_CONFIG cc = set_create_config();
+			cc.storage = BERKELEY_DB;
+			setsync::config::Configuration c(cc);
+			evaluation::SetTest settest(c);
+			settest.run();
+		}
+#endif
+	}
+
 }
