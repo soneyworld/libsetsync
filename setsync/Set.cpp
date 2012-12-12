@@ -18,6 +18,119 @@
 
 namespace setsync {
 
+SynchronizationProcess::SynchronizationProcess(Set * set,
+		AbstractDiffHandler * handler) :
+	set_(set), handler_(handler), stat_(START) {
+	this->externalhash = new unsigned char[set_->hash_.getHashSize()];
+	this->looseSync_ = set->bf_->createSyncProcess();
+	this->strictSync_ = set->trie_->createSyncProcess();
+}
+
+std::size_t SynchronizationProcess::step(void * inbuf,
+		const std::size_t inlength, void * outbuf, const std::size_t outlength,
+		diff_callback * callback, void * closure) {
+	C_DiffHandler handler(callback, closure);
+	return this->step(inbuf, inlength, outbuf, outlength, handler);
+}
+
+std::size_t SynchronizationProcess::step(void * inbuf,
+		const std::size_t inlength, void * outbuf, const std::size_t outlength,
+		AbstractDiffHandler& diffhandler) {
+	throw "not yet implemented";
+	std::size_t hashsize = this->set_->hash_.getHashSize();
+	switch (this->stat_) {
+	case START: {
+		/*
+		std::size_t min = std::min(inlength, hashsize - pos_);
+		memcpy(externalhash + pos_, inbuf, min);
+		pos_ += min;
+		if (pos_ == hashsize) {
+			unsigned char localroot[hashsize];
+			if (this->set_->trie_->getRoot(localroot)) {
+				if (memcmp(localroot, externalhash, hashsize) == 0) {
+					this->stat_ = EQUAL;
+				} else {
+					this->stat_ = BF;
+					this->pos_ = 0;
+					return step((unsigned char *) (inbuf) + min,
+							inlength - min, outbuf, outlength, diffhandler);
+				}
+			} else {
+				this->stat_ = BF;
+				this->pos_ = 0;
+				return step((unsigned char *) (inbuf) + min, inlength - min,
+						outbuf, outlength, diffhandler);
+			}
+		}*/
+	}
+		break;
+	case BF: {
+
+	}
+		break;
+	case TRIE: {
+
+	}
+		break;
+	case EQUAL: {
+
+	}
+		break;
+	}
+	//TODO
+	throw "not yet implemented";
+}
+
+std::size_t SynchronizationProcess::step(void * inbuf,
+		const std::size_t inlength, void * outbuf, const std::size_t outlength) {
+	if (this->handler_ != NULL) {
+		return this->step(inbuf, inlength, outbuf, outlength, *handler_);
+	} else {
+		IgnoringDiffHandler ignore;
+		return this->step(inbuf, inlength, outbuf, outlength, ignore);
+	}
+}
+
+SynchronizationProcess::~SynchronizationProcess() {
+	delete this->externalhash;
+	delete this->looseSync_;
+	delete this->strictSync_;
+}
+
+std::size_t SynchronizationProcess::calcOutputBufferSize(const size_t RTT,
+		const size_t bandwidth) const {
+	if (RTT == 0) {
+		return this->set_->hash_.getHashSize() * 2;
+	} else {
+		double rtt = RTT;
+		rtt = rtt / 1000000;
+		double bw = bandwidth;
+		double bits = bandwidth * rtt;
+		std::size_t result = (std::size_t) (bits / 8.0);
+		return result;
+	}
+}
+
+bool SynchronizationProcess::done() const {
+	throw "not yet implemented";
+	if (this->stat_ == EQUAL) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool SynchronizationProcess::pendingOutput() const {
+	throw "not yet implemented";
+	return false;
+}
+
+bool SynchronizationProcess::awaitingInput() const {
+	throw "not yet implemented";
+	return false;
+}
+
+
 Set::Set(const config::Configuration& config) :
 	config_(config), hash_(config.getHashFunction()), tempDir(NULL),
 			indexInUse_(false) {
@@ -251,11 +364,21 @@ bool Set::find(const void * data, const std::size_t length) {
 	return find(k);
 }
 
+bool Set::get(const unsigned char * key, unsigned char ** value,
+			std::size_t * valueSize){
+	return false;
+}
+
 void Set::clear() {
 	this->trie_->clear();
 	this->bf_->clear();
 	this->index_->clear();
 	this->indexInUse_ = false;
+}
+
+
+setsync::sync::AbstractSyncProcessPart * Set::createSyncProcess(){
+	return NULL;
 }
 
 } // end of namespace setsync
@@ -409,7 +532,7 @@ int set_sync_init_handle(SET * set, SET_SYNC_HANDLE * handle) {
 	handle->error = NULL;
 	try {
 		setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
-		handle->process = (void*) new setsync::SynchronizationProcess(cppset);
+		handle->process = (void*) cppset->createSyncProcess();
 	} catch (std::exception& e) {
 		if (set->error == NULL) {
 			set->error = (void *) new std::string(e.what());

@@ -6,6 +6,7 @@
 
 #ifndef KEYVALUECOUNTINGBLOOMFILTER_H_
 #define KEYVALUECOUNTINGBLOOMFILTER_H_
+#include <setsync/sync/Synchronization.h>
 #include <setsync/bloom/CountingBloomFilter.h>
 #include <setsync/bloom/FSBloomFilter.h>
 #include <setsync/bloom/ComparableBloomFilter.h>
@@ -13,6 +14,30 @@
 #include <setsync/DiffHandler.h>
 
 namespace bloom {
+class KeyValueCountingBloomFilter;
+
+class KeyValueBloomFilterSync: public setsync::sync::AbstractSyncProcessPart {
+private:
+	KeyValueCountingBloomFilter * bf_;
+	std::size_t inPos_;
+	std::size_t outPos_;
+public:
+	KeyValueBloomFilterSync(KeyValueCountingBloomFilter * bf);
+	virtual ~KeyValueBloomFilterSync();
+	/**
+	 * \return true, if more output is available
+	 */
+	virtual bool pendingOutput() const;
+	/**
+	 * \return true, if the sync process expects  more input
+	 */
+	virtual bool awaitingInput() const;
+
+	virtual std::size_t processInput(void * inbuf, const std::size_t length,
+			setsync::AbstractDiffHandler& diffhandler);
+	virtual std::size_t writeOutput(void * outbuf, const std::size_t maxlength);
+};
+
 /**
  * This BloomFilter is an implementation of a counting bloomfilter,
  * which uses the given Key-Value store to load and safe the hashes
@@ -21,8 +46,10 @@ namespace bloom {
  */
 class KeyValueCountingBloomFilter: public CountingBloomFilter,
 		public FSBloomFilter,
-		public ComparableBloomFilterInterface {
+		public ComparableBloomFilterInterface,
+		public ::setsync::sync::SyncableDataStructureInterface {
 	friend class KeyValueCountingBloomFilterTest;
+	friend class KeyValueBloomFilterSync;
 protected:
 	setsync::storage::AbstractKeyValueStorage& storage_;
 public:
@@ -84,6 +111,8 @@ public:
 	 * cleans the key value storage and the bloom filter
 	 */
 	virtual void clear(void);
+
+	virtual setsync::sync::AbstractSyncProcessPart * createSyncProcess();
 };
 
 }

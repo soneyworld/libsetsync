@@ -58,6 +58,10 @@ int main(int argc, const char* argv[]) {
 		set_free(&s2);
 		return result;
 	}
+	SET_SYNC_HANDLE handle;
+	set_sync_init_handle(&s2,&handle);
+	printf("%ld\n", set_sync_calc_output_buffer_size(&handle, 1000, 1000));
+	set_sync_free_handle(&handle);
 	result = set_free(&s2);
 	if (result != 0) {
 		printf("error on deleting set2: %d\n", result);

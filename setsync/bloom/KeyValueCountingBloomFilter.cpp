@@ -10,6 +10,50 @@
 
 namespace bloom {
 
+KeyValueBloomFilterSync::KeyValueBloomFilterSync(
+		KeyValueCountingBloomFilter * bf) :
+	bf_(bf), inPos_(0), outPos_(0) {
+
+}
+KeyValueBloomFilterSync::~KeyValueBloomFilterSync() {
+
+}
+
+bool KeyValueBloomFilterSync::pendingOutput() const {
+	return this->bf_->size() > outPos_;
+}
+bool KeyValueBloomFilterSync::awaitingInput() const {
+	return this->bf_->size() > inPos_;
+}
+
+std::size_t KeyValueBloomFilterSync::processInput(void * inbuf,
+		const std::size_t inlength, setsync::AbstractDiffHandler& diffhandler) {
+	std::size_t bflength = this->bf_->size();
+	if (inPos_ + inlength > bflength) {
+		std::size_t bfpart = inlength - (bflength - inPos_);
+		this->bf_->diff((unsigned char *) inbuf, bfpart, inPos_, diffhandler);
+		this->inPos_ = bflength;
+		return bfpart;
+	} else if (inPos_ + inlength == bflength) {
+		this->bf_->diff((unsigned char *) inbuf, inlength, inPos_, diffhandler);
+		this->inPos_ = bflength;
+		return inlength;
+	} else {
+		this->bf_->diff((unsigned char *) inbuf, inlength, inPos_, diffhandler);
+		this->inPos_ += inlength;
+		return inlength;
+	}
+	return 0;
+}
+
+std::size_t KeyValueBloomFilterSync::writeOutput(void * outbuf,
+		const std::size_t maxlength) {
+	std::size_t resultsize = std::min(this->bf_->size() - outPos_, maxlength);
+	this->outPos_ += resultsize;
+	memcpy(outbuf, this->bf_->bitArray_ + outPos_, resultsize);
+	return resultsize;
+}
+
 KeyValueCountingBloomFilter::KeyValueCountingBloomFilter(
 		const utils::CryptoHash& hash,
 		setsync::storage::AbstractKeyValueStorage& storage,
@@ -197,6 +241,10 @@ bool KeyValueCountingBloomFilter::remove(const unsigned char * key) {
 		}
 	}
 	return result;
+}
+
+setsync::sync::AbstractSyncProcessPart * KeyValueCountingBloomFilter::createSyncProcess() {
+	return new KeyValueBloomFilterSync(this);
 }
 
 }

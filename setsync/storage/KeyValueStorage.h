@@ -62,8 +62,7 @@ public:
 	 * \param valueSize of the returned value
 	 * \return true on success, otherwise false
 	 */
-	virtual bool
-	get(const unsigned char * key, const std::size_t length,
+	virtual bool get(const unsigned char * key, const std::size_t length,
 			unsigned char ** value, std::size_t * valueSize) const = 0;
 	/**
 	 * Adds or updates the key and its value

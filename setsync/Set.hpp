@@ -8,6 +8,7 @@
 #define SET_HPP_
 #include "set.h"
 #include <stdint.h>
+#include <setsync/sync/Synchronization.h>
 #include <setsync/storage/KeyValueStorage.h>
 #include <setsync/bloom/KeyValueCountingBloomFilter.h>
 #include <setsync/index/KeyValueIndex.h>
@@ -15,12 +16,89 @@
 #include <setsync/utils/CryptoHash.h>
 #include <setsync/config/Configuration.h>
 #include <setsync/utils/FileSystem.h>
-#include <setsync/Synchronization.h>
+
 #ifdef HAVE_DB_CXX_H
 #include <db_cxx.h>
 #endif
 
 namespace setsync {
+
+/**
+ * With the help of this class, an external set can be synchronized with
+ * the local instance.
+ */
+class SynchronizationProcess: public sync::AbstractSyncProcessPart {
+private:
+	enum status {
+		START, BF, TRIE, EQUAL
+	} stat_;
+	/// Local set instance
+	Set * set_;
+	/// default handler, C++ interface only, NULL if the no diff handler should be used
+	AbstractDiffHandler * handler_;
+	/// hash of the other trie root
+	unsigned char * externalhash;
+
+	AbstractSyncProcessPart * looseSync_;
+	AbstractSyncProcessPart * strictSync_;
+public:
+	/**
+	 * Creates a new Synchronization Process for the given set. If a
+	 * diff handler is passed, it will be used as default for the step
+	 * call, which hasn't passed a dedicated callback, or DiffHandler
+	 * reference.
+	 *
+	 * \param set local set, which should be synchronized
+	 * \param handler which should be called as default, if no other is given
+	 */
+	SynchronizationProcess(Set * set, AbstractDiffHandler * handler = NULL);
+	std::size_t step(void * inbuf, const std::size_t inlength, void * outbuf,
+			const std::size_t outlength, diff_callback * callback,
+			void * closure);
+	std::size_t step(void * inbuf, const std::size_t inlength, void * outbuf,
+			const std::size_t outlength, AbstractDiffHandler& diffhandler);
+	std::size_t step(void * inbuf, const std::size_t inlength, void * outbuf,
+			const std::size_t outlength);
+	std::size_t loose_step(void * inbuf, const std::size_t inlength,
+			void * outbuf, const std::size_t outlength,
+			diff_callback * callback, void * closure);
+	std::size_t loose_step(void * inbuf, const std::size_t inlength,
+			void * outbuf, const std::size_t outlength,
+			AbstractDiffHandler& diffhandler);
+	std::size_t loose_step(void * inbuf, const std::size_t inlength,
+			void * outbuf, const std::size_t outlength);
+	std::size_t strict_step(void * inbuf, const std::size_t inlength,
+			void * outbuf, const std::size_t outlength,
+			diff_callback * callback, void * closure);
+	std::size_t strict_step(void * inbuf, const std::size_t inlength,
+			void * outbuf, const std::size_t outlength,
+			AbstractDiffHandler& diffhandler);
+	std::size_t strict_step(void * inbuf, const std::size_t inlength,
+			void * outbuf, const std::size_t outlength);
+	virtual ~SynchronizationProcess();
+	/**
+	 * Calculates the optimal size of a sending buffer for the given network parameter.
+	 *
+	 * \param RTT round trip time in nanoseconds
+	 * \param bandwidth in bits per second
+	 * \return the optimal size of a sending buffer
+	 */
+	std::size_t
+	calcOutputBufferSize(const size_t RTT, const size_t bandwidth) const;
+	/**
+	 * \return true, if more output is available
+	 */
+	virtual bool pendingOutput() const;
+	/**
+	 * \return true, if the sync process expects  more input
+	 */
+	virtual bool awaitingInput() const;
+	/**
+	 * \return true, if sync is done
+	 */
+	virtual bool done() const;
+};
+
 /**
  * Main class to use for a set, which should be synchronized
  * over a network or locally. It provides mechanisms to add, find
@@ -28,7 +106,7 @@ namespace setsync {
  * keys or binary data, which is hashed automatically on insertion
  * or find.
  */
-class Set {
+class Set: public sync::SyncableDataStructureInterface {
 	friend class SynchronizationProcess;
 private:
 	/// maximum number of allowed set elements
@@ -110,6 +188,23 @@ public:
 	virtual bool find(const char * str);
 	virtual bool find(const std::string& str);
 	virtual bool find(const void * data, const std::size_t length);
+
+	/**
+	 * Copies the result of the search for the given key
+	 * into a newly allocated memory position and writes the
+	 * pointer to value, if the find has been successful.
+	 * The size of the allocated memory will be passed to
+	 * valueSize.
+	 * If no entry has been found, the valueSize is set to 0,
+	 * the value pointing is NULL and false is returned.
+	 *
+	 * \param key to be searched for
+	 * \param value pointer to the stored value
+	 * \param valueSize of the returned value
+	 * \return true on success, otherwise false
+	 */
+	virtual bool get(const unsigned char * key, unsigned char ** value,
+			std::size_t * valueSize);
 
 	// Modifiers
 	/**
@@ -195,6 +290,8 @@ public:
 	 * new instance.
 	 */
 	virtual ~Set();
+
+	virtual setsync::sync::AbstractSyncProcessPart * createSyncProcess();
 };
 }
 

@@ -6,10 +6,11 @@
 
 #ifndef TRIE_H_
 #define TRIE_H_
-
+#include <setsync/sync/Synchronization.h>
 #include <cstring>
 #include <string>
 #include <setsync/utils/CryptoHash.h>
+
 
 namespace trie {
 /**
@@ -26,7 +27,7 @@ enum TrieNodeType {
 /**
  *
  */
-class Trie {
+class Trie: public setsync::sync::SyncableDataStructureInterface {
 private:
 	/// The number of the saved leafs, not the number of nodes!
 	size_t size;
@@ -175,7 +176,6 @@ public:
 	 *
 	 * \return dot string containing the whole trie
 	 */
-
 	virtual std::string toDotString() const;
 	/**
 	 * Generates a string, containing a graph in the dot language.
@@ -188,6 +188,8 @@ public:
 	 * \return dot string containing the whole trie
 	 */
 	virtual std::string toDotString(const std::string nodePrefix) const = 0;
+
+	virtual setsync::sync::AbstractSyncProcessPart * createSyncProcess() = 0;
 };
 
 }

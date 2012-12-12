@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 
-h_sources = Trie.h KeyValueTrie.h TrieException.h
-cpp_sources = Trie.cpp KeyValueTrie.cpp
+h_sources = Synchronization.h
+cpp_sources = Synchronization.cpp
 
 AM_CFLAGS = 
 AM_LDFLAGS =
@@ -21,5 +21,5 @@ AM_CPPFLAGS = @IBRCOMMON_CFLAGS@
 AM_LDFLAGS += @IBRCOMMON_LIBS@
 endif
 
-noinst_LTLIBRARIES = libtrie.la
-libtrie_la_SOURCES= $(h_sources) $(cpp_sources)
+noinst_LTLIBRARIES = libsync.la
+libsync_la_SOURCES= $(h_sources) $(cpp_sources)

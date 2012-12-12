@@ -217,6 +217,7 @@ AC_CONFIG_FILES([Makefile \
 	setsync/Makefile \
 	setsync/bloom/Makefile \
 	setsync/config/Makefile \
+	setsync/sync/Makefile \
 	setsync/trie/Makefile \
 	setsync/index/Makefile \
 	setsync/utils/Makefile \

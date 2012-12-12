@@ -1,15 +1,15 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = utils config bloom trie index storage . tests
+SUBDIRS = utils config sync bloom trie index storage . tests
 
 # what flags you want to pass to the C compiler & linker
 AM_CPPFLAGS = @CFLAGS@ 
 AM_LDFLAGS = @LIBS@
 
 include_h_sources = set.h Set.hpp
-h_sources = $(include_h_sources) DiffHandler.h Synchronization.h
+h_sources = $(include_h_sources) DiffHandler.h
 c_sources = 
-cpp_sources = Set.cpp DiffHandler.cpp Synchronization.cpp
+cpp_sources = Set.cpp DiffHandler.cpp
 
 if BERKELEY_DB
 
@@ -38,7 +38,7 @@ library_include_HEADERS = $(include_h_sources)
 lib_LTLIBRARIES = libsetsync.la
 libsetsync_la_SOURCES = $(h_sources) $(cpp_sources) $(c_sources)
 libsetsync_la_LDFLAGS = -version-info $(GENERIC_LIBRARY_VERSION) -release $(GENERIC_RELEASE)
-libsetsync_la_LIBADD = bloom/libbloom.la trie/libtrie.la index/libindex.la utils/libutils.la storage/libstorage.la config/libconfig.la
+libsetsync_la_LIBADD = bloom/libbloom.la trie/libtrie.la index/libindex.la utils/libutils.la storage/libstorage.la config/libconfig.la sync/libsync.la
 
 noinst_PROGRAMS=set
 set_SOURCES = main.c

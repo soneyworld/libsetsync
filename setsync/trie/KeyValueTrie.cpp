@@ -14,6 +14,34 @@
 #include <stdlib.h>
 
 namespace trie {
+
+KeyValueTrieSync::KeyValueTrieSync(KeyValueTrie * trie) :
+	trie_(trie) {
+
+}
+
+KeyValueTrieSync::~KeyValueTrieSync() {
+
+}
+
+bool KeyValueTrieSync::pendingOutput() const {
+	throw "not yet implemented";
+	return false;
+}
+bool KeyValueTrieSync::awaitingInput() const {
+	throw "not yet implemented";
+	return false;
+}
+
+std::size_t KeyValueTrieSync::processInput(void * inbuf,
+		const std::size_t length, setsync::AbstractDiffHandler& diffhandler) {
+	throw "not yet implemented";
+}
+std::size_t KeyValueTrieSync::writeOutput(void * outbuf,
+		const std::size_t maxlength) {
+	throw "not yet implemented";
+}
+
 const uint8_t TrieNode::HAS_PARENT = 0x01;
 const uint8_t TrieNode::HAS_CHILDREN = 0x02;
 const uint8_t TrieNode::DIRTY = 0x04;
@@ -156,7 +184,7 @@ bool TrieNode::similar(const TrieNode& node) const {
 	return true;
 }
 
-uint8_t TrieNode::commonPrefixSize(TrieNode& other) const {
+uint8_t TrieNode::commonPrefixSize(const TrieNode& other) const {
 	uint8_t common = 0;
 	for (uint8_t i = 0; i < 8 * hashfunction_.getHashSize(); i++) {
 		if (BITTEST(this->prefix, i) != BITTEST(other.prefix, i))
@@ -872,6 +900,10 @@ void KeyValueTrie::diff(const void * subtrie, const std::size_t length,
 					false);
 		}
 	}
+}
+
+setsync::sync::AbstractSyncProcessPart * KeyValueTrie::createSyncProcess() {
+	return new KeyValueTrieSync(this);
 }
 
 }
