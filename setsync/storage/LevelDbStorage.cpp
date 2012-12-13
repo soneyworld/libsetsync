@@ -62,14 +62,16 @@ LevelDbStorage::LevelDbStorage(const std::string& path,
 
 LevelDbStorage::LevelDbStorage(const std::string& path,
 		const leveldb::Options& options, const leveldb::ReadOptions& roptions,
-		const leveldb::WriteOptions& woptions) {
+		const leveldb::WriteOptions& woptions) :
+	path_(path), options_(options), writeOptions_(woptions),
+			readOptions_(roptions) {
 	init();
 }
 
 void LevelDbStorage::init() {
 	options_.create_if_missing = true;
 	leveldb::Status s = leveldb::DB::Open(options_, path_, &(this->db_));
-	if(!s.ok()){
+	if (!s.ok()) {
 		throw StorageException("Failed to open db");
 	}
 }

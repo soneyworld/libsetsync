@@ -8,15 +8,6 @@
 
 namespace bloom {
 
-HashFunctionFactory& HashFunctionFactory::getInstance() {
-	static HashFunctionFactory instance;
-	return instance;
-}
-
-HashFunction * HashFunctionFactory::createHashFunction(std::string function) {
-	return new SaltedHashFunction(64);
-}
-
 uint64_t HashFunction::operator ()(const unsigned char * input,
 		const std::size_t length) const {
 	return this->hash(input, length, 0);
@@ -25,26 +16,6 @@ uint64_t HashFunction::operator ()(const unsigned char * input,
 uint64_t HashFunction::operator ()(const unsigned char * input,
 		const std::size_t length, const std::size_t function) const {
 	return this->hash(input, length, function);
-}
-
-SplittingMDHashFunction::SplittingMDHashFunction(
-		const std::size_t outputLength, const utils::CryptoHash& hash) :
-	hash_(hash), outputLength_(outputLength) {
-
-}
-
-SplittingMDHashFunction::~SplittingMDHashFunction() {
-}
-
-size_t SplittingMDHashFunction::count() const {
-	//TODO
-	throw "MUST BE IMPLEMENTED";
-}
-
-uint64_t SplittingMDHashFunction::hash(const unsigned char * input,
-		const std::size_t length, const std::size_t function) const {
-	//TODO
-	throw "MUST BE IMPLEMENTED";
 }
 
 SaltedHashFunction::SaltedHashFunction(size_t salt_count) :

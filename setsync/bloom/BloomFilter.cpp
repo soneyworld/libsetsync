@@ -93,16 +93,6 @@ BloomFilter::BloomFilter(const utils::CryptoHash& hash,
 			this->cryptoHashFunction_.getHashSize());
 }
 
-BloomFilter::BloomFilter(const utils::CryptoHash& hash,
-		const std::string hashFunction, const uint64_t maxNumberOfElements,
-		const bool hardMaximum, const float falsePositiveRate) :
-	AbstractBloomFilter(hash) {
-	init(falsePositiveRate, hardMaximum, maxNumberOfElements);
-	this->hashFunction_
-			= HashFunctionFactory::getInstance().createHashFunction(
-					hashFunction);
-}
-
 BloomFilter::~BloomFilter() {
 	if (this->bitArray_ != NULL)
 		free(this->bitArray_);
@@ -176,8 +166,8 @@ bool BloomFilter::operator ==(const AbstractBloomFilter& filter) const {
 			return true;
 		unsigned char c1 = this->bitArray_[this->filterSize_ / BYTESIZE];
 		unsigned char c2 = filter_.bitArray_[this->filterSize_ / BYTESIZE];
-		c1 >> BYTESIZE - remainder;
-		c2 >> BYTESIZE - remainder;
+		c1 = c1 >> (BYTESIZE - remainder);
+		c2 = c2 >> (BYTESIZE - remainder);
 		return c1 == c2;
 	} catch (const std::bad_cast& e) {
 		return false;
@@ -200,8 +190,8 @@ bool BloomFilter::operator !=(const AbstractBloomFilter& filter) const {
 			return false;
 		unsigned char c1 = this->bitArray_[this->filterSize_ / BYTESIZE];
 		unsigned char c2 = filter_.bitArray_[this->filterSize_ / BYTESIZE];
-		c1 >> BYTESIZE - remainder;
-		c2 >> BYTESIZE - remainder;
+		c1 = c1 >> (BYTESIZE - remainder);
+		c2 = c2 >> (BYTESIZE - remainder);
 		return c1 != c2;
 	} catch (const std::bad_cast& e) {
 		return false;
@@ -223,7 +213,7 @@ void BloomFilter::add(const unsigned char *key) {
 		throw "Maximum of Elements reached, adding failed";
 	std::size_t bit_index = 0;
 	std::size_t bit = 0;
-	for (int i = 0; i < this->functionCount_; i++) {
+	for (std::size_t i = 0; i < this->functionCount_; i++) {
 		uint64_t pos = this->hashFunction_->operator ()(key,
 				this->cryptoHashFunction_.getHashSize(), i);
 		compute_indices(pos, bit_index, bit);
@@ -237,17 +227,20 @@ void BloomFilter::addAll(const unsigned char *keys, const std::size_t count) {
 	if (this->hardMaximum_ && this->itemCount_ + count > maxElements_)
 		throw "Maximum of Elements reached, adding failed";
 	uint64_t hashes[count * this->functionCount_];
-	for (int i = 0; i < count; i++) {
-		for (int j = 0; j < this->functionCount_; j++) {
-			hashes[i * this->functionCount_ + j] = this->hashFunction_->operator ()(
-					keys + (this->cryptoHashFunction_.getHashSize() * i),
-					this->cryptoHashFunction_.getHashSize(), j);
+	for (std::size_t i = 0; i < count; i++) {
+		for (std::size_t j = 0; j < this->functionCount_; j++) {
+			hashes[i * this->functionCount_ + j]
+					= this->hashFunction_->operator ()(
+							keys
+									+ (this->cryptoHashFunction_.getHashSize()
+											* i),
+							this->cryptoHashFunction_.getHashSize(), j);
 		}
 	}
 	std::sort(hashes, hashes + (count * this->functionCount_));
 	std::size_t bit_index = 0;
 	std::size_t bit = 0;
-	for (int i = 0; i < count * this->functionCount_; i++) {
+	for (std::size_t i = 0; i < count * this->functionCount_; i++) {
 		compute_indices(hashes[i], bit_index, bit);
 		this->bitArray_[bit_index / BYTESIZE] |= bit_mask[bit];
 	}
@@ -279,7 +272,7 @@ bool BloomFilter::contains(const unsigned char *key) const {
 	std::size_t bit_index = 0;
 	std::size_t bit = 0;
 
-	for (int i = 0; i < this->functionCount_; i++) {
+	for (std::size_t i = 0; i < this->functionCount_; i++) {
 		uint64_t pos = this->hashFunction_->operator ()(key,
 				this->cryptoHashFunction_.getHashSize(), i);
 		compute_indices(pos, bit_index, bit);
@@ -340,7 +333,7 @@ void BloomFilter::init(const float falsePositiveRate, const bool hardMaximum,
 
 std::string BloomFilter::toString() {
 	std::stringstream ss;
-	for (int i = 0; i < (this->filterSize_ + 7) / BYTESIZE; i++) {
+	for (std::size_t i = 0; i < (this->filterSize_ + 7) / BYTESIZE; i++) {
 		unsigned char byte = this->bitArray_[i];
 		for (int j = 7; j >= 0; j--) {
 			if (byte & (1 << j))

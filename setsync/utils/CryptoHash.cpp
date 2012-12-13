@@ -21,6 +21,13 @@ void CryptoHash::init() {
 		throw "Crypto hash algorithm not found";
 	}
 #endif
+
+#ifdef HAVE_OPENSSL
+	size_ = this->digit->md_size;
+#else
+	size_ = this->digit->size;
+#endif
+
 }
 
 CryptoHash::CryptoHash(const char * name) :
@@ -38,12 +45,8 @@ CryptoHash::CryptoHash(const CryptoHash& copy) :
 	init();
 }
 
-const std::size_t CryptoHash::getHashSize() const {
-#ifdef HAVE_OPENSSL
-	return this->digit->md_size;
-#else
-	return this->digit->size;
-#endif
+std::size_t CryptoHash::getHashSize() const {
+	return this->size_;
 }
 
 int CryptoHash::hash(unsigned char * target_md, const char *str) const {

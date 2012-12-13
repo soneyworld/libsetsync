@@ -23,6 +23,8 @@
 #define BYTESIZE 8
 #endif
 
+#define _unused(x) ((void)x)
+
 namespace bloom {
 
 FSBloomFilter::FSBloomFilter(const utils::CryptoHash& hash, const char * file,
@@ -100,12 +102,16 @@ FSBloomFilter::~FSBloomFilter() {
 	if(ret==-1) {
 		throw "THIS SHOULD NEVER EVER HAPPEN!!!! OTHERWISE, THIS CLASS IS WRONG!!!";
 	}
+#else
+	_unused(ret);
 #endif
 	ret = fclose(this->filehandler_);
 #ifdef DEBUG
 	if(ret!=0) {
 		throw "closing file failed, this shouldn't happen, but it is not important";
 	}
+#else
+	_unused(ret);
 #endif
 	delete this->hashFunction_;
 }
@@ -135,7 +141,7 @@ void FSBloomFilter::add(const unsigned char *key) {
 		throw std::runtime_error("Maximum of Elements reached, adding failed");
 	std::size_t bit_index = 0;
 	std::size_t bit = 0;
-	for (int i = 0; i < this->functionCount_; i++) {
+	for (std::size_t i = 0; i < this->functionCount_; i++) {
 		uint64_t pos = this->hashFunction_->operator ()(key,
 				this->cryptoHashFunction_.getHashSize(), i) % this->filterSize_;
 		compute_indices(pos, bit_index, bit);
@@ -149,8 +155,8 @@ void FSBloomFilter::addAll(const unsigned char* keys, const std::size_t count) {
 	if (this->hardMaximum_ && this->itemCount_ + count > maxElements_)
 		throw std::runtime_error("Maximum of Elements reached, adding failed");
 	uint64_t hashes[count * this->functionCount_];
-	for (int i = 0; i < count; i++) {
-		for (int j = 0; j < this->functionCount_; j++) {
+	for (std::size_t i = 0; i < count; i++) {
+		for (std::size_t j = 0; j < this->functionCount_; j++) {
 			hashes[i * this->functionCount_ + j]
 					= this->hashFunction_->operator ()(
 							keys
@@ -162,7 +168,7 @@ void FSBloomFilter::addAll(const unsigned char* keys, const std::size_t count) {
 	std::sort(hashes, hashes + (count * this->functionCount_));
 	std::size_t bit_index = 0;
 	std::size_t bit = 0;
-	for (int i = 0; i < count * this->functionCount_; i++) {
+	for (std::size_t i = 0; i < count * this->functionCount_; i++) {
 		compute_indices(hashes[i], bit_index, bit);
 		this->bitArray_[bit_index] |= bit_mask[bit];
 	}
@@ -177,7 +183,7 @@ bool FSBloomFilter::contains(const unsigned char *key) const {
 	std::size_t bit_index = 0;
 	std::size_t bit = 0;
 
-	for (int i = 0; i < this->functionCount_; i++) {
+	for (std::size_t i = 0; i < this->functionCount_; i++) {
 		uint64_t pos = this->hashFunction_->operator ()(key,
 				this->cryptoHashFunction_.getHashSize(), i) % this->filterSize_;
 		compute_indices(pos, bit_index, bit);
@@ -191,8 +197,8 @@ bool FSBloomFilter::contains(const unsigned char *key) const {
 std::size_t FSBloomFilter::containsAll(const unsigned char *keys,
 		const std::size_t count) const {
 	uint64_t hashes[count * this->functionCount_];
-	for (int i = 0; i < count; i++) {
-		for (int j = 0; j < this->functionCount_; j++) {
+	for (std::size_t i = 0; i < count; i++) {
+		for (std::size_t j = 0; j < this->functionCount_; j++) {
 			hashes[i * this->functionCount_ + j]
 					= this->hashFunction_->operator ()(
 							keys
@@ -205,12 +211,13 @@ std::size_t FSBloomFilter::containsAll(const unsigned char *keys,
 	std::sort(hashes, hashes + (count * this->functionCount_));
 	std::size_t bit_index = 0;
 	std::size_t bit = 0;
-	for (int i = 0; i < count * this->functionCount_; i++) {
+	for (std::size_t i = 0; i < count * this->functionCount_; i++) {
 		compute_indices(hashes[i], bit_index, bit);
 		if ((this->bitArray_[bit_index] & bit_mask[bit]) != bit_mask[bit]) {
 			return i == 0 ? 1 : i;
 		}
 	}
+	return true;
 }
 
 void FSBloomFilter::compute_indices(const uint64_t hash,
@@ -271,8 +278,8 @@ bool FSBloomFilter::operator ==(const AbstractBloomFilter& filter) const {
 			return true;
 		unsigned char c1 = this->bitArray_[this->filterSize_ / BYTESIZE];
 		unsigned char c2 = filter_.bitArray_[this->filterSize_ / BYTESIZE];
-		c1 >> BYTESIZE - remainder;
-		c2 >> BYTESIZE - remainder;
+		c1 = c1 >> (BYTESIZE - remainder);
+		c2 = c2 >> (BYTESIZE - remainder);
 		return c1 == c2;
 	} catch (const std::bad_cast& e) {
 		return false;
@@ -296,8 +303,8 @@ bool FSBloomFilter::operator !=(const AbstractBloomFilter& filter) const {
 			return false;
 		unsigned char c1 = this->bitArray_[this->filterSize_ / BYTESIZE];
 		unsigned char c2 = filter_.bitArray_[this->filterSize_ / BYTESIZE];
-		c1 >> BYTESIZE - remainder;
-		c2 >> BYTESIZE - remainder;
+		c1 = c1 >> (BYTESIZE - remainder);
+		c2 = c2 >> (BYTESIZE - remainder);
 		return c1 != c2;
 	} catch (const std::bad_cast& e) {
 		return false;

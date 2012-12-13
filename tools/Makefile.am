@@ -2,7 +2,7 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 AUTOMAKE_OPTIONS = foreign
 
 # what flags you want to pass to the C compiler & linker
-AM_CFLAGS = @CFLAGS@ 
+AM_CPPFLAGS =
 AM_LDFLAGS = @LIBS@ -lsetsync -L@top_srcdir@/setsync/.libs
 
 

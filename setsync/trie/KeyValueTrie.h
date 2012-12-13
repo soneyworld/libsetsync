@@ -54,7 +54,7 @@ private:
 			const std::size_t loadedSize);
 	static void marshall(const TrieNode& source,
 			const unsigned char * targetBuffer);
-	static const std::size_t getMarshallBufferSize(const TrieNode& node);
+	static std::size_t getMarshallBufferSize(const TrieNode& node);
 	/// Reference to the key value storage where the node (should) exist
 	setsync::storage::AbstractKeyValueStorage& storage_;
 	/**
@@ -71,12 +71,6 @@ private:
 	 * \return common bits
 	 */
 	uint8_t commonPrefixSize(const TrieNode& other) const;
-	/// true, if this node has a parent
-	bool hasParent_;
-	/// true, if this node has children
-	bool hasChildren_;
-	/// true, if the hash of this node hasn't been updated since a new child has been added
-	bool dirty_;
 	/// The hash of this node
 	unsigned char * hash;
 	/// The hash of the parent of this node
@@ -87,8 +81,14 @@ private:
 	unsigned char * larger;
 	/// The prefix of this node
 	unsigned char * prefix;
+	/// true, if this node has children
+	bool hasChildren_;
+	/// true, if this node has a parent
+	bool hasParent_;
 	/// The size of the prefix
 	uint8_t prefix_mask;
+	/// true, if the hash of this node hasn't been updated since a new child has been added
+	bool dirty_;
 
 	const utils::CryptoHash& hashfunction_;
 
@@ -334,7 +334,6 @@ private:
 			setsync::storage::AbstractKeyValueStorage& storage);
 	virtual ~KeyValueRootNode() {
 	}
-	;
 public:
 	/**
 	 * Loads the hash of the DbNode, which is saved as root node. Throws a

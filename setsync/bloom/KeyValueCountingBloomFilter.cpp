@@ -60,9 +60,10 @@ KeyValueCountingBloomFilter::KeyValueCountingBloomFilter(
 		const std::string& file, const uint64_t maxNumberOfElements,
 		const bool hardMaximum, const float falsePositiveRate) :
 			AbstractBloomFilter(hash),
+			CountingBloomFilter(hash),
 			FSBloomFilter(hash, (file.size() == 0) ? NULL : file.c_str(),
 					maxNumberOfElements, hardMaximum, falsePositiveRate),
-			CountingBloomFilter(hash), storage_(storage) {
+			storage_(storage) {
 	/*
 	 * Loading all set bloom filter bits from db
 	 */
@@ -93,7 +94,6 @@ void KeyValueCountingBloomFilter::diff(const unsigned char * externalBF,
 		setsync::AbstractDiffHandler& handler) const {
 	if (length + offset > this->mmapLength_)
 		throw "";
-	unsigned char c;
 	for (std::size_t i = 0; i < length; ++i) {
 		for (unsigned short j = 0; j < 8; j++) {
 			if (!BITTEST(externalBF+i,j) && BITTEST(this->bitArray_+i+offset,j)) {
@@ -102,7 +102,6 @@ void KeyValueCountingBloomFilter::diff(const unsigned char * externalBF,
 				if (pos > this->filterSize_)
 					continue;
 				// Buffer
-				unsigned char hash[this->cryptoHashFunction_.getHashSize()];
 				unsigned char * resultbuffer;
 				std::size_t resultSize;
 				if (storage_.get((unsigned char*) &pos, sizeof(uint64_t),
@@ -125,7 +124,7 @@ void KeyValueCountingBloomFilter::add(const unsigned char * key) {
 	unsigned char * resultbuffer;
 	std::size_t resultSize;
 	// Insert the given key once per hash function
-	for (int i = 0; i < this->functionCount_; i++) {
+	for (std::size_t i = 0; i < this->functionCount_; i++) {
 		// calculate the db key
 		uint64_t k = this->hashFunction_->operator ()(key,
 				this->cryptoHashFunction_.getHashSize(), i);
@@ -184,13 +183,10 @@ bool KeyValueCountingBloomFilter::remove(const unsigned char * key) {
 	std::size_t resultSize;
 	// success status of the remove process
 	bool result = false;
-	int ret;
-	// value buffer for found crypto keys
-	unsigned char hash[this->cryptoHashFunction_.getHashSize()];
 	// position in the bloom filter
 	uint64_t pos;
 	// Getting crypto key entries for all hash functions
-	for (int func = 0; func < functionCount_; func++) {
+	for (std::size_t func = 0; func < functionCount_; func++) {
 		// The searched crypto hash has been found
 		bool hash_found = false;
 		// Another crypto hash has been found

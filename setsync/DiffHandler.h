@@ -6,6 +6,7 @@
 
 #ifndef DIFFHANDLER_H_
 #define DIFFHANDLER_H_
+#define _unused(x) ((void)x)
 #include <vector>
 #include <ostream>
 #include <setsync/set.h>
@@ -54,6 +55,9 @@ class IgnoringDiffHandler: public AbstractDiffHandler {
 	 */
 	virtual void handle(const unsigned char * hash, const std::size_t hashsize,
 			const bool existsLocally) {
+		_unused(hash);
+		_unused(hashsize);
+		_unused(existsLocally);
 	}
 };
 
@@ -99,7 +103,7 @@ public:
 	/**
 	 * \return the count of the distinct hashes to be sent to remote
 	 */
-	virtual const std::size_t size();
+	virtual std::size_t size();
 
 	/**
 	 * Removes all entries from list

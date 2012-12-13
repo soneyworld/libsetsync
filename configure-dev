@@ -2,4 +2,4 @@
 #
 
 CONF_PARAMS="--with-openssl --with-sqlite --with-leveldb --enable-cppunit --enable-evaluation --enable-tools"
-	./configure $CONF_PARAMS $@
+	./configure CXXFLAGS="-ggdb -g3 -Wall -Wextra" $CONF_PARAMS $@

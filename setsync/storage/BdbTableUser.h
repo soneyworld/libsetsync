@@ -40,7 +40,7 @@ public:
 	 *
 	 * \return the table type
 	 */
-	static const DBTYPE getTableType();
+	static DBTYPE getTableType();
 	/**
 	 * A berkeley DB table could require additional flags before
 	 * the open method could be called. Normally this is 0. But
@@ -49,7 +49,7 @@ public:
 	 *
 	 * \return the required flags
 	 */
-	static const u_int32_t getTableFlags() {
+	static u_int32_t getTableFlags() {
 		return 0;
 	}
 	/**
@@ -77,7 +77,7 @@ public:
 	 *
 	 * \return true, if transactions are available, otherwise false
 	 */
-	virtual const bool isTransactionEnabled(void) const;
+	virtual bool isTransactionEnabled(void) const;
 };
 }
 #endif /* BERKELEYDBTABLEUSERINTERFACE_H_ */

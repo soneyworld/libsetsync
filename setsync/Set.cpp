@@ -20,7 +20,7 @@ namespace setsync {
 
 SynchronizationProcess::SynchronizationProcess(Set * set,
 		AbstractDiffHandler * handler) :
-	set_(set), handler_(handler), stat_(START) {
+	stat_(START), set_(set), handler_(handler) {
 	this->externalhash = new unsigned char[set_->hash_.getHashSize()];
 	this->looseSync_ = set->bf_->createSyncProcess();
 	this->strictSync_ = set->trie_->createSyncProcess();
@@ -41,27 +41,27 @@ std::size_t SynchronizationProcess::step(void * inbuf,
 	switch (this->stat_) {
 	case START: {
 		/*
-		std::size_t min = std::min(inlength, hashsize - pos_);
-		memcpy(externalhash + pos_, inbuf, min);
-		pos_ += min;
-		if (pos_ == hashsize) {
-			unsigned char localroot[hashsize];
-			if (this->set_->trie_->getRoot(localroot)) {
-				if (memcmp(localroot, externalhash, hashsize) == 0) {
-					this->stat_ = EQUAL;
-				} else {
-					this->stat_ = BF;
-					this->pos_ = 0;
-					return step((unsigned char *) (inbuf) + min,
-							inlength - min, outbuf, outlength, diffhandler);
-				}
-			} else {
-				this->stat_ = BF;
-				this->pos_ = 0;
-				return step((unsigned char *) (inbuf) + min, inlength - min,
-						outbuf, outlength, diffhandler);
-			}
-		}*/
+		 std::size_t min = std::min(inlength, hashsize - pos_);
+		 memcpy(externalhash + pos_, inbuf, min);
+		 pos_ += min;
+		 if (pos_ == hashsize) {
+		 unsigned char localroot[hashsize];
+		 if (this->set_->trie_->getRoot(localroot)) {
+		 if (memcmp(localroot, externalhash, hashsize) == 0) {
+		 this->stat_ = EQUAL;
+		 } else {
+		 this->stat_ = BF;
+		 this->pos_ = 0;
+		 return step((unsigned char *) (inbuf) + min,
+		 inlength - min, outbuf, outlength, diffhandler);
+		 }
+		 } else {
+		 this->stat_ = BF;
+		 this->pos_ = 0;
+		 return step((unsigned char *) (inbuf) + min, inlength - min,
+		 outbuf, outlength, diffhandler);
+		 }
+		 }*/
 	}
 		break;
 	case BF: {
@@ -130,9 +130,8 @@ bool SynchronizationProcess::awaitingInput() const {
 	return false;
 }
 
-
 Set::Set(const config::Configuration& config) :
-	config_(config), hash_(config.getHashFunction()), tempDir(NULL),
+	hash_(config.getHashFunction()), config_(config), tempDir(NULL),
 			indexInUse_(false) {
 	if (config_.getPath().size() == 0) {
 		tempDir = new utils::FileSystem::TemporaryDirectory("set_");
@@ -365,7 +364,11 @@ bool Set::find(const void * data, const std::size_t length) {
 }
 
 bool Set::get(const unsigned char * key, unsigned char ** value,
-			std::size_t * valueSize){
+		std::size_t * valueSize) {
+	throw "not yet implemented";
+	_unused(key);
+	_unused(value);
+	_unused(valueSize);
 	return false;
 }
 
@@ -376,8 +379,7 @@ void Set::clear() {
 	this->indexInUse_ = false;
 }
 
-
-setsync::sync::AbstractSyncProcessPart * Set::createSyncProcess(){
+setsync::sync::AbstractSyncProcessPart * Set::createSyncProcess() {
 	return NULL;
 }
 

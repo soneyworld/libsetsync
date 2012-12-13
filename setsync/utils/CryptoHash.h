@@ -22,6 +22,7 @@ namespace utils {
 class CryptoHash {
 private:
 	std::string name_;
+	std::size_t size_;
 #ifdef HAVE_OPENSSL
 	/// Hash algorithm properties of OPENSSL
 	const EVP_MD *digit;
@@ -67,7 +68,7 @@ public:
 	/**
 	 * \return memory size of the hash digit in bytes
 	 */
-	const std::size_t getHashSize() const;
+	std::size_t getHashSize() const;
 
 	int operator()(unsigned char * target_md, const char * str) const;
 	int operator()(unsigned char * target_md, const unsigned char * data,

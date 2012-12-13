@@ -52,7 +52,7 @@ uint64_t ExtendedDoubleHashingScheme::extendedHash(const unsigned char * input,
 	//Use third part of hash as hash function 3, otherwise, simply return function
 	if (remaining > 0) {
 		uint64_t f3 = 0;
-		for (int j = 0; j < sizeof(uint64_t) && j < remaining; j++) {
+		for (uint64_t j = 0; j < sizeof(uint64_t) && j < remaining; j++) {
 			f3 = f3 | *(input + j);
 			f3 = f3 << 8;
 		}

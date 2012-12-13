@@ -61,7 +61,7 @@ void BdbIterator::key(unsigned char * buffer) const {
 }
 
 BdbStorage::BdbStorage(Db * db) :
-	db_(db), berkeley::AbstractBdbTableUser(db) {
+		berkeley::AbstractBdbTableUser(db), db_(db) {
 
 }
 

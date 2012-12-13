@@ -36,17 +36,22 @@ bool KeyValueTrieSync::awaitingInput() const {
 std::size_t KeyValueTrieSync::processInput(void * inbuf,
 		const std::size_t length, setsync::AbstractDiffHandler& diffhandler) {
 	throw "not yet implemented";
+	_unused(inbuf);
+	_unused(length);
+	_unused(diffhandler);
 }
 std::size_t KeyValueTrieSync::writeOutput(void * outbuf,
 		const std::size_t maxlength) {
 	throw "not yet implemented";
+	_unused(outbuf);
+	_unused(maxlength);
 }
 
 const uint8_t TrieNode::HAS_PARENT = 0x01;
 const uint8_t TrieNode::HAS_CHILDREN = 0x02;
 const uint8_t TrieNode::DIRTY = 0x04;
 
-const std::size_t TrieNode::getMarshallBufferSize(const TrieNode& node) {
+std::size_t TrieNode::getMarshallBufferSize(const TrieNode& node) {
 	return 4 * node.hashfunction_.getHashSize() + 2 * sizeof(uint8_t);
 }
 
@@ -67,7 +72,7 @@ const char KeyValueRootNode::root_name[] = "root";
 KeyValueRootNode::KeyValueRootNode(const KeyValueTrie& trie,
 		const utils::CryptoHash& hashfunction,
 		setsync::storage::AbstractKeyValueStorage& storage) :
-	trie_(trie), hashfunction_(hashfunction), storage_(storage) {
+	storage_(storage), hashfunction_(hashfunction), trie_(trie) {
 }
 
 TrieNode KeyValueRootNode::get() const {
@@ -117,7 +122,7 @@ TrieNode::TrieNode(const KeyValueTrie& trie,
 		const utils::CryptoHash& hashfunction,
 		setsync::storage::AbstractKeyValueStorage& storage,
 		const unsigned char * hash, bool newone) :
-	trie_(trie), storage_(storage), hashfunction_(hashfunction) {
+	storage_(storage), hashfunction_(hashfunction), trie_(trie) {
 	this->hash = (unsigned char*) malloc(hashfunction_.getHashSize() * 5);
 	this->smaller = this->hash + hashfunction_.getHashSize();
 	this->larger = this->smaller + hashfunction_.getHashSize();
@@ -160,6 +165,7 @@ void TrieNode::unmarshall(TrieNode& target, const unsigned char * loadedValue,
 	target.dirty_ = (flags & DIRTY) == DIRTY;
 	target.hasChildren_ = (flags & HAS_CHILDREN) == HAS_CHILDREN;
 	target.hasParent_ = (flags & HAS_PARENT) == HAS_PARENT;
+	_unused(loadedSize);
 }
 
 bool TrieNode::toDb() {
@@ -167,7 +173,7 @@ bool TrieNode::toDb() {
 	unsigned char buffer[getMarshallBufferSize(*this)];
 	marshall(*this, buffer);
 	try {
-		this ->storage_.put(this->hash, hashfunction_.getHashSize(), buffer,
+		this ->storage_.put(this->hash, hashsize, buffer,
 				getMarshallBufferSize(*this));
 	} catch (KeyValueStoreException e) {
 		return false;
@@ -426,9 +432,9 @@ bool TrieNode::operator >(const TrieNode& other) const {
 }
 
 TrieNode::TrieNode(const TrieNode& other) :
-	dirty_(other.dirty_), hasChildren_(other.hasChildren_),
+	storage_(other.storage_), hasChildren_(other.hasChildren_),
 			hasParent_(other.hasParent_), prefix_mask(other.prefix_mask),
-			storage_(other.storage_), hashfunction_(other.hashfunction_),
+			dirty_(other.dirty_), hashfunction_(other.hashfunction_),
 			trie_(other.trie_) {
 	this->hash = (unsigned char*) malloc(hashfunction_.getHashSize() * 5);
 	this->smaller = this->hash + hashfunction_.getHashSize();
@@ -894,7 +900,7 @@ bool KeyValueTrie::getRoot(unsigned char * hash) {
 void KeyValueTrie::diff(const void * subtrie, const std::size_t length,
 		setsync::AbstractDiffHandler& handler) const {
 	unsigned char * subtrie_ = (unsigned char *) subtrie;
-	for (int i = 0; i < length / hash_.getHashSize(); i++) {
+	for (std::size_t i = 0; i < length / hash_.getHashSize(); i++) {
 		if (!contains(subtrie_ + i * hash_.getHashSize())) {
 			handler(subtrie_ + i * hash_.getHashSize(), hash_.getHashSize(),
 					false);

@@ -53,7 +53,7 @@ const std::pair<unsigned char *, bool> ListDiffHandler::operator[](
 	return this->list_[index];
 }
 
-const std::size_t ListDiffHandler::size() {
+std::size_t ListDiffHandler::size() {
 	return this->list_.size();
 }
 

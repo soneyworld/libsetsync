@@ -65,10 +65,8 @@ uint64_t FileSystem::dirSize(const char* path) {
 	std::size_t sum = 0;
 	DIR *d = opendir(path);
 	size_t path_len = strlen(path);
-	int r = -1;
 	if (d) {
 		struct dirent *p;
-		r = 0;
 		while (p = readdir(d)) {
 			char *buf;
 			size_t len;

@@ -25,36 +25,6 @@ public:
 	virtual size_t count() const = 0;
 };
 
-class HashFunctionFactory {
-private:
-	HashFunctionFactory() {
-	}
-	HashFunctionFactory(const HashFunctionFactory&) {
-	}
-	HashFunctionFactory& operator=(const HashFunctionFactory&) {
-		return *this;
-	}
-	~HashFunctionFactory() {
-	}
-public:
-	static HashFunctionFactory& getInstance();
-	HashFunction * createHashFunction(std::string function);
-};
-
-class SplittingMDHashFunction: public HashFunction {
-protected:
-	virtual uint64_t hash(const unsigned char * input,
-			const std::size_t length, const std::size_t function) const;
-public:
-	SplittingMDHashFunction(const std::size_t outputLength,
-			const utils::CryptoHash& hash);
-	virtual ~SplittingMDHashFunction();
-	virtual size_t count() const;
-private:
-	const utils::CryptoHash& hash_;
-	std::size_t outputLength_;
-};
-
 class SaltedHashFunction: public HashFunction {
 protected:
 	virtual uint64_t hash(const unsigned char * input,
