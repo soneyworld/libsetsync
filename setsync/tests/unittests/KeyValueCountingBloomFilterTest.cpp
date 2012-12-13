@@ -23,6 +23,18 @@ void KeyValueBloomFilterSyncTest::testInput() {
 	}
 	CPPUNIT_ASSERT(handler.size() == 0);
 	CPPUNIT_ASSERT(inputlength == this->filter->size());
+	delete this->process;
+	inputlength = 0;
+	unsigned char hash[hashFunction_.getHashSize()];
+	hashFunction_(hash, "bla");
+	this->filter->add(hash);
+	this->process = this->filter->createSyncProcess();
+	while (this->process->awaitingInput()) {
+		inputlength += this->process->processInput(buffer, buffersize, handler);
+	}
+	CPPUNIT_ASSERT(handler.size() > 0);
+	CPPUNIT_ASSERT(inputlength == this->filter->size());
+	CPPUNIT_ASSERT(memcmp(handler[0].first,hash,hashFunction_.getHashSize())==0);
 }
 void KeyValueBloomFilterSyncTest::testOutput() {
 	std::size_t outputlength = 0;
