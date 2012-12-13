@@ -32,13 +32,15 @@ private:
 	enum status {
 		START, BF, TRIE, EQUAL
 	} stat_;
+	///
+	std::size_t startpos_;
 	/// Local set instance
 	Set * set_;
 	/// default handler, C++ interface only, NULL if the no diff handler should be used
 	AbstractDiffHandler * handler_;
+	const std::size_t hashsize;
 	/// hash of the other trie root
 	unsigned char * externalhash;
-
 	AbstractSyncProcessPart * looseSync_;
 	AbstractSyncProcessPart * strictSync_;
 public:
@@ -79,7 +81,7 @@ public:
 	virtual std::size_t processInput(void * inbuf, const std::size_t length,
 			AbstractDiffHandler& diffhandler);
 	virtual std::size_t
-			writeOutput(void * outbuf, const std::size_t maxlength);
+	writeOutput(void * outbuf, const std::size_t maxlength);
 	virtual ~SynchronizationProcess();
 	/**
 	 * Calculates the optimal size of a sending buffer for the given network parameter.
@@ -89,7 +91,7 @@ public:
 	 * \return the optimal size of a sending buffer
 	 */
 	std::size_t
-	calcOutputBufferSize(const size_t RTT, const size_t bandwidth) const;
+			calcOutputBufferSize(const size_t RTT, const size_t bandwidth) const;
 	/**
 	 * \return true, if more output is available
 	 */
@@ -113,6 +115,7 @@ public:
  */
 class Set: public sync::SyncableDataStructureInterface {
 	friend class SynchronizationProcess;
+	friend class SetTest;
 private:
 	/// maximum number of allowed set elements
 	size_t maxSize_;

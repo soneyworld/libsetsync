@@ -20,7 +20,8 @@ namespace setsync {
 
 SynchronizationProcess::SynchronizationProcess(Set * set,
 		AbstractDiffHandler * handler) :
-	stat_(START), set_(set), handler_(handler) {
+	stat_(START), startpos_(0), set_(set), handler_(handler),
+			hashsize(set->hash_.getHashSize()) {
 	this->externalhash = new unsigned char[set_->hash_.getHashSize()];
 	this->looseSync_ = set->bf_->createSyncProcess();
 	this->strictSync_ = set->trie_->createSyncProcess();
@@ -37,48 +38,6 @@ std::size_t SynchronizationProcess::step(void * inbuf,
 		const std::size_t inlength, void * outbuf, const std::size_t outlength,
 		AbstractDiffHandler& diffhandler) {
 	throw "not yet implemented";
-	std::size_t hashsize = this->set_->hash_.getHashSize();
-	switch (this->stat_) {
-	case START: {
-		/*
-		 std::size_t min = std::min(inlength, hashsize - pos_);
-		 memcpy(externalhash + pos_, inbuf, min);
-		 pos_ += min;
-		 if (pos_ == hashsize) {
-		 unsigned char localroot[hashsize];
-		 if (this->set_->trie_->getRoot(localroot)) {
-		 if (memcmp(localroot, externalhash, hashsize) == 0) {
-		 this->stat_ = EQUAL;
-		 } else {
-		 this->stat_ = BF;
-		 this->pos_ = 0;
-		 return step((unsigned char *) (inbuf) + min,
-		 inlength - min, outbuf, outlength, diffhandler);
-		 }
-		 } else {
-		 this->stat_ = BF;
-		 this->pos_ = 0;
-		 return step((unsigned char *) (inbuf) + min, inlength - min,
-		 outbuf, outlength, diffhandler);
-		 }
-		 }*/
-	}
-		break;
-	case BF: {
-
-	}
-		break;
-	case TRIE: {
-
-	}
-		break;
-	case EQUAL: {
-
-	}
-		break;
-	}
-	//TODO
-	throw "not yet implemented";
 }
 
 std::size_t SynchronizationProcess::step(void * inbuf,
@@ -93,11 +52,89 @@ std::size_t SynchronizationProcess::step(void * inbuf,
 
 std::size_t SynchronizationProcess::processInput(void * inbuf,
 		const std::size_t length, AbstractDiffHandler& diffhandler) {
-	throw "not yet implemented";
+	if (stat_ == START) {
+		std::size_t size = std::min(hashsize - startpos_, length);
+		memcpy(this->externalhash + startpos_, inbuf, size);
+		startpos_ += size;
+		// Completely read the external hash
+		if (startpos_ == this->set_->hash_.getHashSize()) {
+			// Check if equal to mine, otherwise, go on processing bf
+			unsigned char localroot[this->set_->hash_.getHashSize()];
+			this->set_->trie_->getRoot(localroot);
+			if (memcmp(this->externalhash, localroot, hashsize) == 0) {
+				this->stat_ = EQUAL;
+				return size;
+			} else {
+				this->stat_ = BF;
+				return size + processInput(
+						(void*) ((unsigned char*) inbuf + size), length - size,
+						diffhandler);
+			}
+		}
+	} else if (stat_ == BF) {
+		std::size_t size = this->looseSync_->processInput(inbuf, length,
+				diffhandler);
+		if (!this->looseSync_->awaitingInput()) {
+			this->stat_ = TRIE;
+		}
+		if (length > size) {
+			return size + this->processInput(
+					(void*) ((unsigned char*) inbuf + size), length - size,
+					diffhandler);
+		} else {
+			return size;
+		}
+	} else if (stat_ == TRIE) {
+		throw "not yet implemented";
+	} else if (stat_ == EQUAL) {
+		return 0;
+	} else {
+		throw "not yet implemented";
+	}
+	return 0;
 }
+
 std::size_t SynchronizationProcess::writeOutput(void * outbuf,
 		const std::size_t maxlength) {
-	throw "not yet implemented";
+	if (stat_ == START) {
+		std::size_t min = std::min(maxlength, hashsize - startpos_);
+		if (min <= hashsize - startpos_) {
+			unsigned char localroot[this->set_->hash_.getHashSize()];
+			this->set_->trie_->getRoot(localroot);
+			memcpy(outbuf, localroot + startpos_, min);
+			if (min == hashsize - startpos_) {
+				this->stat_ = BF;
+			}
+			return min;
+		} else {
+			unsigned char localroot[this->set_->hash_.getHashSize()];
+			this->set_->trie_->getRoot(localroot);
+			memcpy(outbuf, localroot + startpos_, min);
+			startpos_ += min;
+			this->stat_ = BF;
+			return hashsize + writeOutput(
+					(void*) ((unsigned char*) outbuf + min), maxlength - min);
+		}
+	} else if (stat_ == EQUAL) {
+		return 0;
+	} else if (stat_ == BF) {
+		std::size_t size = this->looseSync_->writeOutput(outbuf, maxlength);
+		if (size < maxlength) {
+			this->stat_ = TRIE;
+			return size + writeOutput((void*) ((unsigned char*) outbuf + size),
+					maxlength - size);
+		} else if (size == maxlength) {
+			if (!this->looseSync_->awaitingInput()) {
+				this->stat_ = TRIE;
+			}
+			return size;
+		} else {
+			throw "FAIL!";
+		}
+	} else if (stat_ == TRIE) {
+		return this->strictSync_->writeOutput(outbuf, maxlength);
+	}
+	return 0;
 }
 
 SynchronizationProcess::~SynchronizationProcess() {
@@ -130,13 +167,19 @@ bool SynchronizationProcess::done() const {
 }
 
 bool SynchronizationProcess::pendingOutput() const {
-	throw "not yet implemented";
+	if (stat_ == START)
+		return true;
+	if (looseSync_->pendingOutput())
+		return true;
+	if (strictSync_->pendingOutput())
+		return true;
 	return false;
 }
 
 bool SynchronizationProcess::awaitingInput() const {
-	throw "not yet implemented";
-	return false;
+	if (stat_ == EQUAL)
+		return false;
+	return true;
 }
 
 Set::Set(const config::Configuration& config) :

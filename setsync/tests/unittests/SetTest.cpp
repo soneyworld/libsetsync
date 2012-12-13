@@ -103,6 +103,40 @@ void SetTest::testSync() {
 	CPPUNIT_ASSERT(localset == remoteset);
 }
 
+void SetTest::testStartSync() {
+	setsync::Set localset(config);
+	setsync::Set remoteset(config);
+	CPPUNIT_ASSERT(localset.insert("hallo"));
+	CPPUNIT_ASSERT(remoteset.insert("hallo"));
+	CPPUNIT_ASSERT(localset == remoteset);
+	setsync::sync::AbstractSyncProcessPart * localprocess =
+			localset.createSyncProcess();
+	setsync::ListDiffHandler localDiffHandler;
+	setsync::sync::AbstractSyncProcessPart * remoteprocess =
+			remoteset.createSyncProcess();
+	setsync::ListDiffHandler remoteDiffHandler;
+	std::size_t buffersize = localset.hash_.getHashSize();
+	unsigned char buffer[buffersize];
+	std::size_t sending;
+	localprocess->writeOutput(buffer, buffersize);
+	remoteprocess->processInput(buffer, buffersize, remoteDiffHandler);
+	remoteprocess->writeOutput(buffer, buffersize);
+	localprocess->processInput(buffer, buffersize, localDiffHandler);
+	CPPUNIT_ASSERT(localDiffHandler.size()==0);
+	CPPUNIT_ASSERT(remoteDiffHandler.size()==0);
+	delete localprocess;
+	delete remoteprocess;
+	CPPUNIT_ASSERT(localset == remoteset);
+}
+
+void SetTest::testLooseSync() {
+	throw "";
+}
+
+void SetTest::testStrictSync() {
+	throw "";
+}
+
 void SetTest::setUp() {
 	this->dir = new utils::FileSystem::TemporaryDirectory("temp_");
 	this->config.setPath(dir->getPath());

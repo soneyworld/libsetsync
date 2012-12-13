@@ -20,6 +20,9 @@ CPPUNIT_TEST_SUITE( SetTest);
 	CPPUNIT_TEST( testClear);
 	CPPUNIT_TEST( testFind);
 	CPPUNIT_TEST( testMaximum);
+	CPPUNIT_TEST( testStartSync);
+	CPPUNIT_TEST( testLooseSync);
+	CPPUNIT_TEST( testStrictSync);
 	CPPUNIT_TEST( testSync);
 CPPUNIT_TEST_SUITE_END();
 
@@ -36,6 +39,9 @@ protected:
 	void testClear();
 	void testFind();
 	void testMaximum();
+	void testStartSync();
+	void testLooseSync();
+	void testStrictSync();
 	void testSync();
 };
 CPPUNIT_TEST_SUITE_REGISTRATION( SetTest);
