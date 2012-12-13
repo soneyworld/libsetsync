@@ -12,6 +12,48 @@
 using namespace std;
 namespace bloom {
 
+void KeyValueBloomFilterSyncTest::testInput() {
+	std::size_t buffersize = 20;
+	std::size_t inputlength = 0;
+	unsigned char buffer[buffersize];
+	memset(buffer, 0, buffersize);
+	setsync::ListDiffHandler handler;
+	while (this->process->awaitingInput()) {
+		inputlength += this->process->processInput(buffer, buffersize, handler);
+	}
+	CPPUNIT_ASSERT(handler.size() == 0);
+	CPPUNIT_ASSERT(inputlength == this->filter->size());
+}
+void KeyValueBloomFilterSyncTest::testOutput() {
+	std::size_t outputlength = 0;
+	std::size_t buffersize = 20;
+	unsigned char buffer[buffersize];
+	while (this->process->pendingOutput()) {
+		outputlength += this->process->writeOutput(buffer, buffersize);
+	}
+	CPPUNIT_ASSERT(outputlength == this->filter->size());
+}
+void KeyValueBloomFilterSyncTest::setUp() {
+	this->db = new Db(NULL, 0);
+	db->open(NULL, "table1.db", NULL, DB_HASH, DB_CREATE, 0);
+	this->storage = new setsync::storage::BdbStorage(this->db);
+	this->filename_ = "temp_filter.bloom";
+	this->filter = new KeyValueCountingBloomFilter(hashFunction_, *storage,
+			filename_);
+	this->process = this->filter->createSyncProcess();
+}
+void KeyValueBloomFilterSyncTest::tearDown() {
+	delete this->process;
+	delete this->filter;
+	delete this->storage;
+	this->db->close(0);
+	delete this->db;
+	this->db = new Db(NULL, 0);
+	db->remove("table1.db", NULL, 0);
+	delete this->db;
+	remove(this->filename_.c_str());
+}
+
 void KeyValueCountingBloomFilterTest::setUp() {
 	this->db1 = new Db(NULL, 0);
 	db1->open(NULL, "table1.db", NULL, DB_HASH, DB_CREATE, 0);
@@ -46,9 +88,9 @@ void KeyValueCountingBloomFilterTest::tearDown() {
 	delete this->storage2;
 	delete this->storage3;
 #ifdef HAVE_LEVELDB
-	utils::FileSystem::rmDirRecursive( path1);
-	utils::FileSystem::rmDirRecursive( path2);
-	utils::FileSystem::rmDirRecursive( path3);
+	utils::FileSystem::rmDirRecursive(path1);
+	utils::FileSystem::rmDirRecursive(path2);
+	utils::FileSystem::rmDirRecursive(path3);
 #else
 	this->db2->close(0);
 	delete this->db2;

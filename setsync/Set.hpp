@@ -75,6 +75,11 @@ public:
 			AbstractDiffHandler& diffhandler);
 	std::size_t strict_step(void * inbuf, const std::size_t inlength,
 			void * outbuf, const std::size_t outlength);
+
+	virtual std::size_t processInput(void * inbuf, const std::size_t length,
+			AbstractDiffHandler& diffhandler);
+	virtual std::size_t
+			writeOutput(void * outbuf, const std::size_t maxlength);
 	virtual ~SynchronizationProcess();
 	/**
 	 * Calculates the optimal size of a sending buffer for the given network parameter.
@@ -292,6 +297,8 @@ public:
 	virtual ~Set();
 
 	virtual setsync::sync::AbstractSyncProcessPart * createSyncProcess();
+
+	virtual bool operator ==(const Set& other) const;
 };
 }
 

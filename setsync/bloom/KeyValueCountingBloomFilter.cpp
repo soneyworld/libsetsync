@@ -30,7 +30,7 @@ std::size_t KeyValueBloomFilterSync::processInput(void * inbuf,
 		const std::size_t inlength, setsync::AbstractDiffHandler& diffhandler) {
 	std::size_t bflength = this->bf_->size();
 	if (inPos_ + inlength > bflength) {
-		std::size_t bfpart = inlength - (bflength - inPos_);
+		std::size_t bfpart = (bflength - inPos_);
 		this->bf_->diff((unsigned char *) inbuf, bfpart, inPos_, diffhandler);
 		this->inPos_ = bflength;
 		return bfpart;
@@ -43,7 +43,6 @@ std::size_t KeyValueBloomFilterSync::processInput(void * inbuf,
 		this->inPos_ += inlength;
 		return inlength;
 	}
-	return 0;
 }
 
 std::size_t KeyValueBloomFilterSync::writeOutput(void * outbuf,

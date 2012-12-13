@@ -18,6 +18,26 @@
 
 namespace bloom {
 
+class KeyValueBloomFilterSyncTest: public CppUnit::TestFixture {
+CPPUNIT_TEST_SUITE(KeyValueBloomFilterSyncTest);
+		CPPUNIT_TEST(testInput);
+		CPPUNIT_TEST(testOutput);
+	CPPUNIT_TEST_SUITE_END();
+private:
+	Db * db;
+	KeyValueCountingBloomFilter * filter;
+	setsync::storage::AbstractKeyValueStorage * storage;
+	utils::CryptoHash hashFunction_;
+	std::string filename_;
+	setsync::sync::AbstractSyncProcessPart * process;
+protected:
+	void testInput();
+	void testOutput();
+public:
+	void setUp();
+	void tearDown();
+};
+
 class KeyValueCountingBloomFilterTest: public CppUnit::TestFixture {
 
 CPPUNIT_TEST_SUITE(KeyValueCountingBloomFilterTest);
@@ -60,6 +80,7 @@ public:
 	void setUp();
 	void tearDown();
 };
+CPPUNIT_TEST_SUITE_REGISTRATION( KeyValueBloomFilterSyncTest);
 CPPUNIT_TEST_SUITE_REGISTRATION( KeyValueCountingBloomFilterTest);
 }
 

@@ -91,6 +91,15 @@ std::size_t SynchronizationProcess::step(void * inbuf,
 	}
 }
 
+std::size_t SynchronizationProcess::processInput(void * inbuf,
+		const std::size_t length, AbstractDiffHandler& diffhandler) {
+	throw "not yet implemented";
+}
+std::size_t SynchronizationProcess::writeOutput(void * outbuf,
+		const std::size_t maxlength) {
+	throw "not yet implemented";
+}
+
 SynchronizationProcess::~SynchronizationProcess() {
 	delete this->externalhash;
 	delete this->looseSync_;
@@ -380,7 +389,11 @@ void Set::clear() {
 }
 
 setsync::sync::AbstractSyncProcessPart * Set::createSyncProcess() {
-	return NULL;
+	return new SynchronizationProcess(this);
+}
+
+bool Set::operator ==(const Set& other) const {
+	return this->trie_->operator ==(*other.trie_);
 }
 
 } // end of namespace setsync

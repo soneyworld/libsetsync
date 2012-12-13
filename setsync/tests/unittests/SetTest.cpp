@@ -70,6 +70,39 @@ void SetTest::testMaximum() {
 	CPPUNIT_ASSERT(set.getSize() == 5);
 }
 
+void SetTest::testSync() {
+	setsync::Set localset(config);
+	setsync::Set remoteset(config);
+	CPPUNIT_ASSERT(localset.insert("hallo"));
+	CPPUNIT_ASSERT(remoteset.insert("hallo"));
+
+	CPPUNIT_ASSERT(localset.insert("hallo1"));
+	setsync::sync::AbstractSyncProcessPart * localprocess =
+			localset.createSyncProcess();
+	setsync::ListDiffHandler localDiffHandler;
+	setsync::sync::AbstractSyncProcessPart * remoteprocess =
+			remoteset.createSyncProcess();
+	setsync::ListDiffHandler remoteDiffHandler;
+	std::size_t buffersize = 20;
+	unsigned char buffer[buffersize];
+	std::size_t sending;
+	while (localprocess->pendingOutput()) {
+		sending = localprocess->writeOutput(buffer, buffersize);
+		remoteprocess->processInput(buffer, sending, remoteDiffHandler);
+		if (remoteprocess->pendingOutput()) {
+			sending = remoteprocess->writeOutput(buffer, buffersize);
+			localprocess->processInput(buffer, sending, localDiffHandler);
+		}
+	}
+	while (remoteprocess->pendingOutput()) {
+		sending = remoteprocess->writeOutput(buffer, buffersize);
+		localprocess->processInput(buffer, sending, localDiffHandler);
+	}
+	delete localprocess;
+	delete remoteprocess;
+	CPPUNIT_ASSERT(localset == remoteset);
+}
+
 void SetTest::setUp() {
 	this->dir = new utils::FileSystem::TemporaryDirectory("temp_");
 	this->config.setPath(dir->getPath());
@@ -78,4 +111,3 @@ void SetTest::tearDown() {
 	delete this->dir;
 }
 }
-;
