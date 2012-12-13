@@ -37,11 +37,22 @@ void KeyValueBloomFilterSyncTest::testInput() {
 	CPPUNIT_ASSERT(memcmp(handler[0].first,hash,hashFunction_.getHashSize())==0);
 }
 void KeyValueBloomFilterSyncTest::testOutput() {
+	unsigned char hash[hashFunction_.getHashSize()];
+	hashFunction_(hash, "bla1");
+	this->filter->add(hash);
+	hashFunction_(hash, "bla2");
+	this->filter->add(hash);
+	hashFunction_(hash, "bla3");
+	this->filter->add(hash);
 	std::size_t outputlength = 0;
 	std::size_t buffersize = 20;
 	unsigned char buffer[buffersize];
 	while (this->process->pendingOutput()) {
-		outputlength += this->process->writeOutput(buffer, buffersize);
+		std::size_t length = this->process->writeOutput(buffer, buffersize);
+		CPPUNIT_ASSERT(length <= buffersize);
+		if (length != 0)
+			CPPUNIT_ASSERT(memcmp(this->filter->bitArray_+outputlength,buffer,length) == 0);
+		outputlength += length;
 	}
 	CPPUNIT_ASSERT(outputlength == this->filter->size());
 }

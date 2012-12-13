@@ -48,8 +48,8 @@ std::size_t KeyValueBloomFilterSync::processInput(void * inbuf,
 std::size_t KeyValueBloomFilterSync::writeOutput(void * outbuf,
 		const std::size_t maxlength) {
 	std::size_t resultsize = std::min(this->bf_->size() - outPos_, maxlength);
-	this->outPos_ += resultsize;
 	memcpy(outbuf, this->bf_->bitArray_ + outPos_, resultsize);
+	this->outPos_ += resultsize;
 	return resultsize;
 }
 

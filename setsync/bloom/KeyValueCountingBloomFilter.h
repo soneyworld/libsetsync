@@ -49,6 +49,7 @@ class KeyValueCountingBloomFilter: public CountingBloomFilter,
 		public ComparableBloomFilterInterface,
 		public ::setsync::sync::SyncableDataStructureInterface {
 	friend class KeyValueCountingBloomFilterTest;
+	friend class KeyValueBloomFilterSyncTest;
 	friend class KeyValueBloomFilterSync;
 protected:
 	setsync::storage::AbstractKeyValueStorage& storage_;
