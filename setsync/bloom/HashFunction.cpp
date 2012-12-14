@@ -74,7 +74,7 @@ uint64_t SaltedHashFunction::hash(const unsigned char * input,
 
 void SaltedHashFunction::generate_salt() {
 	const uint32_t predef_salt_count = 64;
-	static const int predef_salt[predef_salt_count] = { 0xAAAAAAAA, 0x55555555,
+	static const unsigned int predef_salt[predef_salt_count] = { 0xAAAAAAAA, 0x55555555,
 			0x33333333, 0xCCCCCCCC, 0x66666666, 0x99999999, 0xB5B5B5B5,
 			0x4B4B4B4B, 0xAA55AA55, 0x55335533, 0x33CC33CC, 0xCC66CC66,
 			0x66996699, 0x99B599B5, 0xB54BB54B, 0x4BAA4BAA, 0xAA33AA33,
