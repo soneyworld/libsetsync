@@ -110,7 +110,7 @@ bool BerkeleyDB::isTransactionEnabled(Db * db) {
 	}
 	u_int32_t flags;
 	env->get_flags(&flags);
-	if (flags & DB_INIT_TXN == DB_INIT_TXN) {
+	if ((flags & DB_INIT_TXN) == DB_INIT_TXN) {
 		return true;
 	} else {
 		return false;
