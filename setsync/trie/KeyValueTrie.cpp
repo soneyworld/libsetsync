@@ -454,7 +454,6 @@ TrieNode& TrieNode::operator=(const TrieNode& rhs) {
 	this->hasChildren_ = rhs.hasChildren_;
 	this->hasParent_ = rhs.hasParent_;
 	this->prefix_mask = rhs.prefix_mask;
-	this->hash = (unsigned char*) malloc(hashfunction_.getHashSize() * 5);
 	this->smaller = this->hash + hashfunction_.getHashSize();
 	this->larger = this->smaller + hashfunction_.getHashSize();
 	this->parent = this->larger + hashfunction_.getHashSize();
