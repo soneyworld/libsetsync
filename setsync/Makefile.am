@@ -6,10 +6,10 @@ SUBDIRS = utils config sync bloom trie index storage . tests
 AM_CPPFLAGS = @CFLAGS@ 
 AM_LDFLAGS = @LIBS@
 
-include_h_sources = set.h Set.hpp
-h_sources = $(include_h_sources) DiffHandler.h
+include_h_sources = set.h Set.hpp DiffHandler.h
+h_sources = $(include_h_sources) Packets.h
 c_sources = 
-cpp_sources = Set.cpp DiffHandler.cpp
+cpp_sources = Set.cpp DiffHandler.cpp Packets.cpp
 
 if BERKELEY_DB
 
