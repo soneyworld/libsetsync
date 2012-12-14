@@ -142,6 +142,7 @@ void KeyValueCountingBloomFilter::add(const unsigned char * key) {
 								* this->cryptoHashFunction_.getHashSize(), key,
 						this->cryptoHashFunction_.getHashSize()) == 0) {
 					// Key exists, so it can be skipped
+					free(resultbuffer);
 					return;
 				}
 			}
