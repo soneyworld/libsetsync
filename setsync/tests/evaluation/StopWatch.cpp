@@ -7,8 +7,8 @@
 #include "StopWatch.h"
 
 StopWatch::StopWatch() :
-	cpu_start_(0), cpu_stop_(0), cpu_duration_(0), cpu_last_duration_(0),
-			time_duration_(0), time_last_duration_(0) {
+	time_duration_(0), time_last_duration_(0), cpu_start_(0), cpu_stop_(0),
+			cpu_duration_(0), cpu_last_duration_(0) {
 	time_start_.tv_sec = 0;
 	time_start_.tv_nsec = 0;
 	time_stop_.tv_sec = 0;
@@ -31,7 +31,7 @@ void StopWatch::stop() {
 	long seconds = this->time_stop_.tv_sec - this->time_start_.tv_sec;
 	long int nanoseconds = this->time_stop_.tv_nsec - this->time_start_.tv_nsec;
 	this->time_last_duration_ = seconds;
-	this->time_last_duration_ += (double)(nanoseconds) / 1000000000;
+	this->time_last_duration_ += (double) (nanoseconds) / 1000000000;
 
 	this->time_duration_ += this->time_last_duration_;
 }
