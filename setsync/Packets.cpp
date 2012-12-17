@@ -56,7 +56,11 @@ PacketHeader::~PacketHeader() {
 
 void PacketHeader::addHeaderByte(unsigned char * nextHeaderByte) {
 	if (this->t_ == DATA || t_ == FILTER) {
-		memcpy((unsigned char *) (&size_) + inHeaderPos_, nextHeaderByte, 1);
+		for (uint8_t i = 0; i < 8; i++) {
+			if (BITTEST(nextHeaderByte,i)) {
+				this->size_ += 1 << ((inHeaderPos_ * 8) + i);
+			}
+		}
 		inHeaderPos_++;
 	} else {
 		throw "No more bytes needed!";
@@ -96,8 +100,15 @@ void PacketHeader::writeHeaderToBuffer(unsigned char * buffer) {
 	}
 	switch (t_) {
 	case FILTER:
-	case DATA:
-		memcpy(buffer + 1, &size_, sizeof(uint64_t));
+	case DATA: {
+		uint64_t s = size_;
+		for (int i = 0; i < 64; i++) {
+			if (s % 2 == 1) {
+				BITSET(buffer+1, i);
+			}
+			s = s >> 1;
+		}
+	}
 		break;
 	case SUBTRIE:
 	case SUBTRIE_REQUEST: {
