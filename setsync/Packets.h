@@ -12,25 +12,27 @@
 
 namespace setsync {
 
-class Packet {
+class PacketHeader {
 public:
 	enum Type {
-		DATA, FILTER, GET_REQUEST, SUBTRIE, UNDEFINED
+		DATA, FILTER, SUBTRIE_REQUEST, SUBTRIE, UNDEFINED
 	};
 private:
 	enum Type t_;
-	std::size_t size_;
-	uint8_t header_;
+	uint64_t size_;
+	uint8_t inHeaderPos_;
 public:
 	// Incoming Packet
-	Packet(const unsigned char * header);
+	PacketHeader(const unsigned char * header);
 	// Creating header for outgoing packet
-	Packet(const Type t, const std::size_t size = 0);
-	virtual ~Packet();
-	bool isHeaderComplete();
+	PacketHeader(const Type t, const std::size_t size = 0);
+	virtual ~PacketHeader();
+	bool isInputHeaderComplete();
 	std::size_t getPacketSize() const;
 	Type getType() const ;
 	void addHeaderByte(unsigned char * nextHeaderByte);
+	size_t getHeaderSize();
+	void writeHeaderToBuffer(unsigned char * buffer);
 };
 
 }

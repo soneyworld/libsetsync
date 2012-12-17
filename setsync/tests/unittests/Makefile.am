@@ -5,7 +5,8 @@ noinst_HEADERS = \
 	DoubleHashingSchemeTest.h \
 	SetTest.h \
 	KeyValueStorageTest.h \
-	DiffHandlerTest.h
+	DiffHandlerTest.h \
+	PacketTest.h
 
 unittest_SOURCES = \
 	Main.cpp \
@@ -14,7 +15,8 @@ unittest_SOURCES = \
 	DoubleHashingSchemeTest.cpp \
 	SetTest.cpp \
 	KeyValueStorageTest.cpp \
-	DiffHandlerTest.cpp
+	DiffHandlerTest.cpp \
+	PacketTest.cpp
 	
 
 # what flags you want to pass to the C compiler & linker
