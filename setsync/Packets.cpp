@@ -16,12 +16,20 @@ PacketHeader::PacketHeader(const unsigned char * header) :
 		if (!BITTEST(header, 1)) {
 			t_ = DATA;
 		} else {
-			t_ = FILTER;
+			if (BITTEST(header, 2)) {
+				t_ = COMPRESSED_FILTER;
+			} else {
+				t_ = FILTER;
+			}
 		}
 		for (uint8_t i = 0; i < 6; i++) {
 			if (BITTEST(header,2+i)) {
-				this->t_ = UNDEFINED;
-				break;
+				if (i == 0 && (t_ == FILTER || t_ == COMPRESSED_FILTER)) {
+					continue;
+				} else {
+					this->t_ = UNDEFINED;
+					break;
+				}
 			}
 		}
 	} else {
@@ -55,7 +63,7 @@ PacketHeader::~PacketHeader() {
 }
 
 void PacketHeader::addHeaderByte(unsigned char * nextHeaderByte) {
-	if (this->t_ == DATA || t_ == FILTER) {
+	if (this->t_ == DATA || t_ == FILTER || t_ == COMPRESSED_FILTER) {
 		for (uint8_t i = 0; i < 8; i++) {
 			if (BITTEST(nextHeaderByte,i)) {
 				this->size_ += 1 << ((inHeaderPos_ * 8) + i);
@@ -68,8 +76,45 @@ void PacketHeader::addHeaderByte(unsigned char * nextHeaderByte) {
 }
 
 size_t PacketHeader::getHeaderSize() {
-	switch (t_) {
+	return getHeaderSize(t_);
+}
+
+PacketHeader::Type PacketHeader::getType(const unsigned char* header) {
+	Type t_;
+	if (!BITTEST(header,0)) {
+		if (!BITTEST(header, 1)) {
+			t_ = DATA;
+		} else {
+			if (BITTEST(header, 2)) {
+				t_ = COMPRESSED_FILTER;
+			} else {
+				t_ = FILTER;
+			}
+		}
+		for (uint8_t i = 0; i < 6; i++) {
+			if (BITTEST(header,2+i)) {
+				if (i == 0 && (t_ == FILTER || t_ == COMPRESSED_FILTER)) {
+					continue;
+				} else {
+					t_ = UNDEFINED;
+					break;
+				}
+			}
+		}
+	} else {
+		if (BITTEST(header,1)) {
+			t_ = SUBTRIE_REQUEST;
+		} else {
+			t_ = SUBTRIE;
+		}
+	}
+	return t_;
+}
+
+size_t PacketHeader::getHeaderSize(const Type& t) {
+	switch (t) {
 	case FILTER:
+	case COMPRESSED_FILTER:
 	case DATA:
 		return sizeof(uint64_t) + sizeof(uint8_t);
 	case SUBTRIE:
@@ -83,6 +128,8 @@ size_t PacketHeader::getHeaderSize() {
 void PacketHeader::writeHeaderToBuffer(unsigned char * buffer) {
 	*buffer = 0;
 	switch (t_) {
+	case COMPRESSED_FILTER:
+		BITSET(buffer,2);
 	case FILTER:
 		BITSET(buffer,1);
 		break;
@@ -100,6 +147,7 @@ void PacketHeader::writeHeaderToBuffer(unsigned char * buffer) {
 	}
 	switch (t_) {
 	case FILTER:
+	case COMPRESSED_FILTER:
 	case DATA: {
 		uint64_t s = size_;
 		for (int i = 0; i < 64; i++) {
@@ -127,7 +175,7 @@ void PacketHeader::writeHeaderToBuffer(unsigned char * buffer) {
 }
 
 bool PacketHeader::isInputHeaderComplete() {
-	if (t_ == DATA || t_ == FILTER) {
+	if (t_ == DATA || t_ == FILTER || t_ == COMPRESSED_FILTER) {
 		if (this->inHeaderPos_ >= 8) {
 			return true;
 		} else {

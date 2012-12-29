@@ -19,10 +19,12 @@ void PacketHeaderTest::testHeaderSize() {
 	PacketHeader dataheader(PacketHeader::DATA);
 	PacketHeader subtrieheader(PacketHeader::SUBTRIE);
 	PacketHeader requestheader(PacketHeader::SUBTRIE_REQUEST);
+	PacketHeader compbfheader(PacketHeader::COMPRESSED_FILTER);
 	CPPUNIT_ASSERT(bfheader.getHeaderSize() == 9);
 	CPPUNIT_ASSERT(dataheader.getHeaderSize() == 9);
 	CPPUNIT_ASSERT(subtrieheader.getHeaderSize() == 1);
 	CPPUNIT_ASSERT(requestheader.getHeaderSize() == 1);
+	CPPUNIT_ASSERT(compbfheader.getHeaderSize() == 9);
 }
 
 void PacketHeaderTest::testParsing() {
@@ -32,6 +34,7 @@ void PacketHeaderTest::testParsing() {
 	PacketHeader outdataheader(PacketHeader::DATA, 2048);
 	PacketHeader outsubtrieheader(PacketHeader::SUBTRIE, 1);
 	PacketHeader outrequestheader(PacketHeader::SUBTRIE_REQUEST, 34);
+	PacketHeader outcompbfheader(PacketHeader::COMPRESSED_FILTER, 34);
 	memset(buffer, 0, 9);
 	outbfheader.writeHeaderToBuffer(buffer);
 	pos = 0;
@@ -76,5 +79,16 @@ void PacketHeaderTest::testParsing() {
 	CPPUNIT_ASSERT(inrequestheader.getType() == outrequestheader.getType());
 	CPPUNIT_ASSERT(inrequestheader.getHeaderSize() == outrequestheader.getHeaderSize());
 	CPPUNIT_ASSERT(inrequestheader.getPacketSize() == outrequestheader.getPacketSize());
+	memset(buffer, 0, 9);
+	outcompbfheader.writeHeaderToBuffer(buffer);
+	pos = 0;
+	PacketHeader incompbfheader(buffer);
+	while (!incompbfheader.isInputHeaderComplete()) {
+		pos++;
+		incompbfheader.addHeaderByte(buffer + pos);
+	}
+	CPPUNIT_ASSERT(incompbfheader.getType() == outcompbfheader.getType());
+	CPPUNIT_ASSERT(incompbfheader.getHeaderSize() == outcompbfheader.getHeaderSize());
+	CPPUNIT_ASSERT(incompbfheader.getPacketSize() == outcompbfheader.getPacketSize());
 }
 }
