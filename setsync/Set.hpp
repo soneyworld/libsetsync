@@ -32,17 +32,18 @@ private:
 	enum status {
 		START, BF, TRIE, EQUAL
 	} stat_;
-	///
-	std::size_t startpos_;
 	/// Local set instance
 	Set * set_;
 	/// default handler, C++ interface only, NULL if the no diff handler should be used
 	AbstractDiffHandler * handler_;
 	const std::size_t hashsize;
 	/// hash of the other trie root
-	unsigned char * externalhash;
+	sync::HashSyncProcessPart * rootSync_;
 	AbstractSyncProcessPart * looseSync_;
 	AbstractSyncProcessPart * strictSync_;
+	PacketHeader * inHeader_;
+	PacketHeader * outHeader_;
+
 public:
 	/**
 	 * Creates a new Synchronization Process for the given set. If a

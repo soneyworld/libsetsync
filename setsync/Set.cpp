@@ -20,11 +20,16 @@ namespace setsync {
 
 SynchronizationProcess::SynchronizationProcess(Set * set,
 		AbstractDiffHandler * handler) :
-	stat_(START), startpos_(0), set_(set), handler_(handler),
+	stat_(START), set_(set), handler_(handler),
 			hashsize(set->hash_.getHashSize()) {
-	this->externalhash = new unsigned char[set_->hash_.getHashSize()];
+	unsigned char roothash[hashsize];
+	if (!set_->trie_->getRoot(roothash)) {
+		set_->hash_(roothash, "");
+	}
+	this->rootSync_ = new sync::HashSyncProcessPart(set_->hash_, roothash);
 	this->looseSync_ = set->bf_->createSyncProcess();
 	this->strictSync_ = set->trie_->createSyncProcess();
+
 }
 
 std::size_t SynchronizationProcess::step(void * inbuf,
@@ -52,29 +57,55 @@ std::size_t SynchronizationProcess::step(void * inbuf,
 
 std::size_t SynchronizationProcess::processInput(void * inbuf,
 		const std::size_t length, AbstractDiffHandler& diffhandler) {
-	if (stat_ == START) {
-		std::size_t size = std::min(hashsize - startpos_, length);
-		memcpy(this->externalhash + startpos_, inbuf, size);
-		startpos_ += size;
-		// Completely read the external hash
-		if (startpos_ == this->set_->hash_.getHashSize()) {
-			// Check if equal to mine, otherwise, go on processing bf
-			unsigned char localroot[this->set_->hash_.getHashSize()];
-			this->set_->trie_->getRoot(localroot);
-			if (memcmp(this->externalhash, localroot, hashsize) == 0) {
+	switch (stat_) {
+	case START: {
+		std::size_t size = this->rootSync_->processInput(inbuf, length,
+				diffhandler);
+		if (!this->rootSync_->awaitingInput()) {
+			if (this->rootSync_->isEqual()) {
 				this->stat_ = EQUAL;
 				return size;
 			} else {
 				this->stat_ = BF;
-				return size + processInput(
-						(void*) ((unsigned char*) inbuf + size), length - size,
-						diffhandler);
 			}
 		}
-	} else if (stat_ == BF) {
-		std::size_t size = this->looseSync_->processInput(inbuf, length,
-				diffhandler);
+		if (size < length) {
+			return size + processInput((void*) ((unsigned char*) inbuf + size),
+					length - size, diffhandler);
+		}
+
+	}
+		break;
+	case BF: {
+		if (length == 0) {
+			return 0;
+		}
+		std::size_t header = 0;
+		if (this->inHeader_ == NULL) {
+			this->inHeader_ = new setsync::PacketHeader((unsigned char*) inbuf);
+			if (this->inHeader_->getType() != setsync::PacketHeader::FILTER) {
+				throw "Wrong Packet Type";
+			}
+			header++;
+		}
+		while (!this->inHeader_->isInputHeaderComplete() && (length - header)
+				> 0) {
+			this->inHeader_->addHeaderByte((unsigned char*) (inbuf) + header);
+			header++;
+		}
+		if (length - header == 0) {
+			return header;
+		}
+		if (this->inHeader_->getPacketSize() != this->set_->bf_->size()) {
+			throw "Wrong filter size! Cannot compare two filter with different sizes";
+		}
+		std::size_t size = header
+				+ this->looseSync_->processInput(
+						(unsigned char*) (inbuf) + header, length - header,
+						diffhandler);
 		if (!this->looseSync_->awaitingInput()) {
+			delete this->inHeader_;
+			this->inHeader_ = NULL;
 			this->stat_ = TRIE;
 		}
 		if (length > size) {
@@ -84,11 +115,15 @@ std::size_t SynchronizationProcess::processInput(void * inbuf,
 		} else {
 			return size;
 		}
-	} else if (stat_ == TRIE) {
-		throw "not yet implemented";
-	} else if (stat_ == EQUAL) {
+
+	}
+		break;
+	case EQUAL:
 		return 0;
-	} else {
+	case TRIE: {
+
+	}
+	default:
 		throw "not yet implemented";
 	}
 	return 0;
@@ -96,49 +131,46 @@ std::size_t SynchronizationProcess::processInput(void * inbuf,
 
 std::size_t SynchronizationProcess::writeOutput(void * outbuf,
 		const std::size_t maxlength) {
-	if (stat_ == START) {
-		std::size_t min = std::min(maxlength, hashsize - startpos_);
-		if (min <= hashsize - startpos_) {
-			unsigned char localroot[this->set_->hash_.getHashSize()];
-			this->set_->trie_->getRoot(localroot);
-			memcpy(outbuf, localroot + startpos_, min);
-			if (min == hashsize - startpos_) {
-				this->stat_ = BF;
-			}
-			return min;
-		} else {
-			unsigned char localroot[this->set_->hash_.getHashSize()];
-			this->set_->trie_->getRoot(localroot);
-			memcpy(outbuf, localroot + startpos_, min);
-			startpos_ += min;
+	switch (stat_) {
+	case START: {
+		std::size_t size = this->rootSync_->writeOutput(outbuf, maxlength);
+		if (!this->rootSync_->pendingOutput()) {
 			this->stat_ = BF;
-			return hashsize + writeOutput(
-					(void*) ((unsigned char*) outbuf + min), maxlength - min);
 		}
-	} else if (stat_ == EQUAL) {
-		return 0;
-	} else if (stat_ == BF) {
-		std::size_t size = this->looseSync_->writeOutput(outbuf, maxlength);
 		if (size < maxlength) {
-			this->stat_ = TRIE;
 			return size + writeOutput((void*) ((unsigned char*) outbuf + size),
 					maxlength - size);
-		} else if (size == maxlength) {
-			if (!this->looseSync_->awaitingInput()) {
-				this->stat_ = TRIE;
-			}
-			return size;
+
 		} else {
-			throw "FAIL!";
+			return size;
 		}
-	} else if (stat_ == TRIE) {
-		return this->strictSync_->writeOutput(outbuf, maxlength);
 	}
-	return 0;
+		break;
+	case BF: {
+		std::size_t size = this->looseSync_->writeOutput(outbuf, maxlength);
+		if (!this->looseSync_->awaitingInput()) {
+			this->stat_ = TRIE;
+		}
+		if (size < maxlength) {
+			return size + writeOutput((void*) ((unsigned char*) outbuf + size),
+					maxlength - size);
+		} else {
+
+			return size;
+
+		}
+	}
+		break;
+	case TRIE:
+		return this->strictSync_->writeOutput(outbuf, maxlength);
+	case EQUAL:
+	default:
+		return 0;
+	}
 }
 
 SynchronizationProcess::~SynchronizationProcess() {
-	delete this->externalhash;
+	delete this->rootSync_;
 	delete this->looseSync_;
 	delete this->strictSync_;
 }
