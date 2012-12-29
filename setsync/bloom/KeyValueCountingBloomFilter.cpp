@@ -13,10 +13,8 @@ namespace bloom {
 KeyValueBloomFilterSync::KeyValueBloomFilterSync(
 		KeyValueCountingBloomFilter * bf) :
 	bf_(bf), inPos_(0), outPos_(0) {
-
 }
 KeyValueBloomFilterSync::~KeyValueBloomFilterSync() {
-
 }
 
 bool KeyValueBloomFilterSync::pendingOutput() const {
@@ -31,7 +29,7 @@ std::size_t KeyValueBloomFilterSync::processInput(void * inbuf,
 	std::size_t bflength = this->bf_->size();
 	if (inPos_ + inlength > bflength) {
 		std::size_t bfpart = (bflength - inPos_);
-		this->bf_->diff((unsigned char *) inbuf, bfpart, inPos_, diffhandler);
+		this->bf_->diff((unsigned char *) inbuf , bfpart, inPos_, diffhandler);
 		this->inPos_ = bflength;
 		return bfpart;
 	} else if (inPos_ + inlength == bflength) {

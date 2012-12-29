@@ -8,32 +8,34 @@
 #include <setsync/utils/FileSystem.h>
 #include <setsync/storage/BdbStorage.h>
 #include <stdlib.h>
+#include <setsync/Packets.h>
+#include <setsync/DiffHandler.h>
 
 using namespace std;
 namespace bloom {
 
 void KeyValueBloomFilterSyncTest::testInput() {
+	unsigned char hash[hashFunction_.getHashSize()];
+	hashFunction_(hash, "bla");
+	this->filter->add(hash);
 	std::size_t buffersize = 20;
 	std::size_t inputlength = 0;
 	unsigned char buffer[buffersize];
 	memset(buffer, 0, buffersize);
 	setsync::ListDiffHandler handler;
-	while (this->process->awaitingInput()) {
-		inputlength += this->process->processInput(buffer, buffersize, handler);
-	}
+	setsync::PacketHeader header(setsync::PacketHeader::FILTER,
+			this->filter->size());
+	header.writeHeaderToBuffer(buffer);
+	inputlength += this->process->processInput(buffer,
+				header.getHeaderSize(), handler);
 	CPPUNIT_ASSERT(handler.size() == 0);
-	CPPUNIT_ASSERT(inputlength == this->filter->size());
-	delete this->process;
-	inputlength = 0;
-	unsigned char hash[hashFunction_.getHashSize()];
-	hashFunction_(hash, "bla");
-	this->filter->add(hash);
-	this->process = this->filter->createSyncProcess();
+	CPPUNIT_ASSERT(inputlength == header.getHeaderSize());
+	memset(buffer, 0, buffersize);
 	while (this->process->awaitingInput()) {
 		inputlength += this->process->processInput(buffer, buffersize, handler);
 	}
-	CPPUNIT_ASSERT(handler.size() > 0);
-	CPPUNIT_ASSERT(inputlength == this->filter->size());
+	CPPUNIT_ASSERT(handler.size() == 1);
+	CPPUNIT_ASSERT(inputlength == this->filter->size() + header.getHeaderSize());
 	CPPUNIT_ASSERT(memcmp(handler[0].first,hash,hashFunction_.getHashSize())==0);
 }
 void KeyValueBloomFilterSyncTest::testOutput() {
