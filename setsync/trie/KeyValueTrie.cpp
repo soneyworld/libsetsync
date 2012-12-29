@@ -40,7 +40,7 @@ bool KeyValueTrieSync::awaitingInput() const {
 
 std::size_t KeyValueTrieSync::processInput(void * inbuf,
 		const std::size_t length, setsync::AbstractDiffHandler& diffhandler) {
-	if(this->outHashesQueue_)
+
 }
 
 std::size_t KeyValueTrieSync::writeOutput(void * outbuf,

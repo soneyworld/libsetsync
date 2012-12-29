@@ -6,7 +6,8 @@ noinst_HEADERS = \
 	SetTest.h \
 	KeyValueStorageTest.h \
 	DiffHandlerTest.h \
-	PacketTest.h
+	PacketTest.h \
+	ProgressTest.h
 
 unittest_SOURCES = \
 	Main.cpp \
@@ -16,7 +17,8 @@ unittest_SOURCES = \
 	SetTest.cpp \
 	KeyValueStorageTest.cpp \
 	DiffHandlerTest.cpp \
-	PacketTest.cpp
+	PacketTest.cpp \
+	ProgressTest.cpp
 	
 
 # what flags you want to pass to the C compiler & linker

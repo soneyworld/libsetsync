@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 
-h_sources = Synchronization.h
-cpp_sources = Synchronization.cpp
+h_sources = Synchronization.h Progress.h
+cpp_sources = Synchronization.cpp Progress.cpp
 
 AM_CFLAGS = 
 AM_LDFLAGS =
