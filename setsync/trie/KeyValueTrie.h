@@ -15,6 +15,7 @@
 #include <exception>
 #include <vector>
 #include <stdint.h>
+#include <queue>
 
 namespace trie {
 
@@ -24,6 +25,9 @@ class KeyValueRootNode;
 class KeyValueTrieSync: public setsync::sync::AbstractSyncProcessPart {
 private:
 	KeyValueTrie * trie_;
+	bool start_;
+	std::queue<unsigned char*> outHashesQueue_;
+	std::size_t hashsize_;
 public:
 	KeyValueTrieSync(KeyValueTrie * trie);
 	virtual ~KeyValueTrieSync();

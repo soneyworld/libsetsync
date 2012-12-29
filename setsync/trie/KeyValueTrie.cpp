@@ -16,8 +16,7 @@
 namespace trie {
 
 KeyValueTrieSync::KeyValueTrieSync(KeyValueTrie * trie) :
-	trie_(trie) {
-
+	trie_(trie), start_(true), hashsize_(trie->getHash().getHashSize()) {
 }
 
 KeyValueTrieSync::~KeyValueTrieSync() {
@@ -25,26 +24,38 @@ KeyValueTrieSync::~KeyValueTrieSync() {
 }
 
 bool KeyValueTrieSync::pendingOutput() const {
-	throw "not yet implemented";
+	if (start_) {
+		return true;
+	}
+
 	return false;
 }
 bool KeyValueTrieSync::awaitingInput() const {
-	throw "not yet implemented";
+	if (this->outHashesQueue_.size() > 0) {
+		return true;
+	}
+
 	return false;
 }
 
 std::size_t KeyValueTrieSync::processInput(void * inbuf,
 		const std::size_t length, setsync::AbstractDiffHandler& diffhandler) {
-	throw "not yet implemented";
-	_unused(inbuf);
-	_unused(length);
-	_unused(diffhandler);
+	if(this->outHashesQueue_)
 }
+
 std::size_t KeyValueTrieSync::writeOutput(void * outbuf,
 		const std::size_t maxlength) {
-	throw "not yet implemented";
-	_unused(outbuf);
-	_unused(maxlength);
+	if (start_) {
+		unsigned char roothash[hashsize_];
+		if (!this->trie_->getRoot(roothash)) {
+			start_ = false;
+			return 0;
+		}
+		std::size_t size = this->trie_->getSubTrie(roothash, outbuf, maxlength);
+		this->start_ = false;
+		return size;
+	}
+	return 0;
 }
 
 const uint8_t TrieNode::HAS_PARENT = 0x01;
