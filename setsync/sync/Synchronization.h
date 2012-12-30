@@ -29,6 +29,8 @@ public:
 			AbstractDiffHandler& diffhandler) = 0;
 	virtual std::size_t
 	writeOutput(void * outbuf, const std::size_t maxlength) = 0;
+
+	virtual std::size_t getRemainigOutputPacketSize() const = 0;
 };
 
 class SyncableDataStructureInterface {
@@ -52,6 +54,7 @@ public:
 			AbstractDiffHandler& diffhandler);
 	virtual std::size_t writeOutput(void * outbuf, const std::size_t maxlength);
 	virtual bool isEqual() const;
+	virtual std::size_t getRemainigOutputPacketSize() const;
 };
 }
 }

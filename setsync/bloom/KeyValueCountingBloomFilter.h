@@ -37,6 +37,7 @@ public:
 	virtual std::size_t processInput(void * inbuf, const std::size_t length,
 			setsync::AbstractDiffHandler& diffhandler);
 	virtual std::size_t writeOutput(void * outbuf, const std::size_t maxlength);
+	virtual std::size_t getRemainigOutputPacketSize() const;
 };
 
 /**

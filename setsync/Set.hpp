@@ -41,6 +41,7 @@ private:
 	sync::HashSyncProcessPart * rootSync_;
 	AbstractSyncProcessPart * looseSync_;
 	AbstractSyncProcessPart * strictSync_;
+	AbstractSyncProcessPart * currentSync_;
 	PacketHeader * inHeader_;
 	PacketHeader * outHeader_;
 
@@ -105,6 +106,10 @@ public:
 	 * \return true, if sync is done
 	 */
 	virtual bool done() const;
+	/**
+	 * \return size of the next output packet
+	 */
+	virtual std::size_t getRemainigOutputPacketSize() const;
 };
 
 /**

@@ -43,6 +43,10 @@ std::size_t KeyValueTrieSync::processInput(void * inbuf,
 
 }
 
+std::size_t KeyValueTrieSync::getRemainigOutputPacketSize() const{
+	return 0;
+}
+
 std::size_t KeyValueTrieSync::writeOutput(void * outbuf,
 		const std::size_t maxlength) {
 	if (start_) {

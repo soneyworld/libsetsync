@@ -81,6 +81,23 @@ int set_sync_init_handle(SET * set, SET_SYNC_HANDLE * handle);
 ssize_t set_sync_step(SET_SYNC_HANDLE * handle, void * inbuf,
 		const size_t inlength, void * outbuf, const size_t maxoutlength,
 		diff_callback * callback, void * closure);
+/**
+ *
+ */
+size_t set_sync_next_out_packet_size(SET_SYNC_HANDLE * handle);
+/**
+ *
+ */
+size_t set_sync_next_out_packet(SET_SYNC_HANDLE * handle,void * outbuf, const size_t maxlength);
+/**
+ *
+ */
+size_t set_sync_next_in_packet(SET_SYNC_HANDLE * handle, void * inbuf, const size_t inlength,
+		diff_callback * callback, void * closure);
+/**
+ *
+ */
+size_t set_sync_awaiting_packet_size(SET_SYNC_HANDLE * handle);
 int set_sync_done(SET_SYNC_HANDLE * handle);
 int set_sync_free_handle(SET_SYNC_HANDLE * handle);
 

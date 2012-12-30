@@ -29,7 +29,12 @@ SynchronizationProcess::SynchronizationProcess(Set * set,
 	this->rootSync_ = new sync::HashSyncProcessPart(set_->hash_, roothash);
 	this->looseSync_ = set->bf_->createSyncProcess();
 	this->strictSync_ = set->trie_->createSyncProcess();
+	this->currentSync_ = this->rootSync_;
 
+}
+
+std::size_t SynchronizationProcess::getRemainigOutputPacketSize() const {
+	return this->currentSync_->getRemainigOutputPacketSize();
 }
 
 std::size_t SynchronizationProcess::step(void * inbuf,
@@ -248,7 +253,7 @@ Set::Set(const config::Configuration& config) :
 		indexpath.append("index");
 		indexStorage_ = new storage::LevelDbStorage(indexpath);
 	}
-		break;
+	break;
 #endif
 #ifdef HAVE_DB_CXX_H
 	case config::Configuration::StorageConfig::BERKELEY_DB: {
