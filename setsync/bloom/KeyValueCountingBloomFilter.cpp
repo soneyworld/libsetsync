@@ -24,6 +24,14 @@ bool KeyValueBloomFilterSync::awaitingInput() const {
 	return this->bf_->size() > inPos_;
 }
 
+bool KeyValueBloomFilterSync::isEqual() const {
+	return false;
+}
+
+bool KeyValueBloomFilterSync::done() const {
+	return !this->pendingOutput();
+}
+
 std::size_t KeyValueBloomFilterSync::getRemainigOutputPacketSize() const{
 	return pendingOutput();
 }

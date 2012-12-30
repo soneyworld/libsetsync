@@ -40,10 +40,10 @@ bool KeyValueTrieSync::awaitingInput() const {
 
 std::size_t KeyValueTrieSync::processInput(void * inbuf,
 		const std::size_t length, setsync::AbstractDiffHandler& diffhandler) {
-
+	throw "not yet implemented";
 }
 
-std::size_t KeyValueTrieSync::getRemainigOutputPacketSize() const{
+std::size_t KeyValueTrieSync::getRemainigOutputPacketSize() const {
 	return 0;
 }
 
@@ -60,6 +60,18 @@ std::size_t KeyValueTrieSync::writeOutput(void * outbuf,
 		return size;
 	}
 	return 0;
+}
+
+bool KeyValueTrieSync::done() const {
+	if (!this->awaitingInput() && !this->pendingOutput()) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool KeyValueTrieSync::isEqual() const {
+	throw "not yet implemented";
 }
 
 const uint8_t TrieNode::HAS_PARENT = 0x01;

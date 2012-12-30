@@ -29,12 +29,13 @@ SynchronizationProcess::SynchronizationProcess(Set * set,
 	this->rootSync_ = new sync::HashSyncProcessPart(set_->hash_, roothash);
 	this->looseSync_ = set->bf_->createSyncProcess();
 	this->strictSync_ = set->trie_->createSyncProcess();
-	this->currentSync_ = this->rootSync_;
+	this->currentInSync_ = this->rootSync_;
+	this->currentOutSync_ = this->rootSync_;
 
 }
 
 std::size_t SynchronizationProcess::getRemainigOutputPacketSize() const {
-	return this->currentSync_->getRemainigOutputPacketSize();
+	return this->currentOutSync_->getRemainigOutputPacketSize();
 }
 
 std::size_t SynchronizationProcess::step(void * inbuf,
@@ -47,7 +48,14 @@ std::size_t SynchronizationProcess::step(void * inbuf,
 std::size_t SynchronizationProcess::step(void * inbuf,
 		const std::size_t inlength, void * outbuf, const std::size_t outlength,
 		AbstractDiffHandler& diffhandler) {
-	throw "not yet implemented";
+	std::size_t outsize = 0;
+	if (inlength > 0) {
+		this->processInput(inbuf, inlength, diffhandler);
+	}
+	if (outlength > 0) {
+		outsize = this->writeOutput(outbuf, outlength);
+	}
+	return outsize;
 }
 
 std::size_t SynchronizationProcess::step(void * inbuf,
@@ -62,116 +70,39 @@ std::size_t SynchronizationProcess::step(void * inbuf,
 
 std::size_t SynchronizationProcess::processInput(void * inbuf,
 		const std::size_t length, AbstractDiffHandler& diffhandler) {
-	switch (stat_) {
-	case START: {
-		std::size_t size = this->rootSync_->processInput(inbuf, length,
-				diffhandler);
-		if (!this->rootSync_->awaitingInput()) {
-			if (this->rootSync_->isEqual()) {
-				this->stat_ = EQUAL;
-				return size;
-			} else {
-				this->stat_ = BF;
-			}
+	std::size_t size = this->currentInSync_->processInput(inbuf, length,
+			diffhandler);
+	if (!this->currentInSync_->awaitingInput()) {
+		if (this->currentInSync_ == this->rootSync_) {
+			this->currentInSync_ = this->looseSync_;
+		} else if (this->currentInSync_ == this->looseSync_) {
+			this->currentInSync_ = this->strictSync_;
 		}
-		if (size < length) {
-			return size + processInput((void*) ((unsigned char*) inbuf + size),
-					length - size, diffhandler);
-		}
-
 	}
-		break;
-	case BF: {
-		if (length == 0) {
-			return 0;
-		}
-		std::size_t header = 0;
-		if (this->inHeader_ == NULL) {
-			this->inHeader_ = new setsync::PacketHeader((unsigned char*) inbuf);
-			if (this->inHeader_->getType() != setsync::PacketHeader::FILTER) {
-				throw "Wrong Packet Type";
-			}
-			header++;
-		}
-		while (!this->inHeader_->isInputHeaderComplete() && (length - header)
-				> 0) {
-			this->inHeader_->addHeaderByte((unsigned char*) (inbuf) + header);
-			header++;
-		}
-		if (length - header == 0) {
-			return header;
-		}
-		if (this->inHeader_->getPacketSize() != this->set_->bf_->size()) {
-			throw "Wrong filter size! Cannot compare two filter with different sizes";
-		}
-		std::size_t size = header
-				+ this->looseSync_->processInput(
-						(unsigned char*) (inbuf) + header, length - header,
-						diffhandler);
-		if (!this->looseSync_->awaitingInput()) {
-			delete this->inHeader_;
-			this->inHeader_ = NULL;
-			this->stat_ = TRIE;
-		}
-		if (length > size) {
-			return size + this->processInput(
-					(void*) ((unsigned char*) inbuf + size), length - size,
-					diffhandler);
-		} else {
-			return size;
-		}
-
-	}
-		break;
-	case EQUAL:
-		return 0;
-	case TRIE: {
-
-	}
-	default:
-		throw "not yet implemented";
-	}
-	return 0;
+	return size;
 }
 
 std::size_t SynchronizationProcess::writeOutput(void * outbuf,
 		const std::size_t maxlength) {
-	switch (stat_) {
-	case START: {
-		std::size_t size = this->rootSync_->writeOutput(outbuf, maxlength);
-		if (!this->rootSync_->pendingOutput()) {
-			this->stat_ = BF;
-		}
-		if (size < maxlength) {
-			return size + writeOutput((void*) ((unsigned char*) outbuf + size),
-					maxlength - size);
-
-		} else {
-			return size;
-		}
-	}
-		break;
-	case BF: {
-		std::size_t size = this->looseSync_->writeOutput(outbuf, maxlength);
-		if (!this->looseSync_->awaitingInput()) {
-			this->stat_ = TRIE;
-		}
-		if (size < maxlength) {
-			return size + writeOutput((void*) ((unsigned char*) outbuf + size),
-					maxlength - size);
-		} else {
-
-			return size;
-
+	std::size_t size = this->currentOutSync_->writeOutput(outbuf, maxlength);
+	if (!this->currentOutSync_->pendingOutput()) {
+		if (this->currentOutSync_ == this->rootSync_) {
+			this->currentOutSync_ = this->looseSync_;
+			if (size < maxlength) {
+				return size + writeOutput(
+						(void*) ((unsigned char*) outbuf + size),
+						maxlength - size);
+			}
+		} else if (this->currentOutSync_ == this->looseSync_) {
+			this->currentOutSync_ = this->strictSync_;
+			if (size < maxlength) {
+				return size + writeOutput(
+						(void*) ((unsigned char*) outbuf + size),
+						maxlength - size);
+			}
 		}
 	}
-		break;
-	case TRIE:
-		return this->strictSync_->writeOutput(outbuf, maxlength);
-	case EQUAL:
-	default:
-		return 0;
-	}
+	return size;
 }
 
 SynchronizationProcess::~SynchronizationProcess() {
@@ -188,35 +119,26 @@ std::size_t SynchronizationProcess::calcOutputBufferSize(const size_t RTT,
 		double rtt = RTT;
 		rtt = rtt / 1000000;
 		double bw = bandwidth;
-		double bits = bandwidth * rtt;
+		double bits = bw * rtt;
 		std::size_t result = (std::size_t) (bits / 8.0);
 		return result;
 	}
 }
 
+bool SynchronizationProcess::isEqual() const {
+	return this->currentInSync_->isEqual();
+}
+
 bool SynchronizationProcess::done() const {
-	throw "not yet implemented";
-	if (this->stat_ == EQUAL) {
-		return true;
-	} else {
-		return false;
-	}
+	return this->isEqual();
 }
 
 bool SynchronizationProcess::pendingOutput() const {
-	if (stat_ == START)
-		return true;
-	if (looseSync_->pendingOutput())
-		return true;
-	if (strictSync_->pendingOutput())
-		return true;
-	return false;
+	return this->currentOutSync_->pendingOutput();
 }
 
 bool SynchronizationProcess::awaitingInput() const {
-	if (stat_ == EQUAL)
-		return false;
-	return true;
+	return this->currentInSync_->awaitingInput();
 }
 
 Set::Set(const config::Configuration& config) :
@@ -253,7 +175,7 @@ Set::Set(const config::Configuration& config) :
 		indexpath.append("index");
 		indexStorage_ = new storage::LevelDbStorage(indexpath);
 	}
-	break;
+		break;
 #endif
 #ifdef HAVE_DB_CXX_H
 	case config::Configuration::StorageConfig::BERKELEY_DB: {

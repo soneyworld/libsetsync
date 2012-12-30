@@ -30,6 +30,14 @@ bool HashSyncProcessPart::awaitingInput() const {
 	return this->inPos_ < hashsize_;
 }
 
+bool HashSyncProcessPart::done() const {
+	if(awaitingInput())
+		return false;
+	if(pendingOutput())
+		return false;
+	return true;
+}
+
 std::size_t HashSyncProcessPart::processInput(void * input,
 		const std::size_t length, AbstractDiffHandler& diffhandler) {
 	std::size_t min = std::min(hashsize_ - inPos_, length);

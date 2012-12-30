@@ -38,6 +38,8 @@ public:
 			setsync::AbstractDiffHandler& diffhandler);
 	virtual std::size_t writeOutput(void * outbuf, const std::size_t maxlength);
 	virtual std::size_t getRemainigOutputPacketSize() const;
+	virtual bool isEqual() const;
+	virtual bool done() const;
 };
 
 /**

@@ -31,6 +31,14 @@ public:
 	writeOutput(void * outbuf, const std::size_t maxlength) = 0;
 
 	virtual std::size_t getRemainigOutputPacketSize() const = 0;
+	/**
+	 * \return true, if sync is done
+	 */
+	virtual bool done() const = 0;
+	/**
+	 * \return true, if this is fully equal to external entity
+	 */
+	virtual bool isEqual() const = 0;
 };
 
 class SyncableDataStructureInterface {
@@ -54,6 +62,7 @@ public:
 			AbstractDiffHandler& diffhandler);
 	virtual std::size_t writeOutput(void * outbuf, const std::size_t maxlength);
 	virtual bool isEqual() const;
+	virtual bool done() const;
 	virtual std::size_t getRemainigOutputPacketSize() const;
 };
 }
