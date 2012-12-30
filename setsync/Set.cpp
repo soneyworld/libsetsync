@@ -35,6 +35,10 @@ SynchronizationProcess::SynchronizationProcess(Set * set,
 }
 
 std::size_t SynchronizationProcess::getRemainigOutputPacketSize() const {
+	if (this->currentOutSync_ == this->rootSync_) {
+		return this->rootSync_->getRemainigOutputPacketSize()
+				+ this->looseSync_->getRemainigOutputPacketSize();
+	}
 	return this->currentOutSync_->getRemainigOutputPacketSize();
 }
 

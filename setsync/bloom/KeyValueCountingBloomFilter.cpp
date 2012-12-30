@@ -12,13 +12,21 @@ namespace bloom {
 
 KeyValueBloomFilterSync::KeyValueBloomFilterSync(
 		KeyValueCountingBloomFilter * bf) :
-	bf_(bf), inPos_(0), outPos_(0) {
+	bf_(bf), inPos_(0), outPos_(0),
+			outgoingPacket(setsync::PacketHeader::FILTER, bf->size()),
+			incomingPacket(NULL) {
+	outPacketBuf_ = new unsigned char[outgoingPacket.getHeaderSize()];
+	outgoingPacket.writeHeaderToBuffer(outPacketBuf_);
 }
 KeyValueBloomFilterSync::~KeyValueBloomFilterSync() {
+	if (this->incomingPacket != NULL) {
+		delete incomingPacket;
+	}
+	delete[] outPacketBuf_;
 }
 
 bool KeyValueBloomFilterSync::pendingOutput() const {
-	return this->bf_->size() > outPos_;
+	return (this->bf_->size() + outgoingPacket.getHeaderSize()) > outPos_;
 }
 bool KeyValueBloomFilterSync::awaitingInput() const {
 	return this->bf_->size() > inPos_;
@@ -32,16 +40,32 @@ bool KeyValueBloomFilterSync::done() const {
 	return !this->pendingOutput();
 }
 
-std::size_t KeyValueBloomFilterSync::getRemainigOutputPacketSize() const{
-	return pendingOutput();
+std::size_t KeyValueBloomFilterSync::getRemainigOutputPacketSize() const {
+	return this->bf_->size() + outgoingPacket.getHeaderSize() - outPos_;
 }
 
 std::size_t KeyValueBloomFilterSync::processInput(void * inbuf,
 		const std::size_t inlength, setsync::AbstractDiffHandler& diffhandler) {
+	if (inlength == 0) {
+		return 0;
+	}
+	if (incomingPacket == NULL) {
+		this->incomingPacket
+				= new setsync::PacketHeader((unsigned char*) inbuf);
+		if (incomingPacket->getType() != setsync::PacketHeader::FILTER) {
+			throw "Illegal Packet!";
+		}
+		return 1 + processInput((void*) ((unsigned char*) inbuf + 1),
+				inlength - 1, diffhandler);
+	} else if (!incomingPacket->isInputHeaderComplete()) {
+		incomingPacket->addHeaderByte((unsigned char*) inbuf);
+		return 1 + processInput((void*) ((unsigned char*) inbuf + 1),
+				inlength - 1, diffhandler);
+	}
 	std::size_t bflength = this->bf_->size();
 	if (inPos_ + inlength > bflength) {
 		std::size_t bfpart = (bflength - inPos_);
-		this->bf_->diff((unsigned char *) inbuf , bfpart, inPos_, diffhandler);
+		this->bf_->diff((unsigned char *) inbuf, bfpart, inPos_, diffhandler);
 		this->inPos_ = bflength;
 		return bfpart;
 	} else if (inPos_ + inlength == bflength) {
@@ -57,8 +81,24 @@ std::size_t KeyValueBloomFilterSync::processInput(void * inbuf,
 
 std::size_t KeyValueBloomFilterSync::writeOutput(void * outbuf,
 		const std::size_t maxlength) {
-	std::size_t resultsize = std::min(this->bf_->size() - outPos_, maxlength);
-	memcpy(outbuf, this->bf_->bitArray_ + outPos_, resultsize);
+	if (maxlength == 0) {
+		return 0;
+	}
+	if (outPos_ < this->outgoingPacket.getHeaderSize()) {
+		std::size_t headerpart = std::min(
+				this->outgoingPacket.getHeaderSize() - outPos_, maxlength);
+		memcpy(outbuf, this->outPacketBuf_ + outPos_, headerpart);
+		outPos_ += headerpart;
+		return headerpart + writeOutput(
+				(void*) ((unsigned char*) outbuf + headerpart),
+				maxlength - headerpart);
+	}
+	std::size_t resultsize = std::min(this->getRemainigOutputPacketSize(),
+			maxlength);
+	memcpy(
+			outbuf,
+			this->bf_->bitArray_ + outPos_
+					- this->outgoingPacket.getHeaderSize(), resultsize);
 	this->outPos_ += resultsize;
 	return resultsize;
 }

@@ -22,6 +22,9 @@ private:
 	KeyValueCountingBloomFilter * bf_;
 	std::size_t inPos_;
 	std::size_t outPos_;
+	setsync::PacketHeader outgoingPacket;
+	setsync::PacketHeader * incomingPacket;
+	unsigned char * outPacketBuf_;
 public:
 	KeyValueBloomFilterSync(KeyValueCountingBloomFilter * bf);
 	virtual ~KeyValueBloomFilterSync();

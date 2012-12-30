@@ -35,7 +35,7 @@ public:
 	Type getType() const ;
 	static Type getType(const unsigned char* header);
 	void addHeaderByte(unsigned char * nextHeaderByte);
-	size_t getHeaderSize();
+	size_t getHeaderSize() const;
 	static size_t getHeaderSize(const Type& t);
 	void writeHeaderToBuffer(unsigned char * buffer);
 };

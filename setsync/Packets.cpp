@@ -75,7 +75,7 @@ void PacketHeader::addHeaderByte(unsigned char * nextHeaderByte) {
 	}
 }
 
-size_t PacketHeader::getHeaderSize() {
+size_t PacketHeader::getHeaderSize() const {
 	return getHeaderSize(t_);
 }
 

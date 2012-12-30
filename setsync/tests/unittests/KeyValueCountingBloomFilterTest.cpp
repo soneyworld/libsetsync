@@ -26,8 +26,8 @@ void KeyValueBloomFilterSyncTest::testInput() {
 	setsync::PacketHeader header(setsync::PacketHeader::FILTER,
 			this->filter->size());
 	header.writeHeaderToBuffer(buffer);
-	inputlength += this->process->processInput(buffer,
-				header.getHeaderSize(), handler);
+	inputlength += this->process->processInput(buffer, header.getHeaderSize(),
+			handler);
 	CPPUNIT_ASSERT(handler.size() == 0);
 	CPPUNIT_ASSERT(inputlength == header.getHeaderSize());
 	memset(buffer, 0, buffersize);
@@ -38,6 +38,7 @@ void KeyValueBloomFilterSyncTest::testInput() {
 	CPPUNIT_ASSERT(inputlength == this->filter->size() + header.getHeaderSize());
 	CPPUNIT_ASSERT(memcmp(handler[0].first,hash,hashFunction_.getHashSize())==0);
 }
+
 void KeyValueBloomFilterSyncTest::testOutput() {
 	unsigned char hash[hashFunction_.getHashSize()];
 	hashFunction_(hash, "bla1");
@@ -49,15 +50,43 @@ void KeyValueBloomFilterSyncTest::testOutput() {
 	std::size_t outputlength = 0;
 	std::size_t buffersize = 20;
 	unsigned char buffer[buffersize];
+	std::size_t headersize = setsync::PacketHeader::getHeaderSize(
+			setsync::PacketHeader::FILTER);
+	CPPUNIT_ASSERT(this->process->writeOutput(buffer,headersize) == headersize);
+	outputlength = 0;
+	buffersize = 20;
 	while (this->process->pendingOutput()) {
 		std::size_t length = this->process->writeOutput(buffer, buffersize);
 		CPPUNIT_ASSERT(length <= buffersize);
-		if (length != 0)
-			CPPUNIT_ASSERT(memcmp(this->filter->bitArray_+outputlength,buffer,length) == 0);
 		outputlength += length;
 	}
 	CPPUNIT_ASSERT(outputlength == this->filter->size());
 }
+
+void KeyValueBloomFilterSyncTest::testSync() {
+	unsigned char hash[hashFunction_.getHashSize()];
+	hashFunction_(hash, "bla1");
+	this->filter->add(hash);
+	hashFunction_(hash, "bla2");
+	this->filter->add(hash);
+	hashFunction_(hash, "bla3");
+	this->filter->add(hash);
+	std::size_t buffersize = 20;
+	unsigned char buffer[buffersize];
+	setsync::ListDiffHandler handler;
+	while (this->process->pendingOutput()) {
+		CPPUNIT_ASSERT(!this->process->done());
+		CPPUNIT_ASSERT(this->process->getRemainigOutputPacketSize()>0);
+		std::size_t length = this->process->writeOutput(buffer, buffersize);
+		this->process->processInput(buffer, length, handler);
+	}
+	CPPUNIT_ASSERT(!this->process->awaitingInput());
+	CPPUNIT_ASSERT(!this->process->pendingOutput());
+	CPPUNIT_ASSERT(this->process->getRemainigOutputPacketSize()==0);
+	CPPUNIT_ASSERT(this->process->done());
+	CPPUNIT_ASSERT(handler.size() == 0);
+}
+
 void KeyValueBloomFilterSyncTest::setUp() {
 	this->db = new Db(NULL, 0);
 	db->open(NULL, "table1.db", NULL, DB_HASH, DB_CREATE, 0);
