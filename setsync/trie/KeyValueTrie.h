@@ -397,13 +397,13 @@ public:
 	 * \param performhash
 	 * \return true on success
 	 */
-	virtual bool add(const unsigned char * hash, bool performhash);
+	virtual bool add(const unsigned char * hash, bool performhash = true);
 	/**
 	 * \param hash to be removed
 	 * \param performhash
 	 * \return true on success
 	 */
-	virtual bool remove(const unsigned char * hash, bool performhash);
+	virtual bool remove(const unsigned char * hash, bool performhash = true);
 	/**
 	 * \param hash to be checked
 	 * \return true if the hash is available

@@ -14,14 +14,97 @@ using namespace std;
 
 namespace trie {
 
+void KeyValueTrieSyncTest::setUp(void) {
+	this->db1 = new Db(NULL, 0);
+	this->db2 = new Db(NULL, 0);
+	db1->open(NULL, "table1.db", NULL, DB_HASH, DB_CREATE, 0);
+	db2->open(NULL, "table2.db", NULL, DB_HASH, DB_CREATE, 0);
+	this->storage1 = new setsync::storage::BdbStorage(this->db1);
+	this->storage2 = new setsync::storage::BdbStorage(this->db2);
+	this->trie1 = new KeyValueTrie(hashFunction_, *storage1);
+	this->trie2 = new KeyValueTrie(hashFunction_, *storage2);
+	this->process1 = this->trie1->createSyncProcess();
+	this->process2 = this->trie2->createSyncProcess();
+}
+
+void KeyValueTrieSyncTest::tearDown(void) {
+	delete this->process1;
+	delete this->process2;
+	delete this->trie1;
+	delete this->trie2;
+	delete this->storage1;
+	delete this->storage2;
+	this->db1->close(0);
+	this->db2->close(0);
+	delete this->db1;
+	delete this->db2;
+	this->db1 = new Db(NULL, 0);
+	this->db2 = new Db(NULL, 0);
+	db1->remove("table1.db", NULL, 0);
+	db2->remove("table2.db", NULL, 0);
+	delete this->db1;
+	delete this->db2;
+}
+
+void KeyValueTrieSyncTest::testInput() {
+	throw "not yet implemented";
+}
+
+void KeyValueTrieSyncTest::testOutput() {
+	throw "not yet implemented";
+}
+
+void KeyValueTrieSyncTest::testSync() {
+	CPPUNIT_ASSERT(*trie1 == *trie2);
+	unsigned char hash[hashFunction_.getHashSize()];
+	hashFunction_(hash, "bla1");
+	this->trie1->add(hash);
+	hashFunction_(hash, "bla2");
+	this->trie1->add(hash);
+	hashFunction_(hash, "bla3");
+	this->trie2->add(hash);
+	CPPUNIT_ASSERT(*trie1 != *trie2);
+	std::size_t buffersize = 20;
+	unsigned char buffer[buffersize];
+	while (this->process1->pendingOutput() || this->process2->pendingOutput()
+			|| this->process1->awaitingInput()
+			|| this->process2->awaitingInput()) {
+		if (this->process1->awaitingInput()) {
+			CPPUNIT_ASSERT(this->process2->pendingOutput());
+			setsync::ListDiffHandler handler;
+			while (this->process2->pendingOutput()) {
+				this->process2->writeOutput(buffer, buffersize);
+				this->process1->processInput(buffer, buffersize, handler);
+			}
+		} else if (this->process2->awaitingInput()) {
+			CPPUNIT_ASSERT(this->process1->pendingOutput());
+			setsync::ListDiffHandler handler;
+			while (this->process1->pendingOutput()) {
+				this->process1->writeOutput(buffer, buffersize);
+				this->process2->processInput(buffer, buffersize, handler);
+			}
+		} else if (this->process1->pendingOutput()) {
+			setsync::ListDiffHandler handler;
+			while (this->process1->pendingOutput()) {
+				this->process1->writeOutput(buffer, buffersize);
+				this->process2->processInput(buffer, buffersize, handler);
+			}
+		} else if (this->process2->pendingOutput()) {
+			setsync::ListDiffHandler handler;
+			while (this->process2->pendingOutput()) {
+				this->process2->writeOutput(buffer, buffersize);
+				this->process1->processInput(buffer, buffersize, handler);
+			}
+		}
+	}
+	CPPUNIT_ASSERT(*trie1 == *trie2);
+}
 
 void KeyValueTrieTest::setUp(void) {
 	this->db = new Db(NULL, 0);
-	db->open(NULL, "trie.db", "trie",
-			DB_HASH, DB_CREATE, 0);
+	db->open(NULL, "trie.db", "trie", DB_HASH, DB_CREATE, 0);
 	this->db2 = new Db(NULL, 0);
-	db2->open(NULL, "trie2.db", "trie",
-			DB_HASH, DB_CREATE, 0);
+	db2->open(NULL, "trie2.db", "trie", DB_HASH, DB_CREATE, 0);
 	this->smaller = (unsigned char *) malloc(this->hash.getHashSize());
 	this->larger = (unsigned char *) malloc(this->hash.getHashSize());
 	memset(this->smaller, 0, hash.getHashSize());
@@ -61,7 +144,7 @@ void KeyValueTrieTest::testAdding() {
 }
 
 void KeyValueTrieTest::testAddingAndErasingElements() {
-	trie::KeyValueTrie trie(hash,*storage1);
+	trie::KeyValueTrie trie(hash, *storage1);
 	CPPUNIT_ASSERT(trie.getSize() == 0);
 	CPPUNIT_ASSERT(trie.Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie.getSize() == 1);
@@ -172,9 +255,9 @@ void KeyValueTrieTest::testEquals() {
 
 void KeyValueTrieTest::testSavingAndLoading() {
 	Db * dbcopy = new Db(NULL, 0);
-	dbcopy->open(NULL, "trieCopy.db", "trie",
-			DB_HASH, DB_CREATE, 0);
-	setsync::storage::BdbStorage * copystorage = new setsync::storage::BdbStorage(dbcopy);
+	dbcopy->open(NULL, "trieCopy.db", "trie", DB_HASH, DB_CREATE, 0);
+	setsync::storage::BdbStorage * copystorage =
+			new setsync::storage::BdbStorage(dbcopy);
 	trie::KeyValueTrie * trie = new trie::KeyValueTrie(hash, *copystorage);
 	CPPUNIT_ASSERT(trie->Trie::add("bla1"));
 	CPPUNIT_ASSERT(trie->Trie::add("bla2"));
@@ -183,8 +266,7 @@ void KeyValueTrieTest::testSavingAndLoading() {
 	dbcopy->close(0);
 	delete dbcopy;
 	dbcopy = new Db(NULL, 0);
-	dbcopy->open(NULL, "trieCopy.db", "trie",
-			DB_HASH, DB_CREATE, 0);
+	dbcopy->open(NULL, "trieCopy.db", "trie", DB_HASH, DB_CREATE, 0);
 	copystorage = new setsync::storage::BdbStorage(dbcopy);
 	trie = new trie::KeyValueTrie(hash, *copystorage);
 	CPPUNIT_ASSERT(trie->Trie::contains("bla1"));
