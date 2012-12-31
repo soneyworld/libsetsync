@@ -16,11 +16,14 @@
 namespace trie {
 
 KeyValueTrieSync::KeyValueTrieSync(KeyValueTrie * trie) :
-	trie_(trie), start_(true), hashsize_(trie->getHash().getHashSize()) {
+	trie_(trie), start_(true), hashsize_(trie->getHash().getHashSize()),
+			incomingPacket_(NULL), outgoingPacket_(NULL), inPos_(0),
+			processedIncommingHashes_(0) {
+	inBuf = new unsigned char[hashsize_];
 }
 
 KeyValueTrieSync::~KeyValueTrieSync() {
-
+	delete[] inBuf;
 }
 
 bool KeyValueTrieSync::pendingOutput() const {
@@ -31,6 +34,8 @@ bool KeyValueTrieSync::pendingOutput() const {
 	return false;
 }
 bool KeyValueTrieSync::awaitingInput() const {
+	if (this->incomingPacket_ != NULL)
+		return true;
 	if (this->outHashesQueue_.size() > 0) {
 		return true;
 	}
@@ -40,7 +45,81 @@ bool KeyValueTrieSync::awaitingInput() const {
 
 std::size_t KeyValueTrieSync::processInput(void * inbuf,
 		const std::size_t length, setsync::AbstractDiffHandler& diffhandler) {
-	throw "not yet implemented";
+	if (length == 0) {
+		return 0;
+	}
+	if (this->incomingPacket_ == NULL) {
+		this->incomingPacket_ = new setsync::PacketHeader(
+				(unsigned char*) inbuf);
+		if (incomingPacket_->getType() != setsync::PacketHeader::SUBTRIE
+				|| incomingPacket_->getType()
+						!= setsync::PacketHeader::SUBTRIE_REQUEST) {
+			throw "Illegal Packet!";
+		}
+		return 1 + processInput((void*) ((unsigned char*) inbuf + 1),
+				length - 1, diffhandler);
+	} else {
+		std::size_t processed;
+		switch (incomingPacket_->getType()) {
+		case setsync::PacketHeader::SUBTRIE:
+			processed = processSubtrieInput(inbuf, length, diffhandler);
+			return processed + processInput(
+					(void*) ((unsigned char*) inbuf + processed),
+					length - processed, diffhandler);
+			break;
+		case setsync::PacketHeader::SUBTRIE_REQUEST:
+			processed = processRequestInput(inbuf, length, diffhandler);
+			return processed + processInput(
+					(void*) ((unsigned char*) inbuf + processed),
+					length - processed, diffhandler);
+			break;
+		default:
+			throw "Illegal Packet!";
+		}
+	}
+}
+
+std::size_t KeyValueTrieSync::processSubtrieInput(void * inbuf,
+		const std::size_t length, setsync::AbstractDiffHandler& diffhandler) {
+	if (length == 0) {
+		return 0;
+	}
+}
+std::size_t KeyValueTrieSync::processRequestInput(void * inbuf,
+		const std::size_t length, setsync::AbstractDiffHandler& diffhandler) {
+	if (length == 0) {
+		return 0;
+	}
+	std::size_t i;
+	for (i = 0; i < length && inPos_ < this->incomingPacket_->getPacketSize(); i++) {
+		std::size_t j;
+		for (j = 0; j < 8; j++) {
+			if (BITTEST((unsigned char*)inbuf , j+8*i)) {
+				// HASH REQUESTED
+				TrieNodeType type = this->trie_->contains(
+						this->sentHashesQueue_.front().get());
+				switch (type) {
+				case INNER_NODE:
+					// SEND SUBTRIE
+					throw "not yet implemented";
+					break;
+				case LEAF_NODE:
+					diffhandler.handle(this->sentHashesQueue_.front().get(),
+							hashsize_, true);
+					break;
+				default:
+					break;
+				}
+				// SEND SUBTRIE
+			} else {
+				// HASH COULD BE IGNORED
+			}
+			this->sentHashesQueue_.pop();
+			inPos_++;
+		}
+
+	}
+	return i;
 }
 
 std::size_t KeyValueTrieSync::getRemainigOutputPacketSize() const {
@@ -58,6 +137,8 @@ std::size_t KeyValueTrieSync::writeOutput(void * outbuf,
 		std::size_t size = this->trie_->getSubTrie(roothash, outbuf, maxlength);
 		this->start_ = false;
 		return size;
+	} else {
+		throw "";
 	}
 	return 0;
 }
@@ -71,7 +152,7 @@ bool KeyValueTrieSync::done() const {
 }
 
 bool KeyValueTrieSync::isEqual() const {
-	throw "not yet implemented";
+	return done();
 }
 
 const uint8_t TrieNode::HAS_PARENT = 0x01;

@@ -156,4 +156,50 @@ int CryptoHash::operator()(unsigned char * target_md, std::istream& in) const {
 std::string CryptoHash::getName() const {
 	return std::string(name_);
 }
+
+CryptoHashContainer::CryptoHashContainer(const CryptoHash& hash,
+		const unsigned char * md) :
+	hashFunction_(hash) {
+	this->md_ = new unsigned char[hashFunction_.getHashSize()];
+	if (md != NULL) {
+		memcpy(md_, md, hashFunction_.getHashSize());
+	} else {
+		memset(md_, 0, hashFunction_.getHashSize());
+	}
+}
+CryptoHashContainer::~CryptoHashContainer() {
+	delete[] this->md_;
+}
+
+void CryptoHashContainer::set(const unsigned char * md) {
+	memcpy(md_, md, hashFunction_.getHashSize());
+}
+const unsigned char * CryptoHashContainer::get(void) const {
+	return this->md_;
+}
+
+CryptoHashContainer::CryptoHashContainer(const CryptoHashContainer& other) :
+	hashFunction_(other.hashFunction_) {
+	this->md_ = new unsigned char[hashFunction_.getHashSize()];
+	memcpy(md_, other.md_, hashFunction_.getHashSize());
+}
+
+bool CryptoHashContainer::operator ==(const CryptoHashContainer& other) const {
+	if (other.hashFunction_.getHashSize() != hashFunction_.getHashSize())
+		return false;
+	if (other.hashFunction_.getName() != hashFunction_.getName()) {
+		return false;
+	}
+	return memcmp(md_, other.md_, hashFunction_.getHashSize()) == 0;
+}
+bool CryptoHashContainer::operator !=(const CryptoHashContainer& other) const {
+	return !(*this == other);
+}
+
+bool CryptoHashContainer::operator ==(const unsigned char * other) const {
+	return memcmp(md_, other, hashFunction_.getHashSize()) == 0;
+}
+bool CryptoHashContainer::operator !=(const unsigned char * other) const {
+	return memcmp(md_, other, hashFunction_.getHashSize()) != 0;
+}
 }

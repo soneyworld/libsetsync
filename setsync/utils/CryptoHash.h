@@ -81,6 +81,23 @@ public:
 	std::string getName(void) const;
 };
 
+class CryptoHashContainer {
+private:
+	unsigned char * md_;
+	const CryptoHash& hashFunction_;
+public:
+			CryptoHashContainer(const CryptoHash& hash,
+					const unsigned char * md = NULL);
+	virtual ~CryptoHashContainer();
+	void set(const unsigned char * md);
+	const unsigned char * get(void) const;
+	CryptoHashContainer(const CryptoHashContainer& other);
+	bool operator ==(const CryptoHashContainer& other) const;
+	bool operator !=(const CryptoHashContainer& other) const;
+	bool operator ==(const unsigned char * other) const;
+	bool operator !=(const unsigned char * other) const;
+};
+
 }
 
 #endif /* CRYPTOHASH_H_ */

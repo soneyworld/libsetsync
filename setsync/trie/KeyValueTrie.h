@@ -11,11 +11,13 @@
 #include <setsync/storage/KeyValueStorage.h>
 #include <setsync/trie/TrieException.h>
 #include <setsync/sync/Synchronization.h>
+#include <setsync/Packets.h>
 #include <setsync/DiffHandler.h>
 #include <exception>
 #include <vector>
 #include <stdint.h>
 #include <queue>
+
 
 namespace trie {
 
@@ -26,8 +28,19 @@ class KeyValueTrieSync: public setsync::sync::AbstractSyncProcessPart {
 private:
 	KeyValueTrie * trie_;
 	bool start_;
-	std::queue<unsigned char*> outHashesQueue_;
+	std::queue<utils::CryptoHashContainer> outHashesQueue_;
+	std::queue<utils::CryptoHashContainer> sentHashesQueue_;
 	std::size_t hashsize_;
+	setsync::PacketHeader * incomingPacket_;
+	setsync::PacketHeader * outgoingPacket_;
+	std::queue<bool> outgoingAckQueue_;
+	std::size_t inPos_;
+	unsigned char * inBuf;
+	std::size_t processedIncommingHashes_;
+	virtual std::size_t processSubtrieInput(void * inbuf, const std::size_t length,
+				setsync::AbstractDiffHandler& diffhandler);
+	virtual std::size_t processRequestInput(void * inbuf, const std::size_t length,
+					setsync::AbstractDiffHandler& diffhandler);
 public:
 	KeyValueTrieSync(KeyValueTrie * trie);
 	virtual ~KeyValueTrieSync();
