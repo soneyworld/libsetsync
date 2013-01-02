@@ -21,8 +21,8 @@ CPPUNIT_TEST_SUITE( SetTest);
 	CPPUNIT_TEST( testFind);
 	CPPUNIT_TEST( testMaximum);
 	CPPUNIT_TEST( testStartSync);
-	CPPUNIT_TEST( testLooseSync);
-	CPPUNIT_TEST( testStrictSync);
+//	CPPUNIT_TEST( testLooseSync);
+//	CPPUNIT_TEST( testStrictSync);
 	CPPUNIT_TEST( testSync);
 CPPUNIT_TEST_SUITE_END();
 

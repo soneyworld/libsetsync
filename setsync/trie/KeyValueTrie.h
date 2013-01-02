@@ -28,14 +28,14 @@ class KeyValueTrieSync: public setsync::sync::AbstractSyncProcessPart {
 private:
 	KeyValueTrie * trie_;
 	bool start_;
-	std::queue<utils::CryptoHashContainer> outHashesQueue_;
+	std::queue<utils::CryptoHashContainer> requestedSubtrieHashesQueue_;
 	std::queue<utils::CryptoHashContainer> sentHashesQueue_;
+	std::queue<bool> pendingAckQueue_;
 	std::size_t hashsize_;
 	setsync::PacketHeader * incomingPacket_;
 	setsync::PacketHeader * outgoingPacket_;
-	std::queue<bool> outgoingAckQueue_;
 	std::size_t inPos_;
-	unsigned char * inBuf;
+	unsigned char * inBuf_;
 	std::size_t processedIncommingHashes_;
 	virtual std::size_t processSubtrieInput(void * inbuf, const std::size_t length,
 				setsync::AbstractDiffHandler& diffhandler);

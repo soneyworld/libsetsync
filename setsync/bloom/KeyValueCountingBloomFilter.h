@@ -20,9 +20,15 @@ class KeyValueCountingBloomFilter;
 class KeyValueBloomFilterSync: public setsync::sync::AbstractSyncProcessPart {
 private:
 	KeyValueCountingBloomFilter * bf_;
+	// Position of the incoming bf
 	std::size_t inPos_;
+	// Position in the last incoming packet
+	std::size_t inPacketPos_;
+	// Position of the outgoing bf
 	std::size_t outPos_;
-	setsync::PacketHeader outgoingPacket;
+	// Position of the actual outgoing packet
+	std::size_t outPacketPos_;
+	setsync::PacketHeader * outgoingPacket;
 	setsync::PacketHeader * incomingPacket;
 	unsigned char * outPacketBuf_;
 public:
@@ -43,6 +49,7 @@ public:
 	virtual std::size_t getRemainigOutputPacketSize() const;
 	virtual bool isEqual() const;
 	virtual bool done() const;
+	virtual bool parsingOfLastPacketDone() const;
 };
 
 /**

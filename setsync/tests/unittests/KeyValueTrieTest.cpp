@@ -76,6 +76,9 @@ void KeyValueTrieSyncTest::testSync() {
 				this->process2->writeOutput(buffer, buffersize);
 				this->process1->processInput(buffer, buffersize, handler);
 			}
+			for (std::size_t i = 0; i < handler.size(); i++) {
+				this->trie2->add(handler[i].first);
+			}
 		} else if (this->process2->awaitingInput()) {
 			CPPUNIT_ASSERT(this->process1->pendingOutput());
 			setsync::ListDiffHandler handler;
@@ -83,17 +86,26 @@ void KeyValueTrieSyncTest::testSync() {
 				this->process1->writeOutput(buffer, buffersize);
 				this->process2->processInput(buffer, buffersize, handler);
 			}
+			for (std::size_t i = 0; i < handler.size(); i++) {
+				this->trie1->add(handler[i].first);
+			}
 		} else if (this->process1->pendingOutput()) {
 			setsync::ListDiffHandler handler;
 			while (this->process1->pendingOutput()) {
 				this->process1->writeOutput(buffer, buffersize);
 				this->process2->processInput(buffer, buffersize, handler);
 			}
+			for (std::size_t i = 0; i < handler.size(); i++) {
+				this->trie1->add(handler[i].first);
+			}
 		} else if (this->process2->pendingOutput()) {
 			setsync::ListDiffHandler handler;
 			while (this->process2->pendingOutput()) {
 				this->process2->writeOutput(buffer, buffersize);
 				this->process1->processInput(buffer, buffersize, handler);
+			}
+			for (std::size_t i = 0; i < handler.size(); i++) {
+				this->trie2->add(handler[i].first);
 			}
 		}
 	}

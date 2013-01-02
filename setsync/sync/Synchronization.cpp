@@ -9,6 +9,22 @@
 namespace setsync {
 
 namespace sync {
+
+AbstractSyncProcessPart::AbstractSyncProcessPart() :
+	optimalPacketSize_(4096) {
+}
+
+AbstractSyncProcessPart::~AbstractSyncProcessPart() {
+}
+
+void AbstractSyncProcessPart::setOptimalPacketSize(const std::size_t s) {
+	this->optimalPacketSize_ = s;
+}
+
+std::size_t AbstractSyncProcessPart::getOptimalPacketSize() const {
+	return this->optimalPacketSize_;
+}
+
 HashSyncProcessPart::HashSyncProcessPart(const utils::CryptoHash& hashFunction,
 		const unsigned char * localHashDigit) :
 	hashsize_(hashFunction.getHashSize()), inPos_(0), outPos_(0) {
@@ -31,9 +47,9 @@ bool HashSyncProcessPart::awaitingInput() const {
 }
 
 bool HashSyncProcessPart::done() const {
-	if(awaitingInput())
+	if (awaitingInput())
 		return false;
-	if(pendingOutput())
+	if (pendingOutput())
 		return false;
 	return true;
 }

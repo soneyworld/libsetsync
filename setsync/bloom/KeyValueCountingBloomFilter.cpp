@@ -12,22 +12,24 @@ namespace bloom {
 
 KeyValueBloomFilterSync::KeyValueBloomFilterSync(
 		KeyValueCountingBloomFilter * bf) :
-	bf_(bf), inPos_(0), outPos_(0),
-			outgoingPacket(setsync::PacketHeader::FILTER, bf->size()),
-			incomingPacket(NULL) {
-	outPacketBuf_ = new unsigned char[outgoingPacket.getHeaderSize()];
-	outgoingPacket.writeHeaderToBuffer(outPacketBuf_);
+	bf_(bf), inPos_(0), outPos_(0), outgoingPacket(NULL), incomingPacket(NULL) {
+	outPacketBuf_ = new unsigned char[setsync::PacketHeader::getHeaderSize(
+			setsync::PacketHeader::FILTER)];
 }
 KeyValueBloomFilterSync::~KeyValueBloomFilterSync() {
 	if (this->incomingPacket != NULL) {
 		delete incomingPacket;
 	}
+	if (this->outgoingPacket != NULL) {
+		delete outgoingPacket;
+	}
 	delete[] outPacketBuf_;
 }
 
 bool KeyValueBloomFilterSync::pendingOutput() const {
-	return (this->bf_->size() + outgoingPacket.getHeaderSize()) > outPos_;
+	return this->bf_->size() > outPos_;
 }
+
 bool KeyValueBloomFilterSync::awaitingInput() const {
 	return this->bf_->size() > inPos_;
 }
@@ -41,7 +43,15 @@ bool KeyValueBloomFilterSync::done() const {
 }
 
 std::size_t KeyValueBloomFilterSync::getRemainigOutputPacketSize() const {
-	return this->bf_->size() + outgoingPacket.getHeaderSize() - outPos_;
+	if (this->outgoingPacket == NULL) {
+		return 0;
+	} else {
+		return this->outgoingPacket->getPacketSize() - this->outPacketPos_;
+	}
+}
+
+bool KeyValueBloomFilterSync::parsingOfLastPacketDone() const {
+	return this->incomingPacket == NULL;
 }
 
 std::size_t KeyValueBloomFilterSync::processInput(void * inbuf,
@@ -84,21 +94,23 @@ std::size_t KeyValueBloomFilterSync::writeOutput(void * outbuf,
 	if (maxlength == 0) {
 		return 0;
 	}
-	if (outPos_ < this->outgoingPacket.getHeaderSize()) {
+	if (this->outgoingPacket == NULL) {
+		this->outgoingPacket = new setsync::PacketHeader(
+				setsync::PacketHeader::FILTER, getOptimalPacketSize());
+	}
+	if (outPacketPos_ < this->outgoingPacket->getHeaderSize()) {
 		std::size_t headerpart = std::min(
-				this->outgoingPacket.getHeaderSize() - outPos_, maxlength);
+				this->outgoingPacket->getHeaderSize() - outPacketPos_,
+				maxlength);
 		memcpy(outbuf, this->outPacketBuf_ + outPos_, headerpart);
-		outPos_ += headerpart;
+		outPacketPos_ += headerpart;
 		return headerpart + writeOutput(
 				(void*) ((unsigned char*) outbuf + headerpart),
 				maxlength - headerpart);
 	}
 	std::size_t resultsize = std::min(this->getRemainigOutputPacketSize(),
 			maxlength);
-	memcpy(
-			outbuf,
-			this->bf_->bitArray_ + outPos_
-					- this->outgoingPacket.getHeaderSize(), resultsize);
+	memcpy(outbuf, this->bf_->bitArray_ + outPos_, resultsize);
 	this->outPos_ += resultsize;
 	return resultsize;
 }

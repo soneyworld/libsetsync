@@ -40,6 +40,29 @@ public:
 	void writeHeaderToBuffer(unsigned char * buffer);
 };
 
+
+class AbstractPacket: public PacketHeader{
+
+};
+
+class InPacket : public virtual AbstractPacket {
+public:
+	virtual std::size_t getInputPosition() const;
+	virtual std::size_t processInput(void * input, const std::size_t length);
+	virtual bool awaitingInput() const;
+};
+
+class OutPacket : public virtual  AbstractPacket {
+protected:
+	uint8_t outHeaderPos_;
+public:
+	virtual std::size_t getOutputPosition() const;
+	virtual bool pendingOutput() const;
+};
+
+class Packet : public InPacket, public OutPacket {
+
+};
 }
 
 #endif /* PACKETS_H_ */

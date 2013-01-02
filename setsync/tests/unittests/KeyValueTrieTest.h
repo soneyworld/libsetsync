@@ -14,8 +14,8 @@ namespace trie {
 
 class KeyValueTrieSyncTest: public CPPUNIT_NS::TestCase {
 CPPUNIT_TEST_SUITE( KeyValueTrieSyncTest);
-		CPPUNIT_TEST( testInput);
-		CPPUNIT_TEST( testOutput);
+//		CPPUNIT_TEST( testInput);
+//		CPPUNIT_TEST( testOutput);
 		CPPUNIT_TEST( testSync);
 	CPPUNIT_TEST_SUITE_END();
 private:

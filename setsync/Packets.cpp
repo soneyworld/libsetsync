@@ -195,4 +195,11 @@ std::size_t PacketHeader::getPacketSize() const {
 PacketHeader::Type PacketHeader::getType() const {
 	return this->t_;
 }
+
+bool InPacket::awaitingInput() const{
+	if(!this->isInputHeaderComplete()){
+		return true;
+	}
+	if(this->get)
+}
 }

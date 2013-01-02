@@ -19,27 +19,31 @@ KeyValueTrieSync::KeyValueTrieSync(KeyValueTrie * trie) :
 	trie_(trie), start_(true), hashsize_(trie->getHash().getHashSize()),
 			incomingPacket_(NULL), outgoingPacket_(NULL), inPos_(0),
 			processedIncommingHashes_(0) {
-	inBuf = new unsigned char[hashsize_];
+	inBuf_ = new unsigned char[hashsize_];
 }
 
 KeyValueTrieSync::~KeyValueTrieSync() {
-	delete[] inBuf;
+	delete[] inBuf_;
 }
 
 bool KeyValueTrieSync::pendingOutput() const {
 	if (start_) {
 		return true;
 	}
-
+	if (requestedSubtrieHashesQueue_.size() > 0) {
+		return true;
+	}
+	if (pendingAckQueue_.size() > 0) {
+		return true;
+	}
 	return false;
 }
 bool KeyValueTrieSync::awaitingInput() const {
 	if (this->incomingPacket_ != NULL)
 		return true;
-	if (this->outHashesQueue_.size() > 0) {
+	if (this->sentHashesQueue_.size() > 0) {
 		return true;
 	}
-
 	return false;
 }
 
@@ -55,6 +59,9 @@ std::size_t KeyValueTrieSync::processInput(void * inbuf,
 				|| incomingPacket_->getType()
 						!= setsync::PacketHeader::SUBTRIE_REQUEST) {
 			throw "Illegal Packet!";
+		}
+		if (incomingPacket_->getPacketSize() > this->sentHashesQueue_.size()) {
+			throw "Illegal size of acknowledges were send";
 		}
 		return 1 + processInput((void*) ((unsigned char*) inbuf + 1),
 				length - 1, diffhandler);
@@ -84,7 +91,25 @@ std::size_t KeyValueTrieSync::processSubtrieInput(void * inbuf,
 	if (length == 0) {
 		return 0;
 	}
+	if (inPos_ > 0 && inPos_ < hashsize_) {
+		std::size_t min = std::min(hashsize_ - inPos_, length);
+		memcpy(inBuf_ + inPos_, inbuf, min);
+		inPos_ += min;
+		if (inPos_ == hashsize_) {
+			if (this->trie_->contains(inBuf_)) {
+				this->pendingAckQueue_.push(false);
+			} else {
+				this->pendingAckQueue_.push(true);
+			}
+			inPos_ = 0;
+		}
+	} else if (inPos_ == 0) {
+		std::size_t numberOfHashes =
+	} else {
+		throw "wrong algorithm";
+	}
 }
+
 std::size_t KeyValueTrieSync::processRequestInput(void * inbuf,
 		const std::size_t length, setsync::AbstractDiffHandler& diffhandler) {
 	if (length == 0) {
@@ -94,30 +119,38 @@ std::size_t KeyValueTrieSync::processRequestInput(void * inbuf,
 	for (i = 0; i < length && inPos_ < this->incomingPacket_->getPacketSize(); i++) {
 		std::size_t j;
 		for (j = 0; j < 8; j++) {
+			if (this->sentHashesQueue_.empty()) {
+				// All sent hashes have been acknowledged
+				delete this->incomingPacket_;
+				this->incomingPacket_ = NULL;
+				inPos_ = 0;
+				return i;
+			}
 			if (BITTEST((unsigned char*)inbuf , j+8*i)) {
 				// HASH REQUESTED
 				TrieNodeType type = this->trie_->contains(
 						this->sentHashesQueue_.front().get());
 				switch (type) {
 				case INNER_NODE:
-					// SEND SUBTRIE
-					throw "not yet implemented";
+					// QUEUE SUBTRIE REQUEST
+					this->requestedSubtrieHashesQueue_.push(
+							sentHashesQueue_.front());
 					break;
 				case LEAF_NODE:
+					// HANDLE REQESTED SET ENTRY
 					diffhandler.handle(this->sentHashesQueue_.front().get(),
 							hashsize_, true);
 					break;
 				default:
 					break;
 				}
-				// SEND SUBTRIE
 			} else {
 				// HASH COULD BE IGNORED
 			}
+			// pop entry from queue
 			this->sentHashesQueue_.pop();
 			inPos_++;
 		}
-
 	}
 	return i;
 }
