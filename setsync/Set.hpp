@@ -43,8 +43,8 @@ private:
 	AbstractSyncProcessPart * strictSync_;
 	AbstractSyncProcessPart * currentInSync_;
 	AbstractSyncProcessPart * currentOutSync_;
-	PacketHeader * inHeader_;
-	PacketHeader * outHeader_;
+	net::PacketHeader * inHeader_;
+	net::PacketHeader * outHeader_;
 
 public:
 	/**

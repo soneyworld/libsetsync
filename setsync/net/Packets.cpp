@@ -9,6 +9,8 @@
 #include <string.h>
 namespace setsync {
 
+namespace net {
+
 PacketHeader::PacketHeader(const unsigned char * header) :
 	t_(UNDEFINED), size_(0), inHeaderPos_(0) {
 	if (!BITTEST(header,0)) {
@@ -213,5 +215,6 @@ bool InPacket::awaitingInput() const {
 	}
 	//TODO
 	throw "";
+}
 }
 }

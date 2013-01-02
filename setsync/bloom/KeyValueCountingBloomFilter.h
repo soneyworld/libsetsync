@@ -28,8 +28,8 @@ private:
 	std::size_t outPos_;
 	// Position of the actual outgoing packet
 	std::size_t outPacketPos_;
-	setsync::PacketHeader * outgoingPacket;
-	setsync::PacketHeader * incomingPacket;
+	setsync::net::PacketHeader * outgoingPacket;
+	setsync::net::PacketHeader * incomingPacket;
 	unsigned char * outPacketBuf_;
 public:
 	KeyValueBloomFilterSync(KeyValueCountingBloomFilter * bf);

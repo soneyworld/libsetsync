@@ -23,7 +23,7 @@ void KeyValueBloomFilterSyncTest::testInput() {
 	unsigned char buffer[buffersize];
 	memset(buffer, 0, buffersize);
 	setsync::ListDiffHandler handler;
-	setsync::PacketHeader header(setsync::PacketHeader::FILTER,
+	setsync::net::PacketHeader header(setsync::net::PacketHeader::FILTER,
 			this->filter->size());
 	header.writeHeaderToBuffer(buffer);
 	inputlength += this->process->processInput(buffer, header.getHeaderSize(),
@@ -50,8 +50,8 @@ void KeyValueBloomFilterSyncTest::testOutput() {
 	std::size_t outputlength = 0;
 	std::size_t buffersize = 20;
 	unsigned char buffer[buffersize];
-	std::size_t headersize = setsync::PacketHeader::getHeaderSize(
-			setsync::PacketHeader::FILTER);
+	std::size_t headersize = setsync::net::PacketHeader::getHeaderSize(
+			setsync::net::PacketHeader::FILTER);
 	CPPUNIT_ASSERT(this->process->writeOutput(buffer,headersize) == headersize);
 	outputlength = 0;
 	buffersize = 20;

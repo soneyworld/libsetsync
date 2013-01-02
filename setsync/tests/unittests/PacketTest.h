@@ -11,7 +11,7 @@
 #include <setsync/net/Packets.h>
 
 namespace setsync {
-
+namespace net {
 class PacketHeaderTest: public CPPUNIT_NS::TestCase {
 
 CPPUNIT_TEST_SUITE( PacketHeaderTest);
@@ -25,6 +25,8 @@ protected:
 	void testParsing();
 };
 CPPUNIT_TEST_SUITE_REGISTRATION(PacketHeaderTest);
+}
+
 }
 
 #endif /* PACKETTEST_H_ */

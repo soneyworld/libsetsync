@@ -53,11 +53,11 @@ std::size_t KeyValueTrieSync::processInput(void * inbuf,
 		return 0;
 	}
 	if (this->incomingPacket_ == NULL) {
-		this->incomingPacket_ = new setsync::PacketHeader(
+		this->incomingPacket_ = new setsync::net::PacketHeader(
 				(unsigned char*) inbuf);
-		if (incomingPacket_->getType() != setsync::PacketHeader::SUBTRIE
+		if (incomingPacket_->getType() != setsync::net::PacketHeader::SUBTRIE
 				|| incomingPacket_->getType()
-						!= setsync::PacketHeader::SUBTRIE_REQUEST) {
+						!= setsync::net::PacketHeader::SUBTRIE_REQUEST) {
 			throw "Illegal Packet!";
 		}
 		if (incomingPacket_->getPacketSize() > this->sentHashesQueue_.size()) {
@@ -68,13 +68,13 @@ std::size_t KeyValueTrieSync::processInput(void * inbuf,
 	} else {
 		std::size_t processed;
 		switch (incomingPacket_->getType()) {
-		case setsync::PacketHeader::SUBTRIE:
+		case setsync::net::PacketHeader::SUBTRIE:
 			processed = processSubtrieInput(inbuf, length, diffhandler);
 			return processed + processInput(
 					(void*) ((unsigned char*) inbuf + processed),
 					length - processed, diffhandler);
 			break;
-		case setsync::PacketHeader::SUBTRIE_REQUEST:
+		case setsync::net::PacketHeader::SUBTRIE_REQUEST:
 			processed = processRequestInput(inbuf, length, diffhandler);
 			return processed + processInput(
 					(void*) ((unsigned char*) inbuf + processed),

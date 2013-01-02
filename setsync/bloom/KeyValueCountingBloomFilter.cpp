@@ -13,8 +13,8 @@ namespace bloom {
 KeyValueBloomFilterSync::KeyValueBloomFilterSync(
 		KeyValueCountingBloomFilter * bf) :
 	bf_(bf), inPos_(0), outPos_(0), outgoingPacket(NULL), incomingPacket(NULL) {
-	outPacketBuf_ = new unsigned char[setsync::PacketHeader::getHeaderSize(
-			setsync::PacketHeader::FILTER)];
+	outPacketBuf_ = new unsigned char[setsync::net::PacketHeader::getHeaderSize(
+			setsync::net::PacketHeader::FILTER)];
 }
 KeyValueBloomFilterSync::~KeyValueBloomFilterSync() {
 	if (this->incomingPacket != NULL) {
@@ -61,8 +61,8 @@ std::size_t KeyValueBloomFilterSync::processInput(void * inbuf,
 	}
 	if (incomingPacket == NULL) {
 		this->incomingPacket
-				= new setsync::PacketHeader((unsigned char*) inbuf);
-		if (incomingPacket->getType() != setsync::PacketHeader::FILTER) {
+				= new setsync::net::PacketHeader((unsigned char*) inbuf);
+		if (incomingPacket->getType() != setsync::net::PacketHeader::FILTER) {
 			throw "Illegal Packet!";
 		}
 		return 1 + processInput((void*) ((unsigned char*) inbuf + 1),
@@ -95,8 +95,8 @@ std::size_t KeyValueBloomFilterSync::writeOutput(void * outbuf,
 		return 0;
 	}
 	if (this->outgoingPacket == NULL) {
-		this->outgoingPacket = new setsync::PacketHeader(
-				setsync::PacketHeader::FILTER, getOptimalPacketSize());
+		this->outgoingPacket = new setsync::net::PacketHeader(
+				setsync::net::PacketHeader::FILTER, getOptimalPacketSize());
 	}
 	if (outPacketPos_ < this->outgoingPacket->getHeaderSize()) {
 		std::size_t headerpart = std::min(

@@ -11,6 +11,8 @@
 
 namespace setsync {
 
+namespace net {
+
 class PacketHeader {
 public:
 	enum Type {
@@ -68,6 +70,7 @@ public:
 class Packet: public InPacket, public OutPacket {
 
 };
+}
 }
 
 #endif /* PACKETS_H_ */

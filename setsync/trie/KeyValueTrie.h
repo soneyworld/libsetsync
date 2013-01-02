@@ -32,8 +32,8 @@ private:
 	std::queue<utils::CryptoHashContainer> sentHashesQueue_;
 	std::queue<bool> pendingAckQueue_;
 	std::size_t hashsize_;
-	setsync::PacketHeader * incomingPacket_;
-	setsync::PacketHeader * outgoingPacket_;
+	setsync::net::PacketHeader * incomingPacket_;
+	setsync::net::PacketHeader * outgoingPacket_;
 	std::size_t inPos_;
 	unsigned char * inBuf_;
 	std::size_t processedIncommingHashes_;

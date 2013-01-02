@@ -8,6 +8,8 @@
 #include <string.h>
 
 namespace setsync {
+
+namespace net {
 void PacketHeaderTest::testConstructor() {
 	PacketHeader header(PacketHeader::DATA, 40);
 	CPPUNIT_ASSERT(header.getType() == PacketHeader::DATA);
@@ -97,5 +99,7 @@ void PacketHeaderTest::testParsing() {
 	CPPUNIT_ASSERT(incompbfheader.getType() == outcompbfheader.getType());
 	CPPUNIT_ASSERT(incompbfheader.getHeaderSize() == outcompbfheader.getHeaderSize());
 	CPPUNIT_ASSERT(incompbfheader.getPacketSize() == outcompbfheader.getPacketSize());
+
+}
 }
 }
