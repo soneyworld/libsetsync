@@ -12,7 +12,7 @@
 #include <setsync/bloom/ComparableBloomFilter.h>
 #include <setsync/storage/KeyValueStorage.h>
 #include <setsync/DiffHandler.h>
-#include <setsync/Packets.h>
+#include <setsync/net/Packets.h>
 
 namespace bloom {
 class KeyValueCountingBloomFilter;

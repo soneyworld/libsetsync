@@ -80,5 +80,10 @@ bool HashSyncProcessPart::isEqual() const {
 std::size_t HashSyncProcessPart::getRemainigOutputPacketSize() const {
 	return this->hashsize_ - this->outPos_;
 }
+
+bool HashSyncProcessPart::parsingOfLastPacketDone() const {
+	return !this->awaitingInput();
+}
+
 }
 }

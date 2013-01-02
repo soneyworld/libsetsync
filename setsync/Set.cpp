@@ -42,6 +42,10 @@ std::size_t SynchronizationProcess::getRemainigOutputPacketSize() const {
 	return this->currentOutSync_->getRemainigOutputPacketSize();
 }
 
+bool SynchronizationProcess::parsingOfLastPacketDone() const{
+	return currentInSync_->parsingOfLastPacketDone();
+}
+
 std::size_t SynchronizationProcess::step(void * inbuf,
 		const std::size_t inlength, void * outbuf, const std::size_t outlength,
 		diff_callback * callback, void * closure) {

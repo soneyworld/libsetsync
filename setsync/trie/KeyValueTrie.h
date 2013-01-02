@@ -11,7 +11,7 @@
 #include <setsync/storage/KeyValueStorage.h>
 #include <setsync/trie/TrieException.h>
 #include <setsync/sync/Synchronization.h>
-#include <setsync/Packets.h>
+#include <setsync/net/Packets.h>
 #include <setsync/DiffHandler.h>
 #include <exception>
 #include <vector>
@@ -59,6 +59,7 @@ public:
 	virtual std::size_t getRemainigOutputPacketSize() const;
 	virtual bool done() const;
 	virtual bool isEqual() const;
+	virtual bool parsingOfLastPacketDone() const;
 };
 
 class TrieNode {

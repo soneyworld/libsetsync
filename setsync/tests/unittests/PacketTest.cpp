@@ -20,14 +20,19 @@ void PacketHeaderTest::testHeaderSize() {
 	PacketHeader subtrieheader(PacketHeader::SUBTRIE);
 	PacketHeader requestheader(PacketHeader::SUBTRIE_REQUEST);
 	PacketHeader compbfheader(PacketHeader::COMPRESSED_FILTER);
+	PacketHeader errheader(PacketHeader::ERROR_MSG);
+	PacketHeader rootheader(PacketHeader::TRIE_ROOT);
 	CPPUNIT_ASSERT(bfheader.getHeaderSize() == 9);
 	CPPUNIT_ASSERT(dataheader.getHeaderSize() == 9);
 	CPPUNIT_ASSERT(subtrieheader.getHeaderSize() == 1);
 	CPPUNIT_ASSERT(requestheader.getHeaderSize() == 1);
 	CPPUNIT_ASSERT(compbfheader.getHeaderSize() == 9);
+	CPPUNIT_ASSERT(errheader.getHeaderSize() == 9);
+	CPPUNIT_ASSERT(rootheader.getHeaderSize() == 9);
 }
 
 void PacketHeaderTest::testParsing() {
+	std::string errormsg = "unknown packet found";
 	unsigned char buffer[9];
 	int pos;
 	PacketHeader outbfheader(PacketHeader::FILTER, 1024);
@@ -35,6 +40,8 @@ void PacketHeaderTest::testParsing() {
 	PacketHeader outsubtrieheader(PacketHeader::SUBTRIE, 1);
 	PacketHeader outrequestheader(PacketHeader::SUBTRIE_REQUEST, 34);
 	PacketHeader outcompbfheader(PacketHeader::COMPRESSED_FILTER, 34);
+	PacketHeader errheader(PacketHeader::ERROR_MSG,errormsg.size());
+	PacketHeader rootheader(PacketHeader::TRIE_ROOT,20);
 	memset(buffer, 0, 9);
 	outbfheader.writeHeaderToBuffer(buffer);
 	pos = 0;

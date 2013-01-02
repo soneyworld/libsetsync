@@ -96,6 +96,8 @@ public:
 	virtual std::size_t getRemainigOutputPacketSize() const;
 
 	virtual bool isEqual() const;
+
+	virtual bool parsingOfLastPacketDone() const;
 };
 
 /**

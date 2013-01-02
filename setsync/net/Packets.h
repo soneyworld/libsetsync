@@ -1,8 +1,7 @@
 /*
  * Packets.h
  *
- *  Created on: 14.12.2012
- *      Author: till
+ *      Author: Till Lorentzen
  */
 
 #ifndef PACKETS_H_
@@ -15,7 +14,14 @@ namespace setsync {
 class PacketHeader {
 public:
 	enum Type {
-		DATA, FILTER, SUBTRIE_REQUEST, SUBTRIE, COMPRESSED_FILTER, UNDEFINED
+		DATA,
+		FILTER,
+		SUBTRIE_REQUEST,
+		SUBTRIE,
+		COMPRESSED_FILTER,
+		ERROR_MSG,
+		TRIE_ROOT,
+		UNDEFINED
 	};
 private:
 	enum Type t_;
@@ -30,7 +36,7 @@ public:
 	/**
 	 * \return true iff the header has no more pending informations
 	 */
-	bool isInputHeaderComplete();
+	bool isInputHeaderComplete() const;
 	std::size_t getPacketSize() const;
 	Type getType() const ;
 	static Type getType(const unsigned char* header);
@@ -40,19 +46,18 @@ public:
 	void writeHeaderToBuffer(unsigned char * buffer);
 };
 
-
-class AbstractPacket: public PacketHeader{
+class AbstractPacket: public PacketHeader {
 
 };
 
-class InPacket : public virtual AbstractPacket {
+class InPacket: public virtual AbstractPacket {
 public:
 	virtual std::size_t getInputPosition() const;
 	virtual std::size_t processInput(void * input, const std::size_t length);
 	virtual bool awaitingInput() const;
 };
 
-class OutPacket : public virtual  AbstractPacket {
+class OutPacket: public virtual AbstractPacket {
 protected:
 	uint8_t outHeaderPos_;
 public:
@@ -60,7 +65,7 @@ public:
 	virtual bool pendingOutput() const;
 };
 
-class Packet : public InPacket, public OutPacket {
+class Packet: public InPacket, public OutPacket {
 
 };
 }

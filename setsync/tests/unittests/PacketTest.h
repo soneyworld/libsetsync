@@ -8,7 +8,7 @@
 #define PACKETTEST_H_
 #include <cppunit/extensions/HelperMacros.h>
 #include <setsync/utils/CryptoHash.h>
-#include <setsync/Packets.h>
+#include <setsync/net/Packets.h>
 
 namespace setsync {
 

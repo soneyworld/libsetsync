@@ -104,10 +104,17 @@ std::size_t KeyValueTrieSync::processSubtrieInput(void * inbuf,
 			inPos_ = 0;
 		}
 	} else if (inPos_ == 0) {
-		std::size_t numberOfHashes =
+		//TODO
+		//std::size_t numberOfHashes =
+		throw "not yet implemented";
 	} else {
 		throw "wrong algorithm";
 	}
+	throw "not yet implemented";
+}
+
+bool KeyValueTrieSync::parsingOfLastPacketDone() const{
+	throw "not yet implemented";
 }
 
 std::size_t KeyValueTrieSync::processRequestInput(void * inbuf,

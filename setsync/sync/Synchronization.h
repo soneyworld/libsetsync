@@ -79,6 +79,7 @@ public:
 	virtual bool isEqual() const;
 	virtual bool done() const;
 	virtual std::size_t getRemainigOutputPacketSize() const;
+	virtual bool parsingOfLastPacketDone() const;
 };
 }
 }

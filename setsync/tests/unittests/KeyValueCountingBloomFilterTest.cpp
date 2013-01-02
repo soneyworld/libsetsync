@@ -8,7 +8,7 @@
 #include <setsync/utils/FileSystem.h>
 #include <setsync/storage/BdbStorage.h>
 #include <stdlib.h>
-#include <setsync/Packets.h>
+#include <setsync/net/Packets.h>
 #include <setsync/DiffHandler.h>
 
 using namespace std;

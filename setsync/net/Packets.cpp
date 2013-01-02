@@ -1,7 +1,6 @@
 /*
  * Packets.cpp
  *
- *  Created on: 14.12.2012
  *      Author: Till Lorentzen
  */
 
@@ -50,9 +49,10 @@ PacketHeader::PacketHeader(const unsigned char * header) :
 
 PacketHeader::PacketHeader(const Type t, const std::size_t size) :
 	t_(t), size_(size) {
-	if (t_ == SUBTRIE || t_ == SUBTRIE_REQUEST) {
+	if (t_ == SUBTRIE || t_ == SUBTRIE_REQUEST || t_ == TRIE_ROOT) {
 		if (size_ > 64) {
 			size_ = 64;
+			throw "maximum size of this packet type is 64";
 		} else if (size_ == 0) {
 			size_ = 1;
 		}
@@ -80,25 +80,29 @@ size_t PacketHeader::getHeaderSize() const {
 }
 
 PacketHeader::Type PacketHeader::getType(const unsigned char* header) {
-	Type t_;
+	Type t_ = UNDEFINED;
+	// first bit is 0 => DATA, ERROR_MSG, FILTER, COMPRESSED_FILTER, TRIE_ROOT
 	if (!BITTEST(header,0)) {
+		// second bit is 0 => DATA, ERROR_MSG, TRIE_ROOT
 		if (!BITTEST(header, 1)) {
-			t_ = DATA;
-		} else {
+			// third bit is 0 => DATA
+			if (!BITTEST(header,2)) {
+				t_ = DATA;
+			} else {
+				// forth bit is 0 => ERROR_MSG
+				if (!BITTEST(header,4)) {
+					t_ = ERROR_MSG;
+				} else {
+					t_ = TRIE_ROOT;
+				}
+			}
+		}
+		//second bit is 1 => FILTER or COMPRESSED_FILTER
+		else {
 			if (BITTEST(header, 2)) {
 				t_ = COMPRESSED_FILTER;
 			} else {
 				t_ = FILTER;
-			}
-		}
-		for (uint8_t i = 0; i < 6; i++) {
-			if (BITTEST(header,2+i)) {
-				if (i == 0 && (t_ == FILTER || t_ == COMPRESSED_FILTER)) {
-					continue;
-				} else {
-					t_ = UNDEFINED;
-					break;
-				}
 			}
 		}
 	} else {
@@ -115,6 +119,8 @@ size_t PacketHeader::getHeaderSize(const Type& t) {
 	switch (t) {
 	case FILTER:
 	case COMPRESSED_FILTER:
+	case ERROR_MSG:
+	case TRIE_ROOT:
 	case DATA:
 		return sizeof(uint64_t) + sizeof(uint8_t);
 	case SUBTRIE:
@@ -135,12 +141,15 @@ void PacketHeader::writeHeaderToBuffer(unsigned char * buffer) {
 		break;
 	case DATA:
 		break;
-	case SUBTRIE:
-		BITSET(buffer,0);
+	case ERROR_MSG:
+		BITSET(buffer,1);
+		break;
+	case TRIE_ROOT:
 		break;
 	case SUBTRIE_REQUEST:
-		BITSET(buffer,0);
 		BITSET(buffer,1);
+	case SUBTRIE:
+		BITSET(buffer,0);
 		break;
 	default:
 		throw "Unsupported";
@@ -148,6 +157,8 @@ void PacketHeader::writeHeaderToBuffer(unsigned char * buffer) {
 	switch (t_) {
 	case FILTER:
 	case COMPRESSED_FILTER:
+	case ERROR_MSG:
+	case TRIE_ROOT:
 	case DATA: {
 		uint64_t s = size_;
 		for (int i = 0; i < 64; i++) {
@@ -174,7 +185,7 @@ void PacketHeader::writeHeaderToBuffer(unsigned char * buffer) {
 	}
 }
 
-bool PacketHeader::isInputHeaderComplete() {
+bool PacketHeader::isInputHeaderComplete() const {
 	if (t_ == DATA || t_ == FILTER || t_ == COMPRESSED_FILTER) {
 		if (this->inHeaderPos_ >= 8) {
 			return true;
@@ -196,10 +207,11 @@ PacketHeader::Type PacketHeader::getType() const {
 	return this->t_;
 }
 
-bool InPacket::awaitingInput() const{
-	if(!this->isInputHeaderComplete()){
+bool InPacket::awaitingInput() const {
+	if (!isInputHeaderComplete()) {
 		return true;
 	}
-	if(this->get)
+	//TODO
+	throw "";
 }
 }
