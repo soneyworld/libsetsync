@@ -20,7 +20,7 @@ namespace net {
 
 class AbstractInputPacketHandler {
 public:
-	virtual std::size_t processInput(void * inbuf, const std::size_t length,
+	virtual std::size_t processInputPacket(const InPacket& packet, void * inbuf, const std::size_t length,
 			AbstractDiffHandler& diffhandler) = 0;
 };
 

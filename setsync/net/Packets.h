@@ -68,6 +68,35 @@ public:
 };
 
 class Packet: public InPacket, public OutPacket {
+public:
+	Packet(PacketHeader::Type t);
+};
+
+class ErrorPacket : public Packet {
+
+};
+
+class DataPacket: public Packet {
+
+};
+
+class FilterPacket: public Packet {
+
+};
+
+class SubTriePacket: public Packet {
+
+};
+
+class SubTrieRequestPacket: public Packet {
+
+};
+
+class TrieRootPacket: public Packet {
+
+};
+
+class CompressedFilterPacket: public Packet {
 
 };
 }
