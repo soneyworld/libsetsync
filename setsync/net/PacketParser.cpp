@@ -10,7 +10,8 @@ namespace setsync {
 
 namespace net {
 
-PacketParser::PacketParser(const setsync::Set& set) : set_(set) {
+PacketParser::PacketParser(const setsync::Set& set) :
+	set_(set) {
 
 }
 
@@ -18,28 +19,27 @@ PacketParser::~PacketParser() {
 }
 
 std::size_t PacketParser::processInput(void * inbuf, const std::size_t length,
-		AbstractDiffHandler& diffhandler){
+		AbstractDiffHandler& diffhandler) {
 	//TODO
 	throw "not yet implemented";
 }
 
 void PacketParser::registerInputHandler(const PacketHeader::Type t,
-		AbstractInputPacketHandler& handler){
-	//TODO
-	throw "not yet implemented";
+		AbstractInputPacketHandler * handler) {
+	this->inputHandler_[t] = handler;
 }
 void PacketParser::unregisterInputHandler(const PacketHeader::Type t,
-		AbstractInputPacketHandler& handler){
-	//TODO
-	throw "not yet implemented";
+		AbstractInputPacketHandler * handler) {
+	if (this->inputHandler_[t] == handler) {
+		this->inputHandler_.erase(t);
+	}
 }
-void PacketParser::registerOutputHandler(AbstractOutputPacketHandler& handler){
-	//TODO
-	throw "not yet implemented";
+void PacketParser::registerOutputHandler(AbstractOutputPacketHandler * handler) {
+	this->outputHandler_.push_front(handler);
 }
-void PacketParser::unregisterOutputHandler(AbstractOutputPacketHandler& handler){
-	//TODO
-	throw "not yet implemented";
+void PacketParser::unregisterOutputHandler(
+		AbstractOutputPacketHandler * handler) {
+	this->outputHandler_.remove(handler);
 }
 }
 

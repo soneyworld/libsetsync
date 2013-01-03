@@ -34,8 +34,8 @@ public:
 class PacketParser {
 private:
 	const setsync::Set& set_;
-	std::map<PacketHeader::Type, AbstractInputPacketHandler&> inputHandler_;
-	//	std::list<AbstractOutputPacketHandler&> outputHandler_;
+	std::map<PacketHeader::Type, AbstractInputPacketHandler *> inputHandler_;
+	std::list<AbstractOutputPacketHandler *> outputHandler_;
 	AbstractOutputPacketHandler * currentOutputHandler_;
 	AbstractInputPacketHandler * currentInputHandler_;
 public:
@@ -44,11 +44,11 @@ public:
 	virtual std::size_t processInput(void * inbuf, const std::size_t length,
 			AbstractDiffHandler& diffhandler);
 	virtual void registerInputHandler(const PacketHeader::Type t,
-			AbstractInputPacketHandler& handler);
+			AbstractInputPacketHandler * handler);
 	virtual void unregisterInputHandler(const PacketHeader::Type t,
-			AbstractInputPacketHandler& handler);
-	virtual void registerOutputHandler(AbstractOutputPacketHandler& handler);
-	virtual void unregisterOutputHandler(AbstractOutputPacketHandler& handler);
+			AbstractInputPacketHandler * handler);
+	virtual void registerOutputHandler(AbstractOutputPacketHandler * handler);
+	virtual void unregisterOutputHandler(AbstractOutputPacketHandler * handler);
 };
 
 }
