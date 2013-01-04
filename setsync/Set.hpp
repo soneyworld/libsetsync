@@ -29,6 +29,7 @@ namespace setsync {
  * the local instance.
  */
 class SynchronizationProcess {
+	friend class SetTest;
 private:
 	enum status {
 		START, BF, TRIE, EQUAL
@@ -81,12 +82,6 @@ public:
 	virtual bool getRootHash(unsigned char * hash);
 	virtual bool getRootHashForSending(unsigned char * hash);
 	/**
-	 * Returns the subtrie of the root, this should be called only at the
-	 * beginning of trie sync process
-	 */
-	virtual size_t getRootSubTrie(unsigned char * buffer,
-			const size_t buffersize);
-	/**
 	 * Returns the next subtrie, which must be sent
 	 */
 	virtual size_t getSubTrie(unsigned char * buffer, const size_t buffersize);
@@ -111,7 +106,7 @@ public:
 	/**
 	 *
 	 */
-	virtual bool isSubtrieOutputAvailable() const;
+	virtual bool isSubtrieOutputAvailable();
 	/**
 	 * Returns true, until any sent hash hasn't been acked
 	 */
@@ -124,6 +119,8 @@ public:
 	 * Returns the size of any processed data in bytes
 	 */
 	virtual std::size_t getReceivedBytes() const;
+
+	virtual bool isAckOutputAvailable() const;
 };
 
 /**

@@ -55,6 +55,10 @@ bool SynchronizationProcess::isBloomFilterOutputAvail() const {
 	return !this->bfOutIsFinished_;
 }
 
+bool SynchronizationProcess::isAckOutputAvailable() const {
+	return this->pendingAcks_.size() > 0;
+}
+
 std::size_t SynchronizationProcess::readSomeBloomFilter(unsigned char * buffer,
 		const std::size_t length) {
 	std::size_t written = this->set_->bf_->getChunk(buffer, length,
@@ -99,32 +103,17 @@ bool SynchronizationProcess::isEqual(const unsigned char* hash) {
 	}
 }
 
-size_t SynchronizationProcess::getRootSubTrie(unsigned char * buffer,
-		const size_t buffersize) {
-	unsigned char hash[this->set_->getHashFunction().getHashSize()];
-	if (this->getRootHash(hash)) {
-		std::size_t subtriesize = this->set_->trie_->getSubTrie(hash, buffer,
-				buffersize);
-		std::size_t hashsize = this->set_->getHashFunction().getHashSize();
-		std::size_t entries = subtriesize / hashsize;
-		for (std::size_t i = 0; i < entries; i++) {
-			this->sentHashes_.push(
-					utils::CryptoHashContainer(this->set_->getHashFunction(),
-							buffer + i * hashsize));
-		}
-		this->sentBytes_ += subtriesize;
-		this->stat_ = TRIE;
-		return subtriesize;
-	} else {
-		return 0;
-	}
-}
-
 size_t SynchronizationProcess::getSubTrie(unsigned char * buffer,
 		const size_t buffersize) {
 	if (this->pendingSubtries_.size() > 0) {
-		std::size_t subtriesize = this->set_->trie_->getSubTrie(
-				pendingSubtries_.front().get(), buffer, buffersize);
+		std::size_t subtriesize;
+		try {
+			subtriesize = this->set_->trie_->getSubTrie(
+					pendingSubtries_.front().get(), buffer, buffersize);
+		} catch (...) {
+			pendingSubtries_.pop();
+			return getSubTrie(buffer, buffersize);
+		}
 		pendingSubtries_.pop();
 		std::size_t hashsize = this->set_->getHashFunction().getHashSize();
 		std::size_t entries = subtriesize / hashsize;
@@ -209,13 +198,26 @@ void SynchronizationProcess::processAcks(const unsigned char * buffer,
 		}
 		this->sentHashes_.pop();
 	}
+	this->receivedBytes_ += (numberOfAcks + 7) / 8;
 }
 
 bool SynchronizationProcess::isSubtrieUnacked() const {
 	return this->sentHashes_.size() > 0;
 }
 
-bool SynchronizationProcess::isSubtrieOutputAvailable() const {
+bool SynchronizationProcess::isSubtrieOutputAvailable() {
+	if (this->stat_ == START) {
+		unsigned char root[set_->getHashFunction().getHashSize()];
+		if (this->getRootHash(root)) {
+			this->stat_ = TRIE;
+			this->pendingSubtries_.push(
+					utils::CryptoHashContainer(this->set_->getHashFunction(),
+							root));
+			return isSubtrieOutputAvailable();
+		} else {
+			return false;
+		}
+	}
 	return this->pendingSubtries_.size() > 0;
 }
 
@@ -831,8 +833,6 @@ ssize_t set_sync_trie_read_subtrie(SET_SYNC_HANDLE * handle,
 	try {
 		if (process->isSubtrieOutputAvailable()) {
 			return process->getSubTrie(buffer, length);
-		} else {
-			return process->getRootSubTrie(buffer, length);
 		}
 	} catch (std::exception& e) {
 		if (handle->error == NULL) {

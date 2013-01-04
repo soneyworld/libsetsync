@@ -5,6 +5,9 @@
  */
 
 #include "SetTest.h"
+
+using namespace std;
+
 namespace setsync {
 void SetTest::testInsert() {
 	setsync::Set set(config);
@@ -106,11 +109,61 @@ void SetTest::testSync() {
 	// they are not, we will just put in a new entry to local set
 	CPPUNIT_ASSERT(localset.insert("hallo2"));
 	CPPUNIT_ASSERT(!(localset == remoteset));
+	localDiffHandler.clear();
+	remoteDiffHandler.clear();
 	// TRIE SYNC Process!!!
+	size_t treecutsize = 2 * localset.getHashFunction().getHashSize();
+	unsigned char treecut[treecutsize];
+	size_t subtriesize;
+	std::size_t ackbuffersize = 20;
+	unsigned char ackbuffer[ackbuffersize];
+	std::size_t numberOfAcks;
+	std::size_t acksize;
+
+	while (!localprocess->done() && !remoteprocess->done()) {
+		if (localprocess->isSubtrieOutputAvailable()) {
+			subtriesize = localprocess->getSubTrie(treecut, treecutsize);
+			CPPUNIT_ASSERT(subtriesize > 0);
+			acksize = remoteprocess->processSubTrie(treecut, subtriesize);
+			CPPUNIT_ASSERT(acksize > 0);
+		}
+		if (localprocess->isAckOutputAvailable()) {
+			acksize = localprocess->readSomeTrieAcks(ackbuffer, ackbuffersize,
+					&numberOfAcks);
+			CPPUNIT_ASSERT(numberOfAcks > 0);
+			CPPUNIT_ASSERT(acksize > 0);
+			remoteprocess->processAcks(ackbuffer, acksize, numberOfAcks,
+					remoteDiffHandler);
+		}
+		if (remoteprocess->isSubtrieOutputAvailable()) {
+			subtriesize = remoteprocess->getSubTrie(treecut, treecutsize);
+			CPPUNIT_ASSERT(subtriesize > 0);
+			acksize = localprocess->processSubTrie(treecut, subtriesize);
+			CPPUNIT_ASSERT(acksize > 0);
+		}
+		if (remoteprocess->isAckOutputAvailable()) {
+			acksize = remoteprocess->readSomeTrieAcks(ackbuffer, ackbuffersize,
+					&numberOfAcks);
+			CPPUNIT_ASSERT(numberOfAcks > 0);
+			CPPUNIT_ASSERT(acksize > 0);
+			localprocess->processAcks(ackbuffer, acksize, numberOfAcks,
+					localDiffHandler);
+		}
+	}
+	for (std::size_t i = 0; i < localDiffHandler.size(); i++) {
+		remoteset.insert(localDiffHandler[i].first);
+	}
+	localDiffHandler.clear();
+	for (std::size_t i = 0; i < remoteDiffHandler.size(); i++) {
+		localset.insert(remoteDiffHandler[i].first);
+	}
+	remoteDiffHandler.clear();
 	CPPUNIT_ASSERT(localprocess->getRootHash(buffer));
 	CPPUNIT_ASSERT(remoteprocess->isEqual(buffer));
 	CPPUNIT_ASSERT(remoteprocess->getRootHash(buffer));
 	CPPUNIT_ASSERT(localprocess->isEqual(buffer));
+	CPPUNIT_ASSERT(localprocess->getReceivedBytes() == remoteprocess->getSentBytes());
+	CPPUNIT_ASSERT(localprocess->getSentBytes() == remoteprocess->getReceivedBytes());
 	delete localprocess;
 	delete remoteprocess;
 	CPPUNIT_ASSERT(localset == remoteset);
@@ -128,7 +181,6 @@ void SetTest::testStartSync() {
 	setsync::ListDiffHandler remoteDiffHandler;
 	std::size_t buffersize = localset.hash_.getHashSize();
 	unsigned char buffer[buffersize];
-	std::size_t sending;
 	CPPUNIT_ASSERT(localprocess->getRootHash(buffer));
 	CPPUNIT_ASSERT(remoteprocess->isEqual(buffer));
 	CPPUNIT_ASSERT(remoteprocess->getRootHash(buffer));
@@ -187,6 +239,7 @@ void SetTest::testStrictSync() {
 	localset.insert("bla3");
 	remoteset.insert("bla3");
 	remoteset.insert("bla4");
+	// Start sync
 	size_t treecutsize = 2 * localset.getHashFunction().getHashSize();
 	unsigned char treecut[treecutsize];
 	SynchronizationProcess * localprocess = localset.createSyncProcess();
@@ -194,25 +247,13 @@ void SetTest::testStrictSync() {
 	SynchronizationProcess * remoteprocess = remoteset.createSyncProcess();
 	setsync::ListDiffHandler remoteDiffHandler;
 
-	size_t subtriesize = localprocess->getRootSubTrie(treecut, treecutsize);
-	size_t pendingackssize = remoteprocess->processSubTrie(treecut,subtriesize);
-	CPPUNIT_ASSERT(pendingackssize < treecutsize);
+	size_t subtriesize;
 	std::size_t ackbuffersize = 20;
 	unsigned char ackbuffer[ackbuffersize];
-	CPPUNIT_ASSERT(remoteprocess->isAckOutputAvailable());
 	std::size_t numberOfAcks;
-	std::size_t acksize = remoteprocess->readSomeTrieAcks(ackbuffer, ackbuffersize,&numberOfAcks);
-	localprocess->processAcks(ackbuffer,acksize,numberOfAcks,localDiffHandler);
+	std::size_t acksize;
 
-	subtriesize = remoteprocess->getSubTrie(remoteroot, treecut, treecutsize);
-	localprocess->diffTrie(treecut, subtriesize, localDiffHandler);
-	CPPUNIT_ASSERT(localDiffHandler.size() <= 2);
-	CPPUNIT_ASSERT(localDiffHandler.size() > 0);
-	localDiffHandler.clear();
-	localset.insert("bla4");
-	// Both Tries are equal
-	CPPUNIT_ASSERT(localset == remoteset);
-
+	// Adding a greater diff to the sets
 	localset.insert("bla5");
 	localset.insert("bla6");
 	localset.insert("bla8");
@@ -224,45 +265,61 @@ void SetTest::testStrictSync() {
 	remoteset.insert("bla12");
 	remoteset.insert("bla13");
 	remoteset.insert("bla14");
+	// Deep search
 
-	localprocess->getRootHash(localroot);
-	subtriesize = localprocess->getSubTrie(localroot, treecut, treecutsize);
-	remoteprocess->diffTrie(treecut, subtriesize, remoteDiffHandler);
-	for (size_t i = 0; i < remoteDiffHandler.size(); i++) {
-		unsigned char subtrie[treecutsize];
-		size_t entrysize = localprocess->getSubTrie(remoteDiffHandler[i].first, subtrie,
-				treecutsize);
-		size_t entries = entrysize / localset.getHashFunction().getHashSize();
-		if (entries == 1) {
-			remoteset.insert(subtrie);
-		} else {
-			remoteprocess->diffTrie(subtrie, entrysize, remoteDiffHandler);
+	while (!localprocess->done() && !remoteprocess->done()) {
+		if (localprocess->isSubtrieOutputAvailable()) {
+			subtriesize = localprocess->getSubTrie(treecut, treecutsize);
+			CPPUNIT_ASSERT(subtriesize > 0);
+			acksize = remoteprocess->processSubTrie(treecut, subtriesize);
+			CPPUNIT_ASSERT(acksize > 0);
+		}
+		if (localprocess->isAckOutputAvailable()) {
+			acksize = localprocess->readSomeTrieAcks(ackbuffer, ackbuffersize,
+					&numberOfAcks);
+			CPPUNIT_ASSERT(numberOfAcks > 0);
+			CPPUNIT_ASSERT(acksize > 0);
+			remoteprocess->processAcks(ackbuffer, acksize, numberOfAcks,
+					remoteDiffHandler);
+		}
+		if (remoteprocess->isSubtrieOutputAvailable()) {
+			subtriesize = remoteprocess->getSubTrie(treecut, treecutsize);
+			CPPUNIT_ASSERT(subtriesize > 0);
+			acksize = localprocess->processSubTrie(treecut, subtriesize);
+			CPPUNIT_ASSERT(acksize > 0);
+		}
+		if (remoteprocess->isAckOutputAvailable()) {
+			acksize = remoteprocess->readSomeTrieAcks(ackbuffer, ackbuffersize,
+					&numberOfAcks);
+			CPPUNIT_ASSERT(numberOfAcks > 0);
+			CPPUNIT_ASSERT(acksize > 0);
+			localprocess->processAcks(ackbuffer, acksize, numberOfAcks,
+					localDiffHandler);
 		}
 	}
-	unsigned char temphash[localset.getHashFunction().getHashSize()];
-	localset.getHashFunction()(temphash, "bla5");
-	CPPUNIT_ASSERT(remoteset.find(temphash));
+	for (std::size_t i = 0; i < localDiffHandler.size(); i++) {
+		remoteset.insert(localDiffHandler[i].first);
+	}
+	localDiffHandler.clear();
+	CPPUNIT_ASSERT(remoteset.find("bla5"));
+	CPPUNIT_ASSERT(remoteset.find("bla6"));
+	CPPUNIT_ASSERT(remoteset.find("bla8"));
+	CPPUNIT_ASSERT(remoteset.find("bla9"));
+	CPPUNIT_ASSERT(remoteset.find("bla10"));
+
+	for (std::size_t i = 0; i < remoteDiffHandler.size(); i++) {
+		localset.insert(remoteDiffHandler[i].first);
+	}
 	remoteDiffHandler.clear();
-	remoteprocess->getRootHash(remoteroot);
-	subtriesize = remoteprocess->getSubTrie(remoteroot, treecut, treecutsize);
-	localprocess->diffTrie(treecut, subtriesize, localDiffHandler);
-	for (size_t i = 0; i < localDiffHandler.size(); i++) {
-		unsigned char subtrie[treecutsize];
-		size_t entrysize = remoteprocess->getSubTrie(localDiffHandler[i].first, subtrie,
-				treecutsize);
-		size_t entries = entrysize / localset.getHashFunction().getHashSize();
-		if (entries == 1) {
-			localset.insert(subtrie);
-		} else {
-			localprocess->diffTrie(subtrie, entrysize, localDiffHandler);
-		}
-	}
-	localset.getHashFunction()(temphash, "bla6");
-	CPPUNIT_ASSERT(localset.find(temphash));
-	localset.getHashFunction()(temphash, "bla7");
-	CPPUNIT_ASSERT(localset.find(temphash));
-	CPPUNIT_ASSERT(localset == remoteset);
+	CPPUNIT_ASSERT(localset.find("bla7"));
+	CPPUNIT_ASSERT(localset.find("bla11"));
+	CPPUNIT_ASSERT(localset.find("bla12"));
+	CPPUNIT_ASSERT(localset.find("bla13"));
+	CPPUNIT_ASSERT(localset.find("bla14"));
 
+	CPPUNIT_ASSERT(localset == remoteset);
+	CPPUNIT_ASSERT(localprocess->getReceivedBytes() == remoteprocess->getSentBytes());
+	CPPUNIT_ASSERT(localprocess->getSentBytes() == remoteprocess->getReceivedBytes());
 	delete localprocess;
 	delete remoteprocess;
 }
