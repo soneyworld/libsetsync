@@ -473,6 +473,11 @@ bool Set::find(const void * data, const std::size_t length) {
 
 bool Set::get(const unsigned char * key, unsigned char ** value,
 		std::size_t * valueSize) {
+	if (find(key)) {
+		this->index_->get(key,)
+	} else {
+		return false;
+	}
 	throw "not yet implemented";
 	_unused(key);
 	_unused(value);
@@ -599,6 +604,12 @@ int set_find(SET *set, const unsigned char * key) {
 int set_find_string(SET *set, const char * str) {
 	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
 	return cppset->find(str);
+}
+
+int set_get_data(SET *set, const unsigned char * key, unsigned char ** value,
+		size_t * valueSize) {
+	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
+	return cppset->get(key, value, valueSize);
 }
 
 // Modifiers
