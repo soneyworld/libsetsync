@@ -601,6 +601,22 @@ int set_free(SET *set) {
 	return 0;
 }
 
+// Capacity
+int set_empty(SET *set) {
+	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
+	return cppset->isEmpty() ? 1 : 0;
+}
+
+size_t set_size(SET *set) {
+	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
+	return cppset->getSize();
+}
+
+size_t set_max_size(SET *set) {
+	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
+	return cppset->getMaximumSize();
+}
+
 // Lookup
 int set_find(SET *set, const unsigned char * key) {
 	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);

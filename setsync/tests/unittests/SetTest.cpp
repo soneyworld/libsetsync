@@ -324,6 +324,20 @@ void SetTest::testStrictSync() {
 	delete remoteprocess;
 }
 
+void SetTest::testCAPI(){
+	SET localset;
+	SET remoteset;
+	SET_CONFIG localconfig = set_create_config();
+	SET_CONFIG remoteconfig = set_create_config();
+	CPPUNIT_ASSERT(set_init(&localset,localconfig) == 0);
+	CPPUNIT_ASSERT(set_init(&remoteset,remoteconfig) == 0);
+	CPPUNIT_ASSERT(set_empty(&localset));
+	CPPUNIT_ASSERT(set_empty(&remoteset));
+
+	CPPUNIT_ASSERT(set_free(&localset)==0);
+	CPPUNIT_ASSERT(set_free(&remoteset)==0);
+}
+
 void SetTest::setUp() {
 	this->dir = new utils::FileSystem::TemporaryDirectory("temp_");
 	this->config.setPath(dir->getPath());

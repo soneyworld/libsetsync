@@ -24,6 +24,7 @@ CPPUNIT_TEST_SUITE( SetTest);
 	CPPUNIT_TEST( testLooseSync);
 	CPPUNIT_TEST( testStrictSync);
 	CPPUNIT_TEST( testSync);
+	CPPUNIT_TEST( testCAPI);
 CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -44,6 +45,7 @@ protected:
 	void testLooseSync();
 	void testStrictSync();
 	void testSync();
+	void testCAPI();
 };
 CPPUNIT_TEST_SUITE_REGISTRATION( SetTest);
 };
