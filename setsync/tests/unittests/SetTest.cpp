@@ -189,18 +189,21 @@ void SetTest::testStrictSync() {
 	remoteset.insert("bla4");
 	size_t treecutsize = 2 * localset.getHashFunction().getHashSize();
 	unsigned char treecut[treecutsize];
-	unsigned char localroot[localset.getHashFunction().getHashSize()];
-	unsigned char remoteroot[remoteset.getHashFunction().getHashSize()];
 	SynchronizationProcess * localprocess = localset.createSyncProcess();
 	setsync::ListDiffHandler localDiffHandler;
 	SynchronizationProcess * remoteprocess = remoteset.createSyncProcess();
 	setsync::ListDiffHandler remoteDiffHandler;
-	CPPUNIT_ASSERT(localprocess->getRootHash(localroot));
-	size_t subtriesize = localprocess->getSubTrie(localroot, treecut, treecutsize);
-	remoteprocess->diffTrie(treecut,subtriesize,remoteDiffHandler);
-	CPPUNIT_ASSERT(remoteDiffHandler.size() == 0);
-	CPPUNIT_ASSERT(localDiffHandler.size() == 0);
-	CPPUNIT_ASSERT(remoteprocess->getRootHash(remoteroot));
+
+	size_t subtriesize = localprocess->getRootSubTrie(treecut, treecutsize);
+	size_t pendingackssize = remoteprocess->processSubTrie(treecut,subtriesize);
+	CPPUNIT_ASSERT(pendingackssize < treecutsize);
+	std::size_t ackbuffersize = 20;
+	unsigned char ackbuffer[ackbuffersize];
+	CPPUNIT_ASSERT(remoteprocess->isAckOutputAvailable());
+	std::size_t numberOfAcks;
+	std::size_t acksize = remoteprocess->readSomeTrieAcks(ackbuffer, ackbuffersize,&numberOfAcks);
+	localprocess->processAcks(ackbuffer,acksize,numberOfAcks,localDiffHandler);
+
 	subtriesize = remoteprocess->getSubTrie(remoteroot, treecut, treecutsize);
 	localprocess->diffTrie(treecut, subtriesize, localDiffHandler);
 	CPPUNIT_ASSERT(localDiffHandler.size() <= 2);

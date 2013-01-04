@@ -15,17 +15,26 @@
 #ifdef HAVE_DB_CXX_H
 #include <setsync/storage/BdbStorage.h>
 #endif
+#include <setsync/utils/bitset.h>
 
 namespace setsync {
 
 SynchronizationProcess::SynchronizationProcess(Set * set,
 		AbstractDiffHandler * handler) :
 	stat_(START), set_(set), handler_(handler), bloomfilterOut_pos(0),
-			bloomfilterIn_pos(0), bfOutIsFinished_(false) {
+			bloomfilterIn_pos(0), bfOutIsFinished_(false), sentBytes_(0),
+			receivedBytes_(0) {
 }
 
 SynchronizationProcess::~SynchronizationProcess() {
 
+}
+
+std::size_t SynchronizationProcess::getSentBytes() const {
+	return this->sentBytes_;
+}
+std::size_t SynchronizationProcess::getReceivedBytes() const {
+	return this->receivedBytes_;
 }
 
 std::size_t SynchronizationProcess::calcOutputBufferSize(const size_t RTT,
@@ -54,6 +63,7 @@ std::size_t SynchronizationProcess::readSomeBloomFilter(unsigned char * buffer,
 	if (written < length) {
 		bfOutIsFinished_ = true;
 	}
+	this->sentBytes_ += written;
 	return written;
 }
 
@@ -61,10 +71,16 @@ void SynchronizationProcess::diffBloomFilter(const unsigned char * buffer,
 		const std::size_t length, AbstractDiffHandler& handler) {
 	this->set_->bf_->diff(buffer, length, bloomfilterIn_pos, handler);
 	bloomfilterIn_pos += length;
+	this->receivedBytes_ += length;
 }
 
 bool SynchronizationProcess::getRootHash(unsigned char * hash) {
 	return this->set_->trie_->getRoot(hash);
+}
+
+bool SynchronizationProcess::getRootHashForSending(unsigned char * hash) {
+	this->sentBytes_ += this->set_->getHashFunction().getHashSize();
+	return getRootHash(hash);
 }
 
 bool SynchronizationProcess::isEqual(const unsigned char* hash) {
@@ -83,18 +99,143 @@ bool SynchronizationProcess::isEqual(const unsigned char* hash) {
 	}
 }
 
-size_t SynchronizationProcess::getSubTrie(const unsigned char * hash,
-		void * buffer, const size_t buffersize) {
-	return this->set_->trie_->getSubTrie(hash, buffer, buffersize);
+size_t SynchronizationProcess::getRootSubTrie(unsigned char * buffer,
+		const size_t buffersize) {
+	unsigned char hash[this->set_->getHashFunction().getHashSize()];
+	if (this->getRootHash(hash)) {
+		std::size_t subtriesize = this->set_->trie_->getSubTrie(hash, buffer,
+				buffersize);
+		std::size_t hashsize = this->set_->getHashFunction().getHashSize();
+		std::size_t entries = subtriesize / hashsize;
+		for (std::size_t i = 0; i < entries; i++) {
+			this->sentHashes_.push(
+					utils::CryptoHashContainer(this->set_->getHashFunction(),
+							buffer + i * hashsize));
+		}
+		this->sentBytes_ += subtriesize;
+		this->stat_ = TRIE;
+		return subtriesize;
+	} else {
+		return 0;
+	}
 }
 
-void SynchronizationProcess::diffTrie(const unsigned char * buffer,
-		const std::size_t length, AbstractDiffHandler& handler) {
-	this->set_->trie_->diff(buffer, length, handler);
+size_t SynchronizationProcess::getSubTrie(unsigned char * buffer,
+		const size_t buffersize) {
+	if (this->pendingSubtries_.size() > 0) {
+		std::size_t subtriesize = this->set_->trie_->getSubTrie(
+				pendingSubtries_.front().get(), buffer, buffersize);
+		pendingSubtries_.pop();
+		std::size_t hashsize = this->set_->getHashFunction().getHashSize();
+		std::size_t entries = subtriesize / hashsize;
+		for (std::size_t i = 0; i < entries; i++) {
+			this->sentHashes_.push(
+					utils::CryptoHashContainer(this->set_->getHashFunction(),
+							buffer + i * hashsize));
+		}
+		this->sentBytes_ += subtriesize;
+		return subtriesize;
+	} else {
+		return 0;
+	}
+}
+
+size_t SynchronizationProcess::readSomeTrieAcks(unsigned char * buffer,
+		const std::size_t length, std::size_t * numberOfAcks) {
+	if (this->pendingAcks_.size() > 0) {
+		memset(buffer, 0, length);
+		std::size_t number = std::min(length * 8, this->pendingAcks_.size());
+		*numberOfAcks = number;
+		for (std::size_t i = 0; i < number; i++) {
+			bool b = this->pendingAcks_.front();
+			if (b)
+				BITSET(buffer,i);
+			this->pendingAcks_.pop();
+		}
+		std::size_t resultsize = (number + 7) / 8;
+		this->sentBytes_ += resultsize;
+		return resultsize;
+	} else {
+		return 0;
+	}
+}
+
+size_t SynchronizationProcess::processSubTrie(const unsigned char * buffer,
+		const std::size_t length) {
+	std::size_t hashsize = this->set_->getHashFunction().getHashSize();
+	std::size_t entries = length / hashsize;
+	for (std::size_t i = 0; i < entries; i++) {
+		if (this->set_->trie_->contains(buffer + i * hashsize)) {
+			this->pendingAcks_.push(false);
+		} else {
+			this->pendingAcks_.push(true);
+		}
+	}
+	this->receivedBytes_ += length;
+	return (this->pendingAcks_.size() + 7) / 8;
+}
+void SynchronizationProcess::processAcks(const unsigned char * buffer,
+		const std::size_t length, const std::size_t numberOfAcks,
+		AbstractDiffHandler& handler) {
+	if (length < (numberOfAcks + 7) / 8) {
+		throw "illegal input length";
+	}
+	if (numberOfAcks > this->sentHashes_.size()) {
+		throw "illegal input length";
+	}
+	for (std::size_t i = 0; i < numberOfAcks; i++) {
+		if (BITTEST(buffer,i)) {
+			trie::TrieNodeType type = this->set_->trie_->contains(
+					this->sentHashes_.front().get());
+			if (type == trie::LEAF_NODE) {
+				handler.handle(this->sentHashes_.front().get(),
+						this->set_->getHashFunction().getHashSize(), true);
+			} else if (type == trie::INNER_NODE) {
+				this->pendingSubtries_.push(this->sentHashes_.front());
+			} else {
+				// THIS SHOULD NEVER HAPPEN, BUT IF MULTIPLE INSTANCES ARE SYNCING,
+				// THIS COULD HAPPEN AND IT RESTARTS THE TRIESYNC
+				while (!this->pendingSubtries_.empty()) {
+					this->pendingSubtries_.pop();
+				}
+				unsigned char
+						newroot[this->set_->getHashFunction().getHashSize()];
+				if (this->getRootHash(newroot))
+					this->pendingSubtries_.push(
+							utils::CryptoHashContainer(
+									this->set_->getHashFunction(), newroot));
+
+			}
+		}
+		this->sentHashes_.pop();
+	}
+}
+
+bool SynchronizationProcess::isSubtrieUnacked() const {
+	return this->sentHashes_.size() > 0;
+}
+
+bool SynchronizationProcess::isSubtrieOutputAvailable() const {
+	return this->pendingSubtries_.size() > 0;
 }
 
 bool SynchronizationProcess::done() const {
-	return (this->stat_ == EQUAL);
+	if (this->stat_ == EQUAL) {
+		return true;
+	}
+	if (this->pendingAcks_.size() > 0) {
+		return false;
+	}
+	if (this->pendingSubtries_.size() > 0) {
+		return false;
+	}
+	if (this->sentHashes_.size() > 0) {
+		return false;
+	}
+	if (this->stat_ == START) {
+		return false;
+	}
+	return true;
 }
 
 Set::Set(const config::Configuration& config) :
@@ -669,11 +810,15 @@ int set_sync_bf_diff(SET_SYNC_HANDLE * handle, const unsigned char* inbuffer,
 }
 
 ssize_t set_sync_trie_read_subtrie(SET_SYNC_HANDLE * handle,
-		const unsigned char* root, unsigned char * buffer, const size_t length) {
+		unsigned char * buffer, const size_t length) {
 	setsync::SynchronizationProcess * process =
 			static_cast<setsync::SynchronizationProcess*> (handle->process);
 	try {
-		return process->getSubTrie(root, buffer, length);
+		if (process->isSubtrieOutputAvailable()) {
+			return process->getSubTrie(buffer, length);
+		} else {
+			return process->getRootSubTrie(buffer, length);
+		}
 	} catch (std::exception& e) {
 		if (handle->error == NULL) {
 			handle->error = (void *) new std::string(e.what());
@@ -694,13 +839,39 @@ ssize_t set_sync_trie_read_subtrie(SET_SYNC_HANDLE * handle,
 	return 0;
 }
 
-int set_sync_trie_diff(SET_SYNC_HANDLE * handle, const unsigned char* inbuffer,
-		const size_t inlength, diff_callback * callback, void * closure) {
+int set_sync_trie_subtrie_output_avail(SET_SYNC_HANDLE * handle) {
+	setsync::SynchronizationProcess * process =
+			static_cast<setsync::SynchronizationProcess*> (handle->process);
+	try {
+		return process->isSubtrieOutputAvailable() ? 1 : 0;
+	} catch (std::exception& e) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string(e.what());
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =(e.what());
+		}
+		return -1;
+	} catch (...) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string("unknown error");
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =("unknown error");
+		}
+		return -1;
+	}
+	return 0;
+}
+
+int set_sync_trie_diff_acks(SET_SYNC_HANDLE * handle,
+		const unsigned char * buffer, const size_t length,
+		const size_t numberOfAcks, diff_callback * callback, void * closure) {
 	setsync::SynchronizationProcess * process =
 			static_cast<setsync::SynchronizationProcess*> (handle->process);
 	try {
 		setsync::C_DiffHandler handler(callback, closure);
-		process->diffTrie(inbuffer, inlength, handler);
+		process->processAcks(buffer, length, numberOfAcks, handler);
 	} catch (std::exception& e) {
 		if (handle->error == NULL) {
 			handle->error = (void *) new std::string(e.what());

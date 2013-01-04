@@ -16,6 +16,7 @@
 #include <setsync/utils/CryptoHash.h>
 #include <setsync/config/Configuration.h>
 #include <setsync/utils/FileSystem.h>
+#include <queue>
 
 #ifdef HAVE_DB_CXX_H
 #include <db_cxx.h>
@@ -39,6 +40,11 @@ private:
 	std::size_t bloomfilterOut_pos;
 	std::size_t bloomfilterIn_pos;
 	bool bfOutIsFinished_;
+	std::size_t sentBytes_;
+	std::size_t receivedBytes_;
+	std::queue<utils::CryptoHashContainer> sentHashes_;
+	std::queue<utils::CryptoHashContainer> pendingSubtries_;
+	std::queue<bool> pendingAcks_;
 public:
 	/**
 	 * Creates a new Synchronization Process for the given set. If a
@@ -73,10 +79,51 @@ public:
 	virtual void diffBloomFilter(const unsigned char * buffer,
 			const std::size_t length, AbstractDiffHandler& handler);
 	virtual bool getRootHash(unsigned char * hash);
-	virtual size_t getSubTrie(const unsigned char * hash, void * buffer,
+	virtual bool getRootHashForSending(unsigned char * hash);
+	/**
+	 * Returns the subtrie of the root, this should be called only at the
+	 * beginning of trie sync process
+	 */
+	virtual size_t getRootSubTrie(unsigned char * buffer,
 			const size_t buffersize);
-	virtual void diffTrie(const unsigned char* buffer, const std::size_t length,
+	/**
+	 * Returns the next subtrie, which must be sent
+	 */
+	virtual size_t getSubTrie(unsigned char * buffer, const size_t buffersize);
+	/**
+	 * Processes the given subtrie and returns the size of the not yet
+	 * sent acknowledgment field. This field can be written by calling
+	 * readSomeTrieAcks
+	 */
+	virtual size_t processSubTrie(const unsigned char * buffer,
+			const std::size_t length);
+	/**
+	 *
+	 */
+	virtual size_t readSomeTrieAcks(unsigned char * buffer,
+			const std::size_t length, std::size_t * numberOfAcks);
+	/**
+	 *
+	 */
+	virtual void processAcks(const unsigned char * buffer,
+			const std::size_t length, const std::size_t numberOfAcks,
 			AbstractDiffHandler& handler);
+	/**
+	 *
+	 */
+	virtual bool isSubtrieOutputAvailable() const;
+	/**
+	 * Returns true, until any sent hash hasn't been acked
+	 */
+	virtual bool isSubtrieUnacked() const;
+	/**
+	 * Returns the size of sent data in bytes
+	 */
+	virtual std::size_t getSentBytes() const;
+	/**
+	 * Returns the size of any processed data in bytes
+	 */
+	virtual std::size_t getReceivedBytes() const;
 };
 
 /**

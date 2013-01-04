@@ -77,7 +77,8 @@ int set_sync_init_handle(SET * set, SET_SYNC_HANDLE * handle);
 // Equality Check Method
 int set_sync_get_root_hash(SET_SYNC_HANDLE * handle, unsigned char * hash);
 
-int set_sync_is_equal_to_hash(SET_SYNC_HANDLE * handle, const unsigned char * remotehash);
+int set_sync_is_equal_to_hash(SET_SYNC_HANDLE * handle,
+		const unsigned char * remotehash);
 // Bloom Filter Synchronization
 /**
  * Returns 0 if no more bf data is available, otherwise the size, which is available to be sent
@@ -96,11 +97,14 @@ int set_sync_bf_diff(SET_SYNC_HANDLE * handle, const unsigned char* inbuffer,
 		const size_t inlength, diff_callback * callback, void * closure);
 
 // Trie Synchronization
-
-ssize_t set_sync_trie_read_subtrie(SET_SYNC_HANDLE * handle, const unsigned char* root, unsigned char * buffer, const size_t length);
-
-int set_sync_trie_diff(SET_SYNC_HANDLE * handle, const unsigned char* inbuffer,
-		const size_t inlength, diff_callback * callback, void * closure);
+int set_sync_trie_subtrie_output_avail(SET_SYNC_HANDLE * handle);
+ssize_t set_sync_trie_read_subtrie(SET_SYNC_HANDLE * handle,
+		unsigned char * buffer, const size_t length);
+size_t set_sync_trie_read_acks(SET_SYNC_HANDLE * handle,
+		unsigned char * buffer, const size_t length, size_t * numberOfAcks);
+int set_sync_trie_diff_acks(SET_SYNC_HANDLE * handle,
+		const unsigned char * buffer, const size_t length,
+		const size_t numberOfAcks, diff_callback * callback, void * closure);
 
 int set_sync_done(SET_SYNC_HANDLE * handle);
 int set_sync_free_handle(SET_SYNC_HANDLE * handle);
