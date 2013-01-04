@@ -486,10 +486,6 @@ bool Set::get(const unsigned char * key, unsigned char ** value,
 	} else {
 		return false;
 	}
-	throw "not yet implemented";
-	_unused(key);
-	_unused(value);
-	_unused(valueSize);
 	return false;
 }
 
