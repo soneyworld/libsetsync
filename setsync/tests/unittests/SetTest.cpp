@@ -187,83 +187,81 @@ void SetTest::testStrictSync() {
 	localset.insert("bla3");
 	remoteset.insert("bla3");
 	remoteset.insert("bla4");
-	setsync::ListDiffHandler difflist;
 	size_t treecutsize = 2 * localset.getHashFunction().getHashSize();
 	unsigned char treecut[treecutsize];
-	unsigned char root[localset.getHashFunction().getHashSize()];
+	unsigned char localroot[localset.getHashFunction().getHashSize()];
+	unsigned char remoteroot[remoteset.getHashFunction().getHashSize()];
 	SynchronizationProcess * localprocess = localset.createSyncProcess();
 	setsync::ListDiffHandler localDiffHandler;
 	SynchronizationProcess * remoteprocess = remoteset.createSyncProcess();
 	setsync::ListDiffHandler remoteDiffHandler;
-	size_t subtriesize = trie1.getSubTrie(root, treecut, treecutsize);
-	trie2.diff(treecut, subtriesize, difflist);
-	CPPUNIT_ASSERT(difflist.size() == 0);
-	trie2.getRoot(root);
-	subtriesize = trie2.getSubTrie(root, treecut, treecutsize);
-	trie1.diff(treecut, subtriesize, difflist);
-	CPPUNIT_ASSERT(difflist.size() <= 2);
-	CPPUNIT_ASSERT(difflist.size() > 0);
-	difflist.clear();
-	localset.add("bla4");
+	CPPUNIT_ASSERT(localprocess->getRootHash(localroot));
+	size_t subtriesize = localprocess->getSubTrie(localroot, treecut, treecutsize);
+	remoteprocess->diffTrie(treecut,subtriesize,remoteDiffHandler);
+	CPPUNIT_ASSERT(remoteDiffHandler.size() == 0);
+	CPPUNIT_ASSERT(localDiffHandler.size() == 0);
+	CPPUNIT_ASSERT(remoteprocess->getRootHash(remoteroot));
+	subtriesize = remoteprocess->getSubTrie(remoteroot, treecut, treecutsize);
+	localprocess->diffTrie(treecut, subtriesize, localDiffHandler);
+	CPPUNIT_ASSERT(localDiffHandler.size() <= 2);
+	CPPUNIT_ASSERT(localDiffHandler.size() > 0);
+	localDiffHandler.clear();
+	localset.insert("bla4");
 	// Both Tries are equal
-	CPPUNIT_ASSERT(trie1 == trie2);
+	CPPUNIT_ASSERT(localset == remoteset);
 
-	localset.add("bla5");
-	localset.add("bla6");
-	localset.add("bla8");
-	localset.add("bla9");
-	localset.add("bla10");
+	localset.insert("bla5");
+	localset.insert("bla6");
+	localset.insert("bla8");
+	localset.insert("bla9");
+	localset.insert("bla10");
 
-	remoteset.add("bla7");
-	remoteset.add("bla11");
-	remoteset.add("bla12");
-	remoteset.add("bla13");
-	remoteset.add("bla14");
+	remoteset.insert("bla7");
+	remoteset.insert("bla11");
+	remoteset.insert("bla12");
+	remoteset.insert("bla13");
+	remoteset.insert("bla14");
 
-	trie1.getRoot(root);
-	subtriesize = trie1.getSubTrie(root, treecut, treecutsize);
-	trie2.diff(treecut, subtriesize, difflist);
-	for (size_t i = 0; i < difflist.size(); i++) {
-		//			if (trie1.contains(difflist[i].first)) {
+	localprocess->getRootHash(localroot);
+	subtriesize = localprocess->getSubTrie(localroot, treecut, treecutsize);
+	remoteprocess->diffTrie(treecut, subtriesize, remoteDiffHandler);
+	for (size_t i = 0; i < remoteDiffHandler.size(); i++) {
 		unsigned char subtrie[treecutsize];
-		size_t entrysize = trie1.getSubTrie(difflist[i].first, subtrie,
+		size_t entrysize = localprocess->getSubTrie(remoteDiffHandler[i].first, subtrie,
 				treecutsize);
-		size_t entries = entrysize / hash.getHashSize();
+		size_t entries = entrysize / localset.getHashFunction().getHashSize();
 		if (entries == 1) {
-			trie2.add(subtrie, true);
+			remoteset.insert(subtrie);
 		} else {
-			trie2.diff(subtrie, entrysize, difflist);
+			remoteprocess->diffTrie(subtrie, entrysize, remoteDiffHandler);
 		}
-		//			}
 	}
-	unsigned char temphash[hash.getHashSize()];
-	hash(temphash, "bla5");
-	CPPUNIT_ASSERT(trie2.contains(temphash));
-	difflist.clear();
-	trie2.getRoot(root);
-	subtriesize = trie2.getSubTrie(root, treecut, treecutsize);
-	trie1.diff(treecut, subtriesize, difflist);
-	for (size_t i = 0; i < difflist.size(); i++) {
-		//			if (trie2.contains(difflist[i].first)) {
+	unsigned char temphash[localset.getHashFunction().getHashSize()];
+	localset.getHashFunction()(temphash, "bla5");
+	CPPUNIT_ASSERT(remoteset.find(temphash));
+	remoteDiffHandler.clear();
+	remoteprocess->getRootHash(remoteroot);
+	subtriesize = remoteprocess->getSubTrie(remoteroot, treecut, treecutsize);
+	localprocess->diffTrie(treecut, subtriesize, localDiffHandler);
+	for (size_t i = 0; i < localDiffHandler.size(); i++) {
 		unsigned char subtrie[treecutsize];
-		size_t entrysize = trie2.getSubTrie(difflist[i].first, subtrie,
+		size_t entrysize = remoteprocess->getSubTrie(localDiffHandler[i].first, subtrie,
 				treecutsize);
-		size_t entries = entrysize / hash.getHashSize();
+		size_t entries = entrysize / localset.getHashFunction().getHashSize();
 		if (entries == 1) {
-			trie1.add(subtrie, true);
+			localset.insert(subtrie);
 		} else {
-			trie1.diff(subtrie, entrysize, difflist);
+			localprocess->diffTrie(subtrie, entrysize, localDiffHandler);
 		}
-		//			}
 	}
-	hash(temphash, "bla6");
-	CPPUNIT_ASSERT(trie1.contains(temphash));
-	hash(temphash, "bla7");
-	CPPUNIT_ASSERT(trie1.contains(temphash));
-	CPPUNIT_ASSERT(trie1 == trie2);
-	trie1.clear();
-	trie2.clear();
+	localset.getHashFunction()(temphash, "bla6");
+	CPPUNIT_ASSERT(localset.find(temphash));
+	localset.getHashFunction()(temphash, "bla7");
+	CPPUNIT_ASSERT(localset.find(temphash));
+	CPPUNIT_ASSERT(localset == remoteset);
 
+	delete localprocess;
+	delete remoteprocess;
 }
 
 void SetTest::setUp() {
