@@ -36,6 +36,18 @@ public:
 	virtual void diff(const unsigned char * externalBF,
 			const std::size_t length, const std::size_t offset,
 			setsync::AbstractDiffHandler& handler) const = 0;
+	/**
+	 * This method will write the requested chunk of the bloom filter
+	 * to the given buffer, it start at the given offset and writes a
+	 * maximum length of the given length into the buffer. The method
+	 * must return the size of the written data. It the returned size is
+	 * less than the given size, the end if the bloom filter data is reached
+	 * this can be happen, if the bloom filter size has been reached,
+	 * or, if the bloomfilter is compressed, it can happen before the
+	 * size of the bloom filter is reached.
+	 */
+	virtual std::size_t getChunk(unsigned char * buffer,
+			const std::size_t maxlength, std::size_t offset) = 0;
 };
 
 }

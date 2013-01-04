@@ -106,6 +106,12 @@ public:
 			const std::size_t length, const std::size_t offset,
 			setsync::AbstractDiffHandler& handler) const;
 	/**
+	 * Write the next part of the bloomfilter into the buffer,
+	 * starting from the offset.
+	 */
+	virtual std::size_t getChunk(unsigned char * buffer,
+			const std::size_t maxlength, std::size_t offset);
+	/**
 	 *  adds this given key to bloom filter and the key value storage
 	 *  \param key to be added
 	 */

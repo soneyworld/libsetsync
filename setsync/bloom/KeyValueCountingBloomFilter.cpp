@@ -13,8 +13,9 @@ namespace bloom {
 KeyValueBloomFilterSync::KeyValueBloomFilterSync(
 		KeyValueCountingBloomFilter * bf) :
 	bf_(bf), inPos_(0), outPos_(0), outgoingPacket(NULL), incomingPacket(NULL) {
-	outPacketBuf_ = new unsigned char[setsync::net::PacketHeader::getHeaderSize(
-			setsync::net::PacketHeader::FILTER)];
+	outPacketBuf_
+			= new unsigned char[setsync::net::PacketHeader::getHeaderSize(
+					setsync::net::PacketHeader::FILTER)];
 }
 KeyValueBloomFilterSync::~KeyValueBloomFilterSync() {
 	if (this->incomingPacket != NULL) {
@@ -60,8 +61,8 @@ std::size_t KeyValueBloomFilterSync::processInput(void * inbuf,
 		return 0;
 	}
 	if (incomingPacket == NULL) {
-		this->incomingPacket
-				= new setsync::net::PacketHeader((unsigned char*) inbuf);
+		this->incomingPacket = new setsync::net::PacketHeader(
+				(unsigned char*) inbuf);
 		if (incomingPacket->getType() != setsync::net::PacketHeader::FILTER) {
 			throw "Illegal Packet!";
 		}
@@ -181,6 +182,17 @@ void KeyValueCountingBloomFilter::diff(const unsigned char * externalBF,
 		}
 	}
 }
+
+std::size_t KeyValueCountingBloomFilter::getChunk(unsigned char * buffer,
+		const std::size_t maxlength, std::size_t offset) {
+	if (offset >= size()) {
+		return 0;
+	}
+	std::size_t chunksize = std::min(maxlength, size() - offset);
+	memcpy(buffer, this->bitArray_ + offset, chunksize);
+	return chunksize;
+}
+
 void KeyValueCountingBloomFilter::add(const unsigned char * key) {
 	unsigned char * resultbuffer;
 	std::size_t resultSize;

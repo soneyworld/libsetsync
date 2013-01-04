@@ -82,7 +82,7 @@ public:
 	void setUp();
 	void tearDown();
 };
-CPPUNIT_TEST_SUITE_REGISTRATION( KeyValueBloomFilterSyncTest);
+//CPPUNIT_TEST_SUITE_REGISTRATION( KeyValueBloomFilterSyncTest);
 CPPUNIT_TEST_SUITE_REGISTRATION( KeyValueCountingBloomFilterTest);
 }
 

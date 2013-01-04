@@ -20,103 +20,12 @@ namespace setsync {
 
 SynchronizationProcess::SynchronizationProcess(Set * set,
 		AbstractDiffHandler * handler) :
-	stat_(START), set_(set), handler_(handler),
-			hashsize(set->hash_.getHashSize()) {
-	unsigned char roothash[hashsize];
-	if (!set_->trie_->getRoot(roothash)) {
-		set_->hash_(roothash, "");
-	}
-	this->rootSync_ = new sync::HashSyncProcessPart(set_->hash_, roothash);
-	this->looseSync_ = set->bf_->createSyncProcess();
-	this->strictSync_ = set->trie_->createSyncProcess();
-	this->currentInSync_ = this->rootSync_;
-	this->currentOutSync_ = this->rootSync_;
-
-}
-
-std::size_t SynchronizationProcess::getRemainigOutputPacketSize() const {
-	if (this->currentOutSync_ == this->rootSync_) {
-		return this->rootSync_->getRemainigOutputPacketSize()
-				+ this->looseSync_->getRemainigOutputPacketSize();
-	}
-	return this->currentOutSync_->getRemainigOutputPacketSize();
-}
-
-bool SynchronizationProcess::parsingOfLastPacketDone() const{
-	return currentInSync_->parsingOfLastPacketDone();
-}
-
-std::size_t SynchronizationProcess::step(void * inbuf,
-		const std::size_t inlength, void * outbuf, const std::size_t outlength,
-		diff_callback * callback, void * closure) {
-	C_DiffHandler handler(callback, closure);
-	return this->step(inbuf, inlength, outbuf, outlength, handler);
-}
-
-std::size_t SynchronizationProcess::step(void * inbuf,
-		const std::size_t inlength, void * outbuf, const std::size_t outlength,
-		AbstractDiffHandler& diffhandler) {
-	std::size_t outsize = 0;
-	if (inlength > 0) {
-		this->processInput(inbuf, inlength, diffhandler);
-	}
-	if (outlength > 0) {
-		outsize = this->writeOutput(outbuf, outlength);
-	}
-	return outsize;
-}
-
-std::size_t SynchronizationProcess::step(void * inbuf,
-		const std::size_t inlength, void * outbuf, const std::size_t outlength) {
-	if (this->handler_ != NULL) {
-		return this->step(inbuf, inlength, outbuf, outlength, *handler_);
-	} else {
-		IgnoringDiffHandler ignore;
-		return this->step(inbuf, inlength, outbuf, outlength, ignore);
-	}
-}
-
-std::size_t SynchronizationProcess::processInput(void * inbuf,
-		const std::size_t length, AbstractDiffHandler& diffhandler) {
-	std::size_t size = this->currentInSync_->processInput(inbuf, length,
-			diffhandler);
-	if (!this->currentInSync_->awaitingInput()) {
-		if (this->currentInSync_ == this->rootSync_) {
-			this->currentInSync_ = this->looseSync_;
-		} else if (this->currentInSync_ == this->looseSync_) {
-			this->currentInSync_ = this->strictSync_;
-		}
-	}
-	return size;
-}
-
-std::size_t SynchronizationProcess::writeOutput(void * outbuf,
-		const std::size_t maxlength) {
-	std::size_t size = this->currentOutSync_->writeOutput(outbuf, maxlength);
-	if (!this->currentOutSync_->pendingOutput()) {
-		if (this->currentOutSync_ == this->rootSync_) {
-			this->currentOutSync_ = this->looseSync_;
-			if (size < maxlength) {
-				return size + writeOutput(
-						(void*) ((unsigned char*) outbuf + size),
-						maxlength - size);
-			}
-		} else if (this->currentOutSync_ == this->looseSync_) {
-			this->currentOutSync_ = this->strictSync_;
-			if (size < maxlength) {
-				return size + writeOutput(
-						(void*) ((unsigned char*) outbuf + size),
-						maxlength - size);
-			}
-		}
-	}
-	return size;
+	stat_(START), set_(set), handler_(handler), bloomfilterOut_pos(0),
+			bloomfilterIn_pos(0), bfOutIsFinished_(false) {
 }
 
 SynchronizationProcess::~SynchronizationProcess() {
-	delete this->rootSync_;
-	delete this->looseSync_;
-	delete this->strictSync_;
+
 }
 
 std::size_t SynchronizationProcess::calcOutputBufferSize(const size_t RTT,
@@ -133,20 +42,59 @@ std::size_t SynchronizationProcess::calcOutputBufferSize(const size_t RTT,
 	}
 }
 
-bool SynchronizationProcess::isEqual() const {
-	return this->currentInSync_->isEqual();
+bool SynchronizationProcess::isBloomFilterOutputAvail() const {
+	return !this->bfOutIsFinished_;
+}
+
+std::size_t SynchronizationProcess::readSomeBloomFilter(unsigned char * buffer,
+		const std::size_t length) {
+	std::size_t written = this->set_->bf_->getChunk(buffer, length,
+			this->bloomfilterOut_pos);
+	this->bloomfilterOut_pos += written;
+	if (written < length) {
+		bfOutIsFinished_ = true;
+	}
+	return written;
+}
+
+void SynchronizationProcess::diffBloomFilter(const unsigned char * buffer,
+		const std::size_t length, AbstractDiffHandler& handler) {
+	this->set_->bf_->diff(buffer, length, bloomfilterIn_pos, handler);
+	bloomfilterIn_pos += length;
+}
+
+bool SynchronizationProcess::getRootHash(unsigned char * hash) {
+	return this->set_->trie_->getRoot(hash);
+}
+
+bool SynchronizationProcess::isEqual(const unsigned char* hash) {
+	if (this->stat_ == EQUAL) {
+		return true;
+	}
+	unsigned char localroothash[this->set_->hash_.getHashSize()];
+	if (!this->set_->trie_->getRoot(localroothash)) {
+		return false;
+	}
+	if (memcmp(localroothash, hash, this->set_->hash_.getHashSize()) == 0) {
+		this->stat_ = EQUAL;
+		return true;
+	} else {
+		return false;
+	}
+}
+
+size_t SynchronizationProcess::getSubTrie(const unsigned char * hash,
+		void * buffer, const size_t buffersize) {
+	return this->set_->trie_->getSubTrie(hash, buffer, buffersize);
+}
+
+void SynchronizationProcess::diffTrie(const unsigned char * buffer,
+		const std::size_t length, AbstractDiffHandler& handler) {
+	this->set_->trie_->diff(buffer, length, handler);
 }
 
 bool SynchronizationProcess::done() const {
-	return this->isEqual();
-}
-
-bool SynchronizationProcess::pendingOutput() const {
-	return this->currentOutSync_->pendingOutput();
-}
-
-bool SynchronizationProcess::awaitingInput() const {
-	return this->currentInSync_->awaitingInput();
+	return (this->stat_ == EQUAL);
 }
 
 Set::Set(const config::Configuration& config) :
@@ -183,7 +131,7 @@ Set::Set(const config::Configuration& config) :
 		indexpath.append("index");
 		indexStorage_ = new storage::LevelDbStorage(indexpath);
 	}
-		break;
+	break;
 #endif
 #ifdef HAVE_DB_CXX_H
 	case config::Configuration::StorageConfig::BERKELEY_DB: {
@@ -371,7 +319,7 @@ bool Set::find(const std::string& key) {
 
 bool Set::find(const unsigned char * key) {
 	if (this->bf_->contains(key)) {
-		return this->trie_->contains(key);
+		return this->trie_->contains(key) == trie::LEAF_NODE;
 	}
 	return false;
 }
@@ -398,7 +346,11 @@ void Set::clear() {
 	this->indexInUse_ = false;
 }
 
-setsync::sync::AbstractSyncProcessPart * Set::createSyncProcess() {
+const utils::CryptoHash& Set::getHashFunction() const {
+	return this->hash_;
+}
+
+SynchronizationProcess * Set::createSyncProcess() {
 	return new SynchronizationProcess(this);
 }
 
@@ -578,14 +530,15 @@ int set_sync_init_handle(SET * set, SET_SYNC_HANDLE * handle) {
 	return 0;
 }
 
-ssize_t set_sync_step(SET_SYNC_HANDLE * handle, void * inbuf,
-		const size_t inlength, void * outbuf, const size_t maxoutlength,
-		diff_callback * callback, void * closure) {
+int set_sync_get_root_hash(SET_SYNC_HANDLE * handle, unsigned char * hash) {
+	setsync::SynchronizationProcess * process =
+			static_cast<setsync::SynchronizationProcess*> (handle->process);
 	try {
-		setsync::SynchronizationProcess * process =
-				static_cast<setsync::SynchronizationProcess*> (handle->process);
-		return process->step(inbuf, inlength, outbuf, maxoutlength, callback,
-				closure);
+		if (process->getRootHash(hash)) {
+			return 0;
+		} else {
+			return -1;
+		}
 	} catch (std::exception& e) {
 		if (handle->error == NULL) {
 			handle->error = (void *) new std::string(e.what());
@@ -603,6 +556,169 @@ ssize_t set_sync_step(SET_SYNC_HANDLE * handle, void * inbuf,
 		}
 		return -1;
 	}
+	return 0;
+}
+
+int set_sync_is_equal_to_hash(SET_SYNC_HANDLE * handle,
+		const unsigned char * remotehash) {
+	setsync::SynchronizationProcess * process =
+			static_cast<setsync::SynchronizationProcess*> (handle->process);
+	try {
+		if (process->isEqual(remotehash)) {
+			return 1;
+		} else {
+			return 0;
+		}
+	} catch (std::exception& e) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string(e.what());
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =(e.what());
+		}
+		return -1;
+	} catch (...) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string("unknown error");
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =("unknown error");
+		}
+		return -1;
+	}
+}
+
+int set_sync_bf_output_avail(SET_SYNC_HANDLE * handle) {
+	setsync::SynchronizationProcess * process =
+			static_cast<setsync::SynchronizationProcess*> (handle->process);
+	try {
+		if (process->isBloomFilterOutputAvail()) {
+			return 1;
+		}
+	} catch (std::exception& e) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string(e.what());
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =(e.what());
+		}
+		return -1;
+	} catch (...) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string("unknown error");
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =("unknown error");
+		}
+		return -1;
+	}
+	return 0;
+}
+
+size_t set_sync_bf_readsome(SET_SYNC_HANDLE * handle, unsigned char* buffer,
+		const size_t buffersize) {
+	setsync::SynchronizationProcess * process =
+			static_cast<setsync::SynchronizationProcess*> (handle->process);
+	try {
+		return process->readSomeBloomFilter(buffer, buffersize);
+	} catch (std::exception& e) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string(e.what());
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =(e.what());
+		}
+		return 0;
+	} catch (...) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string("unknown error");
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =("unknown error");
+		}
+		return 0;
+	}
+	return 0;
+}
+
+int set_sync_bf_diff(SET_SYNC_HANDLE * handle, const unsigned char* inbuffer,
+		const size_t inlength, diff_callback * callback, void * closure) {
+	setsync::SynchronizationProcess * process =
+			static_cast<setsync::SynchronizationProcess*> (handle->process);
+	try {
+		setsync::C_DiffHandler handler(callback, closure);
+		process->diffBloomFilter(inbuffer, inlength, handler);
+	} catch (std::exception& e) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string(e.what());
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =(e.what());
+		}
+		return -1;
+	} catch (...) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string("unknown error");
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =("unknown error");
+		}
+		return -1;
+	}
+	return 0;
+}
+
+ssize_t set_sync_trie_read_subtrie(SET_SYNC_HANDLE * handle,
+		const unsigned char* root, unsigned char * buffer, const size_t length) {
+	setsync::SynchronizationProcess * process =
+			static_cast<setsync::SynchronizationProcess*> (handle->process);
+	try {
+		return process->getSubTrie(root, buffer, length);
+	} catch (std::exception& e) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string(e.what());
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =(e.what());
+		}
+		return -1;
+	} catch (...) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string("unknown error");
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =("unknown error");
+		}
+		return -1;
+	}
+	return 0;
+}
+
+int set_sync_trie_diff(SET_SYNC_HANDLE * handle, const unsigned char* inbuffer,
+		const size_t inlength, diff_callback * callback, void * closure) {
+	setsync::SynchronizationProcess * process =
+			static_cast<setsync::SynchronizationProcess*> (handle->process);
+	try {
+		setsync::C_DiffHandler handler(callback, closure);
+		process->diffTrie(inbuffer, inlength, handler);
+	} catch (std::exception& e) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string(e.what());
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =(e.what());
+		}
+		return -1;
+	} catch (...) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string("unknown error");
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =("unknown error");
+		}
+		return -1;
+	}
+	return 0;
 }
 
 int set_sync_done(SET_SYNC_HANDLE * handle) {

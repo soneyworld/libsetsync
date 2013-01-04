@@ -27,7 +27,7 @@ namespace setsync {
  * With the help of this class, an external set can be synchronized with
  * the local instance.
  */
-class SynchronizationProcess: public sync::AbstractSyncProcessPart {
+class SynchronizationProcess {
 private:
 	enum status {
 		START, BF, TRIE, EQUAL
@@ -36,16 +36,9 @@ private:
 	Set * set_;
 	/// default handler, C++ interface only, NULL if the no diff handler should be used
 	AbstractDiffHandler * handler_;
-	const std::size_t hashsize;
-	/// hash of the other trie root
-	sync::HashSyncProcessPart * rootSync_;
-	AbstractSyncProcessPart * looseSync_;
-	AbstractSyncProcessPart * strictSync_;
-	AbstractSyncProcessPart * currentInSync_;
-	AbstractSyncProcessPart * currentOutSync_;
-	net::PacketHeader * inHeader_;
-	net::PacketHeader * outHeader_;
-
+	std::size_t bloomfilterOut_pos;
+	std::size_t bloomfilterIn_pos;
+	bool bfOutIsFinished_;
 public:
 	/**
 	 * Creates a new Synchronization Process for the given set. If a
@@ -57,17 +50,6 @@ public:
 	 * \param handler which should be called as default, if no other is given
 	 */
 	SynchronizationProcess(Set * set, AbstractDiffHandler * handler = NULL);
-	std::size_t step(void * inbuf, const std::size_t inlength, void * outbuf,
-			const std::size_t outlength, diff_callback * callback,
-			void * closure);
-	std::size_t step(void * inbuf, const std::size_t inlength, void * outbuf,
-			const std::size_t outlength, AbstractDiffHandler& diffhandler);
-	std::size_t step(void * inbuf, const std::size_t inlength, void * outbuf,
-			const std::size_t outlength);
-	virtual std::size_t processInput(void * inbuf, const std::size_t length,
-			AbstractDiffHandler& diffhandler);
-	virtual std::size_t
-	writeOutput(void * outbuf, const std::size_t maxlength);
 	virtual ~SynchronizationProcess();
 	/**
 	 * Calculates the optimal size of a sending buffer for the given network parameter.
@@ -79,25 +61,22 @@ public:
 	std::size_t
 	calcOutputBufferSize(const size_t RTT, const size_t bandwidth) const;
 	/**
-	 * \return true, if more output is available
-	 */
-	virtual bool pendingOutput() const;
-	/**
-	 * \return true, if the sync process expects  more input
-	 */
-	virtual bool awaitingInput() const;
-	/**
 	 * \return true, if sync is done
 	 */
 	virtual bool done() const;
-	/**
-	 * \return size of the next output packet
-	 */
-	virtual std::size_t getRemainigOutputPacketSize() const;
 
-	virtual bool isEqual() const;
+	virtual bool isEqual(const unsigned char* hash);
 
-	virtual bool parsingOfLastPacketDone() const;
+	virtual bool isBloomFilterOutputAvail() const;
+	virtual std::size_t readSomeBloomFilter(unsigned char * buffer,
+			const std::size_t length);
+	virtual void diffBloomFilter(const unsigned char * buffer,
+			const std::size_t length, AbstractDiffHandler& handler);
+	virtual bool getRootHash(unsigned char * hash);
+	virtual size_t getSubTrie(const unsigned char * hash, void * buffer,
+			const size_t buffersize);
+	virtual void diffTrie(const unsigned char* buffer, const std::size_t length,
+			AbstractDiffHandler& handler);
 };
 
 /**
@@ -107,7 +86,7 @@ public:
  * keys or binary data, which is hashed automatically on insertion
  * or find.
  */
-class Set: public sync::SyncableDataStructureInterface {
+class Set {
 	friend class SynchronizationProcess;
 	friend class SetTest;
 private:
@@ -293,9 +272,11 @@ public:
 	 */
 	virtual ~Set();
 
-	virtual setsync::sync::AbstractSyncProcessPart * createSyncProcess();
+	virtual SynchronizationProcess * createSyncProcess();
 
 	virtual bool operator ==(const Set& other) const;
+
+	virtual const utils::CryptoHash& getHashFunction() const;
 };
 }
 

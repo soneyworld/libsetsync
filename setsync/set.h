@@ -73,26 +73,35 @@ int set_clear(SET *set);
 size_t set_sync_calc_output_buffer_size(SET_SYNC_HANDLE * handle,
 		const size_t RTT, const size_t bandwidth);
 int set_sync_init_handle(SET * set, SET_SYNC_HANDLE * handle);
-ssize_t set_sync_step(SET_SYNC_HANDLE * handle, void * inbuf,
-		const size_t inlength, void * outbuf, const size_t maxoutlength,
-		diff_callback * callback, void * closure);
+
+// Equality Check Method
+int set_sync_get_root_hash(SET_SYNC_HANDLE * handle, unsigned char * hash);
+
+int set_sync_is_equal_to_hash(SET_SYNC_HANDLE * handle, const unsigned char * remotehash);
+// Bloom Filter Synchronization
 /**
- *
+ * Returns 0 if no more bf data is available, otherwise the size, which is available to be sent
  */
-size_t set_sync_next_out_packet_size(SET_SYNC_HANDLE * handle);
+int set_sync_bf_output_avail(SET_SYNC_HANDLE * handle);
+
 /**
- *
+ * Reads the next data from bloom filter into the buffer and returns the written size
  */
-size_t set_sync_next_out_packet(SET_SYNC_HANDLE * handle,void * outbuf, const size_t maxlength);
+size_t set_sync_bf_readsome(SET_SYNC_HANDLE * handle, unsigned char* buffer,
+		const size_t buffersize);
 /**
- *
+ * Checks the external bloom filter input and calculates the difference
  */
-size_t set_sync_next_in_packet(SET_SYNC_HANDLE * handle, void * inbuf, const size_t inlength,
-		diff_callback * callback, void * closure);
-/**
- *
- */
-size_t set_sync_awaiting_packet_size(SET_SYNC_HANDLE * handle);
+int set_sync_bf_diff(SET_SYNC_HANDLE * handle, const unsigned char* inbuffer,
+		const size_t inlength, diff_callback * callback, void * closure);
+
+// Trie Synchronization
+
+ssize_t set_sync_trie_read_subtrie(SET_SYNC_HANDLE * handle, const unsigned char* root, unsigned char * buffer, const size_t length);
+
+int set_sync_trie_diff(SET_SYNC_HANDLE * handle, const unsigned char* inbuffer,
+		const size_t inlength, diff_callback * callback, void * closure);
+
 int set_sync_done(SET_SYNC_HANDLE * handle);
 int set_sync_free_handle(SET_SYNC_HANDLE * handle);
 
