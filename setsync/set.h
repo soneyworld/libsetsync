@@ -101,13 +101,20 @@ int set_sync_bf_diff(SET_SYNC_HANDLE * handle, const unsigned char* inbuffer,
 
 // Trie Synchronization
 int set_sync_trie_subtrie_output_avail(SET_SYNC_HANDLE * handle);
-ssize_t set_sync_trie_read_subtrie(SET_SYNC_HANDLE * handle,
+ssize_t set_sync_trie_get_subtrie(SET_SYNC_HANDLE * handle,
 		unsigned char * buffer, const size_t length);
-size_t set_sync_trie_read_acks(SET_SYNC_HANDLE * handle,
+ssize_t set_sync_trie_process_subtrie(SET_SYNC_HANDLE * handle,
+		unsigned char* buffer, const size_t length);
+int set_sync_trie_acks_avail(SET_SYNC_HANDLE * handle);
+ssize_t set_sync_trie_read_acks(SET_SYNC_HANDLE * handle,
 		unsigned char * buffer, const size_t length, size_t * numberOfAcks);
-int set_sync_trie_diff_acks(SET_SYNC_HANDLE * handle,
+int set_sync_trie_process_acks(SET_SYNC_HANDLE * handle,
 		const unsigned char * buffer, const size_t length,
 		const size_t numberOfAcks, diff_callback * callback, void * closure);
+
+// Transfered Sizes
+size_t set_sync_sent_bytes(SET_SYNC_HANDLE * handle);
+size_t set_sync_received_bytes(SET_SYNC_HANDLE * handle);
 
 int set_sync_done(SET_SYNC_HANDLE * handle);
 int set_sync_free_handle(SET_SYNC_HANDLE * handle);

@@ -8,6 +8,12 @@
 
 using namespace std;
 
+void localset_callback(void *closure, const unsigned char * hash,
+		const size_t hashsize, const size_t existsLocally) {
+	SET * set = (SET *) closure;
+	set_insert(set, hash);
+}
+
 namespace setsync {
 void SetTest::testInsert() {
 	setsync::Set set(config);
@@ -347,7 +353,91 @@ void SetTest::testCAPI() {
 	CPPUNIT_ASSERT(!set_find_string(&remoteset, "bla1"));
 
 	CPPUNIT_ASSERT(set_insert_string(&localset, "bla3"));
+	CPPUNIT_ASSERT(set_size(&localset) == 2);
 	CPPUNIT_ASSERT(set_erase_string(&localset, "bla3"));
+	CPPUNIT_ASSERT(set_size(&localset) == 1);
+	SET_SYNC_HANDLE localprocess;
+	SET_SYNC_HANDLE remoteprocess;
+	set_sync_init_handle(&localset, &localprocess);
+	set_sync_init_handle(&remoteset, &remoteprocess);
+
+	CPPUNIT_ASSERT(!set_sync_done(&localprocess));
+	CPPUNIT_ASSERT(!set_sync_done(&remoteprocess));
+
+	// BF Sync
+	std::size_t buffersize = 100;
+	unsigned char buffer[buffersize];
+	std::size_t sending;
+	diff_callback * callback = &localset_callback;
+	while (set_sync_bf_output_avail(&localprocess) == 1) {
+		sending = set_sync_bf_readsome(&localprocess, buffer, buffersize);
+		set_sync_bf_diff(&remoteprocess, buffer, sending, callback, &localset);
+	}
+	while (set_sync_bf_output_avail(&remoteprocess) == 1) {
+		sending = set_sync_bf_readsome(&remoteprocess, buffer, buffersize);
+		set_sync_bf_diff(&localprocess, buffer, sending, callback, &remoteset);
+	}
+
+	// BF SYNC DONE AND SET SHOULD BE EQUAL, SO ADDING A DIFF
+	CPPUNIT_ASSERT(set_insert_string(&localset, "diff"));
+
+	// Trie Sync
+	size_t treecutsize = 2 * 20;
+	unsigned char treecut[treecutsize];
+	size_t subtriesize;
+	std::size_t ackbuffersize = 20;
+	unsigned char ackbuffer[ackbuffersize];
+	std::size_t numberOfAcks;
+	std::size_t acksize;
+
+	while (!set_sync_done(&localprocess) && !set_sync_done(&remoteprocess)) {
+		if (set_sync_trie_subtrie_output_avail(&localprocess)) {
+			subtriesize = set_sync_trie_get_subtrie(&localprocess, treecut,
+					treecutsize);
+			CPPUNIT_ASSERT(subtriesize > 0);
+			acksize = set_sync_trie_process_subtrie(&remoteprocess, treecut,
+					subtriesize);
+			CPPUNIT_ASSERT(acksize > 0);
+		}
+		if (set_sync_trie_acks_avail(&localprocess)) {
+			acksize = set_sync_trie_read_acks(&localprocess, ackbuffer,
+					ackbuffersize, &numberOfAcks);
+			CPPUNIT_ASSERT(numberOfAcks > 0);
+			CPPUNIT_ASSERT(acksize > 0);
+			set_sync_trie_process_acks(&remoteprocess, ackbuffer, acksize,
+					numberOfAcks, callback, &localset);
+		}
+		if (set_sync_trie_subtrie_output_avail(&remoteprocess)) {
+			subtriesize = set_sync_trie_get_subtrie(&remoteprocess, treecut,
+					treecutsize);
+			CPPUNIT_ASSERT(subtriesize > 0);
+			acksize = set_sync_trie_process_subtrie(&localprocess, treecut,
+					subtriesize);
+			CPPUNIT_ASSERT(acksize > 0);
+		}
+		if (set_sync_trie_acks_avail(&remoteprocess)) {
+			acksize = set_sync_trie_read_acks(&remoteprocess, ackbuffer,
+					ackbuffersize, &numberOfAcks);
+			CPPUNIT_ASSERT(numberOfAcks > 0);
+			CPPUNIT_ASSERT(acksize > 0);
+			set_sync_trie_process_acks(&localprocess, ackbuffer, acksize,
+					numberOfAcks, callback, &remoteset);
+		}
+	}
+	// TRIES SHOULD BE EQUAL -> TEST IT
+	unsigned char localroot[20];
+	unsigned char remoteroot[20];
+	CPPUNIT_ASSERT(set_sync_get_root_hash(&localprocess, localroot)==0);
+	CPPUNIT_ASSERT(set_sync_get_root_hash(&remoteprocess, remoteroot)==0);
+	CPPUNIT_ASSERT(set_sync_is_equal_to_hash(&localprocess,remoteroot));
+	CPPUNIT_ASSERT(set_sync_is_equal_to_hash(&remoteprocess,localroot));
+
+	// TRANSMITTED DATA TEST
+	CPPUNIT_ASSERT(set_sync_received_bytes(&localprocess) == set_sync_sent_bytes(&remoteprocess));
+	CPPUNIT_ASSERT(set_sync_received_bytes(&remoteprocess) == set_sync_sent_bytes(&localprocess));
+
+	CPPUNIT_ASSERT(set_sync_free_handle(&localprocess)==0);
+	CPPUNIT_ASSERT(set_sync_free_handle(&remoteprocess)==0);
 	CPPUNIT_ASSERT(set_free(&localset)==0);
 	CPPUNIT_ASSERT(set_free(&remoteset)==0);
 }

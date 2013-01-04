@@ -847,7 +847,7 @@ int set_sync_bf_diff(SET_SYNC_HANDLE * handle, const unsigned char* inbuffer,
 	return 0;
 }
 
-ssize_t set_sync_trie_read_subtrie(SET_SYNC_HANDLE * handle,
+ssize_t set_sync_trie_get_subtrie(SET_SYNC_HANDLE * handle,
 		unsigned char * buffer, const size_t length) {
 	setsync::SynchronizationProcess * process =
 			static_cast<setsync::SynchronizationProcess*> (handle->process);
@@ -855,6 +855,32 @@ ssize_t set_sync_trie_read_subtrie(SET_SYNC_HANDLE * handle,
 		if (process->isSubtrieOutputAvailable()) {
 			return process->getSubTrie(buffer, length);
 		}
+	} catch (std::exception& e) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string(e.what());
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =(e.what());
+		}
+		return -1;
+	} catch (...) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string("unknown error");
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =("unknown error");
+		}
+		return -1;
+	}
+	return 0;
+}
+
+ssize_t set_sync_trie_process_subtrie(SET_SYNC_HANDLE * handle,
+		unsigned char* buffer, const size_t length) {
+	setsync::SynchronizationProcess * process =
+			static_cast<setsync::SynchronizationProcess*> (handle->process);
+	try {
+		return process->processSubTrie(buffer, length);
 	} catch (std::exception& e) {
 		if (handle->error == NULL) {
 			handle->error = (void *) new std::string(e.what());
@@ -900,7 +926,58 @@ int set_sync_trie_subtrie_output_avail(SET_SYNC_HANDLE * handle) {
 	return 0;
 }
 
-int set_sync_trie_diff_acks(SET_SYNC_HANDLE * handle,
+int set_sync_trie_acks_avail(SET_SYNC_HANDLE * handle) {
+	setsync::SynchronizationProcess * process =
+			static_cast<setsync::SynchronizationProcess*> (handle->process);
+	try {
+		return process->isAckOutputAvailable() ? 1 : 0;
+	} catch (std::exception& e) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string(e.what());
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =(e.what());
+		}
+		return -1;
+	} catch (...) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string("unknown error");
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =("unknown error");
+		}
+		return -1;
+	}
+	return 0;
+}
+
+ssize_t set_sync_trie_read_acks(SET_SYNC_HANDLE * handle,
+		unsigned char * buffer, const size_t length, size_t * numberOfAcks) {
+	setsync::SynchronizationProcess * process =
+			static_cast<setsync::SynchronizationProcess*> (handle->process);
+	try {
+		return process->readSomeTrieAcks(buffer, length, numberOfAcks);
+	} catch (std::exception& e) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string(e.what());
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =(e.what());
+		}
+		return -1;
+	} catch (...) {
+		if (handle->error == NULL) {
+			handle->error = (void *) new std::string("unknown error");
+		} else {
+			std::string * msg = static_cast<std::string *> (handle->error);
+			msg->operator =("unknown error");
+		}
+		return -1;
+	}
+	return 0;
+}
+
+int set_sync_trie_process_acks(SET_SYNC_HANDLE * handle,
 		const unsigned char * buffer, const size_t length,
 		const size_t numberOfAcks, diff_callback * callback, void * closure) {
 	setsync::SynchronizationProcess * process =
@@ -926,6 +1003,18 @@ int set_sync_trie_diff_acks(SET_SYNC_HANDLE * handle,
 		return -1;
 	}
 	return 0;
+}
+
+size_t set_sync_sent_bytes(SET_SYNC_HANDLE * handle) {
+	setsync::SynchronizationProcess * process =
+			static_cast<setsync::SynchronizationProcess*> (handle->process);
+	return process->getSentBytes();
+}
+
+size_t set_sync_received_bytes(SET_SYNC_HANDLE * handle) {
+	setsync::SynchronizationProcess * process =
+			static_cast<setsync::SynchronizationProcess*> (handle->process);
+	return process->getReceivedBytes();
 }
 
 int set_sync_done(SET_SYNC_HANDLE * handle) {
