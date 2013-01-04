@@ -11,7 +11,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "config.h"
 #include <unistd.h>
 #include <string.h>
 #include <inttypes.h>
@@ -45,10 +44,6 @@ typedef struct {
 typedef void diff_callback(void *closure, const unsigned char * hash,
 		const size_t hashsize, const size_t existsLocally);
 
-// Set configuration
-#ifdef HAVE_IBRCOMMON
-int set_load_config_file(SET_CONFIG * config);
-#endif
 SET_CONFIG set_create_config();
 
 // Init and Free
