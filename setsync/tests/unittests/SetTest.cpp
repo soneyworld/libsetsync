@@ -324,7 +324,7 @@ void SetTest::testStrictSync() {
 	delete remoteprocess;
 }
 
-void SetTest::testCAPI(){
+void SetTest::testCAPI() {
 	SET localset;
 	SET remoteset;
 	SET_CONFIG localconfig = set_create_config();
@@ -333,7 +333,21 @@ void SetTest::testCAPI(){
 	CPPUNIT_ASSERT(set_init(&remoteset,remoteconfig) == 0);
 	CPPUNIT_ASSERT(set_empty(&localset));
 	CPPUNIT_ASSERT(set_empty(&remoteset));
+	CPPUNIT_ASSERT(set_max_size(&localset) == localconfig.bf_max_elements);
+	CPPUNIT_ASSERT(set_max_size(&remoteset) == remoteconfig.bf_max_elements);
+	CPPUNIT_ASSERT(set_size(&localset) == 0);
+	CPPUNIT_ASSERT(set_size(&remoteset) == 0);
+	CPPUNIT_ASSERT(set_insert_string(&localset, "bla1"));
+	CPPUNIT_ASSERT(set_insert_string(&remoteset, "bla2"));
+	CPPUNIT_ASSERT(set_size(&localset) == 1);
+	CPPUNIT_ASSERT(set_size(&remoteset) == 1);
+	CPPUNIT_ASSERT(set_find_string(&localset, "bla1"));
+	CPPUNIT_ASSERT(set_find_string(&remoteset, "bla2"));
+	CPPUNIT_ASSERT(!set_find_string(&localset, "bla2"));
+	CPPUNIT_ASSERT(!set_find_string(&remoteset, "bla1"));
 
+	CPPUNIT_ASSERT(set_insert_string(&localset, "bla3"));
+	CPPUNIT_ASSERT(set_erase_string(&localset, "bla3"));
 	CPPUNIT_ASSERT(set_free(&localset)==0);
 	CPPUNIT_ASSERT(set_free(&remoteset)==0);
 }

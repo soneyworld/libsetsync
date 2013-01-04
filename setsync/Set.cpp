@@ -655,6 +655,11 @@ int set_erase(SET *set, const unsigned char * key) {
 	return cppset->erase(key);
 }
 
+int set_erase_string(SET *set, const char * str) {
+	setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
+	return cppset->erase(str);
+}
+
 int set_clear(SET *set) {
 	try {
 		setsync::Set * cppset = static_cast<setsync::Set*> (set->set);
