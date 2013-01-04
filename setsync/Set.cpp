@@ -272,7 +272,7 @@ Set::Set(const config::Configuration& config) :
 		indexpath.append("index");
 		indexStorage_ = new storage::LevelDbStorage(indexpath);
 	}
-	break;
+		break;
 #endif
 #ifdef HAVE_DB_CXX_H
 	case config::Configuration::StorageConfig::BERKELEY_DB: {
@@ -473,8 +473,16 @@ bool Set::find(const void * data, const std::size_t length) {
 
 bool Set::get(const unsigned char * key, unsigned char ** value,
 		std::size_t * valueSize) {
+	*value = NULL;
+	*valueSize = 0;
 	if (find(key)) {
-		this->index_->get(key,)
+		if (this->indexInUse_) {
+			*valueSize = this->index_->getSizeOf(key);
+			*value = (unsigned char*) malloc(*valueSize);
+			this->index_->get(key, *value, valueSize);
+		} else {
+			return false;
+		}
 	} else {
 		return false;
 	}
