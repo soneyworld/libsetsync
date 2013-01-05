@@ -264,6 +264,14 @@ std::size_t Set::getMinSyncBuffer() const {
 	return std::max(getMinSyncBFBuffer(), getMinSyncTrieBuffer());
 }
 
+std::string Set::getPath() const {
+	if(this->tempDir!=NULL){
+		return this->tempDir->getPath();
+	}else{
+		return config_.getPath();
+	}
+}
+
 Set::Set(const config::Configuration& config) :
 	hash_(config.getHashFunction()), config_(config), tempDir(NULL),
 			indexInUse_(false) {

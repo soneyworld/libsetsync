@@ -329,6 +329,7 @@ public:
 	virtual std::size_t getMinSyncTrieBuffer() const;
 	virtual std::size_t getMinSyncBFBuffer() const;
 	virtual std::size_t getMinSyncBuffer() const;
+	virtual std::string getPath() const;
 };
 }
 
