@@ -19,6 +19,14 @@ evaluation_SOURCES = \
 	SetSync.cpp \
 	Test.h
 
+ssync_SOURCES = \
+	StopWatch.h \
+	StopWatch.cpp \
+	SetSync.h \
+	SetSync.cpp \
+	Test.h \
+	SetSyncMain.cpp
+
 # what flags you want to pass to the C compiler & linker
 AM_CPPFLAGS = -fopenmp
 AM_LDFLAGS = -lrt
@@ -47,8 +55,11 @@ AM_LDFLAGS += @IBRCOMMON_LIBS@
 endif
 
 
-noinst_PROGRAMS=evaluation
+noinst_PROGRAMS=evaluation ssync
 evaluation_CXXFLAGS = ${AM_CPPFLAGS}
+ssync_CXXFLAGS =  ${AM_CPPFLAGS}
 evaluation_LDFLAGS = ${AM_LDFLAGS}
+ssync_LDFLAGS = ${AM_LDFLAGS}
 evaluation_LDADD = @top_srcdir@/setsync/libsetsync.la
+ssync_LDADD = @top_srcdir@/setsync/libsetsync.la
 INCLUDES = -I@top_srcdir@
