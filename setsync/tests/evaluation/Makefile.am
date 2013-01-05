@@ -15,6 +15,8 @@ evaluation_SOURCES = \
 	StopWatch.cpp \
 	SetTest.h \
 	SetTest.cpp \
+	SetSync.h \
+	SetSync.cpp \
 	Test.h
 
 # what flags you want to pass to the C compiler & linker
