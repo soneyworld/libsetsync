@@ -38,12 +38,11 @@ Configuration::Configuration(const BloomFilterConfig& bf,
 
 }
 Configuration::Configuration(const TrieConfig& trie, const std::string hashname) :
-	hashname_(hashname), bfConfig_(BloomFilterConfig()), trieConfig_(trie){
+	hashname_(hashname), bfConfig_(BloomFilterConfig()), trieConfig_(trie) {
 
 }
 Configuration::Configuration(const BloomFilterConfig& bf,
-		const TrieConfig& trie,
-		const std::string hashname) :
+		const TrieConfig& trie, const std::string hashname) :
 	hashname_(hashname), bfConfig_(bf), trieConfig_(trie) {
 
 }
@@ -77,6 +76,13 @@ Configuration::Configuration(const SET_CONFIG config) {
 	case SHA_512:
 		this->hashname_ = "sha512";
 		break;
+	}
+	this->storageConfig_.cacheInBytes_ = config.storage_cache_bytes;
+	this->storageConfig_.cacheInGBytes_ = config.storage_cache_gbytes;
+	if (config.storage_cache_bytes == 0 && config.storage_cache_gbytes == 0) {
+		this->storageConfig_.cacheSizeGiven_ = false;
+	} else {
+		this->storageConfig_.cacheSizeGiven_ = true;
 	}
 	switch (config.storage) {
 #ifdef HAVE_LEVELDB

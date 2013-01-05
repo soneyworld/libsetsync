@@ -14,6 +14,7 @@
 #endif
 #ifdef HAVE_DB_CXX_H
 #include <setsync/storage/BdbStorage.h>
+#define GIGABYTE 1024 * 1024 * 1024
 #endif
 #include <setsync/utils/bitset.h>
 
@@ -265,9 +266,9 @@ std::size_t Set::getMinSyncBuffer() const {
 }
 
 std::string Set::getPath() const {
-	if(this->tempDir!=NULL){
+	if (this->tempDir != NULL) {
 		return this->tempDir->getPath();
-	}else{
+	} else {
 		return config_.getPath();
 	}
 }
@@ -324,6 +325,21 @@ Set::Set(const config::Configuration& config) :
 		this->bfdb = new Db(this->env_, 0);
 		this->triedb = new Db(this->env_, 0);
 		this->indexdb = new Db(this->env_, 0);
+		if (config_.getStorage().isCacheSizeGiven()) {
+			std::size_t halfcache = config_.getStorage().getByteCacheSize() / 2;
+			std::size_t halfgbcache = config_.getStorage().getGByteCacheSize()
+					/ 2;
+			if (config_.getStorage().getGByteCacheSize() % 2 == 1) {
+				std::size_t remainder = GIGABYTE / 2;
+				halfcache += remainder;
+				if (halfcache > GIGABYTE) {
+					halfgbcache += halfcache / GIGABYTE;
+					halfcache = halfcache % GIGABYTE;
+				}
+			}
+			this->bfdb->set_cachesize(halfgbcache, halfcache, 0);
+			this->triedb->set_cachesize(halfgbcache, halfcache, 0);
+		}
 		this->bfdb->open(NULL, "set", "bf", DB_HASH, DB_CREATE, 0);
 		this->triedb->open(NULL, "set", "trie", DB_HASH, DB_CREATE, 0);
 		this->indexdb->open(NULL, "set", "in", DB_HASH, DB_CREATE, 0);
@@ -555,6 +571,8 @@ SET_CONFIG set_create_config() {
 #else
 	c.storage = BERKELEY_DB;
 #endif
+	c.storage_cache_gbytes = 0;
+	c.storage_cache_bytes = 0;
 	return c;
 }
 

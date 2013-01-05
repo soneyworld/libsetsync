@@ -66,11 +66,18 @@ public:
 		};
 	private:
 		StorageType type_;
+		bool cacheSizeGiven_;
+		std::size_t cacheInBytes_;
+		std::size_t cacheInGBytes_;
+
 	public:
 
 #ifdef HAVE_LEVELDB
-		StorageConfig(const StorageType type = LEVELDB) :
-			type_(type) {
+		StorageConfig(const StorageType type = LEVELDB,
+				const std::size_t cacheInBytes = 0,
+				const std::size_t cacheInGBytes = 0) :
+			type_(type), cacheInBytes_(cacheInBytes),
+					cacheInGBytes_(cacheInGBytes_) {
 #else
 #ifdef HAVE_DB_CXX_H
 			StorageConfig(const StorageType type = BERKELEY_DB) :
@@ -82,11 +89,27 @@ public:
 				throw "Leveldb is not supported!";
 			}
 #endif
+			if (cacheInGBytes == 0) {
+				if (cacheInBytes == 0) {
+					this->cacheSizeGiven_ = false;
+				} else {
+					this->cacheSizeGiven_ = true;
+				}
+			}
 		}
 		virtual ~StorageConfig() {
 		}
 		StorageType getType(void) const {
 			return this->type_;
+		}
+		bool isCacheSizeGiven() const {
+			return this->isCacheSizeGiven();
+		}
+		std::size_t getByteCacheSize() const {
+			return this->cacheInBytes_;
+		}
+		std::size_t getGByteCacheSize() const {
+			return this->cacheInGBytes_;
 		}
 	};
 private:
@@ -96,12 +119,15 @@ public:
 	const std::string getPath() const;
 	void setPath(const char * path);
 	void setPath(const std::string& path);
-	Configuration(const std::string hashname = utils::CryptoHash::getDefaultName());
-	Configuration(const BloomFilterConfig& bf, const std::string hashname = utils::CryptoHash::getDefaultName());
-	Configuration(const TrieConfig& trie, const std::string hashname = utils::CryptoHash::getDefaultName());
+	Configuration(
+			const std::string hashname = utils::CryptoHash::getDefaultName());
+	Configuration(const BloomFilterConfig& bf,
+			const std::string hashname = utils::CryptoHash::getDefaultName());
+	Configuration(const TrieConfig& trie,
+			const std::string hashname = utils::CryptoHash::getDefaultName());
 	Configuration(const BloomFilterConfig& bf, const TrieConfig& trie,
 
-			const std::string hashname = utils::CryptoHash::getDefaultName());
+	const std::string hashname = utils::CryptoHash::getDefaultName());
 	Configuration(const SET_CONFIG config);
 	virtual ~Configuration();
 	std::string getHashFunction() const;

@@ -39,6 +39,8 @@ typedef struct {
 	int bf_hard_max;
 	uint64_t bf_max_elements;
 	float false_positive_rate;
+	size_t storage_cache_gbytes;
+	size_t storage_cache_bytes;
 } SET_CONFIG;
 
 typedef void diff_callback(void *closure, const unsigned char * hash,
