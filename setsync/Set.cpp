@@ -241,15 +241,27 @@ bool SynchronizationProcess::done() const {
 }
 
 std::size_t SynchronizationProcess::getMinTrieBuffer() const {
-	return this->set_->trie_->getHash().getHashSize() * 2;
+	return this->set_->getMinSyncTrieBuffer();
 }
 
 std::size_t SynchronizationProcess::getMinBFBuffer() const {
-	return 1;
+	return this->set_->getMinSyncBFBuffer();
 }
 
 std::size_t SynchronizationProcess::getMinBuffer() const {
-	return std::max(getMinBFBuffer(), getMinTrieBuffer());
+	return this->set_->getMinSyncBuffer();
+}
+
+std::size_t Set::getMinSyncTrieBuffer() const {
+	return trie_->getHash().getHashSize() * 2;
+}
+
+std::size_t Set::getMinSyncBFBuffer() const {
+	return 1;
+}
+
+std::size_t Set::getMinSyncBuffer() const {
+	return std::max(getMinSyncBFBuffer(), getMinSyncTrieBuffer());
 }
 
 Set::Set(const config::Configuration& config) :
@@ -1064,12 +1076,12 @@ int set_sync_free_handle(SET_SYNC_HANDLE * handle) {
 	return 0;
 }
 
-size_t set_sync_trie_min_buffer(SET_SYNC_HANDLE * handle) {
+size_t set_sync_min_trie_buffer(SET_SYNC_HANDLE * handle) {
 	setsync::SynchronizationProcess * process =
 			static_cast<setsync::SynchronizationProcess*> (handle->process);
 	return process->getMinTrieBuffer();
 }
-size_t set_sync_bf_min_buffer(SET_SYNC_HANDLE * handle) {
+size_t set_sync_min_bf_buffer(SET_SYNC_HANDLE * handle) {
 	setsync::SynchronizationProcess * process =
 			static_cast<setsync::SynchronizationProcess*> (handle->process);
 	return process->getMinBFBuffer();

@@ -365,9 +365,9 @@ void SetTest::testCAPI() {
 	CPPUNIT_ASSERT(!set_sync_done(&remoteprocess));
 
 
-	CPPUNIT_ASSERT(set_sync_bf_min_buffer(&localprocess)==1);
-	CPPUNIT_ASSERT(set_sync_trie_min_buffer(&localprocess)==20*2);
-	CPPUNIT_ASSERT(set_sync_trie_min_buffer(&localprocess)<=set_sync_min_buffer(&localprocess));
+	CPPUNIT_ASSERT(set_sync_min_bf_buffer(&localprocess)==1);
+	CPPUNIT_ASSERT(set_sync_min_trie_buffer(&localprocess)==20*2);
+	CPPUNIT_ASSERT(set_sync_min_trie_buffer(&localprocess)<=set_sync_min_buffer(&localprocess));
 
 	// BF Sync
 	std::size_t buffersize = 100;

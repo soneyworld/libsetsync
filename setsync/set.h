@@ -99,8 +99,8 @@ size_t set_sync_bf_readsome(SET_SYNC_HANDLE * handle, unsigned char* buffer,
 int set_sync_bf_diff(SET_SYNC_HANDLE * handle, const unsigned char* inbuffer,
 		const size_t inlength, diff_callback * callback, void * closure);
 // Synchronization buffer
-size_t set_sync_trie_min_buffer(SET_SYNC_HANDLE * handle);
-size_t set_sync_bf_min_buffer(SET_SYNC_HANDLE * handle);
+size_t set_sync_min_trie_buffer(SET_SYNC_HANDLE * handle);
+size_t set_sync_min_bf_buffer(SET_SYNC_HANDLE * handle);
 size_t set_sync_min_buffer(SET_SYNC_HANDLE * handle);
 
 // Trie Synchronization

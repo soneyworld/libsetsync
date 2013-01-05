@@ -41,18 +41,18 @@ void StopWatch::reset() {
 	this->time_duration_ = 0;
 }
 
-double StopWatch::getDuration() {
+double StopWatch::getDuration() const {
 	return this->time_duration_;
 }
 
-double StopWatch::getLastDuration() {
+double StopWatch::getLastDuration() const {
 	return this->time_last_duration_;
 }
 
-double StopWatch::getCPUDuration() {
+double StopWatch::getCPUDuration() const {
 	return this->cpu_duration_;
 }
 
-double StopWatch::getLastCPUDuration() {
+double StopWatch::getLastCPUDuration() const {
 	return this->cpu_last_duration_;
 }

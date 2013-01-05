@@ -52,19 +52,19 @@ public:
 	 *
 	 * \return the sum duration in seconds
 	 */
-	double getDuration();
+	double getDuration() const ;
 	/**
 	 * \return last interval duration in seconds
 	 */
-	double getLastDuration();
+	double getLastDuration() const ;
 	/**
 	 * \return sum of cpu duration in seconds
 	 */
-	double getCPUDuration();
+	double getCPUDuration() const ;
 	/**
 	 * \return last interval duration of CPU time in seconds
 	 */
-	double getLastCPUDuration();
+	double getLastCPUDuration() const ;
 	/// default destructor
 	virtual ~StopWatch();
 };

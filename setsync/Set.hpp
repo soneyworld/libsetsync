@@ -325,6 +325,10 @@ public:
 	virtual bool operator ==(const Set& other) const;
 
 	virtual const utils::CryptoHash& getHashFunction() const;
+
+	virtual std::size_t getMinSyncTrieBuffer() const;
+	virtual std::size_t getMinSyncBFBuffer() const;
+	virtual std::size_t getMinSyncBuffer() const;
 };
 }
 
