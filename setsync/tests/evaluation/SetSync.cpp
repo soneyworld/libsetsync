@@ -33,22 +33,22 @@ SetSync::SetSync(const SET_CONFIG config, const size_t initA,
 		break;
 	}
 	hashType_ = A_.getHashFunction().getName();
-	uint64_t i;
+	size_t i;
 	for (i = 0; i < sameElements; i++) {
 		stringstream ss;
 		ss << salt << i;
 		A_.insert(ss.str());
 		B_.insert(ss.str());
 	}
-	uint64_t diffA = initA_ - initSameElements_;
-	uint64_t j;
+	size_t diffA = initA_ - initSameElements_;
+	size_t j;
 	for (j = 0; j < diffA; j++) {
 		stringstream ss;
 		ss << salt << i;
 		A_.insert(ss.str());
 		i++;
 	}
-	uint64_t diffB = initB_ - initSameElements_;
+	size_t diffB = initB_ - initSameElements_;
 	for (j = 0; j < diffB; j++) {
 		stringstream ss;
 		ss << salt << i;
