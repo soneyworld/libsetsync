@@ -8,6 +8,9 @@
 #ifdef HAVE_LEVELDB
 #include <setsync/storage/LevelDbStorage.h>
 #endif
+#include <setsync/utils/FileSystem.h>
+#include "StopWatch.h"
+
 using namespace std;
 namespace evaluation {
 
@@ -31,12 +34,25 @@ SetTest::~SetTest() {
 void SetTest::insert() {
 
 	cout << "running Set insertion test (" << storage_ << ")" << endl;
-	cout << "noinserts,CPUintervalDuration,realtimeIntervalDuration,duration"
+	cout
+			<< "noinserts,CPUinterval,realtimeInterval,CPUduration,realtimeDuration,foldersize,"
 			<< endl;
+	StopWatch watch;
+	double CPUinterval;
+	double RTinterval;
 	for (uint64_t i = 0; i < ITERATIONS; i++) {
+		watch.start();
 		set_.insert((void *) &i, sizeof(uint64_t));
+		watch.stop();
+		CPUinterval += watch.getLastCPUDuration();
+		RTinterval += watch.getLastDuration();
 		if (((i + 1) % ITEMS_PER_LOOPS) == 0) {
-			std::cout << i + 1 << "," << std::endl;
+			std::cout << i + 1 << "," << CPUinterval << "," << RTinterval
+					<< "," << watch.getCPUDuration() << ","
+					<< watch.getDuration() << ","
+					<< utils::FileSystem::dirSize(set_.getPath()) << std::endl;
+			CPUinterval = 0;
+			RTinterval = 0;
 		}
 	}
 }

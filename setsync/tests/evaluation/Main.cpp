@@ -184,7 +184,7 @@ int main(int ac, char **av) {
 		}
 #endif
 	}
-	{
+/*	{
 		SET_CONFIG config = set_create_config();
 		config.bf_max_elements = 13000;
 		evaluation::SetSync test(config, 12000, 12000, 11500, evaluation::BOTH, "bla",
@@ -195,4 +195,5 @@ int main(int ac, char **av) {
 		s.stop();
 		cout << "sync duration: " << s.getDuration() << endl;
 	}
+	*/
 }
