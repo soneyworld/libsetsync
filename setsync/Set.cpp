@@ -240,6 +240,18 @@ bool SynchronizationProcess::done() const {
 	return true;
 }
 
+std::size_t SynchronizationProcess::getMinTrieBuffer() const {
+	return this->set_->trie_->getHash().getHashSize() * 2;
+}
+
+std::size_t SynchronizationProcess::getMinBFBuffer() const {
+	return 1;
+}
+
+std::size_t SynchronizationProcess::getMinBuffer() const {
+	return std::max(getMinBFBuffer(), getMinTrieBuffer());
+}
+
 Set::Set(const config::Configuration& config) :
 	hash_(config.getHashFunction()), config_(config), tempDir(NULL),
 			indexInUse_(false) {
@@ -1050,6 +1062,22 @@ int set_sync_free_handle(SET_SYNC_HANDLE * handle) {
 		return -1;
 	}
 	return 0;
+}
+
+size_t set_sync_trie_min_buffer(SET_SYNC_HANDLE * handle) {
+	setsync::SynchronizationProcess * process =
+			static_cast<setsync::SynchronizationProcess*> (handle->process);
+	return process->getMinTrieBuffer();
+}
+size_t set_sync_bf_min_buffer(SET_SYNC_HANDLE * handle) {
+	setsync::SynchronizationProcess * process =
+			static_cast<setsync::SynchronizationProcess*> (handle->process);
+	return process->getMinBFBuffer();
+}
+size_t set_sync_min_buffer(SET_SYNC_HANDLE * handle) {
+	setsync::SynchronizationProcess * process =
+			static_cast<setsync::SynchronizationProcess*> (handle->process);
+	return process->getMinBuffer();
 }
 
 size_t set_sync_calc_output_buffer_size(SET_SYNC_HANDLE * handle,

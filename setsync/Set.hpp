@@ -121,6 +121,10 @@ public:
 	virtual std::size_t getReceivedBytes() const;
 
 	virtual bool isAckOutputAvailable() const;
+
+	virtual std::size_t getMinTrieBuffer() const;
+	virtual std::size_t getMinBFBuffer() const;
+	virtual std::size_t getMinBuffer() const;
 };
 
 /**
