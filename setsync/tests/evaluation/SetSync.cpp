@@ -17,10 +17,16 @@ SetSync::SetSync(const SET_CONFIG config, const size_t initA,
 			bufferSize_(maximumBufferSize), type_(type), initSalt_(salt),
 			configA_(config), configB_(config), A_(configA_), B_(configB_) {
 	if (sameElements > initA || sameElements > initB) {
-		throw "illegal arguments";
+		if(sameElements > initA){
+			cout << "Illegal argument: A is smaller as equal elements"<< endl;
+		}else{
+			cout << "illegal argument: B is smaller as equal elements"<< endl;
+		}
+		exit(-1);
 	}
 	if (bufferSize_ < A_.getHashFunction().getHashSize() * 2) {
-		throw "illegal argument: Buffer is too small";
+		cout << "illegal argument: Buffer is too small"<< endl;
+		exit(-1);
 	}
 	switch (config.storage) {
 	case LEVELDB:
@@ -35,7 +41,7 @@ SetSync::SetSync(const SET_CONFIG config, const size_t initA,
 	}
 	hashType_ = A_.getHashFunction().getName();
 	size_t i;
-	for (i = 0; i < sameElements; i++) {
+	for (i = 0; i < initSameElements_; i++) {
 		stringstream ss;
 		ss << salt << i;
 		A_.insert(ss.str());
