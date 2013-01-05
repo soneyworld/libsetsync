@@ -6,6 +6,7 @@
 
 #include "SetSync.h"
 #include <setsync/set.h>
+#include <sstream>
 
 namespace evaluation {
 
