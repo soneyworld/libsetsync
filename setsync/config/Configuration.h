@@ -103,7 +103,7 @@ public:
 			return this->type_;
 		}
 		bool isCacheSizeGiven() const {
-			return this->isCacheSizeGiven();
+			return this->cacheSizeGiven_;
 		}
 		std::size_t getByteCacheSize() const {
 			return this->cacheInBytes_;
