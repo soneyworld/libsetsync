@@ -62,7 +62,7 @@ public:
 		friend class Configuration;
 	public:
 		enum StorageType {
-			BERKELEY_DB = 0, LEVELDB = 1
+			BERKELEY_DB = 0, LEVELDB = 1, IN_MEMORY = 2
 		};
 	private:
 		StorageType type_;

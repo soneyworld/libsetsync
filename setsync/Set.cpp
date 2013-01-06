@@ -14,6 +14,7 @@
 #endif
 #ifdef HAVE_DB_CXX_H
 #include <setsync/storage/BdbStorage.h>
+#include <setsync/storage/MemStorage.h>
 #define GIGABYTE 1024 * 1024 * 1024
 #endif
 #include <setsync/utils/bitset.h>
@@ -348,6 +349,37 @@ Set::Set(const config::Configuration& config) :
 		indexStorage_ = new storage::BdbStorage(this->indexdb);
 	}
 		break;
+	case config::Configuration::StorageConfig::IN_MEMORY: {
+		std::string path;
+		if (tempDir == NULL)
+			tempDir = new utils::FileSystem::TemporaryDirectory("set_");
+		path = tempDir->getPath();
+		this->env_ = new DbEnv(0);
+		if (this->env_->open(path.c_str(), DB_INIT_MPOOL | DB_CREATE, 0) != 0) {
+			this->env_->close(0);
+			throw "Failed to open berkeley db database env";
+		}
+		if (config_.getStorage().isCacheSizeGiven()) {
+			std::size_t halfcache = config_.getStorage().getByteCacheSize() / 2;
+			std::size_t halfgbcache = config_.getStorage().getGByteCacheSize()
+					/ 2;
+			if (config_.getStorage().getGByteCacheSize() % 2 == 1) {
+				std::size_t remainder = GIGABYTE / 2;
+				halfcache += remainder;
+				if (halfcache > GIGABYTE) {
+					halfgbcache += halfcache / GIGABYTE;
+					halfcache = halfcache % GIGABYTE;
+				}
+			}
+			trieStorage_ = new storage::MemStorage(halfgbcache, halfcache);
+			bfStorage_ = new storage::MemStorage(halfgbcache,  halfcache);
+		}else{
+			throw "no memory size is given";
+		}
+		this->indexdb = new Db(this->env_, 0);
+		this->indexdb->open(NULL, "set", "in", DB_HASH, DB_CREATE, 0);
+		indexStorage_ = new storage::BdbStorage(this->indexdb);
+	}
 #endif
 	default:
 		throw "No storage type found!";

@@ -7,7 +7,7 @@
 #ifndef TEST_H_
 #define TEST_H_
 
-#define ITERATIONS 10000000
+#define ITERATIONS 1000000
 #define ITEMS_PER_LOOPS 1000
 #define LOOP_ITERATIONS ITERATIONS/ITEMS_PER_LOOPS
 #include "config.h"

@@ -14,11 +14,11 @@
 #endif
 #ifdef HAVE_DB_CXX_H
 #include <setsync/storage/BdbStorage.h>
+#include <setsync/storage/MemStorage.h>
 #endif
 #ifdef HAVE_SQLITE
 //#include <setsync/storage/SqliteStorage.h>
 #endif
-//#include <setsync/storage/MemStorage.h>
 
 namespace setsync {
 

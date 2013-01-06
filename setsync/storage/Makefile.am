@@ -13,8 +13,8 @@ cpp_sources += LevelDbStorage.cpp
 endif
 
 if BERKELEY_DB
-h_sources += BdbStorage.h BdbTableUser.h
-cpp_sources += BdbStorage.cpp BdbTableUser.cpp
+h_sources += BdbStorage.h BdbTableUser.h MemStorage.h
+cpp_sources += BdbStorage.cpp BdbTableUser.cpp MemStorage.cpp
 endif
 
 noinst_LTLIBRARIES = libstorage.la

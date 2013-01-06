@@ -94,6 +94,9 @@ Configuration::Configuration(const SET_CONFIG config) {
 	case BERKELEY_DB:
 		this->storageConfig_.type_ = Configuration::StorageConfig::BERKELEY_DB;
 		break;
+	case IN_MEMORY_DB:
+		this->storageConfig_.type_ = Configuration::StorageConfig::IN_MEMORY;
+		break;
 #endif
 	default:
 		break;
