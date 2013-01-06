@@ -20,7 +20,7 @@ void printUsage() {
 			<< endl;
 	cout << endl;
 	cout
-			<< "\t-s, --storage <levelDB|berkeleyDB> chooses a key value storage type,"
+			<< "\t-s, --storage <levelDB|berkeleyDB|memDB> chooses a key value storage type,"
 			<< endl;
 	cout
 			<< "\t                                   default is the compiled default"
@@ -45,6 +45,10 @@ void printUsage() {
 			<< endl;
 	cout
 			<< "\t--buffer <size>                    sets the sending and receiving buffer size[default=160]"
+			<< endl;
+	cout << "\t--md5                              uses MD5 as hash function"
+			<< endl;
+	cout << "\t--sha1                             uses SHA1 as hash function"
 			<< endl;
 	cout << "\t-?, --help                         prints out this message"
 			<< endl;
@@ -74,11 +78,11 @@ int main(int ac, char **av) {
 				printUsage();
 			}
 			if (*iter == "levelDB") {
-				cout << "Storage=levelDB"<< endl;
 				config.storage = LEVELDB;
 			} else if (*iter == "berkeleyDB") {
-				cout << "Storage=berkeleyDB"<< endl;
 				config.storage = BERKELEY_DB;
+			} else if (*iter == "memDB") {
+				config.storage = IN_MEMORY_DB;
 			} else {
 				printUsage();
 			}
@@ -88,19 +92,23 @@ int main(int ac, char **av) {
 				printUsage();
 			}
 			if (*iter == "BLOOM") {
-				cout << "Type=BLOOM"<< endl;
+				cout << "Type=BLOOM" << endl;
 				type = evaluation::LOOSE;
 			} else if (*iter == "TRIE") {
-				cout << "Type=TRIE"<< endl;
+				cout << "Type=TRIE" << endl;
 				type = evaluation::STRICT;
 			} else if (*iter == "BOTH") {
-				cout << "Type=BOTH"<< endl;
+				cout << "Type=BOTH" << endl;
 				type = evaluation::BOTH;
 			} else {
 				printUsage();
 			}
 		} else if (*iter == "--help" || *iter == "-?") {
 			printUsage();
+		} else if (*iter == "--md5") {
+			config.function = MD_5;
+		} else if (*iter == "--sha1") {
+			config.function = SHA_1;
 		} else if (*iter == "A") {
 			iter++;
 			if (iter == args.end()) {
@@ -143,13 +151,25 @@ int main(int ac, char **av) {
 	if (!maxIsGiven) {
 		maxelements = a + b - same;
 	}
-
 	cout << "A=" << a << endl;
 	cout << "B=" << b << endl;
 	cout << "Equal=" << same << endl;
 	cout << "Salt=" << salt << endl;
 	cout << "MaximalElementes=" << maxelements << endl;
 	cout << "BufferSize=" << buffersize << endl;
+	cout << "NumberOfElementsAfterSync=" << a + b - same << endl;
+	if (config.storage == IN_MEMORY_DB) {
+		uint64_t gigabyte = 1024 * 1024 * 1024;
+		uint64_t size =(a + b - same) * 50 + 1024 * 1024;
+		std::size_t gbsize = 0;
+		if(size > gigabyte){
+			gbsize = size / gigabyte;
+			size = size%gigabyte;
+		}
+		config.storage_cache_bytes = size;
+		config.storage_cache_gbytes = gbsize;
+		cout << "InMemoryDBsize=" << gbsize <<"GB "<< size << "B"<< endl;
+	}
 	{
 		config.bf_max_elements = maxelements;
 		evaluation::SetSync test(config, a, b, same, type, salt, buffersize);

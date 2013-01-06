@@ -359,27 +359,34 @@ Set::Set(const config::Configuration& config) :
 			this->env_->close(0);
 			throw "Failed to open berkeley db database env";
 		}
-		if (config_.getStorage().isCacheSizeGiven()) {
-			std::size_t halfcache = config_.getStorage().getByteCacheSize() / 2;
-			std::size_t halfgbcache = config_.getStorage().getGByteCacheSize()
-					/ 2;
-			if (config_.getStorage().getGByteCacheSize() % 2 == 1) {
-				std::size_t remainder = GIGABYTE / 2;
-				halfcache += remainder;
-				if (halfcache > GIGABYTE) {
-					halfgbcache += halfcache / GIGABYTE;
-					halfcache = halfcache % GIGABYTE;
-				}
+		uint64_t size = config_.getStorage().getByteCacheSize();
+		std::size_t gbsize = config_.getStorage().getGByteCacheSize();
+		if (!config_.getStorage().isCacheSizeGiven()) {
+			uint64_t maxElements = config_.getBloomFilter().getMaxElements();
+			size = maxElements * getHashFunction().getHashSize() * 40 + 1024
+					* 1024;
+			if (size > GIGABYTE) {
+				gbsize = size / GIGABYTE;
+				size = size % GIGABYTE;
 			}
-			trieStorage_ = new storage::MemStorage(halfgbcache, halfcache);
-			bfStorage_ = new storage::MemStorage(halfgbcache,  halfcache);
-		}else{
-			throw "no memory size is given";
 		}
+		std::size_t halfcache = size / 2;
+		std::size_t halfgbcache = gbsize / 2;
+		if (gbsize % 2 == 1) {
+			std::size_t remainder = GIGABYTE / 2;
+			halfcache += remainder;
+			if (halfcache > GIGABYTE) {
+				halfgbcache += halfcache / GIGABYTE;
+				halfcache = halfcache % GIGABYTE;
+			}
+		}
+		trieStorage_ = new storage::MemStorage(halfgbcache, halfcache);
+		bfStorage_ = new storage::MemStorage(halfgbcache, halfcache);
 		this->indexdb = new Db(this->env_, 0);
 		this->indexdb->open(NULL, "set", "in", DB_HASH, DB_CREATE, 0);
 		indexStorage_ = new storage::BdbStorage(this->indexdb);
 	}
+		break;
 #endif
 	default:
 		throw "No storage type found!";
