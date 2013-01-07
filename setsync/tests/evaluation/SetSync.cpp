@@ -211,11 +211,9 @@ void SetSync::run() {
 	cout << "\tBuffersize=" << bufferSize_ << endl;
 	cout << "\tMinimalBuffersize=" << A_.getMinSyncBuffer() << endl;
 	cout << "\tMinimalListTransferA->B=" << A_.getSize()
-			* A_.getHashFunction().getHashSize() + (B_.getSize() + 7) / 8
-			<< endl;
+			* A_.getHashFunction().getHashSize() << endl;
 	cout << "\tMinimalListTransferB->A=" << B_.getSize()
-			* B_.getHashFunction().getHashSize() + (A_.getSize() + 7) / 8
-			<< endl;
+			* B_.getHashFunction().getHashSize() << endl;
 	cout << endl;
 	cout
 			<< "sizeofA,sizeofB,diffSize,sentBytesA,sentBytesB,syncPhase,syncDurationA,syncDurationB,syncLastDurationA,syncLastDurationB,syncCPU_A,syncCPU_B,syncLastCPU_A,syncLastCPU_B"
