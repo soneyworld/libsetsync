@@ -274,7 +274,7 @@ std::string Set::getPath() const {
 	}
 }
 
-uint64_t Set::getBFSize() const {
+std::size_t Set::getBFSize() const {
 	return this->bf_->size();
 }
 std::size_t Set::getBFFunctionCount() const {

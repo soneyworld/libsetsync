@@ -80,8 +80,11 @@ public:
 					cacheInGBytes_(cacheInGBytes_) {
 #else
 #ifdef HAVE_DB_CXX_H
-			StorageConfig(const StorageType type = BERKELEY_DB) :
-			type_(type) {
+			StorageConfig(const StorageType type = BERKELEY_DB,
+					const std::size_t cacheInBytes = 0,
+					const std::size_t cacheInGBytes = 0) :
+			type_(type), cacheInBytes_(cacheInBytes),
+			cacheInGBytes_(cacheInGBytes_) {
 #endif
 #endif
 #ifndef HAVE_LEVELDB
