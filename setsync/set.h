@@ -93,12 +93,12 @@ int set_sync_bf_output_avail(SET_SYNC_HANDLE * handle);
 /**
  * Reads the next data from bloom filter into the buffer and returns the written size
  */
-size_t set_sync_bf_readsome(SET_SYNC_HANDLE * handle, unsigned char* buffer,
+size_t set_sync_bf_read_next_chunk(SET_SYNC_HANDLE * handle, unsigned char* buffer,
 		const size_t buffersize);
 /**
  * Checks the external bloom filter input and calculates the difference
  */
-int set_sync_bf_diff(SET_SYNC_HANDLE * handle, const unsigned char* inbuffer,
+int set_sync_bf_process_chunk(SET_SYNC_HANDLE * handle, const unsigned char* inbuffer,
 		const size_t inlength, diff_callback * callback, void * closure);
 // Synchronization buffer
 size_t set_sync_min_trie_buffer(SET_SYNC_HANDLE * handle);

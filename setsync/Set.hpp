@@ -91,12 +91,12 @@ public:
 	 * \param length of the buffer
 	 * \return the size of the written bloom filter data
 	 */
-	virtual std::size_t readSomeBloomFilter(unsigned char * buffer,
+	virtual std::size_t readNextBloomFilterChunk(unsigned char * buffer,
 			const std::size_t length);
 	/**
 	 *
 	 */
-	virtual void diffBloomFilter(const unsigned char * buffer,
+	virtual void processBloomFilterChunk(const unsigned char * buffer,
 			const std::size_t length, AbstractDiffHandler& handler);
 	/**
 	 * \return true, if the trie has a root and it has been written into hash

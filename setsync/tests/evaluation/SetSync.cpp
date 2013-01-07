@@ -79,10 +79,10 @@ void SetSync::runLooseSync(setsync::SynchronizationProcess * processA,
 			|| processB->isBloomFilterOutputAvail()) {
 		if (processA->isBloomFilterOutputAvail()) {
 			watchA.start();
-			sending = processA->readSomeBloomFilter(buffer, bufferSize_);
+			sending = processA->readNextBloomFilterChunk(buffer, bufferSize_);
 			watchA.stop();
 			watchB.start();
-			processB->diffBloomFilter(buffer, sending, handlerB);
+			processB->processBloomFilterChunk(buffer, sending, handlerB);
 			watchB.stop();
 			for (size_t i = 0; i < handlerB.size(); i++) {
 				if (A_.insert(handlerB[i].first))
@@ -93,10 +93,10 @@ void SetSync::runLooseSync(setsync::SynchronizationProcess * processA,
 		}
 		if (processB->isBloomFilterOutputAvail()) {
 			watchB.start();
-			sending = processB->readSomeBloomFilter(buffer, bufferSize_);
+			sending = processB->readNextBloomFilterChunk(buffer, bufferSize_);
 			watchB.stop();
 			watchA.start();
-			processA->diffBloomFilter(buffer, sending, handlerA);
+			processA->processBloomFilterChunk(buffer, sending, handlerA);
 			watchA.stop();
 			for (size_t i = 0; i < handlerA.size(); i++) {
 				if (B_.insert(handlerA[i].first)) {

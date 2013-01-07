@@ -61,7 +61,7 @@ bool SynchronizationProcess::isAckOutputAvailable() const {
 	return this->pendingAcks_.size() > 0;
 }
 
-std::size_t SynchronizationProcess::readSomeBloomFilter(unsigned char * buffer,
+std::size_t SynchronizationProcess::readNextBloomFilterChunk(unsigned char * buffer,
 		const std::size_t length) {
 	std::size_t written = this->set_->bf_->getChunk(buffer, length,
 			this->bloomfilterOut_pos);
@@ -73,7 +73,7 @@ std::size_t SynchronizationProcess::readSomeBloomFilter(unsigned char * buffer,
 	return written;
 }
 
-void SynchronizationProcess::diffBloomFilter(const unsigned char * buffer,
+void SynchronizationProcess::processBloomFilterChunk(const unsigned char * buffer,
 		const std::size_t length, AbstractDiffHandler& handler) {
 	this->set_->bf_->diff(buffer, length, bloomfilterIn_pos, handler);
 	bloomfilterIn_pos += length;
@@ -890,12 +890,12 @@ int set_sync_bf_output_avail(SET_SYNC_HANDLE * handle) {
 	return 0;
 }
 
-size_t set_sync_bf_readsome(SET_SYNC_HANDLE * handle, unsigned char* buffer,
+size_t set_sync_bf_read_next_chunk(SET_SYNC_HANDLE * handle, unsigned char* buffer,
 		const size_t buffersize) {
 	setsync::SynchronizationProcess * process =
 			static_cast<setsync::SynchronizationProcess*> (handle->process);
 	try {
-		return process->readSomeBloomFilter(buffer, buffersize);
+		return process->readNextBloomFilterChunk(buffer, buffersize);
 	} catch (std::exception& e) {
 		if (handle->error == NULL) {
 			handle->error = (void *) new std::string(e.what());
@@ -916,13 +916,13 @@ size_t set_sync_bf_readsome(SET_SYNC_HANDLE * handle, unsigned char* buffer,
 	return 0;
 }
 
-int set_sync_bf_diff(SET_SYNC_HANDLE * handle, const unsigned char* inbuffer,
+int set_sync_bf_process_chunk(SET_SYNC_HANDLE * handle, const unsigned char* inbuffer,
 		const size_t inlength, diff_callback * callback, void * closure) {
 	setsync::SynchronizationProcess * process =
 			static_cast<setsync::SynchronizationProcess*> (handle->process);
 	try {
 		setsync::C_DiffHandler handler(callback, closure);
-		process->diffBloomFilter(inbuffer, inlength, handler);
+		process->processBloomFilterChunk(inbuffer, inlength, handler);
 	} catch (std::exception& e) {
 		if (handle->error == NULL) {
 			handle->error = (void *) new std::string(e.what());

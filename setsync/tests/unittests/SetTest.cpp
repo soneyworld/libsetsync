@@ -94,16 +94,16 @@ void SetTest::testSync() {
 	unsigned char buffer[buffersize];
 	std::size_t sending;
 	while (localprocess->isBloomFilterOutputAvail()) {
-		sending = localprocess->readSomeBloomFilter(buffer, buffersize);
-		remoteprocess->diffBloomFilter(buffer, sending, remoteDiffHandler);
+		sending = localprocess->readNextBloomFilterChunk(buffer, buffersize);
+		remoteprocess->processBloomFilterChunk(buffer, sending, remoteDiffHandler);
 		if (remoteprocess->isBloomFilterOutputAvail()) {
-			sending = remoteprocess->readSomeBloomFilter(buffer, buffersize);
-			localprocess->diffBloomFilter(buffer, sending, localDiffHandler);
+			sending = remoteprocess->readNextBloomFilterChunk(buffer, buffersize);
+			localprocess->processBloomFilterChunk(buffer, sending, localDiffHandler);
 		}
 	}
 	while (remoteprocess->isBloomFilterOutputAvail()) {
-		sending = remoteprocess->readSomeBloomFilter(buffer, buffersize);
-		localprocess->diffBloomFilter(buffer, sending, localDiffHandler);
+		sending = remoteprocess->readNextBloomFilterChunk(buffer, buffersize);
+		localprocess->processBloomFilterChunk(buffer, sending, localDiffHandler);
 	}
 	for (size_t i = 0; i < localDiffHandler.size(); i++) {
 		CPPUNIT_ASSERT(remoteset.insert(localDiffHandler[i].first));
@@ -213,16 +213,16 @@ void SetTest::testLooseSync() {
 	unsigned char buffer[buffersize];
 	std::size_t sending;
 	while (localprocess->isBloomFilterOutputAvail()) {
-		sending = localprocess->readSomeBloomFilter(buffer, buffersize);
-		remoteprocess->diffBloomFilter(buffer, sending, remoteDiffHandler);
+		sending = localprocess->readNextBloomFilterChunk(buffer, buffersize);
+		remoteprocess->processBloomFilterChunk(buffer, sending, remoteDiffHandler);
 		if (remoteprocess->isBloomFilterOutputAvail()) {
-			sending = remoteprocess->readSomeBloomFilter(buffer, buffersize);
-			localprocess->diffBloomFilter(buffer, sending, localDiffHandler);
+			sending = remoteprocess->readNextBloomFilterChunk(buffer, buffersize);
+			localprocess->processBloomFilterChunk(buffer, sending, localDiffHandler);
 		}
 	}
 	while (remoteprocess->isBloomFilterOutputAvail()) {
-		sending = remoteprocess->readSomeBloomFilter(buffer, buffersize);
-		localprocess->diffBloomFilter(buffer, sending, localDiffHandler);
+		sending = remoteprocess->readNextBloomFilterChunk(buffer, buffersize);
+		localprocess->processBloomFilterChunk(buffer, sending, localDiffHandler);
 	}
 	for (size_t i = 0; i < localDiffHandler.size(); i++) {
 		CPPUNIT_ASSERT(remoteset.insert(localDiffHandler[i].first));
@@ -375,12 +375,12 @@ void SetTest::testCAPI() {
 	std::size_t sending;
 	diff_callback * callback = &localset_callback;
 	while (set_sync_bf_output_avail(&localprocess) == 1) {
-		sending = set_sync_bf_readsome(&localprocess, buffer, buffersize);
-		set_sync_bf_diff(&remoteprocess, buffer, sending, callback, &localset);
+		sending = set_sync_bf_read_next_chunk(&localprocess, buffer, buffersize);
+		set_sync_bf_process_chunk(&remoteprocess, buffer, sending, callback, &localset);
 	}
 	while (set_sync_bf_output_avail(&remoteprocess) == 1) {
-		sending = set_sync_bf_readsome(&remoteprocess, buffer, buffersize);
-		set_sync_bf_diff(&localprocess, buffer, sending, callback, &remoteset);
+		sending = set_sync_bf_read_next_chunk(&remoteprocess, buffer, buffersize);
+		set_sync_bf_process_chunk(&localprocess, buffer, sending, callback, &remoteset);
 	}
 
 	// BF SYNC DONE AND SET SHOULD BE EQUAL, SO ADDING A DIFF
