@@ -274,6 +274,13 @@ std::string Set::getPath() const {
 	}
 }
 
+uint64_t Set::getBFSize() const {
+	return this->bf_->size();
+}
+std::size_t Set::getBFFunctionCount() const {
+	return this->bf_->numberOfFunctions();
+}
+
 Set::Set(const config::Configuration& config) :
 	hash_(config.getHashFunction()), config_(config), tempDir(NULL),
 			indexInUse_(false) {

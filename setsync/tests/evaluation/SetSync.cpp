@@ -210,6 +210,14 @@ void SetSync::run() {
 	cout << "\tHashFunction=" << hashType_ << endl;
 	cout << "\tBuffersize=" << bufferSize_ << endl;
 	cout << "\tMinimalBuffersize=" << A_.getMinSyncBuffer() << endl;
+	if (! (type_ == STRICT)) {
+		cout << "\tBloomFilterSize=" << A_.getBFSize() << endl;
+		cout << "\tBloomFilterFunctionCount=" << A_.getBFFunctionCount()
+				<< endl;
+		cout << "\tBloomFilterFalsePositiveRate="
+				<< configA_.getBloomFilter().falsePositiveRate << endl;
+	}
+	cout << endl;
 	cout << "\tMinimalListTransferA->B=" << A_.getSize()
 			* A_.getHashFunction().getHashSize() << endl;
 	cout << "\tMinimalListTransferB->A=" << B_.getSize()

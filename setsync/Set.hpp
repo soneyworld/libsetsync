@@ -71,15 +71,40 @@ public:
 	 * \return true, if sync is done
 	 */
 	virtual bool done() const;
-
+	/**
+	 * Checks, if the given hash is the same as the local trie root.
+	 * If it is, the sync process is done and marked as equal.
+	 *
+	 * \param hash of the remote trie root
+	 * \return true, if hash is equal to local trie root
+	 */
 	virtual bool isEqual(const unsigned char* hash);
-
+	/**
+	 * \return true, while any bloom filter data is available to be sent
+	 */
 	virtual bool isBloomFilterOutputAvail() const;
+	/**
+	 * Reads the next bloom filter data and writes them into
+	 * the given buffer. The maximum data size is given by length.
+	 *
+	 * \param buffer where the bf data should be written to
+	 * \param length of the buffer
+	 * \return the size of the written bloom filter data
+	 */
 	virtual std::size_t readSomeBloomFilter(unsigned char * buffer,
 			const std::size_t length);
+	/**
+	 *
+	 */
 	virtual void diffBloomFilter(const unsigned char * buffer,
 			const std::size_t length, AbstractDiffHandler& handler);
+	/**
+	 * \return true, if the trie has a root and it has been written into hash
+	 */
 	virtual bool getRootHash(unsigned char * hash);
+	/**
+	 * \return true, if the trie has a root and it has been written into hash
+	 */
 	virtual bool getRootHashForSending(unsigned char * hash);
 	/**
 	 * Returns the next subtrie, which must be sent
@@ -108,18 +133,20 @@ public:
 	 */
 	virtual bool isSubtrieOutputAvailable();
 	/**
-	 * Returns true, until any sent hash hasn't been acked
+	 * \return true, until any sent hash hasn't been acked
 	 */
 	virtual bool isSubtrieUnacked() const;
 	/**
-	 * Returns the size of sent data in bytes
+	 * \return the size of sent data in bytes
 	 */
 	virtual std::size_t getSentBytes() const;
 	/**
-	 * Returns the size of any processed data in bytes
+	 * \return the size of any processed data in bytes
 	 */
 	virtual std::size_t getReceivedBytes() const;
-
+	/**
+	 * \return true while any pending ack is available to be sent
+	 */
 	virtual bool isAckOutputAvailable() const;
 
 	virtual std::size_t getMinTrieBuffer() const;
@@ -319,16 +346,58 @@ public:
 	 * new instance.
 	 */
 	virtual ~Set();
-
+	/**
+	 * To synchronize this set with another one, a sync "process" or must
+	 * been spawned. The process tracks the state of the sync. It must be
+	 * destroyed before this set is been destroyed.
+	 *
+	 * \return a new synchronization process
+	 */
 	virtual SynchronizationProcess * createSyncProcess();
-
+	/**
+	 * \return true, if both tries are equal
+	 */
 	virtual bool operator ==(const Set& other) const;
-
+	/**
+	 * \return the used crypto hash function
+	 */
 	virtual const utils::CryptoHash& getHashFunction() const;
 
+	/**
+	 * \return the actual size of the used bloom filter in bytes
+	 */
+	virtual std::size_t getBFSize() const;
+	/**
+	 * \return the number of hashing functions of the uses bloom filter
+	 */
+	virtual std::size_t getBFFunctionCount() const;
+	/**
+	 * To create a trie sync data structure, a minimum size for buffer
+	 * is needed. So the minimal size can be requested.
+	 *
+	 * \return buffer size
+	 */
 	virtual std::size_t getMinSyncTrieBuffer() const;
+	/**
+	 * To sync parts of the bloom filter, a minimal size is needed
+	 * to save a part. This can be requested by calling this method.
+	 *
+	 * \return buffer size
+	 */
 	virtual std::size_t getMinSyncBFBuffer() const;
+	/**
+	 * The minimal buffer for synchronizing sets is given by this
+	 * method. It returns the maximum of the minimal buffer size for
+	 * triesync and the minimal buffer size for bloom filter sync
+	 *
+	 * \return buffer size
+	 */
 	virtual std::size_t getMinSyncBuffer() const;
+	/**
+	 * All persistent data of this set is saved in this path.
+	 *
+	 * \return the path to the saved files of the set
+	 */
 	virtual std::string getPath() const;
 };
 }

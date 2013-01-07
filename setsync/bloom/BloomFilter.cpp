@@ -25,6 +25,10 @@ uint64_t AbstractBloomFilter::numberOfElements() const {
 	return this->itemCount_;
 }
 
+std::size_t AbstractBloomFilter::numberOfFunctions() const {
+	return this->functionCount_;
+}
+
 std::size_t AbstractBloomFilter::size() const {
 	return (this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE;
 }

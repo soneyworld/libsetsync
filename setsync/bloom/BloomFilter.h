@@ -52,6 +52,14 @@ public:
 	 */
 	virtual uint64_t numberOfElements() const;
 	/**
+	 * Each entry in the bloom filter is created by a hash function
+	 * How many entries per saved input element are created, can be
+	 * requested by this method
+	 *
+	 * \return the number of internal hash functions
+	 */
+	virtual std::size_t numberOfFunctions() const;
+	/**
 	 * \param string will be hashed and the hash will be added to bloom filter
 	 * \throws an Exception, if the maximum is reached and hardMaximum has been set
 	 */

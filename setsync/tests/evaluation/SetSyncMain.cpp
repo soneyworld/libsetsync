@@ -50,6 +50,12 @@ void printUsage() {
 			<< endl;
 	cout << "\t--sha1                             uses SHA1 as hash function"
 			<< endl;
+	cout
+			<< "\t--bf <falsePositiveRate>           bloom filter false positive rate[default=0.001]"
+			<< endl
+			<< "\t                                   Allowed values= ]1,0["
+			<< endl;
+
 	cout << "\t-?, --help                         prints out this message"
 			<< endl;
 	exit(-1);
@@ -146,6 +152,12 @@ int main(int ac, char **av) {
 				printUsage();
 			}
 			istringstream(*iter) >> buffersize;
+		} else if (*iter == "--bf") {
+			iter++;
+			if (iter == args.end()) {
+				printUsage();
+			}
+			istringstream(*iter) >> config.false_positive_rate;
 		}
 	}
 	if (!maxIsGiven) {
@@ -160,15 +172,15 @@ int main(int ac, char **av) {
 	cout << "NumberOfElementsAfterSync=" << a + b - same << endl;
 	if (config.storage == IN_MEMORY_DB) {
 		uint64_t gigabyte = 1024 * 1024 * 1024;
-		uint64_t size =(a + b - same) * 50 + 1024 * 1024;
+		uint64_t size = (a + b - same) * 50 + 1024 * 1024;
 		std::size_t gbsize = 0;
-		if(size > gigabyte){
+		if (size > gigabyte) {
 			gbsize = size / gigabyte;
-			size = size%gigabyte;
+			size = size % gigabyte;
 		}
 		config.storage_cache_bytes = size;
 		config.storage_cache_gbytes = gbsize;
-		cout << "InMemoryDBsize=" << gbsize <<"GB "<< size << "B"<< endl;
+		cout << "InMemoryDBsize=" << gbsize << "GB " << size << "B" << endl;
 	}
 	{
 		config.bf_max_elements = maxelements;
