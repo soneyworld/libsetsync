@@ -36,6 +36,8 @@ private:
 	setsync::Set B_;
 	StopWatch watchA;
 	StopWatch watchB;
+	StopWatch insertWatchA;
+	StopWatch insertWatchB;
 	uint64_t diffSize_;
 	void runLooseSync(setsync::SynchronizationProcess * processA,
 			setsync::SynchronizationProcess * processB);

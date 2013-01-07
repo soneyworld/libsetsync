@@ -7,6 +7,7 @@
 #include "SetSync.h"
 #include <setsync/set.h>
 #include <sstream>
+#include <cstdlib>
 
 namespace evaluation {
 
@@ -43,23 +44,31 @@ SetSync::SetSync(const SET_CONFIG config, const size_t initA,
 	size_t i;
 	for (i = 0; i < initSameElements_; i++) {
 		stringstream ss;
-		ss << salt << i;
+		ss << salt << "_" << i;
+		insertWatchA.start();
 		A_.insert(ss.str());
+		insertWatchA.stop();
+		insertWatchB.start();
 		B_.insert(ss.str());
+		insertWatchB.stop();
 	}
 	size_t diffA = initA_ - initSameElements_;
 	size_t j;
 	for (j = 0; j < diffA; j++) {
 		stringstream ss;
-		ss << salt << i;
+		ss << salt << "_" << i;
+		insertWatchA.start();
 		A_.insert(ss.str());
+		insertWatchA.stop();
 		i++;
 	}
 	size_t diffB = initB_ - initSameElements_;
 	for (j = 0; j < diffB; j++) {
 		stringstream ss;
-		ss << salt << i;
+		ss << salt << "_" << i;
+		insertWatchB.start();
 		B_.insert(ss.str());
+		insertWatchB.stop();
 		i++;
 	}
 	diffSize_ = diffA + diffB;
@@ -85,8 +94,10 @@ void SetSync::runLooseSync(setsync::SynchronizationProcess * processA,
 			processB->processBloomFilterChunk(buffer, sending, handlerB);
 			watchB.stop();
 			for (size_t i = 0; i < handlerB.size(); i++) {
+				insertWatchA.start();
 				if (A_.insert(handlerB[i].first))
 					diffSize_--;
+				insertWatchA.stop();
 			}
 			handlerB.clear();
 			printLine(processA, processB, "bloomA->B");
@@ -99,9 +110,11 @@ void SetSync::runLooseSync(setsync::SynchronizationProcess * processA,
 			processA->processBloomFilterChunk(buffer, sending, handlerA);
 			watchA.stop();
 			for (size_t i = 0; i < handlerA.size(); i++) {
+				insertWatchB.start();
 				if (B_.insert(handlerA[i].first)) {
 					diffSize_--;
 				}
+				insertWatchB.stop();
 			}
 			handlerA.clear();
 			printLine(processA, processB, "bloomB->A");
@@ -138,9 +151,11 @@ void SetSync::runStrictSync(setsync::SynchronizationProcess * processA,
 			processB->processAcks(buffer, acksize, numberOfAcks, handlerB);
 			watchB.stop();
 			for (std::size_t i = 0; i < handlerB.size(); i++) {
+				insertWatchA.start();
 				if (A_.insert(handlerB[i].first)) {
 					diffSize_--;
 				}
+				insertWatchA.stop();
 			}
 			handlerB.clear();
 			printLine(processA, processB, "trieAckA->B");
@@ -163,8 +178,10 @@ void SetSync::runStrictSync(setsync::SynchronizationProcess * processA,
 			processA->processAcks(buffer, acksize, numberOfAcks, handlerA);
 			watchA.stop();
 			for (std::size_t i = 0; i < handlerA.size(); i++) {
+				insertWatchB.start();
 				if (B_.insert(handlerA[i].first))
 					diffSize_--;
+				insertWatchB.stop();
 			}
 			handlerA.clear();
 			printLine(processA, processB, "trieAckB->A");
@@ -210,7 +227,7 @@ void SetSync::run() {
 	cout << "\tHashFunction=" << hashType_ << endl;
 	cout << "\tBuffersize=" << bufferSize_ << endl;
 	cout << "\tMinimalBuffersize=" << A_.getMinSyncBuffer() << endl;
-	if (! (type_ == STRICT)) {
+	if (!(type_ == STRICT)) {
 		cout << "\tBloomFilterSize=" << A_.getBFSize() << endl;
 		cout << "\tBloomFilterFunctionCount=" << A_.getBFFunctionCount()
 				<< endl;
@@ -223,6 +240,7 @@ void SetSync::run() {
 	cout << "\tMinimalListTransferB->A=" << B_.getSize()
 			* B_.getHashFunction().getHashSize() << endl;
 	cout << endl;
+	cout << "======== CSV ========" << endl;
 	cout
 			<< "sizeofA,sizeofB,diffSize,sentBytesA,sentBytesB,syncPhase,syncDurationA,syncDurationB,syncLastDurationA,syncLastDurationB,syncCPU_A,syncCPU_B,syncLastCPU_A,syncLastCPU_B"
 			<< endl;
@@ -235,6 +253,15 @@ void SetSync::run() {
 	if (type_ == STRICT || type_ == BOTH) {
 		runStrictSync(processA, processB);
 	}
+
+	cout << endl;
+	cout << "Ainserts(secs),Binserts(secs),CPUAinserts(secs),CPUBinserts(secs)"
+			<< endl;
+	cout << insertWatchA.getDuration() << "," << insertWatchB.getDuration()
+			<< "," << insertWatchA.getCPUDuration() << ","
+			<< insertWatchB.getCPUDuration() << endl;
+	delete processA;
+	delete processB;
 }
 
 }

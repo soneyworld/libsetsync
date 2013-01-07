@@ -12,6 +12,8 @@
 #include <setsync/Set.hpp>
 #include <setsync/config/Configuration.h>
 #include <sstream>
+#include <cstdlib>
+
 using namespace std;
 
 void printUsage() {
