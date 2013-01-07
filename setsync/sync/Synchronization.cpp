@@ -5,6 +5,7 @@
  */
 
 #include "Synchronization.h"
+#include <stdlib.h>
 
 namespace setsync {
 

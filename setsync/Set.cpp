@@ -18,6 +18,8 @@
 #define GIGABYTE 1024 * 1024 * 1024
 #endif
 #include <setsync/utils/bitset.h>
+#include <stdlib.h>
+
 
 namespace setsync {
 
