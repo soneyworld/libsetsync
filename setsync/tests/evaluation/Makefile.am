@@ -26,6 +26,13 @@ ssync_SOURCES = \
 	SetSync.cpp \
 	Test.h \
 	SetSyncMain.cpp
+	
+crypto_SOURCES = \
+	StopWatch.h \
+	StopWatch.cpp \
+	Test.h \
+	CryptoBenchmark.h \
+	CryptoBenchmark.cpp
 
 # what flags you want to pass to the C compiler & linker
 AM_CPPFLAGS = -fopenmp
@@ -55,11 +62,14 @@ AM_LDFLAGS += @IBRCOMMON_LIBS@
 endif
 
 
-noinst_PROGRAMS=evaluation ssync
+noinst_PROGRAMS=evaluation ssync crypto
 evaluation_CXXFLAGS = ${AM_CPPFLAGS}
 ssync_CXXFLAGS =  ${AM_CPPFLAGS}
+crypto_CXXFLAGS =  ${AM_CPPFLAGS}
 evaluation_LDFLAGS = ${AM_LDFLAGS}
 ssync_LDFLAGS = ${AM_LDFLAGS}
+crypto_LDFLAGS = ${AM_LDFLAGS}
 evaluation_LDADD = @top_srcdir@/setsync/libsetsync.la
 ssync_LDADD = @top_srcdir@/setsync/libsetsync.la
+crypto_LDADD = @top_srcdir@/setsync/libsetsync.la
 INCLUDES = -I@top_srcdir@
