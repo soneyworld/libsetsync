@@ -57,6 +57,11 @@ void printUsage() {
 			<< endl
 			<< "\t                                   Allowed values= ]1,0["
 			<< endl;
+	cout
+			<< "\t--dot                              If sync was not successful, a dot graph will be produced"
+			<< endl
+			<< "\t                                   from set A and B wit the error marked red[default=off]"
+			<< endl;
 
 	cout << "\t-?, --help                         prints out this message"
 			<< endl;
@@ -78,6 +83,7 @@ int main(int ac, char **av) {
 	size_t buffersize = 160;
 	size_t maxelements = a + b - same;
 	bool maxIsGiven = false;
+	bool dot = false;
 	evaluation::SyncType type = evaluation::BOTH;
 	for (iter = args.begin(); iter != args.end(); ++iter) {
 		if (*iter == "--storage" || *iter == "-s") {
@@ -117,6 +123,8 @@ int main(int ac, char **av) {
 			config.function = MD_5;
 		} else if (*iter == "--sha1") {
 			config.function = SHA_1;
+		} else if (*iter == "--dot") {
+			dot = true;
 		} else if (*iter == "A") {
 			iter++;
 			if (iter == args.end()) {
@@ -186,7 +194,8 @@ int main(int ac, char **av) {
 	}
 	{
 		config.bf_max_elements = maxelements;
-		evaluation::SetSync test(config, a, b, same, type, salt, buffersize);
+		evaluation::SetSync test(config, a, b, same, type, salt, buffersize,
+				dot);
 		test.run();
 	}
 }

@@ -28,6 +28,7 @@ private:
 	const size_t bufferSize_;
 	const SyncType type_;
 	const string initSalt_;
+	const bool printDot_;
 	string dbType_;
 	string hashType_;
 	setsync::config::Configuration configA_;
@@ -43,12 +44,14 @@ private:
 			setsync::SynchronizationProcess * processB);
 	void runStrictSync(setsync::SynchronizationProcess * processA,
 			setsync::SynchronizationProcess * processB);
-	void printLine(setsync::SynchronizationProcess * processA,
-			setsync::SynchronizationProcess * processB, const string& phase) const;
+	void
+			printLine(setsync::SynchronizationProcess * processA,
+					setsync::SynchronizationProcess * processB,
+					const string& phase) const;
 public:
 	SetSync(const SET_CONFIG config, const size_t initA, const size_t initB,
 			const size_t sameElements, const SyncType type, const string salt,
-			const size_t maximumBufferSize);
+			const size_t maximumBufferSize, const bool printDotOnError = false);
 	virtual ~SetSync();
 	virtual void run();
 };

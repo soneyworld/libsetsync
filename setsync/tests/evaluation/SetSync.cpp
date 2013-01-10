@@ -8,15 +8,18 @@
 #include <setsync/set.h>
 #include <sstream>
 #include <cstdlib>
+#include <setsync/utils/CryptoHash.h>
+#include <setsync/utils/OutputFunctions.h>
 
 namespace evaluation {
 
 SetSync::SetSync(const SET_CONFIG config, const size_t initA,
 		const size_t initB, const size_t sameElements, const SyncType type,
-		const string salt, const size_t maximumBufferSize) :
+		const string salt, const size_t maximumBufferSize, const bool printDot) :
 	initA_(initA), initB_(initB), initSameElements_(sameElements),
 			bufferSize_(maximumBufferSize), type_(type), initSalt_(salt),
-			configA_(config), configB_(config), A_(configA_), B_(configB_) {
+			configA_(config), configB_(config), A_(configA_), B_(configB_),
+			printDot_(printDot) {
 	if (sameElements > initA || sameElements > initB) {
 		if (sameElements > initA) {
 			cout << "Illegal argument: A is smaller as equal elements" << endl;
@@ -253,7 +256,50 @@ void SetSync::run() {
 	if (type_ == STRICT || type_ == BOTH) {
 		runStrictSync(processA, processB);
 	}
+	if ((A_ != B_)) {
+		printLine(processA, processB, "finishedWithError");
+		if (printDot_) {
+			cout << "digraph error {" << endl;
+			cout << A_.getTrieToDot("A");
+			cout << B_.getTrieToDot("B");
+			size_t diffA = initA_ - initSameElements_;
+			size_t j;
+			string color = "red";
+			size_t i = initSameElements_;
+			const utils::CryptoHash& hash = A_.getHashFunction();
+			unsigned char buffer[hash.getHashSize()];
+			for (j = 0; j < diffA; j++) {
+				stringstream ss;
+				ss << initSalt_ << "_" << i;
+				hash(buffer, ss.str());
+				if (!B_.find(buffer)) {
 
+					cout << "A" << utils::OutputFunctions::CryptoHashtoString(
+							buffer, hash.getHashSize())
+							<< " [style=filled color=\"" << color << "\"];"
+							<< endl;
+				}
+				i++;
+			}
+			size_t diffB = initB_ - initSameElements_;
+			for (j = 0; j < diffB; j++) {
+				stringstream ss;
+				ss << initSalt_ << "_" << i;
+				hash(buffer, ss.str());
+				if (!A_.find(buffer)) {
+					cout << "B" << utils::OutputFunctions::CryptoHashtoString(
+							buffer, hash.getHashSize())
+							<< " [style=filled color=\"" << color << "\"];"
+							<< endl;
+				}
+				i++;
+			}
+
+			cout << "}" << endl;
+		}
+	} else {
+		printLine(processA, processB, "finished");
+	}
 	cout << endl;
 	cout << "Ainserts(secs),Binserts(secs),CPUAinserts(secs),CPUBinserts(secs)"
 			<< endl;
