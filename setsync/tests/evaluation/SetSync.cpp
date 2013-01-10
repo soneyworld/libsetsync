@@ -136,15 +136,6 @@ void SetSync::runStrictSync(setsync::SynchronizationProcess * processA,
 	setsync::ListDiffHandler handlerA;
 	setsync::ListDiffHandler handlerB;
 	while (!processA->done() && !processB->done()) {
-		if (processA->isSubtrieOutputAvailable()) {
-			watchA.start();
-			subtriesize = processA->getSubTrie(buffer, bufferSize_);
-			watchA.stop();
-			watchB.start();
-			acksize = processB->processSubTrie(buffer, subtriesize);
-			watchB.stop();
-			printLine(processA, processB, "trieSubA->B");
-		}
 		if (processA->isAckOutputAvailable()) {
 			watchA.start();
 			acksize = processA->readSomeTrieAcks(buffer, bufferSize_,
@@ -163,15 +154,6 @@ void SetSync::runStrictSync(setsync::SynchronizationProcess * processA,
 			handlerB.clear();
 			printLine(processA, processB, "trieAckA->B");
 		}
-		if (processB->isSubtrieOutputAvailable()) {
-			watchB.start();
-			subtriesize = processB->getSubTrie(buffer, bufferSize_);
-			watchB.stop();
-			watchA.start();
-			acksize = processA->processSubTrie(buffer, subtriesize);
-			watchA.stop();
-			printLine(processA, processB, "trieSubB->A");
-		}
 		if (processB->isAckOutputAvailable()) {
 			watchB.start();
 			acksize = processB->readSomeTrieAcks(buffer, bufferSize_,
@@ -188,6 +170,24 @@ void SetSync::runStrictSync(setsync::SynchronizationProcess * processA,
 			}
 			handlerA.clear();
 			printLine(processA, processB, "trieAckB->A");
+		}
+		if (processB->isSubtrieOutputAvailable()) {
+			watchB.start();
+			subtriesize = processB->getSubTrie(buffer, bufferSize_);
+			watchB.stop();
+			watchA.start();
+			acksize = processA->processSubTrie(buffer, subtriesize);
+			watchA.stop();
+			printLine(processA, processB, "trieSubB->A");
+		}
+		if (processA->isSubtrieOutputAvailable()) {
+			watchA.start();
+			subtriesize = processA->getSubTrie(buffer, bufferSize_);
+			watchA.stop();
+			watchB.start();
+			acksize = processB->processSubTrie(buffer, subtriesize);
+			watchB.stop();
+			printLine(processA, processB, "trieSubA->B");
 		}
 	}
 }
