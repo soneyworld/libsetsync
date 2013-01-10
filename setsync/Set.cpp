@@ -20,7 +20,6 @@
 #include <setsync/utils/bitset.h>
 #include <stdlib.h>
 
-
 namespace setsync {
 
 SynchronizationProcess::SynchronizationProcess(Set * set,
@@ -63,8 +62,8 @@ bool SynchronizationProcess::isAckOutputAvailable() const {
 	return this->pendingAcks_.size() > 0;
 }
 
-std::size_t SynchronizationProcess::readNextBloomFilterChunk(unsigned char * buffer,
-		const std::size_t length) {
+std::size_t SynchronizationProcess::readNextBloomFilterChunk(
+		unsigned char * buffer, const std::size_t length) {
 	std::size_t written = this->set_->bf_->getChunk(buffer, length,
 			this->bloomfilterOut_pos);
 	this->bloomfilterOut_pos += written;
@@ -75,8 +74,9 @@ std::size_t SynchronizationProcess::readNextBloomFilterChunk(unsigned char * buf
 	return written;
 }
 
-void SynchronizationProcess::processBloomFilterChunk(const unsigned char * buffer,
-		const std::size_t length, AbstractDiffHandler& handler) {
+void SynchronizationProcess::processBloomFilterChunk(
+		const unsigned char * buffer, const std::size_t length,
+		AbstractDiffHandler& handler) {
 	this->set_->bf_->diff(buffer, length, bloomfilterIn_pos, handler);
 	bloomfilterIn_pos += length;
 	this->receivedBytes_ += length;
@@ -317,7 +317,7 @@ Set::Set(const config::Configuration& config) :
 		indexpath.append("index");
 		indexStorage_ = new storage::LevelDbStorage(indexpath);
 	}
-		break;
+	break;
 #endif
 #ifdef HAVE_DB_CXX_H
 	case config::Configuration::StorageConfig::BERKELEY_DB: {
@@ -606,7 +606,20 @@ bool Set::operator ==(const Set& other) const {
 	return this->trie_->operator ==(*other.trie_);
 }
 
+bool Set::operator !=(const Set& other) const {
+	return this->trie_->operator !=(*other.trie_);
+}
+
+std::string Set::getTrieToDot() const {
+	return this->trie_->toDotString();
+}
+std::string Set::getTrieToDot(const std::string prefix) const {
+	return this->trie_->toDotString(prefix);
+}
+
 } // end of namespace setsync
+
+//#################### BEGINNING OF ANSI C API ######################
 
 SET_CONFIG set_create_config() {
 	SET_CONFIG c;
@@ -892,8 +905,8 @@ int set_sync_bf_output_avail(SET_SYNC_HANDLE * handle) {
 	return 0;
 }
 
-size_t set_sync_bf_read_next_chunk(SET_SYNC_HANDLE * handle, unsigned char* buffer,
-		const size_t buffersize) {
+size_t set_sync_bf_read_next_chunk(SET_SYNC_HANDLE * handle,
+		unsigned char* buffer, const size_t buffersize) {
 	setsync::SynchronizationProcess * process =
 			static_cast<setsync::SynchronizationProcess*> (handle->process);
 	try {
@@ -918,8 +931,9 @@ size_t set_sync_bf_read_next_chunk(SET_SYNC_HANDLE * handle, unsigned char* buff
 	return 0;
 }
 
-int set_sync_bf_process_chunk(SET_SYNC_HANDLE * handle, const unsigned char* inbuffer,
-		const size_t inlength, diff_callback * callback, void * closure) {
+int set_sync_bf_process_chunk(SET_SYNC_HANDLE * handle,
+		const unsigned char* inbuffer, const size_t inlength,
+		diff_callback * callback, void * closure) {
 	setsync::SynchronizationProcess * process =
 			static_cast<setsync::SynchronizationProcess*> (handle->process);
 	try {

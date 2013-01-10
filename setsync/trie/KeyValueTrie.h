@@ -449,7 +449,7 @@ public:
 	 * \param nodePrefix of the dot nodes
 	 * \return dot string containing the whole trie
 	 */
-	virtual std::string toDotString(const std::string nodePrefix) const;
+	virtual std::string toDotString(const std::string nodePrefix = "N") const;
 
 	/**
 	 * Copies a subtrie into the given buffer with a maximum size

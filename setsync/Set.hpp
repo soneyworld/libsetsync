@@ -359,6 +359,10 @@ public:
 	 */
 	virtual bool operator ==(const Set& other) const;
 	/**
+	 * \return true, if both tries not equal
+	 */
+	virtual bool operator !=(const Set& other) const;
+	/**
 	 * \return the used crypto hash function
 	 */
 	virtual const utils::CryptoHash& getHashFunction() const;
@@ -399,6 +403,20 @@ public:
 	 * \return the path to the saved files of the set
 	 */
 	virtual std::string getPath() const;
+	/**
+	 * Returns the full trie as a graph in dot language
+	 *
+	 * \return dot string
+	 */
+	virtual std::string getTrieToDot() const;
+	/**
+	 * Returns the full trie as a graph in dot language with the
+	 * given prefix at the beginning of each node
+	 *
+	 * \param prefix for the nodes
+	 * \return dot string
+	 */
+	virtual std::string getTrieToDot(const std::string prefix) const;
 };
 }
 
