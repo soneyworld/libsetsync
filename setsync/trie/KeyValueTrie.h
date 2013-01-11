@@ -17,7 +17,7 @@
 #include <stdint.h>
 #include <queue>
 
-
+namespace setsync {
 namespace trie {
 
 class KeyValueTrie;
@@ -443,7 +443,7 @@ public:
 			setsync::AbstractDiffHandler& handler) const;
 
 };
-
+}
 }
 
 #endif /* KEYVALUETRIE_H_ */

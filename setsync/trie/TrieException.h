@@ -6,7 +6,7 @@
 
 #ifndef TRIEEXCEPTION_H_
 #define TRIEEXCEPTION_H_
-
+namespace setsync {
 namespace trie {
 /**
  * This exception should be thrown, if any consistency failure happens
@@ -69,7 +69,7 @@ public:
 	virtual ~TrieRootNotFoundException() throw () {
 	}
 };
-
+}
 }
 
 #endif /* TRIEEXCEPTION_H_ */

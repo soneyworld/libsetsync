@@ -5,7 +5,7 @@
  */
 
 #include "Trie.h"
-
+namespace setsync {
 namespace trie {
 
 Trie::Trie(const utils::CryptoHash& hash) :
@@ -108,5 +108,6 @@ TrieNodeType Trie::contains(const std::string& str) const {
 
 std::string Trie::toDotString() const {
 	return toDotString("N");
+}
 }
 }

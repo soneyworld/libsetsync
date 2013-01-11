@@ -12,7 +12,7 @@
 #include <iomanip>
 
 using namespace std;
-using namespace trie;
+using namespace setsync::trie;
 
 Trie2Dot::Trie2Dot() {
 	this->db1_ = new Db(NULL, 0);

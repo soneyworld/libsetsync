@@ -11,7 +11,7 @@
 #include <string>
 #include <setsync/utils/CryptoHash.h>
 
-
+namespace setsync {
 namespace trie {
 /**
  * A Trie can contain more than just the inserted hashes,
@@ -189,7 +189,7 @@ public:
 	 */
 	virtual std::string toDotString(const std::string nodePrefix) const = 0;
 };
-
+}
 }
 
 #endif /* TRIE_H_ */

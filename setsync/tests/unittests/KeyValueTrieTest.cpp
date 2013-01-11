@@ -11,7 +11,7 @@
 #include <setsync/DiffHandler.h>
 
 using namespace std;
-
+namespace setsync {
 namespace trie {
 
 void KeyValueTrieTest::setUp(void) {
@@ -398,5 +398,5 @@ void KeyValueTrieTest::testDiff() {
 		trie2.clear();
 	}
 }
-
+}
 }

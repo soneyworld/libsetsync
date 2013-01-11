@@ -110,7 +110,7 @@ void DBTest::runFsDb() {
 void DBTest::runTrie(Db * db) {
 	utils::CryptoHash sha1;
 	setsync::storage::BdbStorage storage(db);
-	trie::KeyValueTrie trie(sha1, storage);
+	setsync::trie::KeyValueTrie trie(sha1, storage);
 	clock_t start, stop, duration, iduration;
 	duration = 0;
 	for (int iter = 0; iter < LOOP_ITERATIONS; iter++) {

@@ -10,7 +10,9 @@
 #include <setsync/trie/KeyValueTrie.h>
 #include <setsync/utils/CryptoHash.h>
 #include <setsync/storage/BdbStorage.h>
+namespace setsync {
 namespace trie {
+
 
 class KeyValueTrieTest: public CPPUNIT_NS::TestCase {
 CPPUNIT_TEST_SUITE( KeyValueTrieTest);
@@ -53,5 +55,5 @@ protected:
 CPPUNIT_TEST_SUITE_REGISTRATION(KeyValueTrieTest);
 
 }
-
+}
 #endif /* KEYVALUETRIETEST_H_ */

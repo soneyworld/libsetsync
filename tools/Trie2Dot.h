@@ -17,8 +17,8 @@ private:
 	Db * db1_;
 	Db * db2_;
 	utils::CryptoHash hash_;
-	trie::KeyValueTrie * trie1_;
-	trie::KeyValueTrie * trie2_;
+	setsync::trie::KeyValueTrie * trie1_;
+	setsync::trie::KeyValueTrie * trie2_;
 	setsync::storage::AbstractKeyValueStorage * storage1;
 	setsync::storage::AbstractKeyValueStorage * storage2;
 public:
