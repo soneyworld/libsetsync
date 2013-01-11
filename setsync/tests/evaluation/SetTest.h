@@ -9,7 +9,7 @@
 
 #include "Test.h"
 #include <setsync/Set.hpp>
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 #include <setsync/config/Configuration.h>
 
 namespace evaluation {

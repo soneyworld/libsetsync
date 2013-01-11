@@ -9,7 +9,7 @@
 #include <setsync/trie/KeyValueTrie.h>
 #include <setsync/storage/KeyValueStorage.h>
 #include <setsync/storage/BdbStorage.h>
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 
 
 class Trie2Dot {

@@ -7,7 +7,7 @@
 #ifndef SYNCHRONIZATION_H_
 #define SYNCHRONIZATION_H_
 #include <setsync/DiffHandler.h>
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 
 namespace setsync {
 class Set;

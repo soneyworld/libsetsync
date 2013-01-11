@@ -9,7 +9,7 @@
 
 #include "Test.h"
 #include <leveldb/db.h>
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 
 class LevelDbTest: public Test {
 private:

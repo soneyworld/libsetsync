@@ -9,7 +9,7 @@
 #include <setsync/sync/Synchronization.h>
 #include <cstring>
 #include <string>
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 
 namespace setsync {
 namespace trie {

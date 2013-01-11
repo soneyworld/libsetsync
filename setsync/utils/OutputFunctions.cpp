@@ -9,7 +9,7 @@
 #include <sstream>
 #include <iomanip>
 #include <setsync/utils/bitset.h>
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 namespace setsync {
 namespace utils {
 

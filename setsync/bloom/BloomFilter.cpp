@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits>
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 #include <sstream>
 #include <typeinfo>
 #include <algorithm>

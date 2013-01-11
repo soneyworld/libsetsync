@@ -6,7 +6,7 @@
 
 #ifndef KEYVALUESTORAGE_H_
 #define KEYVALUESTORAGE_H_
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 namespace setsync {
 
 namespace storage {

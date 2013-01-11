@@ -9,7 +9,7 @@
 #define CRYPTOBENCHMARK_H_
 #include "Test.h"
 #include "StopWatch.h"
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 
 namespace evaluation {
 

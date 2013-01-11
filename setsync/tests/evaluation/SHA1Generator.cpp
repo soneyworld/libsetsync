@@ -5,7 +5,7 @@
  */
 
 #include "SHA1Generator.h"
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 #include <stdlib.h>
 #include <iostream>
 #include <sstream>

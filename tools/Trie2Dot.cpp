@@ -5,7 +5,7 @@
  */
 
 #include "Trie2Dot.h"
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 #include <setsync/utils/OutputFunctions.h>
 #include <setsync/storage/BdbStorage.h>
 #include <sstream>

@@ -15,7 +15,7 @@
 #include <stdint.h>
 #include <iostream>
 #include "HashFunction.h"
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 #ifndef BYTESIZE
 #define BYTESIZE 8
 #endif

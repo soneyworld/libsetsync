@@ -6,7 +6,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <setsync/bloom/KeyValueCountingBloomFilter.h>
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 #ifdef HAVE_LEVELDB
 #include <setsync/storage/LevelDbStorage.h>
 #endif

@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <vector>
 #include <string>
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 
 namespace setsync {
 

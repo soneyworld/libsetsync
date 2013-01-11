@@ -8,7 +8,7 @@
 #define KEYVALUETRIETEST_H_
 #include <cppunit/extensions/HelperMacros.h>
 #include <setsync/trie/KeyValueTrie.h>
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 #include <setsync/storage/BdbStorage.h>
 namespace setsync {
 namespace trie {

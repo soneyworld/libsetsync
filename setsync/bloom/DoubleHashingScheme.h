@@ -24,7 +24,7 @@
 #define DOUBLEHASHINGSCHEME_H_
 
 #include "HashFunction.h"
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 namespace setsync {
 
 namespace bloom {

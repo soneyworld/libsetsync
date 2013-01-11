@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <stdint.h>
 #include <string>
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 #include <setsync/set.h>
 #ifdef HAVE_IBRCOMMON
 #include <ibrcommon/data/ConfigFile.h>

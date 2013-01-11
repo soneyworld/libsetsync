@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = utils config sync bloom trie index storage . tests
+SUBDIRS = utils crypto config sync bloom trie index storage . tests
 
 # what flags you want to pass to the C compiler & linker
 AM_CPPFLAGS = @CFLAGS@ 
@@ -38,7 +38,7 @@ library_include_HEADERS = $(include_h_sources)
 lib_LTLIBRARIES = libsetsync.la
 libsetsync_la_SOURCES = $(h_sources) $(cpp_sources) $(c_sources)
 libsetsync_la_LDFLAGS = -version-info $(GENERIC_LIBRARY_VERSION) -release $(GENERIC_RELEASE)
-libsetsync_la_LIBADD = bloom/libbloom.la trie/libtrie.la index/libindex.la utils/libutils.la storage/libstorage.la config/libconfig.la sync/libsync.la
+libsetsync_la_LIBADD = bloom/libbloom.la trie/libtrie.la index/libindex.la utils/libutils.la storage/libstorage.la config/libconfig.la sync/libsync.la crypto/libcrypto.la
 
 noinst_PROGRAMS=set
 set_SOURCES = main.c

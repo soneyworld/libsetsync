@@ -6,7 +6,7 @@
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 
 #ifndef FSBLOOMFILTERTEST_H
 #define FSBLOOMFILTERTEST_H

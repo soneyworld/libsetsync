@@ -8,7 +8,7 @@
 #define KEYVALUEINDEX_H_
 
 #include "AbstractSetIndex.h"
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 #include <setsync/storage/KeyValueStorage.h>
 
 namespace setsync {

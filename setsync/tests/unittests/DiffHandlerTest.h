@@ -8,7 +8,7 @@
 #define DIFFHANDLERTEST_H_
 #include <cppunit/extensions/HelperMacros.h>
 #include <setsync/DiffHandler.h>
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 
 namespace setsync {
 

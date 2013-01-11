@@ -13,7 +13,7 @@
 #include <setsync/bloom/KeyValueCountingBloomFilter.h>
 #include <setsync/index/KeyValueIndex.h>
 #include <setsync/trie/KeyValueTrie.h>
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 #include <setsync/config/Configuration.h>
 #include <setsync/utils/FileSystem.h>
 #include <queue>

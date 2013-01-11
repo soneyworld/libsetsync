@@ -7,7 +7,7 @@
 #ifndef KEYVALUEINDEXTEST_H_
 #define KEYVALUEINDEXTEST_H_
 #include <cppunit/extensions/HelperMacros.h>
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 #include <setsync/index/KeyValueIndex.h>
 #include <setsync/storage/KeyValueStorage.h>
 #ifdef HAVE_DB_CXX_H

@@ -5,7 +5,7 @@
  */
 
 #include "SQLiteTest.h"
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 #include <sstream>
 #include <time.h>
 #include "StopWatch.h"

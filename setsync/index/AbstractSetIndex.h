@@ -6,7 +6,7 @@
 
 #ifndef ABSTRACTSETINDEX_H_
 #define ABSTRACTSETINDEX_H_
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 
 namespace setsync {
 /**

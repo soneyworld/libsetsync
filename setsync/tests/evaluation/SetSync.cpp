@@ -8,7 +8,7 @@
 #include <setsync/set.h>
 #include <sstream>
 #include <cstdlib>
-#include <setsync/utils/CryptoHash.h>
+#include <setsync/crypto/CryptoHash.h>
 #include <setsync/utils/OutputFunctions.h>
 
 namespace evaluation {
