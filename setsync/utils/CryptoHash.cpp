@@ -6,6 +6,7 @@
 #ifdef HAVE_OPENSSL
 #include <openssl/sha.h>
 #endif
+namespace setsync {
 namespace utils {
 
 void CryptoHash::init() {
@@ -201,5 +202,6 @@ bool CryptoHashContainer::operator ==(const unsigned char * other) const {
 }
 bool CryptoHashContainer::operator !=(const unsigned char * other) const {
 	return memcmp(md_, other, hashFunction_.getHashSize()) != 0;
+}
 }
 }

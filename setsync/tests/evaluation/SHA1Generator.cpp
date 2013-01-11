@@ -40,7 +40,7 @@ SHA1Generator::~SHA1Generator() {
 
 void SHA1Generator::run() {
 	uint64_t i;
-	utils::CryptoHash sha1("sha1");
+	setsync::utils::CryptoHash sha1("sha1");
 	for (i = this->start; i < this->end; i++) {
 		sha1(this->array + 20 * (i - this->start), (unsigned char*) &i,
 				sizeof(uint64_t));

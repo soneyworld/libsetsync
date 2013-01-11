@@ -266,7 +266,7 @@ void SetSync::run() {
 			size_t j;
 			string color = "red";
 			size_t i = initSameElements_;
-			const utils::CryptoHash& hash = A_.getHashFunction();
+			const setsync::utils::CryptoHash& hash = A_.getHashFunction();
 			unsigned char buffer[hash.getHashSize()];
 			for (j = 0; j < diffA; j++) {
 				stringstream ss;
@@ -274,7 +274,7 @@ void SetSync::run() {
 				hash(buffer, ss.str());
 				if (!B_.find(buffer)) {
 
-					cout << "A" << utils::OutputFunctions::CryptoHashtoString(
+					cout << "A" << setsync::utils::OutputFunctions::CryptoHashtoString(
 							buffer, hash.getHashSize())
 							<< " [style=filled color=\"" << color << "\"];"
 							<< endl;
@@ -287,7 +287,7 @@ void SetSync::run() {
 				ss << initSalt_ << "_" << i;
 				hash(buffer, ss.str());
 				if (!A_.find(buffer)) {
-					cout << "B" << utils::OutputFunctions::CryptoHashtoString(
+					cout << "B" << setsync::utils::OutputFunctions::CryptoHashtoString(
 							buffer, hash.getHashSize())
 							<< " [style=filled color=\"" << color << "\"];"
 							<< endl;

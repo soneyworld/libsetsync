@@ -9,7 +9,7 @@
 namespace berkeley {
 
 AbstractBdbTableUser::AbstractBdbTableUser(Db * db, DbTxn * txn) :
-	txn_(txn), txn_enabled_(utils::BerkeleyDB::isTransactionEnabled(db)) {
+	txn_(txn), txn_enabled_(setsync::utils::BerkeleyDB::isTransactionEnabled(db)) {
 }
 
 void AbstractBdbTableUser::setParentTransaction(DbTxn * txn) {

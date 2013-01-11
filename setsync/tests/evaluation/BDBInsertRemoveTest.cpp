@@ -25,7 +25,7 @@ BDBInsertRemoveTest::~BDBInsertRemoveTest() {
 
 void BDBInsertRemoveTest::run() {
 	cout << "running Berkeley DB insert delete file size test ("
-			<< utils::BerkeleyDB::tableTypeToString(db) << ")" << endl;
+			<< setsync::utils::BerkeleyDB::tableTypeToString(db) << ")" << endl;
 	fillDB();
 	cout << ITERATIONS << " inserts done:\nITEMS_PER_LOOP=" << ITEMS_PER_LOOPS
 			<< endl;
@@ -36,8 +36,8 @@ void BDBInsertRemoveTest::run() {
 void BDBInsertRemoveTest::insertRemove() {
 	cout << "loop,noentries,filesize" << endl;
 	Dbt value(NULL, 0);
-	cout << "0," << utils::BerkeleyDB::numberOfKeys(db) << ","
-			<< utils::FileSystem::fileSize("temp-table.db") << endl;
+	cout << "0," << setsync::utils::BerkeleyDB::numberOfKeys(db) << ","
+			<< setsync::utils::FileSystem::fileSize("temp-table.db") << endl;
 	for (uint64_t loop = 0; loop < LOOP_ITERATIONS; loop++) {
 		for (uint64_t item = 0; item < ITEMS_PER_LOOPS; item++) {
 			uint64_t d = loop * ITEMS_PER_LOOPS + item;
@@ -48,8 +48,8 @@ void BDBInsertRemoveTest::insertRemove() {
 			this->db->put(NULL, &ikey, &value, 0);
 		}
 		this->db->sync(0);
-		cout << loop + 1 << "," << utils::BerkeleyDB::numberOfKeys(db) << ","
-				<< utils::FileSystem::fileSize("temp-table.db") << endl;
+		cout << loop + 1 << "," << setsync::utils::BerkeleyDB::numberOfKeys(db) << ","
+				<< setsync::utils::FileSystem::fileSize("temp-table.db") << endl;
 	}
 	for (uint64_t loop = 0; loop < LOOP_ITERATIONS; loop++) {
 		for (uint64_t item = 0; item < ITEMS_PER_LOOPS; item++) {
@@ -60,8 +60,8 @@ void BDBInsertRemoveTest::insertRemove() {
 		this->db->compact(NULL, NULL, NULL, NULL, DB_FREE_SPACE, NULL);
 		this->db->sync(0);
 		cout << loop + 1 + LOOP_ITERATIONS << ","
-				<< utils::BerkeleyDB::numberOfKeys(db) << ","
-				<< utils::FileSystem::fileSize("temp-table.db") << endl;
+				<< setsync::utils::BerkeleyDB::numberOfKeys(db) << ","
+				<< setsync::utils::FileSystem::fileSize("temp-table.db") << endl;
 	}
 }
 

@@ -15,6 +15,7 @@
 #else
 #include "md.h"
 #endif
+namespace setsync {
 namespace utils {
 /**
  * Wrapper class to provide a generic interface for polarssl and openssl
@@ -99,5 +100,5 @@ public:
 };
 
 }
-
+}
 #endif /* CRYPTOHASH_H_ */

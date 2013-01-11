@@ -55,14 +55,14 @@ void Trie2Dot::out() {
 			if (trie1_->contains(buffer + j * hash_.getHashSize()) == LEAF_NODE) {
 				color = "green";
 			}
-			cout << "N" << utils::OutputFunctions::CryptoHashtoString(
+			cout << "N" << setsync::utils::OutputFunctions::CryptoHashtoString(
 					buffer + j * hash_.getHashSize())
 					<< " [style=filled color=\"" << color << "\"];" << endl;
 /*			cout << "N" << utils::OutputFunctions::CryptoHashtoString(
 					buffer + j * hash_.getHashSize()) << " -> " << "_"
 					<< utils::OutputFunctions::CryptoHashtoString(
 							buffer + j * hash_.getHashSize())<<";"<< endl;*/
-			cout << "_" << utils::OutputFunctions::CryptoHashtoString(
+			cout << "_" << setsync::utils::OutputFunctions::CryptoHashtoString(
 					buffer + j * hash_.getHashSize())
 					<< " [style=filled color=\"" << color << "\"];" << endl;
 		}

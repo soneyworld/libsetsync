@@ -14,7 +14,7 @@ using namespace std;
 
 BDBTransactionsTest::BDBTransactionsTest(const DBTYPE type) {
 	int ret;
-	utils::FileSystem::rmDirRecursive("temp-env");
+	setsync::utils::FileSystem::rmDirRecursive("temp-env");
 	mkdir("temp-env", 0700);
 	this->env_ = new DbEnv(0);
 	u_int32_t gb = 0;
@@ -36,12 +36,12 @@ BDBTransactionsTest::~BDBTransactionsTest() {
 	this->env_->close(0);
 	delete this->db_;
 	delete this->env_;
-	utils::FileSystem::rmDirRecursive("temp-env");
+	setsync::utils::FileSystem::rmDirRecursive("temp-env");
 }
 
 void BDBTransactionsTest::run() {
 	cout << "running Berkeley DB transaction test ("
-			<< utils::BerkeleyDB::tableTypeToString(db_) << ")" << endl;
+			<< setsync::utils::BerkeleyDB::tableTypeToString(db_) << ")" << endl;
 	cout << "notrans,CPUintervalDuration,realtimeIntervalDuration,duration"
 			<< endl;
 	Dbt value(NULL, 0);

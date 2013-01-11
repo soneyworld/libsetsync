@@ -7,7 +7,7 @@
 #ifndef BERKELEYDB_H_
 #define BERKELEYDB_H_
 #include <db_cxx.h>
-
+namespace setsync {
 namespace utils {
 /**
  * Utilities and wrapper for berkeley DB operations
@@ -62,5 +62,5 @@ public:
 };
 
 }
-
+}
 #endif /* BERKELEYDB_H_ */

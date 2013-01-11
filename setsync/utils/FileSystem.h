@@ -8,6 +8,7 @@
 #define FILESYSTEM_H_
 #include <inttypes.h>
 #include <string>
+namespace setsync {
 namespace utils {
 /**
  * Utilities for file system operations
@@ -107,7 +108,7 @@ public:
 		std::string getPath() const;
 	};
 };
-
+}
 }
 
 #endif /* FILESYSTEM_H_ */

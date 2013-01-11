@@ -122,22 +122,22 @@ int main(int ac, char **av) {
 #ifdef HAVE_LEVELDB
 	if (level || all) {
 		{
-			utils::CryptoHash hash;
+			setsync::utils::CryptoHash hash;
 			LevelDbTest leveldb(hash);
 			leveldb.run();
 		}
 		{
-			utils::CryptoHash hash("md5");
+			setsync::utils::CryptoHash hash("md5");
 			LevelDbTest leveldb(hash);
 			leveldb.run();
 		}
 	}
 	if (levelsize || all) {
-		utils::CryptoHash hash;
+		setsync::utils::CryptoHash hash;
 		LevelDbTest leveldb(hash);
 		leveldb.runDbSizeTestInSteps();
 	} else {
-		utils::CryptoHash hash;
+		setsync::utils::CryptoHash hash;
 		if (levelsize8) {
 			LevelDbTest leveldb(hash);
 			leveldb.runDbSizeTestInSteps(8, 0);

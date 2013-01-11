@@ -12,7 +12,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <cstdio>
-
+namespace setsync {
 namespace utils {
 
 int FileSystem::rmDirRecursive(const std::string& path) {
@@ -151,5 +151,6 @@ FileSystem::TemporaryDirectory::~TemporaryDirectory() {
 }
 std::string FileSystem::TemporaryDirectory::getPath() const {
 	return this->path_;
+}
 }
 }

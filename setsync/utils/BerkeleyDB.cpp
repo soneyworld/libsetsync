@@ -5,7 +5,7 @@
  */
 
 #include "BerkeleyDB.h"
-
+namespace setsync {
 namespace utils {
 
 uint64_t BerkeleyDB::numberOfKeys(Db * db, DbTxn * txn, int flags) {
@@ -116,5 +116,5 @@ bool BerkeleyDB::isTransactionEnabled(Db * db) {
 		return false;
 	}
 }
-
+}
 }

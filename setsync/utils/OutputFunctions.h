@@ -8,6 +8,7 @@
 #ifndef OUTPUTFUNCTIONS_H_
 #define OUTPUTFUNCTIONS_H_
 #include <string>
+namespace setsync {
 namespace utils {
 
 class OutputFunctions {
@@ -20,5 +21,5 @@ public:
 			const std::size_t bitcount);
 };
 }
-
+}
 #endif /* OUTPUTFUNCTIONS_H_ */

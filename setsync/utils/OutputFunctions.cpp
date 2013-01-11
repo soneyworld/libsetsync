@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <setsync/utils/bitset.h>
 #include <setsync/utils/CryptoHash.h>
+namespace setsync {
 namespace utils {
 
 std::string OutputFunctions::CryptoHashtoString(const unsigned char * hash) {
@@ -36,5 +37,6 @@ std::string OutputFunctions::ArrayToBitString(const unsigned char * array,
 		}
 	}
 	return ss.str();
+}
 }
 }

@@ -50,7 +50,7 @@ void SetTest::insert() {
 			std::cout << i + 1 << "," << CPUinterval << "," << RTinterval
 					<< "," << watch.getCPUDuration() << ","
 					<< watch.getDuration() << ","
-					<< utils::FileSystem::dirSize(set_.getPath()) << std::endl;
+					<< setsync::utils::FileSystem::dirSize(set_.getPath()) << std::endl;
 			CPUinterval = 0;
 			RTinterval = 0;
 		}

@@ -9,6 +9,7 @@
 #include "config.h"
 namespace evaluation {
 using namespace std;
+using namespace setsync;
 
 CryptoBenchmark::CryptoBenchmark() {
 }

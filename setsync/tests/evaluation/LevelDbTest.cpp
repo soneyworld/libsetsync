@@ -12,7 +12,7 @@
 
 using namespace std;
 
-LevelDbTest::LevelDbTest(const utils::CryptoHash& hash) :
+LevelDbTest::LevelDbTest(const setsync::utils::CryptoHash& hash) :
 	hash(hash) {
 	leveldb::Options options;
 	options.create_if_missing = true;
@@ -23,7 +23,7 @@ LevelDbTest::LevelDbTest(const utils::CryptoHash& hash) :
 
 LevelDbTest::~LevelDbTest() {
 	delete db;
-	utils::FileSystem::rmDirRecursive("testdb");
+	setsync::utils::FileSystem::rmDirRecursive("testdb");
 }
 
 void LevelDbTest::run() {
@@ -150,14 +150,14 @@ void LevelDbTest::runDbSizeTestInSteps(const size_t keysize,
 			i++;
 		}
 		cout << i << "," << keysize_ << "," << valuesize << ",";
-		uint64_t dirsize = utils::FileSystem::dirSize(path);
+		uint64_t dirsize = setsync::utils::FileSystem::dirSize(path);
 		double sizePerEntry = ((double) dirsize) / (double) (i);
 		double sizePerByte = ((double) dirsize) / (double) ((i) * (keysize_
 				+ valuesize));
 		cout << dirsize << "," << sizePerEntry << "," << sizePerByte << endl;
 	}
 	delete storage;
-	utils::FileSystem::rmDirRecursive(path);
+	setsync::utils::FileSystem::rmDirRecursive(path);
 }
 
 void LevelDbTest::runDbSizeTestInSteps() {
