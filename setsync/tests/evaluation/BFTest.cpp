@@ -11,7 +11,7 @@
 #include <setsync/bloom/HashFunction.h>
 #include <setsync/bloom/KeyValueCountingBloomFilter.h>
 using namespace std;
-
+using namespace setsync;
 BFTest::BFTest() {
 	// TODO Auto-generated constructor stub
 

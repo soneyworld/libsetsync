@@ -24,7 +24,7 @@
 #endif
 
 #define _unused(x) ((void)x)
-
+namespace setsync {
 namespace bloom {
 
 FSBloomFilter::FSBloomFilter(const utils::CryptoHash& hash, const char * file,
@@ -317,4 +317,6 @@ std::string FSBloomFilter::toString() {
 	return utils::OutputFunctions::ArrayToBitString(this->bitArray_,
 			this->filterSize_);
 }
+}
+
 }

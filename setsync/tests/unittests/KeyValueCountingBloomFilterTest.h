@@ -15,7 +15,7 @@
 
 #ifndef KEYVALUECOUNTINGBLOOMFILTERTEST_H_
 #define KEYVALUECOUNTINGBLOOMFILTERTEST_H_
-
+namespace setsync {
 namespace bloom {
 
 class KeyValueBloomFilterSyncTest: public CppUnit::TestFixture {
@@ -84,6 +84,7 @@ public:
 };
 //CPPUNIT_TEST_SUITE_REGISTRATION( KeyValueBloomFilterSyncTest);
 CPPUNIT_TEST_SUITE_REGISTRATION( KeyValueCountingBloomFilterTest);
+}
 }
 
 #endif /* KEYVALUECOUNTINGBLOOMFILTERTEST_H_ */

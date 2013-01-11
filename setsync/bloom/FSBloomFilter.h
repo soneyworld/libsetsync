@@ -8,7 +8,7 @@
 #define FSBLOOMFILTER_H_
 
 #include "BloomFilter.h"
-
+namespace setsync {
 namespace bloom {
 
 class FSBloomFilter: public virtual bloom::AbstractBloomFilter {
@@ -105,6 +105,8 @@ private:
 			const uint64_t numberOfElements);
 };
 
+
+}
 }
 
 #endif /* FSBLOOMFILTER_H_ */

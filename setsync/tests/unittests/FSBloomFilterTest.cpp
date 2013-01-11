@@ -15,7 +15,7 @@
 #include <stdlib.h>
 
 using namespace std;
-
+namespace setsync {
 namespace bloom {
 
 /*=== BEGIN tests for class 'FSBloomFilter' ===*/
@@ -206,4 +206,4 @@ void FSBloomFilterTest::tearDown() {
 }
 
 }
-;
+}

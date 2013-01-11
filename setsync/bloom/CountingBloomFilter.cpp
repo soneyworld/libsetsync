@@ -6,6 +6,7 @@
 
 #include "CountingBloomFilter.h"
 #include <string.h>
+namespace setsync {
 namespace bloom {
 
 bool CountingBloomFilter::remove(const char * string) {
@@ -25,5 +26,5 @@ CountingBloomFilter::CountingBloomFilter(const utils::CryptoHash& hash) :
 }
 CountingBloomFilter::~CountingBloomFilter() {
 }
-
+}
 }

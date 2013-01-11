@@ -14,7 +14,7 @@
 
 class BFTest : public Test{
 private:
-	void runBF(bloom::AbstractBloomFilter * bf);
+	void runBF(setsync::bloom::AbstractBloomFilter * bf);
 	void runMemBF();
 	void runFSBF();
 	void runDBBF();

@@ -7,7 +7,7 @@
 #include "DoubleHashingScheme.h"
 #include <limits>
 #include <string.h>
-
+namespace setsync {
 namespace bloom {
 
 DoubleHashingScheme::DoubleHashingScheme(const std::size_t hashsize) :
@@ -61,5 +61,5 @@ uint64_t ExtendedDoubleHashingScheme::extendedHash(const unsigned char * input,
 		return function;
 	}
 }
-
+}
 }

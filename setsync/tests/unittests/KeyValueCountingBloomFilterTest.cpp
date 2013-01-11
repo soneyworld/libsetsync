@@ -12,6 +12,7 @@
 #include <setsync/DiffHandler.h>
 
 using namespace std;
+namespace setsync {
 namespace bloom {
 
 void KeyValueBloomFilterSyncTest::testInput() {
@@ -371,5 +372,5 @@ void KeyValueCountingBloomFilterTest::testToString() {
 	}
 	FilterA.toString();
 }
-
+}
 }

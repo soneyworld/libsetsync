@@ -16,6 +16,7 @@
 #include <limits>
 
 using namespace std;
+namespace setsync {
 namespace bloom {
 
 /*=== BEGIN tests for class 'DoubleHashingScheme' ===*/
@@ -91,4 +92,5 @@ void DoubleHashingSchemeTest::setUp() {
 
 void DoubleHashingSchemeTest::tearDown() {
 }
-};
+}
+}

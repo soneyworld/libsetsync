@@ -13,6 +13,7 @@
 #include <setsync/storage/KeyValueStorage.h>
 #include <setsync/DiffHandler.h>
 #include <setsync/net/Packets.h>
+namespace setsync {
 
 namespace bloom {
 class KeyValueCountingBloomFilter;
@@ -136,6 +137,7 @@ public:
 	virtual setsync::sync::AbstractSyncProcessPart * createSyncProcess();
 };
 
+}
 }
 
 #endif /* KEYVALUECOUNTINGBLOOMFILTER_H_ */

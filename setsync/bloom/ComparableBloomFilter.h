@@ -7,6 +7,7 @@
 #ifndef COMPARABLEBLOOMFILTER_H_
 #define COMPARABLEBLOOMFILTER_H_
 #include <setsync/DiffHandler.h>
+namespace setsync{
 
 namespace bloom {
 /**
@@ -50,6 +51,7 @@ public:
 			const std::size_t maxlength, std::size_t offset) = 0;
 };
 
+}
 }
 
 #endif /* COMPARABLEBLOOMFILTER_H_ */

@@ -19,6 +19,8 @@
 #include <typeinfo>
 #include <algorithm>
 #include "DoubleHashingScheme.h"
+namespace setsync {
+
 namespace bloom {
 
 uint64_t AbstractBloomFilter::numberOfElements() const {
@@ -347,6 +349,7 @@ std::string BloomFilter::toString() {
 		}
 	}
 	return ss.str();
+}
 }
 
 }

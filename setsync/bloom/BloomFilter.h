@@ -19,6 +19,8 @@
 #ifndef BYTESIZE
 #define BYTESIZE 8
 #endif
+
+namespace setsync {
 ///Contains all variations of bloom filter
 namespace bloom {
 
@@ -256,6 +258,8 @@ private:
 			const uint64_t numberOfElements);
 };
 
-}
+}// end namespace bloom
+
+}// end namespace setsync
 
 #endif /* BLOOMFILTER_H_ */

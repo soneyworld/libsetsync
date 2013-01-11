@@ -10,16 +10,14 @@
 
 #ifndef BLOOMFILTERTEST_HH
 #define BLOOMFILTERTEST_HH
+namespace setsync {
+
 namespace bloom {
+
 class BloomFilterTest : public CppUnit::TestFixture {
 	private:
 	utils::CryptoHash hash;
 	public:
-		/*=== BEGIN tests for class 'DefaultHashProvider' ===*/
-		void testCount();
-		void testHash();
-		/*=== END   tests for class 'DefaultHashProvider' ===*/
-
 		/*=== BEGIN tests for class 'BloomFilter' ===*/
 		void testLoad();
 		void testInsert();
@@ -35,8 +33,6 @@ class BloomFilterTest : public CppUnit::TestFixture {
 
 
 		CPPUNIT_TEST_SUITE(BloomFilterTest);
-			CPPUNIT_TEST(testCount);
-			CPPUNIT_TEST(testHash);
 			CPPUNIT_TEST(testLoad);
 			CPPUNIT_TEST(testInsert);
 			CPPUNIT_TEST(testContains);
@@ -46,5 +42,7 @@ class BloomFilterTest : public CppUnit::TestFixture {
 			CPPUNIT_TEST(testOperatorXorAndAssign);
 		CPPUNIT_TEST_SUITE_END();
 };
-};
+CPPUNIT_TEST_SUITE_REGISTRATION( BloomFilterTest);
+}
+}
 #endif /* BLOOMFILTERTEST_HH */

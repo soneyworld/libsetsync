@@ -25,6 +25,7 @@
 
 #include "HashFunction.h"
 #include <setsync/utils/CryptoHash.h>
+namespace setsync {
 
 namespace bloom {
 /**
@@ -92,6 +93,7 @@ private:
 	uint64_t extendedHash(const unsigned char * input,
 			const std::size_t remaining, const std::size_t function) const;
 };
+}
 }
 
 #endif /* DOUBLEHASHINGSCHEME_H_ */

@@ -7,6 +7,7 @@
 #ifndef COUNTINGBLOOMFILTER_H_
 #define COUNTINGBLOOMFILTER_H_
 #include "BloomFilter.h"
+namespace setsync {
 
 namespace bloom {
 /**
@@ -39,6 +40,7 @@ public:
 	virtual ~CountingBloomFilter();
 };
 
+}
 }
 
 #endif /* COUNTINGBLOOMFILTER_H_ */

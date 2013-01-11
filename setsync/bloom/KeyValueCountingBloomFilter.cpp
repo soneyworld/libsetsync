@@ -7,7 +7,7 @@
 #include "KeyValueCountingBloomFilter.h"
 #include <setsync/utils/bitset.h>
 #include <stdlib.h>
-
+namespace setsync {
 namespace bloom {
 
 KeyValueBloomFilterSync::KeyValueBloomFilterSync(
@@ -316,5 +316,5 @@ bool KeyValueCountingBloomFilter::remove(const unsigned char * key) {
 setsync::sync::AbstractSyncProcessPart * KeyValueCountingBloomFilter::createSyncProcess() {
 	return new KeyValueBloomFilterSync(this);
 }
-
+}
 }
