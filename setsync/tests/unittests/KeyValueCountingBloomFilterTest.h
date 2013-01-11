@@ -18,28 +18,6 @@
 namespace setsync {
 namespace bloom {
 
-class KeyValueBloomFilterSyncTest: public CppUnit::TestFixture {
-CPPUNIT_TEST_SUITE(KeyValueBloomFilterSyncTest);
-		CPPUNIT_TEST(testInput);
-		CPPUNIT_TEST(testOutput);
-		CPPUNIT_TEST(testSync);
-	CPPUNIT_TEST_SUITE_END();
-private:
-	Db * db;
-	KeyValueCountingBloomFilter * filter;
-	setsync::storage::AbstractKeyValueStorage * storage;
-	utils::CryptoHash hashFunction_;
-	std::string filename_;
-	setsync::sync::AbstractSyncProcessPart * process;
-protected:
-	void testInput();
-	void testOutput();
-	void testSync();
-public:
-	void setUp();
-	void tearDown();
-};
-
 class KeyValueCountingBloomFilterTest: public CppUnit::TestFixture {
 
 CPPUNIT_TEST_SUITE(KeyValueCountingBloomFilterTest);

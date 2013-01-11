@@ -11,7 +11,6 @@
 #include <setsync/storage/KeyValueStorage.h>
 #include <setsync/trie/TrieException.h>
 #include <setsync/sync/Synchronization.h>
-#include <setsync/net/Packets.h>
 #include <setsync/DiffHandler.h>
 #include <exception>
 #include <vector>
@@ -23,44 +22,6 @@ namespace trie {
 
 class KeyValueTrie;
 class KeyValueRootNode;
-
-class KeyValueTrieSync: public setsync::sync::AbstractSyncProcessPart {
-private:
-	KeyValueTrie * trie_;
-	bool start_;
-	std::queue<utils::CryptoHashContainer> requestedSubtrieHashesQueue_;
-	std::queue<utils::CryptoHashContainer> sentHashesQueue_;
-	std::queue<bool> pendingAckQueue_;
-	std::size_t hashsize_;
-	setsync::net::PacketHeader * incomingPacket_;
-	setsync::net::PacketHeader * outgoingPacket_;
-	std::size_t inPos_;
-	unsigned char * inBuf_;
-	std::size_t processedIncommingHashes_;
-	virtual std::size_t processSubtrieInput(void * inbuf, const std::size_t length,
-				setsync::AbstractDiffHandler& diffhandler);
-	virtual std::size_t processRequestInput(void * inbuf, const std::size_t length,
-					setsync::AbstractDiffHandler& diffhandler);
-public:
-	KeyValueTrieSync(KeyValueTrie * trie);
-	virtual ~KeyValueTrieSync();
-	/**
-	 * \return true, if more output is available
-	 */
-	virtual bool pendingOutput() const;
-	/**
-	 * \return true, if the sync process expects  more input
-	 */
-	virtual bool awaitingInput() const;
-
-	virtual std::size_t processInput(void * inbuf, const std::size_t length,
-			setsync::AbstractDiffHandler& diffhandler);
-	virtual std::size_t writeOutput(void * outbuf, const std::size_t maxlength);
-	virtual std::size_t getRemainigOutputPacketSize() const;
-	virtual bool done() const;
-	virtual bool isEqual() const;
-	virtual bool parsingOfLastPacketDone() const;
-};
 
 class TrieNode {
 	friend class KeyValueRootNode;
@@ -481,7 +442,6 @@ public:
 	virtual void diff(const void * subtrie, const std::size_t length,
 			setsync::AbstractDiffHandler& handler) const;
 
-	virtual setsync::sync::AbstractSyncProcessPart * createSyncProcess();
 };
 
 }

@@ -27,7 +27,7 @@ enum TrieNodeType {
 /**
  *
  */
-class Trie: public setsync::sync::SyncableDataStructureInterface {
+class Trie{
 private:
 	/// The number of the saved leafs, not the number of nodes!
 	size_t size;
@@ -188,8 +188,6 @@ public:
 	 * \return dot string containing the whole trie
 	 */
 	virtual std::string toDotString(const std::string nodePrefix) const = 0;
-
-	virtual setsync::sync::AbstractSyncProcessPart * createSyncProcess() = 0;
 };
 
 }

@@ -8,106 +8,11 @@
 #include <setsync/utils/FileSystem.h>
 #include <setsync/storage/BdbStorage.h>
 #include <stdlib.h>
-#include <setsync/net/Packets.h>
 #include <setsync/DiffHandler.h>
 
 using namespace std;
 namespace setsync {
 namespace bloom {
-
-void KeyValueBloomFilterSyncTest::testInput() {
-	unsigned char hash[hashFunction_.getHashSize()];
-	hashFunction_(hash, "bla");
-	this->filter->add(hash);
-	std::size_t buffersize = 20;
-	std::size_t inputlength = 0;
-	unsigned char buffer[buffersize];
-	memset(buffer, 0, buffersize);
-	setsync::ListDiffHandler handler;
-	setsync::net::PacketHeader header(setsync::net::PacketHeader::FILTER,
-			this->filter->size());
-	header.writeHeaderToBuffer(buffer);
-	inputlength += this->process->processInput(buffer, header.getHeaderSize(),
-			handler);
-	CPPUNIT_ASSERT(handler.size() == 0);
-	CPPUNIT_ASSERT(inputlength == header.getHeaderSize());
-	memset(buffer, 0, buffersize);
-	while (this->process->awaitingInput()) {
-		inputlength += this->process->processInput(buffer, buffersize, handler);
-	}
-	CPPUNIT_ASSERT(handler.size() == 1);
-	CPPUNIT_ASSERT(inputlength == this->filter->size() + header.getHeaderSize());
-	CPPUNIT_ASSERT(memcmp(handler[0].first,hash,hashFunction_.getHashSize())==0);
-}
-
-void KeyValueBloomFilterSyncTest::testOutput() {
-	unsigned char hash[hashFunction_.getHashSize()];
-	hashFunction_(hash, "bla1");
-	this->filter->add(hash);
-	hashFunction_(hash, "bla2");
-	this->filter->add(hash);
-	hashFunction_(hash, "bla3");
-	this->filter->add(hash);
-	std::size_t outputlength = 0;
-	std::size_t buffersize = 20;
-	unsigned char buffer[buffersize];
-	std::size_t headersize = setsync::net::PacketHeader::getHeaderSize(
-			setsync::net::PacketHeader::FILTER);
-	CPPUNIT_ASSERT(this->process->writeOutput(buffer,headersize) == headersize);
-	outputlength = 0;
-	buffersize = 20;
-	while (this->process->pendingOutput()) {
-		std::size_t length = this->process->writeOutput(buffer, buffersize);
-		CPPUNIT_ASSERT(length <= buffersize);
-		outputlength += length;
-	}
-	CPPUNIT_ASSERT(outputlength == this->filter->size());
-}
-
-void KeyValueBloomFilterSyncTest::testSync() {
-	unsigned char hash[hashFunction_.getHashSize()];
-	hashFunction_(hash, "bla1");
-	this->filter->add(hash);
-	hashFunction_(hash, "bla2");
-	this->filter->add(hash);
-	hashFunction_(hash, "bla3");
-	this->filter->add(hash);
-	std::size_t buffersize = 20;
-	unsigned char buffer[buffersize];
-	setsync::ListDiffHandler handler;
-	while (this->process->pendingOutput()) {
-		CPPUNIT_ASSERT(!this->process->done());
-		CPPUNIT_ASSERT(this->process->getRemainigOutputPacketSize()>0);
-		std::size_t length = this->process->writeOutput(buffer, buffersize);
-		this->process->processInput(buffer, length, handler);
-	}
-	CPPUNIT_ASSERT(!this->process->awaitingInput());
-	CPPUNIT_ASSERT(!this->process->pendingOutput());
-	CPPUNIT_ASSERT(this->process->getRemainigOutputPacketSize()==0);
-	CPPUNIT_ASSERT(this->process->done());
-	CPPUNIT_ASSERT(handler.size() == 0);
-}
-
-void KeyValueBloomFilterSyncTest::setUp() {
-	this->db = new Db(NULL, 0);
-	db->open(NULL, "table1.db", NULL, DB_HASH, DB_CREATE, 0);
-	this->storage = new setsync::storage::BdbStorage(this->db);
-	this->filename_ = "temp_filter.bloom";
-	this->filter = new KeyValueCountingBloomFilter(hashFunction_, *storage,
-			filename_);
-	this->process = this->filter->createSyncProcess();
-}
-void KeyValueBloomFilterSyncTest::tearDown() {
-	delete this->process;
-	delete this->filter;
-	delete this->storage;
-	this->db->close(0);
-	delete this->db;
-	this->db = new Db(NULL, 0);
-	db->remove("table1.db", NULL, 0);
-	delete this->db;
-	remove(this->filename_.c_str());
-}
 
 void KeyValueCountingBloomFilterTest::setUp() {
 	this->db1 = new Db(NULL, 0);

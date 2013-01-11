@@ -60,27 +60,6 @@ class SyncableDataStructureInterface {
 public:
 	virtual AbstractSyncProcessPart * createSyncProcess() = 0;
 };
-
-class HashSyncProcessPart: public AbstractSyncProcessPart {
-	unsigned char * inHash_;
-	unsigned char * outHash_;
-	const std::size_t hashsize_;
-	std::size_t inPos_;
-	std::size_t outPos_;
-public:
-	HashSyncProcessPart(const utils::CryptoHash& hashFunction,
-			const unsigned char * localHashDigit);
-	virtual ~HashSyncProcessPart();
-	virtual bool pendingOutput() const;
-	virtual bool awaitingInput() const;
-	virtual std::size_t processInput(void * input, const std::size_t length,
-			AbstractDiffHandler& diffhandler);
-	virtual std::size_t writeOutput(void * outbuf, const std::size_t maxlength);
-	virtual bool isEqual() const;
-	virtual bool done() const;
-	virtual std::size_t getRemainigOutputPacketSize() const;
-	virtual bool parsingOfLastPacketDone() const;
-};
 }
 }
 
