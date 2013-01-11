@@ -34,7 +34,7 @@ CPPUNIT_TEST_SUITE( KeyValueStorageTest);
 	CPPUNIT_TEST_SUITE_END();
 private:
 	std::list<AbstractKeyValueStorage *> stores;
-	utils::CryptoHash hash;
+	crypto::CryptoHash hash;
 #ifdef HAVE_LEVELDB
 	std::string levelpath;
 #endif

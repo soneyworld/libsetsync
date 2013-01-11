@@ -43,7 +43,7 @@ public:
 	 * \param hardMaximum will be passed to FSBloomFilter
 	 * \param falsePositiveRate will be passed to FSBloomFilter
 	 */
-	KeyValueCountingBloomFilter(const utils::CryptoHash& hash,
+	KeyValueCountingBloomFilter(const crypto::CryptoHash& hash,
 			setsync::storage::AbstractKeyValueStorage& storage,
 			const std::string& file,
 			const uint64_t maxNumberOfElements = 10000,

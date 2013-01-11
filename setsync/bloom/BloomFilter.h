@@ -150,9 +150,9 @@ protected:
 	/// Pointer to the used hash Function of the filter
 	HashFunction* hashFunction_;
 	/// Reference to the crypto hash function used to create the inserted keys
-	const utils::CryptoHash& cryptoHashFunction_;
+	const crypto::CryptoHash& cryptoHashFunction_;
 public:
-	AbstractBloomFilter(const utils::CryptoHash& hash);
+	AbstractBloomFilter(const crypto::CryptoHash& hash);
 };
 
 /**
@@ -166,7 +166,7 @@ public:
 	 * \param hardMaximum ensures that the the maximum of storable entries will never be exceeded
 	 * \param falsePositiveRate can be set to any value ]0,1[.
 	 */
-	BloomFilter(const utils::CryptoHash& hash,
+	BloomFilter(const crypto::CryptoHash& hash,
 			const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
 			const float falsePositiveRate = 0.001);

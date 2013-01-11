@@ -28,18 +28,18 @@ void BFTest::run() {
 }
 void BFTest::runMemBF() {
 	cout << "running BloomFilter test:" << endl;
-	utils::CryptoHash sha1;
+	crypto::CryptoHash sha1;
 	bloom::BloomFilter bf(sha1, ITERATIONS);
 	runBF(&bf);
 }
 void BFTest::runFSBF() {
 	cout << "running FSBloomFilter test:" << endl;
-	utils::CryptoHash sha1;
+	crypto::CryptoHash sha1;
 	bloom::FSBloomFilter bf(sha1, NULL, ITERATIONS);
 	runBF(&bf);
 }
 void BFTest::runDBBF() {
-	utils::CryptoHash sha1;
+	crypto::CryptoHash sha1;
 	/*	cout << "running Berkeley DBBloomFilter(MEMDB) test:" << endl;
 	 Db db1(NULL, 0);
 	 db1.set_flags(bloom::DBBloomFilter::getTableFlags());

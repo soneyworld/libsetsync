@@ -123,14 +123,14 @@ public:
 	void setPath(const char * path);
 	void setPath(const std::string& path);
 	Configuration(
-			const std::string hashname = utils::CryptoHash::getDefaultName());
+			const std::string hashname = crypto::CryptoHash::getDefaultName());
 	Configuration(const BloomFilterConfig& bf,
-			const std::string hashname = utils::CryptoHash::getDefaultName());
+			const std::string hashname = crypto::CryptoHash::getDefaultName());
 	Configuration(const TrieConfig& trie,
-			const std::string hashname = utils::CryptoHash::getDefaultName());
+			const std::string hashname = crypto::CryptoHash::getDefaultName());
 	Configuration(const BloomFilterConfig& bf, const TrieConfig& trie,
 
-	const std::string hashname = utils::CryptoHash::getDefaultName());
+	const std::string hashname = crypto::CryptoHash::getDefaultName());
 	Configuration(const SET_CONFIG config);
 	virtual ~Configuration();
 	std::string getHashFunction() const;

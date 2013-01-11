@@ -10,7 +10,7 @@ namespace setsync {
 
 namespace index {
 
-AbstractSetIndex::AbstractSetIndex(const utils::CryptoHash& hash) :
+AbstractSetIndex::AbstractSetIndex(const crypto::CryptoHash& hash) :
 	hash_(hash) {
 }
 

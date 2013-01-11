@@ -46,7 +46,7 @@ private:
 	setsync::storage::AbstractKeyValueStorage * storage2;
 	setsync::storage::AbstractKeyValueStorage * storage3;
 	setsync::storage::AbstractKeyValueStorage * bdbstorage;
-	utils::CryptoHash hashFunction_;
+	crypto::CryptoHash hashFunction_;
 public:
 	void testConstructor();
 	void testLoad();

@@ -63,7 +63,7 @@ bool AbstractBloomFilter::contains(const char * string) const {
 	return contains(c);
 }
 
-AbstractBloomFilter::AbstractBloomFilter(const utils::CryptoHash& hash) :
+AbstractBloomFilter::AbstractBloomFilter(const crypto::CryptoHash& hash) :
 	cryptoHashFunction_(hash) {
 }
 
@@ -90,7 +90,7 @@ BloomFilter::BloomFilter(const BloomFilter& filter) :
 			(this->filterSize_ + (BYTESIZE - 1)) / BYTESIZE);
 }
 
-BloomFilter::BloomFilter(const utils::CryptoHash& hash,
+BloomFilter::BloomFilter(const crypto::CryptoHash& hash,
 		const uint64_t maxNumberOfElements, const bool hardMaximum,
 		const float falsePositiveRate) :
 	AbstractBloomFilter(hash) {

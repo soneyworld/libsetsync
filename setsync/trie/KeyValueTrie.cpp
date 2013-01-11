@@ -38,7 +38,7 @@ void TrieNode::marshall(const TrieNode& source,
 const char KeyValueRootNode::root_name[] = "root";
 
 KeyValueRootNode::KeyValueRootNode(const KeyValueTrie& trie,
-		const utils::CryptoHash& hashfunction,
+		const crypto::CryptoHash& hashfunction,
 		setsync::storage::AbstractKeyValueStorage& storage) :
 	storage_(storage), hashfunction_(hashfunction), trie_(trie) {
 }
@@ -87,7 +87,7 @@ std::string KeyValueRootNode::toString(const std::string nodePrefix) const {
 }
 
 TrieNode::TrieNode(const KeyValueTrie& trie,
-		const utils::CryptoHash& hashfunction,
+		const crypto::CryptoHash& hashfunction,
 		setsync::storage::AbstractKeyValueStorage& storage,
 		const unsigned char * hash, bool newone) :
 	storage_(storage), hashfunction_(hashfunction), trie_(trie) {
@@ -688,7 +688,7 @@ uint8_t TrieNode::getFlags() const {
 	return flags;
 }
 
-KeyValueTrie::KeyValueTrie(const utils::CryptoHash& hash,
+KeyValueTrie::KeyValueTrie(const crypto::CryptoHash& hash,
 		setsync::storage::AbstractKeyValueStorage& storage) :
 	Trie(hash), storage_(storage) {
 	this->root_ = new KeyValueRootNode(*this, hash, storage_);

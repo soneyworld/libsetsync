@@ -36,7 +36,7 @@ private:
 	Db * db2;
 	setsync::storage::BdbStorage * storage1;
 	setsync::storage::BdbStorage * storage2;
-	utils::CryptoHash hash;
+	crypto::CryptoHash hash;
 	unsigned char * smaller;
 	unsigned char * larger;
 protected:

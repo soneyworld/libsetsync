@@ -16,7 +16,7 @@
 #include "md.h"
 #endif
 namespace setsync {
-namespace utils {
+namespace crypto {
 /**
  * Wrapper class to provide a generic interface for polarssl and openssl
  */

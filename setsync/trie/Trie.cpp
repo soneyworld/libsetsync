@@ -8,7 +8,7 @@
 namespace setsync {
 namespace trie {
 
-Trie::Trie(const utils::CryptoHash& hash) :
+Trie::Trie(const crypto::CryptoHash& hash) :
 	hash_(hash) {
 	this->size = 0;
 	this->hashscratch = new unsigned char[this->hash_.getHashSize() * 2];
@@ -22,7 +22,7 @@ size_t Trie::getSize() const {
 	return this->size;
 }
 
-const utils::CryptoHash& Trie::getHash() const {
+const crypto::CryptoHash& Trie::getHash() const {
 	return this->hash_;
 }
 

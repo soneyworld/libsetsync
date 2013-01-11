@@ -105,9 +105,9 @@ Configuration::Configuration(const SET_CONFIG config) {
 
 std::string Configuration::getHashFunction() const {
 	try {
-		utils::CryptoHash hash(hashname_);
+		crypto::CryptoHash hash(hashname_);
 	} catch (...) {
-		return utils::CryptoHash::getDefaultName();
+		return crypto::CryptoHash::getDefaultName();
 	}
 	return hashname_;
 }

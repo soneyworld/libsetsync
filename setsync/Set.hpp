@@ -43,8 +43,8 @@ private:
 	bool bfOutIsFinished_;
 	std::size_t sentBytes_;
 	std::size_t receivedBytes_;
-	std::queue<utils::CryptoHashContainer> sentHashes_;
-	std::queue<utils::CryptoHashContainer> pendingSubtries_;
+	std::queue<crypto::CryptoHashContainer> sentHashes_;
+	std::queue<crypto::CryptoHashContainer> pendingSubtries_;
 	std::queue<bool> pendingAcks_;
 public:
 	/**
@@ -170,7 +170,7 @@ private:
 	/// true if the maximum is a hard limit
 	bool hardMaximum_;
 	/// The used cryptographic hash function
-	const utils::CryptoHash hash_;
+	const crypto::CryptoHash hash_;
 	/// The used configuration
 	const config::Configuration& config_;
 	/// A bloom filter instance of the set
@@ -365,7 +365,7 @@ public:
 	/**
 	 * \return the used crypto hash function
 	 */
-	virtual const utils::CryptoHash& getHashFunction() const;
+	virtual const crypto::CryptoHash& getHashFunction() const;
 
 	/**
 	 * \return the actual size of the used bloom filter in bytes

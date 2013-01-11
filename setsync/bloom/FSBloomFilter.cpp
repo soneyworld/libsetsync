@@ -27,7 +27,7 @@
 namespace setsync {
 namespace bloom {
 
-FSBloomFilter::FSBloomFilter(const utils::CryptoHash& hash, const char * file,
+FSBloomFilter::FSBloomFilter(const crypto::CryptoHash& hash, const char * file,
 		const uint64_t maxNumberOfElements, const bool hardMaximum,
 		const float falsePositiveRate) :
 	AbstractBloomFilter(hash), filehandler_(NULL) {

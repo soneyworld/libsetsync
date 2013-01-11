@@ -266,7 +266,7 @@ void SetSync::run() {
 			size_t j;
 			string color = "red";
 			size_t i = initSameElements_;
-			const setsync::utils::CryptoHash& hash = A_.getHashFunction();
+			const setsync::crypto::CryptoHash& hash = A_.getHashFunction();
 			unsigned char buffer[hash.getHashSize()];
 			for (j = 0; j < diffA; j++) {
 				stringstream ss;

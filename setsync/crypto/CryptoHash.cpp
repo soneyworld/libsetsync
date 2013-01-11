@@ -7,7 +7,7 @@
 #include <openssl/sha.h>
 #endif
 namespace setsync {
-namespace utils {
+namespace crypto {
 
 void CryptoHash::init() {
 #ifdef HAVE_OPENSSL

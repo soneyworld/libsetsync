@@ -14,7 +14,7 @@ namespace setsync {
 namespace bloom {
 class DoubleHashingSchemeTest: public CppUnit::TestFixture {
 private:
-	utils::CryptoHash hash;
+	crypto::CryptoHash hash;
 public:
 	/*=== BEGIN tests for class 'DoubleHashingScheme' ===*/
 	void testCount();

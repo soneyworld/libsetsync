@@ -32,7 +32,7 @@ public:
 	 * \param storage to save the hashes and the values
 	 * \param hash function which has been used to calculate the hashes of values to be saved
 	 */
-	KeyValueIndex(const utils::CryptoHash& hash,
+	KeyValueIndex(const crypto::CryptoHash& hash,
 			setsync::storage::AbstractKeyValueStorage& storage);
 	virtual ~KeyValueIndex();
 	/**

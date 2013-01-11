@@ -34,7 +34,7 @@ private:
 #endif
 #endif
 	setsync::storage::AbstractKeyValueStorage * storage;
-	utils::CryptoHash hash;
+	crypto::CryptoHash hash;
 	KeyValueIndex * index;
 protected:
 	void testAdding();

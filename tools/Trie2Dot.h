@@ -16,7 +16,7 @@ class Trie2Dot {
 private:
 	Db * db1_;
 	Db * db2_;
-	setsync::utils::CryptoHash hash_;
+	setsync::crypto::CryptoHash hash_;
 	setsync::trie::KeyValueTrie * trie1_;
 	setsync::trie::KeyValueTrie * trie2_;
 	setsync::storage::AbstractKeyValueStorage * storage1;

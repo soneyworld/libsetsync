@@ -11,7 +11,7 @@
 namespace setsync {
 void callback(void *closure, const unsigned char * hash, const size_t hashsize,
 		const size_t existsLocally) {
-	utils::CryptoHash h;
+	crypto::CryptoHash h;
 	if (hashsize != h.getHashSize())
 		throw "";
 	unsigned char bla1[h.getHashSize()];

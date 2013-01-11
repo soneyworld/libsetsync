@@ -22,7 +22,7 @@ public:
 	 * \param hardMaximum ensures that the the maximum of storable entries will never be exceeded
 	 * \param falsePositiveRate can be set to any value ]0,1[.
 	 */
-	FSBloomFilter(const utils::CryptoHash& hash, const char * file = NULL,
+	FSBloomFilter(const crypto::CryptoHash& hash, const char * file = NULL,
 			const uint64_t maxNumberOfElements = 10000,
 			const bool hardMaximum = false,
 			const float falsePositiveRate = 0.001);

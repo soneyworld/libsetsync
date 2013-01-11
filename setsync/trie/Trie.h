@@ -35,7 +35,7 @@ private:
 	bool needsHashPerforming;
 protected:
 	/// The used cryptographic hash algorithm
-	const utils::CryptoHash& hash_;
+	const crypto::CryptoHash& hash_;
 	/**
 	 * Sets the number of leaf nodes
 	 *
@@ -64,7 +64,7 @@ protected:
 	 */
 	void setHashingPerformed();
 public:
-	Trie(const utils::CryptoHash& hash);
+	Trie(const crypto::CryptoHash& hash);
 	/**
 	 * This method requests the number of leaf nodes in the
 	 * Trie. It gives read access to the private size variable.
@@ -72,7 +72,7 @@ public:
 	 * \return the number of leaf nodes
 	 */
 	size_t getSize() const;
-	const utils::CryptoHash& getHash() const;
+	const crypto::CryptoHash& getHash() const;
 	/// Temporary memory for hashing two child nodes
 	unsigned char * hashscratch;
 	/**

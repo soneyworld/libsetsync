@@ -24,7 +24,7 @@ CPPUNIT_TEST_SUITE( DiffHandlerTest);
 			const size_t hashsize, const size_t existsLocally);
 
 private:
-	utils::CryptoHash hash_;
+	crypto::CryptoHash hash_;
 	unsigned int counts;
 public:
 	void setUp(void) {

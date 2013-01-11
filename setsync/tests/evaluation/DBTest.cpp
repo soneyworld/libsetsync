@@ -108,7 +108,7 @@ void DBTest::runFsDb() {
 }
 
 void DBTest::runTrie(Db * db) {
-	setsync::utils::CryptoHash sha1;
+	setsync::crypto::CryptoHash sha1;
 	setsync::storage::BdbStorage storage(db);
 	setsync::trie::KeyValueTrie trie(sha1, storage);
 	clock_t start, stop, duration, iduration;

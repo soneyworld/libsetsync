@@ -36,7 +36,7 @@ public:
 	 */
 	virtual bool remove(const std::string& string);
 
-	CountingBloomFilter(const utils::CryptoHash& hash);
+	CountingBloomFilter(const crypto::CryptoHash& hash);
 	virtual ~CountingBloomFilter();
 };
 

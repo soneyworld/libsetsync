@@ -14,7 +14,7 @@ namespace setsync {
 namespace utils {
 
 std::string OutputFunctions::CryptoHashtoString(const unsigned char * hash) {
-	return CryptoHashtoString(hash, CryptoHash::getDefaultDigitLength());
+	return CryptoHashtoString(hash, crypto::CryptoHash::getDefaultDigitLength());
 }
 std::string OutputFunctions::CryptoHashtoString(const unsigned char * hash,
 		const std::size_t hashSize) {

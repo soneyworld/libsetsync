@@ -12,7 +12,7 @@ namespace setsync {
 
 namespace index {
 
-KeyValueIndex::KeyValueIndex(const utils::CryptoHash& hash,
+KeyValueIndex::KeyValueIndex(const crypto::CryptoHash& hash,
 		setsync::storage::AbstractKeyValueStorage& storage) :
 	AbstractSetIndex(hash), storage_(storage) {
 

@@ -21,7 +21,7 @@ bool CountingBloomFilter::remove(const std::string& string) {
 	return remove(c);
 }
 
-CountingBloomFilter::CountingBloomFilter(const utils::CryptoHash& hash) :
+CountingBloomFilter::CountingBloomFilter(const crypto::CryptoHash& hash) :
 	AbstractBloomFilter(hash) {
 }
 CountingBloomFilter::~CountingBloomFilter() {

@@ -14,9 +14,9 @@
 class LevelDbTest: public Test {
 private:
 	leveldb::DB* db;
-	const setsync::utils::CryptoHash& hash;
+	const setsync::crypto::CryptoHash& hash;
 public:
-	LevelDbTest(const setsync::utils::CryptoHash& hash);
+	LevelDbTest(const setsync::crypto::CryptoHash& hash);
 	virtual ~LevelDbTest();
 	virtual void runInsertTest();
 	virtual void runRequestTest();

@@ -12,7 +12,7 @@
 
 using namespace std;
 
-LevelDbTest::LevelDbTest(const setsync::utils::CryptoHash& hash) :
+LevelDbTest::LevelDbTest(const setsync::crypto::CryptoHash& hash) :
 	hash(hash) {
 	leveldb::Options options;
 	options.create_if_missing = true;

@@ -16,7 +16,7 @@ namespace bloom {
 
 class BloomFilterTest : public CppUnit::TestFixture {
 	private:
-	utils::CryptoHash hash;
+	crypto::CryptoHash hash;
 	public:
 		/*=== BEGIN tests for class 'BloomFilter' ===*/
 		void testLoad();

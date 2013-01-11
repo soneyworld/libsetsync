@@ -72,7 +72,7 @@ private:
 	/// true, if the hash of this node hasn't been updated since a new child has been added
 	bool dirty_;
 
-	const utils::CryptoHash& hashfunction_;
+	const crypto::CryptoHash& hashfunction_;
 
 	const KeyValueTrie& trie_;
 	/**
@@ -84,7 +84,7 @@ private:
 	 * \param hash of the node, which should be created or loaded
 	 * \param newone if true, a new node will be created, otherwise load the node with this hash from the given DB
 	 */
-	TrieNode(const KeyValueTrie& trie, const utils::CryptoHash& hashfunction,
+	TrieNode(const KeyValueTrie& trie, const crypto::CryptoHash& hashfunction,
 			setsync::storage::AbstractKeyValueStorage& storage,
 			const unsigned char * hash, bool newone = false);
 	/**
@@ -173,7 +173,7 @@ private:
 	 */
 	bool isEqualToLarger(const TrieNode& node) const;
 public:
-	TrieNode(const KeyValueTrie& trie, const utils::CryptoHash& hashfunction,
+	TrieNode(const KeyValueTrie& trie, const crypto::CryptoHash& hashfunction,
 			setsync::storage::AbstractKeyValueStorage& storage);
 	/**
 	 * Copies all member variables of other to the new instance
@@ -308,11 +308,11 @@ private:
 	/// The key of the <key,value> pair in the DB, where the root hash is saved as value
 	static const char root_name[];
 	/// Reference to the used cryptographic hash function
-	const utils::CryptoHash& hashfunction_;
+	const crypto::CryptoHash& hashfunction_;
 	/// Reference to the Trie, which should be used for operations
 	const KeyValueTrie& trie_;
 	KeyValueRootNode(const KeyValueTrie& trie,
-			const utils::CryptoHash& hashfunction,
+			const crypto::CryptoHash& hashfunction,
 			setsync::storage::AbstractKeyValueStorage& storage);
 	virtual ~KeyValueRootNode() {
 	}
@@ -364,7 +364,7 @@ private:
 					std::vector<TrieNode>& innerNodes,
 					std::vector<TrieNode>& leafNodes);
 public:
-	KeyValueTrie(const utils::CryptoHash& hash,
+	KeyValueTrie(const crypto::CryptoHash& hash,
 			setsync::storage::AbstractKeyValueStorage& storage);
 	virtual ~KeyValueTrie();
 	/**

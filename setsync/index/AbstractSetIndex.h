@@ -29,12 +29,12 @@ namespace index {
 class AbstractSetIndex {
 protected:
 	/// Hash function used to create the key
-	const utils::CryptoHash& hash_;
+	const crypto::CryptoHash& hash_;
 public:
 	/**
 	 * \param hash function to be used by the Index
 	 */
-	AbstractSetIndex(const utils::CryptoHash& hash);
+	AbstractSetIndex(const crypto::CryptoHash& hash);
 	virtual ~AbstractSetIndex();
 	/**
 	 * Puts the given data with the given length to the index.

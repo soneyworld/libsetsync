@@ -14,7 +14,7 @@ namespace setsync {
 namespace bloom {
 class FSBloomFilterTest: public CppUnit::TestFixture {
 private:
-	utils::CryptoHash hash;
+	crypto::CryptoHash hash;
 public:
 	/*=== BEGIN tests for class 'FSBloomFilter' ===*/
 	void testLoad();

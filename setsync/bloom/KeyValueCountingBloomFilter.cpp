@@ -11,7 +11,7 @@ namespace setsync {
 namespace bloom {
 
 KeyValueCountingBloomFilter::KeyValueCountingBloomFilter(
-		const utils::CryptoHash& hash,
+		const crypto::CryptoHash& hash,
 		setsync::storage::AbstractKeyValueStorage& storage,
 		const std::string& file, const uint64_t maxNumberOfElements,
 		const bool hardMaximum, const float falsePositiveRate) :

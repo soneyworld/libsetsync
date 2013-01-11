@@ -123,7 +123,7 @@ size_t SynchronizationProcess::getSubTrie(unsigned char * buffer,
 		std::size_t entries = subtriesize / hashsize;
 		for (std::size_t i = 0; i < entries; i++) {
 			this->sentHashes_.push(
-					utils::CryptoHashContainer(this->set_->getHashFunction(),
+					crypto::CryptoHashContainer(this->set_->getHashFunction(),
 							buffer + i * hashsize));
 		}
 		this->sentBytes_ += subtriesize;
@@ -195,7 +195,7 @@ void SynchronizationProcess::processAcks(const unsigned char * buffer,
 						newroot[this->set_->getHashFunction().getHashSize()];
 				if (this->getRootHash(newroot))
 					this->pendingSubtries_.push(
-							utils::CryptoHashContainer(
+							crypto::CryptoHashContainer(
 									this->set_->getHashFunction(), newroot));
 
 			}
@@ -215,7 +215,7 @@ bool SynchronizationProcess::isSubtrieOutputAvailable() {
 		if (this->getRootHash(root)) {
 			this->stat_ = TRIE;
 			this->pendingSubtries_.push(
-					utils::CryptoHashContainer(this->set_->getHashFunction(),
+					crypto::CryptoHashContainer(this->set_->getHashFunction(),
 							root));
 			return isSubtrieOutputAvailable();
 		} else {
@@ -594,7 +594,7 @@ void Set::clear() {
 	this->indexInUse_ = false;
 }
 
-const utils::CryptoHash& Set::getHashFunction() const {
+const crypto::CryptoHash& Set::getHashFunction() const {
 	return this->hash_;
 }
 

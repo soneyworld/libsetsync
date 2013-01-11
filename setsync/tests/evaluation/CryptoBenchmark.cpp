@@ -23,8 +23,8 @@ void CryptoBenchmark::run() {
 #else
 	std::cout << "POLARSSL BENCHMARK" << std::endl;
 #endif
-	utils::CryptoHash md5("md5");
-	utils::CryptoHash sha1("sha1");
+	crypto::CryptoHash md5("md5");
+	crypto::CryptoHash sha1("sha1");
 	std::string s = "HASH ME, I AM A STRING";
 	StopWatch w;
 	unsigned char md5buffer[md5.getHashSize()];
