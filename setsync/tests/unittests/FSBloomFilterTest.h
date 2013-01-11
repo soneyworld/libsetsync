@@ -23,6 +23,7 @@ class FSBloomFilterTest : public CppUnit::TestFixture {
 		void testOperatorAndAndAssign();
 		void testOperatorInclusiveOrAndAssign();
 		void testOperatorXorAndAssign();
+		void testFilterSize();
 		/*=== END   tests for class 'FSBloomFilter' ===*/
 
 		void setUp();
@@ -37,6 +38,7 @@ class FSBloomFilterTest : public CppUnit::TestFixture {
 			CPPUNIT_TEST(testOperatorAndAndAssign);
 			CPPUNIT_TEST(testOperatorInclusiveOrAndAssign);
 			CPPUNIT_TEST(testOperatorXorAndAssign);
+			CPPUNIT_TEST(testFilterSize);
 		CPPUNIT_TEST_SUITE_END();
 };
 CPPUNIT_TEST_SUITE_REGISTRATION( FSBloomFilterTest);

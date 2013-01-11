@@ -40,18 +40,17 @@ void Trie2Dot::out() {
 	}
 	cout << trie1_->Trie::toDotString();
 	cout << trie2_->toDotString("_");
-	int max_cut_size = 2;
+	int max_cut_size = 5;
 	unsigned char buffer[max_cut_size * hash_.getHashSize()];
 	unsigned char root[hash_.getHashSize()];
 	trie1_->getRoot(root);
-	for (int i = max_cut_size; i <= max_cut_size; i++) {
 		// unsigned short color = i * (200 / max_cut_size);
 		//		cout << "subgraph cluster_" << i << " {" << endl;
 		//		cout << "label=\"cutsize: " << i << "\"" << endl;
 		//		cout << "style=filled;" << endl;
 		size_t cutsize = trie1_->getSubTrie(root, buffer,
-				hash_.getHashSize() * i);
-		for (size_t j = 0; j < cutsize / hash_.getHashSize(); j++) {
+				hash_.getHashSize() * max_cut_size);
+		for (size_t j = 0; j < (cutsize / hash_.getHashSize()); j++) {
 			string color = "grey";
 			if (trie1_->contains(buffer + j * hash_.getHashSize()) == LEAF_NODE) {
 				color = "green";
@@ -68,7 +67,6 @@ void Trie2Dot::out() {
 					<< " [style=filled color=\"" << color << "\"];" << endl;
 		}
 		//		cout << "}" << endl;
-	}
 
 	cout << "}" << endl;
 }

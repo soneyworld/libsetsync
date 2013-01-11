@@ -105,14 +105,11 @@ int main(int ac, char **av) {
 			if (iter == args.end()) {
 				printUsage();
 			}
-			if (*iter == "BLOOM") {
-				cout << "Type=BLOOM" << endl;
+			if (*iter == "BF") {
 				type = evaluation::LOOSE;
 			} else if (*iter == "TRIE") {
-				cout << "Type=TRIE" << endl;
 				type = evaluation::STRICT;
 			} else if (*iter == "BOTH") {
-				cout << "Type=BOTH" << endl;
 				type = evaluation::BOTH;
 			} else {
 				printUsage();

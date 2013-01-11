@@ -35,6 +35,25 @@ void FSBloomFilterTest::testLoad() {
 	CPPUNIT_ASSERT(Filter2.AbstractBloomFilter::contains("hello"));
 }
 
+void FSBloomFilterTest::testFilterSize() {
+	double falsePositive = 0.00001;
+	uint64_t filtersize = 10000000000000;
+	int numberOfElements = 100000;
+	while( falsePositive < 1){
+		uint64_t calculated = ceil(
+				(numberOfElements * log(falsePositive)) / log(
+						1.0 / (pow(2.0, log(2.0)))));
+		CPPUNIT_ASSERT(calculated <= filtersize);
+		filtersize = calculated;
+		falsePositive += 0.00001;
+	}
+
+	bloom::FSBloomFilter Filter1(hash, NULL, 10, false, 0.011);
+	bloom::FSBloomFilter Filter2(hash, NULL, 10, false, 0.012);
+	CPPUNIT_ASSERT(Filter1.size()>=Filter2.size());
+}
+
+
 void FSBloomFilterTest::testInsert() {
 	bloom::FSBloomFilter Filter1(hash, NULL, 10, false, 0.01);
 

@@ -54,8 +54,10 @@ void FSBloomFilter::init(const float falsePositiveRate, const bool hardMaximum,
 		const uint64_t numberOfElements) {
 	this->bitArray_ = NULL;
 	if (falsePositiveRate >= 1 || falsePositiveRate <= 0) {
-		std::cout << "Wrong false positive rate" << std::endl;
-		throw std::runtime_error("Wrong false positive rate");
+		std::stringstream ss;
+		ss << "Wrong false positive rate: "<<falsePositiveRate;
+		std::cout << ss.str()<< std::endl;
+		throw std::runtime_error(ss.str());
 	}
 
 	this->hardMaximum_ = hardMaximum;
