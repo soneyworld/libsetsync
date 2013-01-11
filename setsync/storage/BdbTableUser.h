@@ -7,6 +7,8 @@
 #ifndef BERKELEYDBTABLEUSERINTERFACE_H_
 #define BERKELEYDBTABLEUSERINTERFACE_H_
 #include "db_cxx.h"
+namespace setsync {
+namespace storage {
 /**
  * Berkeley DB helper classes and interfaces
  */
@@ -25,7 +27,9 @@ private:
 	const bool txn_enabled_;
 public:
 	AbstractBdbTableUser(Db * db, DbTxn * txn = NULL);
-	virtual ~AbstractBdbTableUser(){};
+	virtual ~AbstractBdbTableUser() {
+	}
+	;
 	/**
 	 * Should return the logical database table name, which must
 	 * be passed to the berkeley DB open method as parameter.
@@ -79,5 +83,7 @@ public:
 	 */
 	virtual bool isTransactionEnabled(void) const;
 };
+}
+}
 }
 #endif /* BERKELEYDBTABLEUSERINTERFACE_H_ */

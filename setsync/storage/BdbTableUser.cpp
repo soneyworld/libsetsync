@@ -6,10 +6,13 @@
 
 #include "BdbTableUser.h"
 #include <setsync/utils/BerkeleyDB.h>
+namespace setsync {
+namespace storage {
 namespace berkeley {
 
 AbstractBdbTableUser::AbstractBdbTableUser(Db * db, DbTxn * txn) :
-	txn_(txn), txn_enabled_(setsync::utils::BerkeleyDB::isTransactionEnabled(db)) {
+	txn_(txn),
+			txn_enabled_(setsync::utils::BerkeleyDB::isTransactionEnabled(db)) {
 }
 
 void AbstractBdbTableUser::setParentTransaction(DbTxn * txn) {
@@ -23,5 +26,6 @@ DbTxn * AbstractBdbTableUser::getParentTransaction(void) const {
 bool AbstractBdbTableUser::isTransactionEnabled(void) const {
 	return this->txn_enabled_;
 }
-
+}
+}
 }
