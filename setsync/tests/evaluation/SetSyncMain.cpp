@@ -62,6 +62,7 @@ void printUsage() {
 			<< endl
 			<< "\t                                   from set A and B wit the error marked red[default=off]"
 			<< endl;
+	cout    << "\t--oneway                           If only A\\B is calculated[default=off]" << endl;
 
 	cout << "\t-?, --help                         prints out this message"
 			<< endl;
@@ -84,6 +85,7 @@ int main(int ac, char **av) {
 	size_t maxelements = a + b - same;
 	bool maxIsGiven = false;
 	bool dot = false;
+	bool oneway = false;
 	evaluation::SyncType type = evaluation::BOTH;
 	for (iter = args.begin(); iter != args.end(); ++iter) {
 		if (*iter == "--storage" || *iter == "-s") {
@@ -122,6 +124,8 @@ int main(int ac, char **av) {
 			config.function = SHA_1;
 		} else if (*iter == "--dot") {
 			dot = true;
+		}else if(*iter == "--oneway") {
+			oneway = true;
 		} else if (*iter == "A") {
 			iter++;
 			if (iter == args.end()) {
