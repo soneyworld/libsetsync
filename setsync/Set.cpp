@@ -317,7 +317,7 @@ Set::Set(const config::Configuration& config) :
 		indexpath.append("index");
 		indexStorage_ = new storage::LevelDbStorage(indexpath);
 	}
-	break;
+		break;
 #endif
 #ifdef HAVE_DB_CXX_H
 	case config::Configuration::StorageConfig::BERKELEY_DB: {
@@ -332,24 +332,13 @@ Set::Set(const config::Configuration& config) :
 			this->env_->close(0);
 			throw "Failed to open berkeley db database env";
 		}
+		if (config_.getStorage().isCacheSizeGiven()) {
+			this->env_->set_cachesize(config_.getStorage().getGByteCacheSize(),
+					config_.getStorage().getByteCacheSize(), 0);
+		}
 		this->bfdb = new Db(this->env_, 0);
 		this->triedb = new Db(this->env_, 0);
 		this->indexdb = new Db(this->env_, 0);
-		if (config_.getStorage().isCacheSizeGiven()) {
-			std::size_t halfcache = config_.getStorage().getByteCacheSize() / 2;
-			std::size_t halfgbcache = config_.getStorage().getGByteCacheSize()
-					/ 2;
-			if (config_.getStorage().getGByteCacheSize() % 2 == 1) {
-				std::size_t remainder = GIGABYTE / 2;
-				halfcache += remainder;
-				if (halfcache > GIGABYTE) {
-					halfgbcache += halfcache / GIGABYTE;
-					halfcache = halfcache % GIGABYTE;
-				}
-			}
-			this->bfdb->set_cachesize(halfgbcache, halfcache, 0);
-			this->triedb->set_cachesize(halfgbcache, halfcache, 0);
-		}
 		this->bfdb->open(NULL, "set", "bf", DB_HASH, DB_CREATE, 0);
 		this->triedb->open(NULL, "set", "trie", DB_HASH, DB_CREATE, 0);
 		this->indexdb->open(NULL, "set", "in", DB_HASH, DB_CREATE, 0);
