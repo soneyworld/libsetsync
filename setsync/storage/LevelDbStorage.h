@@ -63,11 +63,24 @@ public:
 	/**
 	 * Creates a new key value store at the given path, or
 	 * loads an existing store.
+	 *
+	 * \param path where the database exists, or should be saved to
 	 */
 	LevelDbStorage(const std::string& path);
 	/**
 	 * Creates a new key value store at the given path, or
+	 * loads an existing store. The given Cache size is used.
+	 *
+	 * \param path where the database exists, or should be saved to
+	 * \param cache_capacity with can be used
+	 */
+	LevelDbStorage(const std::string& path, const std::size_t cache_capacity);
+	/**
+	 * Creates a new key value store at the given path, or
 	 * loads an existing store.
+	 *
+	 * \param path where the database exists, or should be saved to
+	 * \param options will be used for this storage
 	 */
 	LevelDbStorage(const std::string& path, const leveldb::Options& options);
 	/**
@@ -89,6 +102,8 @@ public:
 	LevelDbStorage(const std::string& path, const leveldb::Options& options,
 			const leveldb::ReadOptions& roptions,
 			const leveldb::WriteOptions& woptions);
+
+
 	/**
 	 * Closes the connection to the key value store
 	 */

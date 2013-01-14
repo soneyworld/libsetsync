@@ -8,6 +8,7 @@
 #include <setsync/utils/FileSystem.h>
 #include <setsync/storage/StorageException.h>
 #include <stdlib.h>
+#include <leveldb/cache.h>
 
 namespace setsync {
 
@@ -40,6 +41,15 @@ void LevelDbIterator::key(unsigned char * buffer) const {
 
 LevelDbStorage::LevelDbStorage(const std::string& path) :
 	path_(path) {
+	init();
+}
+
+LevelDbStorage::LevelDbStorage(const std::string& path,
+		const std::size_t cache_capacity) :
+	path_(path) {
+	if (cache_capacity > 0) {
+		options_.block_cache = leveldb::NewLRUCache(cache_capacity);
+	}
 	init();
 }
 
@@ -78,6 +88,9 @@ void LevelDbStorage::init() {
 
 LevelDbStorage::~LevelDbStorage() {
 	delete this->db_;
+	if (this->options_.block_cache != NULL) {
+		delete this->options_.block_cache;
+	}
 }
 
 bool LevelDbStorage::get(const unsigned char * key, const std::size_t length,

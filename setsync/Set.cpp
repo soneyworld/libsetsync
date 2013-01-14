@@ -309,10 +309,17 @@ Set::Set(const config::Configuration& config) :
 		}
 		std::string triepath(path);
 		triepath.append("trie");
-		trieStorage_ = new storage::LevelDbStorage(triepath);
+		std::size_t cachesize = 0; // If 0, the default will be used
+		if(config_.getStorage().isCacheSizeGiven()){
+			std::size_t size = config_.getStorage().getByteCacheSize();
+			std::size_t gbsize = config_.getStorage().getGByteCacheSize();
+			std::size_t cache = GIGABYTE * gbsize + size;
+			cachesize = cache / 2;
+		}
+		trieStorage_ = new storage::LevelDbStorage(triepath, cachesize);
 		std::string bfpath(path);
 		bfpath.append("bloom");
-		bfStorage_ = new storage::LevelDbStorage(bfpath);
+		bfStorage_ = new storage::LevelDbStorage(bfpath, cachesize);
 		std::string indexpath(path);
 		indexpath.append("index");
 		indexStorage_ = new storage::LevelDbStorage(indexpath);
