@@ -1,7 +1,19 @@
 Requirements to build this library:
 
-Ubuntu 12.04:
-apt-get install build-essential libdb++-dev autoconf libtool libcppunit-dev pkg-config
+- C++ Compiler
+- Berkeley DB library + C++ Interface
+
+Including this lib into your own project can be done with the tool pkg-config and its provided
+configuration file setsync.pc
+
+Building the source from a repository checkout needs also the tools libtool and autoconf. To build to needed configure files, please execute the autogen.sh script. To create a source distribution package, please execute make dist.
+
+The source code documentation can be generated with doxygen. The default configuration, given as doc/setsync.doxyfile configuration file, can be used from this folder.
+
+Installing instructions for Ubuntu 12.04:
+apt-get install build-essential libdb++-dev autoconf libtool pkg-config
  
 optional:
-apt-get install libsqlite3-dev libssl-dev libsnappy-dev libleveldb-dev
+apt-get install libsqlite3-dev libssl-dev libsnappy-dev libleveldb-dev libcppunit-dev doxygen
+
+
