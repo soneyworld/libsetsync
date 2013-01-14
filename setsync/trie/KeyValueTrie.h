@@ -348,6 +348,8 @@ private:
 	KeyValueRootNode * root_;
 	/// Reference to the used key value storage
 	setsync::storage::AbstractKeyValueStorage& storage_;
+	/// The key of the <key,value> pair in the DB, where the size is saved as value
+	static const char sizeKey[];
 	/**
 	 * Adds a cut through the subtree of the given root node.
 	 * The numberOfNodes is the maximum number of nodes, to be

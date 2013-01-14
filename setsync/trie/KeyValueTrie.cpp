@@ -36,6 +36,7 @@ void TrieNode::marshall(const TrieNode& source,
 }
 
 const char KeyValueRootNode::root_name[] = "root";
+const char KeyValueTrie::sizeKey[] = "triesize";
 
 KeyValueRootNode::KeyValueRootNode(const KeyValueTrie& trie,
 		const crypto::CryptoHash& hashfunction,
@@ -692,9 +693,23 @@ KeyValueTrie::KeyValueTrie(const crypto::CryptoHash& hash,
 		setsync::storage::AbstractKeyValueStorage& storage) :
 	Trie(hash), storage_(storage) {
 	this->root_ = new KeyValueRootNode(*this, hash, storage_);
+	size_t * sp;
+	size_t valuesize;
+	if (this->storage_.get((unsigned char *) sizeKey, strlen(sizeKey),
+			(unsigned char **) &sp, &valuesize)) {
+		if (valuesize == sizeof(size_t)) {
+			this->setSize(*sp);
+		}
+		delete sp;
+	}
 }
 
 KeyValueTrie::~KeyValueTrie() {
+	if (this->getSize() > 0) {
+		size_t size = getSize();
+		this->storage_.put((unsigned char *) sizeKey, strlen(sizeKey),
+				(unsigned char*) &size, sizeof(size_t));
+	}
 	delete this->root_;
 }
 
