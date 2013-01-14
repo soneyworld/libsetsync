@@ -29,6 +29,7 @@ CPPUNIT_TEST_SUITE(KeyValueCountingBloomFilterTest);
 		CPPUNIT_TEST(testContainsAll);
 		CPPUNIT_TEST(testDiff);
 		CPPUNIT_TEST(testToString);
+		CPPUNIT_TEST(testSize);
 	CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -56,6 +57,7 @@ public:
 	void testContainsAll();
 	void testDiff();
 	void testToString();
+	void testSize();
 
 	void setUp();
 	void tearDown();

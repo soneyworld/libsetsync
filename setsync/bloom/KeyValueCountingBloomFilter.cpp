@@ -10,6 +10,8 @@
 namespace setsync {
 namespace bloom {
 
+const char KeyValueCountingBloomFilter::sizeKey[] = "bfsize";
+
 KeyValueCountingBloomFilter::KeyValueCountingBloomFilter(
 		const crypto::CryptoHash& hash,
 		setsync::storage::AbstractKeyValueStorage& storage,
@@ -36,6 +38,16 @@ KeyValueCountingBloomFilter::KeyValueCountingBloomFilter(
 			compute_indices(pos, bit_index, bit);
 			// Sets the found bit to the filter
 			this->bitArray_[bit_index] |= bit_mask[bit];
+		} else if (iter->keySize() == strlen(sizeKey)) {
+			uint64_t * size;
+			size_t valuesize;
+			if (this->storage_.get((unsigned char *) sizeKey, strlen(sizeKey),
+					(unsigned char **) &size, &valuesize)) {
+				if (valuesize == sizeof(uint64_t)) {
+					this->itemCount_ = *size;
+				}
+				delete size;
+			}
 		}
 		iter->next();
 	}
@@ -43,7 +55,10 @@ KeyValueCountingBloomFilter::KeyValueCountingBloomFilter(
 }
 
 KeyValueCountingBloomFilter::~KeyValueCountingBloomFilter() {
-
+	if (this->itemCount_ > 0) {
+		this->storage_.put((unsigned char*) sizeKey, strlen(sizeKey),
+				(unsigned char*) &itemCount_, sizeof(uint64_t));
+	}
 }
 void KeyValueCountingBloomFilter::diff(const unsigned char * externalBF,
 		const std::size_t length, const std::size_t offset,

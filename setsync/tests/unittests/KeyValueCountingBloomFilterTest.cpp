@@ -277,5 +277,23 @@ void KeyValueCountingBloomFilterTest::testToString() {
 	}
 	FilterA.toString();
 }
+
+void KeyValueCountingBloomFilterTest::testSize() {
+	uint64_t size = 0;
+	{
+		bloom::KeyValueCountingBloomFilter Filter1(hashFunction_, *storage1,
+				"", 10, false, 0.01);
+		Filter1.AbstractBloomFilter::add("bla1");
+		Filter1.AbstractBloomFilter::add("bla2");
+		Filter1.AbstractBloomFilter::add("bla3");
+		Filter1.AbstractBloomFilter::add("bla4");
+		size = Filter1.numberOfElements();
+	}
+	{
+		bloom::KeyValueCountingBloomFilter Filter1(hashFunction_, *storage1,
+				"", 10, false, 0.01);
+		CPPUNIT_ASSERT(size == Filter1.numberOfElements());
+	}
+}
 }
 }

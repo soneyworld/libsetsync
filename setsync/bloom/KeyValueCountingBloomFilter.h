@@ -26,6 +26,8 @@ class KeyValueCountingBloomFilter: public CountingBloomFilter,
 	friend class KeyValueCountingBloomFilterTest;
 	friend class KeyValueBloomFilterSyncTest;
 	friend class KeyValueBloomFilterSync;
+private:
+	static const char sizeKey[];
 protected:
 	setsync::storage::AbstractKeyValueStorage& storage_;
 public:
