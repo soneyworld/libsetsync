@@ -43,14 +43,14 @@ std::size_t SynchronizationProcess::getReceivedBytes() const {
 std::size_t SynchronizationProcess::calcOutputBufferSize(const size_t RTT,
 		const size_t bandwidth) const {
 	if (RTT == 0) {
-		return this->set_->hash_.getHashSize() * 2;
+		return getMinBuffer();
 	} else {
 		double rtt = RTT;
 		rtt = rtt / 1000000;
 		double bw = bandwidth;
 		double bits = bw * rtt;
 		std::size_t result = (std::size_t) (bits / 8.0);
-		return result;
+		return std::max(result, getMinBuffer());
 	}
 }
 
@@ -310,7 +310,7 @@ Set::Set(const config::Configuration& config) :
 		std::string triepath(path);
 		triepath.append("trie");
 		std::size_t cachesize = 0; // If 0, the default will be used
-		if(config_.getStorage().isCacheSizeGiven()){
+		if (config_.getStorage().isCacheSizeGiven()) {
 			std::size_t size = config_.getStorage().getByteCacheSize();
 			std::size_t gbsize = config_.getStorage().getGByteCacheSize();
 			std::size_t cache = GIGABYTE * gbsize + size;

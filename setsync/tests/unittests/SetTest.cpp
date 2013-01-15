@@ -91,6 +91,9 @@ void SetTest::testSync() {
 	SynchronizationProcess * remoteprocess = remoteset.createSyncProcess();
 	setsync::ListDiffHandler remoteDiffHandler;
 	std::size_t buffersize = localset.getHashFunction().getHashSize();
+
+	CPPUNIT_ASSERT(localprocess->calcOutputBufferSize(1,1024*8)>=localprocess->getMinBuffer());
+	CPPUNIT_ASSERT(localprocess->calcOutputBufferSize(1000000,1024*8) == 1024);
 	unsigned char buffer[buffersize];
 	std::size_t sending;
 	while (localprocess->isBloomFilterOutputAvail()) {

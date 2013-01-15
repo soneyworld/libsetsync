@@ -61,7 +61,7 @@ public:
 	/**
 	 * Calculates the optimal size of a sending buffer for the given network parameter.
 	 *
-	 * \param RTT round trip time in nanoseconds
+	 * \param RTT round trip time in microseconds
 	 * \param bandwidth in bits per second
 	 * \return the optimal size of a sending buffer
 	 */
