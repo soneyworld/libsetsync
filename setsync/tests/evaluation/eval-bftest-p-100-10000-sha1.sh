@@ -54,7 +54,9 @@ while [ "$SALT" != "$MAXSALT" ]; do
 	while  float_cond "$COUNTER <= $MAX_A"; do
 		P=$(float_eval "$MAX_ERROR / $COUNTER")
 		FILE="${_PATH}/a_${COUNTER}p_${P}_salt_${SALT}.csv"
+		if [ ! -f $FILE ]; then 
 		./bftest A $COUNTER salt $SALT p $P > $FILE
+		fi
 		echo "$FILE"
 		let COUNTER=$COUNTER+$STEPSIZE
 	done
