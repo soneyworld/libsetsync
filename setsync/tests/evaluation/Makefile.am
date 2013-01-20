@@ -33,6 +33,11 @@ crypto_SOURCES = \
 	Test.h \
 	CryptoBenchmark.h \
 	CryptoBenchmark.cpp
+	
+bftest_SOURCES = \
+	Test.h \
+	BloomFilterDiff.h \
+	BloomFilterDiff.cpp
 
 # what flags you want to pass to the C compiler & linker
 AM_CPPFLAGS = -fopenmp
@@ -62,7 +67,7 @@ AM_LDFLAGS += @IBRCOMMON_LIBS@
 endif
 
 
-noinst_PROGRAMS=evaluation ssync crypto
+noinst_PROGRAMS=evaluation ssync crypto bftest
 evaluation_CXXFLAGS = ${AM_CPPFLAGS}
 ssync_CXXFLAGS =  ${AM_CPPFLAGS}
 crypto_CXXFLAGS =  ${AM_CPPFLAGS}
@@ -72,4 +77,9 @@ crypto_LDFLAGS = ${AM_LDFLAGS}
 evaluation_LDADD = @top_srcdir@/setsync/libsetsync.la
 ssync_LDADD = @top_srcdir@/setsync/libsetsync.la
 crypto_LDADD = @top_srcdir@/setsync/libsetsync.la
+
+bftest_CXXFLAGS = ${AM_CPPFLAGS}
+bftest_LDFLAGS = ${AM_LDFLAGS}
+bftest_LDADD = @top_srcdir@/setsync/libsetsync.la
+
 INCLUDES = -I@top_srcdir@
