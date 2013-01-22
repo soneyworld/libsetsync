@@ -21,11 +21,11 @@ BloomFilterDiff::BloomFilterDiff(const setsync::crypto::CryptoHash& hash,
 	uint64_t i;
 	unsigned char buffer[hash.getHashSize()];
 
-	for (i = salt; i < A+salt; i++) {
+	for (i = salt*A; i < A+A*salt; i++) {
 		hash(buffer, (unsigned char *) &i, sizeof(uint64_t));
 		A_.add(buffer);
 	}
-	for (; i < 2 * A+salt; i++) {
+	for (; i < 2 * A+A*salt; i++) {
 		hash(buffer, (unsigned char *) &i, sizeof(uint64_t));
 		B_.add(buffer);
 	}
