@@ -56,9 +56,9 @@ while [ "$SALT" != "$MAXSALT" ]; do
 	while  float_cond "$COUNTER <= $MAX_P"; do
 		FILE="${_PATH}/a_${A}p_${COUNTER}_salt_${SALT}.csv"
 		if [ ! -f $FILE ]; then 
-		./bftest A $A salt $SALT p $COUNTER --$HASH > $FILE
+			./bftest A $A salt $SALT p $COUNTER --$HASH > $FILE
+			echo "$FILE"
 		fi
-		echo "$FILE"
 		COUNTER=$(float_eval "$COUNTER + $MIN_P")
 	done
 	let SALT=SALT+1
