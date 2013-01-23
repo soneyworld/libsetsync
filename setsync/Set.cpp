@@ -113,7 +113,7 @@ size_t SynchronizationProcess::getSubTrie(unsigned char * buffer,
 		std::size_t subtriesize;
 		try {
 			subtriesize = this->set_->trie_->getSubTrie(
-					pendingSubtries_.front().get(), buffer, buffersize);
+					pendingSubtries_.top().get(), buffer, buffersize);
 		} catch (...) {
 			pendingSubtries_.pop();
 			return getSubTrie(buffer, buffersize);

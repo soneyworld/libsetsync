@@ -17,6 +17,7 @@
 #include <setsync/config/Configuration.h>
 #include <setsync/utils/FileSystem.h>
 #include <queue>
+#include <stack>
 
 #ifdef HAVE_DB_CXX_H
 #include <db_cxx.h>
@@ -44,7 +45,7 @@ private:
 	std::size_t sentBytes_;
 	std::size_t receivedBytes_;
 	std::queue<crypto::CryptoHashContainer> sentHashes_;
-	std::queue<crypto::CryptoHashContainer> pendingSubtries_;
+	std::stack<crypto::CryptoHashContainer> pendingSubtries_;
 	std::queue<bool> pendingAcks_;
 public:
 	/**
