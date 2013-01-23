@@ -28,7 +28,6 @@ private:
 	const size_t bufferSize_;
 	const SyncType type_;
 	const string initSalt_;
-	const bool printDot_;
 	string dbType_;
 	string hashType_;
 	setsync::config::Configuration configA_;
@@ -40,6 +39,8 @@ private:
 	StopWatch insertWatchA;
 	StopWatch insertWatchB;
 	uint64_t diffSize_;
+	const bool printDot_;
+	const bool synchron_;
 	void runLooseSync(setsync::SynchronizationProcess * processA,
 			setsync::SynchronizationProcess * processB);
 	void runStrictSync(setsync::SynchronizationProcess * processA,
@@ -51,7 +52,7 @@ private:
 public:
 	SetSync(const SET_CONFIG config, const size_t initA, const size_t initB,
 			const size_t sameElements, const SyncType type, const string salt,
-			const size_t maximumBufferSize, const bool printDotOnError = false);
+			const size_t maximumBufferSize, const bool printDotOnError, const bool synchron);
 	virtual ~SetSync();
 	virtual void run();
 };

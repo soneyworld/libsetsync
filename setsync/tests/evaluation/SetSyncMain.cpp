@@ -62,7 +62,12 @@ void printUsage() {
 			<< endl
 			<< "\t                                   from set A and B wit the error marked red[default=off]"
 			<< endl;
-	cout    << "\t--oneway                           If only A\\B is calculated[default=off]" << endl;
+	cout
+			<< "\t--oneway                           If only A\\B is calculated[default=off]"
+			<< endl;
+	cout
+			<< "\t--absolute-synchron                If this is given, the sync process does not work asynchron"
+			<< endl;
 
 	cout << "\t-?, --help                         prints out this message"
 			<< endl;
@@ -86,6 +91,7 @@ int main(int ac, char **av) {
 	bool maxIsGiven = false;
 	bool dot = false;
 	bool oneway = false;
+	bool synchron = false;
 	evaluation::SyncType type = evaluation::BOTH;
 	for (iter = args.begin(); iter != args.end(); ++iter) {
 		if (*iter == "--storage" || *iter == "-s") {
@@ -124,7 +130,7 @@ int main(int ac, char **av) {
 			config.function = SHA_1;
 		} else if (*iter == "--dot") {
 			dot = true;
-		}else if(*iter == "--oneway") {
+		} else if (*iter == "--oneway") {
 			oneway = true;
 		} else if (*iter == "A") {
 			iter++;
@@ -169,7 +175,10 @@ int main(int ac, char **av) {
 				printUsage();
 			}
 			istringstream(*iter) >> config.false_positive_rate;
+		}else if (*iter == "--absolute-synchron") {
+			synchron = true;
 		}
+
 	}
 	if (!maxIsGiven) {
 		maxelements = a + b - same;
@@ -196,7 +205,7 @@ int main(int ac, char **av) {
 	{
 		config.bf_max_elements = maxelements;
 		evaluation::SetSync test(config, a, b, same, type, salt, buffersize,
-				dot);
+				dot, synchron);
 		test.run();
 	}
 }

@@ -15,11 +15,11 @@ namespace evaluation {
 
 SetSync::SetSync(const SET_CONFIG config, const size_t initA,
 		const size_t initB, const size_t sameElements, const SyncType type,
-		const string salt, const size_t maximumBufferSize, const bool printDot) :
+		const string salt, const size_t maximumBufferSize, const bool printDot, const bool synchron) :
 	initA_(initA), initB_(initB), initSameElements_(sameElements),
 			bufferSize_(maximumBufferSize), type_(type), initSalt_(salt),
 			configA_(config), configB_(config), A_(configA_), B_(configB_),
-			printDot_(printDot) {
+			printDot_(printDot), synchron_(synchron) {
 	if (sameElements > initA || sameElements > initB) {
 		if (sameElements > initA) {
 			cout << "Illegal argument: A is smaller as equal elements" << endl;
@@ -153,6 +153,8 @@ void SetSync::runStrictSync(setsync::SynchronizationProcess * processA,
 			}
 			handlerB.clear();
 			printLine(processA, processB, "trieAckA->B");
+			if(synchron_)
+				break;
 		}
 		while (processB->isAckOutputAvailable()) {
 			watchB.start();
@@ -170,6 +172,8 @@ void SetSync::runStrictSync(setsync::SynchronizationProcess * processA,
 			}
 			handlerA.clear();
 			printLine(processA, processB, "trieAckB->A");
+			if(synchron_)
+				break;
 		}
 		while (processB->isSubtrieOutputAvailable()) {
 			watchB.start();
@@ -179,6 +183,8 @@ void SetSync::runStrictSync(setsync::SynchronizationProcess * processA,
 			acksize = processA->processSubTrie(buffer, subtriesize);
 			watchA.stop();
 			printLine(processA, processB, "trieSubB->A");
+			if(synchron_)
+				break;
 		}
 		while (processA->isSubtrieOutputAvailable()) {
 			watchA.start();
@@ -188,6 +194,8 @@ void SetSync::runStrictSync(setsync::SynchronizationProcess * processA,
 			acksize = processB->processSubTrie(buffer, subtriesize);
 			watchB.stop();
 			printLine(processA, processB, "trieSubA->B");
+			if(synchron_)
+				break;
 		}
 	}
 }
