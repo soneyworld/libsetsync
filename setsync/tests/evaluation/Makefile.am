@@ -17,6 +17,8 @@ evaluation_SOURCES = \
 	SetTest.cpp \
 	SetSync.h \
 	SetSync.cpp \
+	SpeedTest.h \
+	SpeedTest.cpp \
 	Test.h
 
 ssync_SOURCES = \

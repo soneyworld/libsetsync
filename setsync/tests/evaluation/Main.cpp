@@ -11,6 +11,7 @@
 #include "SetTest.h"
 #include "SetSync.h"
 #include "StopWatch.h"
+#include "SpeedTest.h"
 #ifdef HAVE_LEVELDB
 #include "LevelDbTest.h"
 #endif
@@ -18,7 +19,13 @@
 #include <set>
 #include <setsync/Set.hpp>
 #include <setsync/config/Configuration.h>
-
+#ifdef HAVE_DB_CXX_H
+#include <setsync/storage/MemStorage.h>
+#include <setsync/storage/BdbStorage.h>
+#endif
+#ifdef HAVE_LEVELDB
+#include <setsync/storage/LevelDbStorage.h>
+#endif
 #ifdef HAVE_SQLITE
 #include "SQLiteTest.h"
 #endif
@@ -40,6 +47,7 @@ int main(int ac, char **av) {
 #ifdef HAVE_SQLITE
 		std::cout << "--sql-test" << std::endl;
 #endif
+		std::cout << "--insert-get-del-test" << std::endl;
 #ifdef HAVE_LEVELDB
 		std::cout << "--leveldb-test" << std::endl;
 		std::cout << "--leveldb-size-test" << std::endl;
@@ -52,6 +60,8 @@ int main(int ac, char **av) {
 		std::cout << "--all-tests" << std::endl;
 		return 0;
 	}
+	bool speedtest = !(args.find(std::string("--insert-get-del-test"))
+			== args.end());
 	bool bdb = !(args.find(std::string("--bdb-test")) == args.end());
 	bool bf = !(args.find(std::string("--bf-test")) == args.end());
 	bool bdbinsert = !(args.find(std::string("--bdb-insert-remove-test"))
@@ -181,6 +191,70 @@ int main(int ac, char **av) {
 			setsync::config::Configuration c(cc);
 			evaluation::SetTest settest(c);
 			settest.run();
+		}
+#endif
+	}
+
+	if (speedtest || all) {
+#ifdef HAVE_DB_CXX_H
+		{
+			cout << "running MemDB Speed Test with 1 GB RAM" << endl;
+			size_t gbyte = 1;
+			size_t byte = 0;
+			setsync::storage::MemStorage storage(gbyte, byte);
+			evaluation::SpeedTest mem(storage);
+			mem.run();
+			cout << "######################################" << endl;
+		}
+		{
+			cout << "running Berkeley DB Speed Test with default RAM" << endl;
+			setsync::utils::FileSystem::TemporaryDirectory tempdir("bdbspeed");
+			string dbfile = tempdir.getPath() + "/test.db";
+			Db db(NULL, 0);
+			db.open(NULL, dbfile.c_str(), "test", DB_HASH, DB_CREATE, 0);
+			{
+				setsync::storage::BdbStorage storage(&db);
+				evaluation::SpeedTest bdb(storage);
+				bdb.run();
+				cout << "######################################" << endl;
+			}
+			db.close(0);
+		}
+		{
+			cout << "running Berkeley DB Speed Test with 128 MB RAM" << endl;
+			setsync::utils::FileSystem::TemporaryDirectory tempdir("bdbspeed");
+			string dbfile = tempdir.getPath() + "/test.db";
+			Db db(NULL, 0);
+			db.set_cachesize(0, 128 * 1024 * 1024, 0);
+			db.open(NULL, dbfile.c_str(), "test", DB_HASH, DB_CREATE, 0);
+			{
+				setsync::storage::BdbStorage storage(&db);
+				evaluation::SpeedTest bdb(storage);
+				bdb.run();
+				cout << "######################################" << endl;
+			}
+			db.close(0);
+		}
+#endif
+#ifdef HAVE_LEVELDB
+		{
+			cout << "running LevelDB Speed Test with default RAM" << endl;
+			setsync::utils::FileSystem::TemporaryDirectory tempdir(
+					"leveldbspeed");
+			setsync::storage::LevelDbStorage storage(tempdir.getPath());
+			evaluation::SpeedTest bdb(storage);
+			bdb.run();
+			cout << "######################################" << endl;
+		}
+		{
+			cout << "running LevelDB Speed Test with 128 MB RAM" << endl;
+			std::size_t cachesize = 128 * 1024 * 1024;
+			setsync::utils::FileSystem::TemporaryDirectory tempdir(
+					"leveldbspeed");
+			setsync::storage::LevelDbStorage storage(tempdir.getPath(), cachesize);
+			evaluation::SpeedTest bdb(storage);
+			bdb.run();
+			cout << "######################################" << endl;
 		}
 #endif
 	}
