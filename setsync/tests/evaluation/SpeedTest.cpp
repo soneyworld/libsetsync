@@ -37,7 +37,7 @@ void SpeedTest::run() {
 			duration.stop();
 		}
 		cout << "insert," << iter * ITEMS_PER_LOOPS + ITEMS_PER_LOOPS << ","
-				<< "," << duration.getDuration() << watch.getDuration() << endl;
+				<< duration.getDuration() << "," << watch.getDuration() << endl;
 		watch.reset();
 	}
 	duration.reset();
