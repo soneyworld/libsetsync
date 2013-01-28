@@ -12,6 +12,7 @@
 #include "SetSync.h"
 #include "StopWatch.h"
 #include "SpeedTest.h"
+#include <math.h>
 #ifdef HAVE_LEVELDB
 #include "LevelDbTest.h"
 #endif
@@ -172,7 +173,7 @@ int main(int ac, char **av) {
 #endif
 	if (settest || all) {
 		size_t elements = 100000;
-		float fpr = float(5) / elements;
+		float fpr = ceil((float)(elements) * 0.000444595) / elements;
 		size_t cachesize = 128 * 1024 * 1024;
 #ifdef HAVE_DB_CXX_H
 		cout << "Berkeley DB default cache" << endl;
