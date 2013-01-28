@@ -197,6 +197,7 @@ int main(int ac, char **av) {
 			cc.false_positive_rate = fpr;
 			cc.storage = BERKELEY_DB;
 			cc.storage_cache_bytes = cachesize;
+			cc.storage_cache_gbytes = 0;
 			setsync::config::Configuration c(cc);
 			c.setPath(tempdir.getPath());
 			evaluation::SetTest settest(c);
