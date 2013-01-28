@@ -335,13 +335,13 @@ Set::Set(const config::Configuration& config) :
 			path = config_.getPath();
 		}
 		this->env_ = new DbEnv(0);
-		if (this->env_->open(path.c_str(), DB_INIT_MPOOL | DB_CREATE, 0) != 0) {
-			this->env_->close(0);
-			throw "Failed to open berkeley db database env";
-		}
 		if (config_.getStorage().isCacheSizeGiven()) {
 			this->env_->set_cachesize(config_.getStorage().getGByteCacheSize(),
 					config_.getStorage().getByteCacheSize(), 0);
+		}
+		if (this->env_->open(path.c_str(), DB_INIT_MPOOL | DB_CREATE, 0) != 0) {
+			this->env_->close(0);
+			throw "Failed to open berkeley db database env";
 		}
 		this->bfdb = new Db(this->env_, 0);
 		this->triedb = new Db(this->env_, 0);
