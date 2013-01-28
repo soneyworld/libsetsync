@@ -23,6 +23,9 @@ SetTest::SetTest(const setsync::config::Configuration& c) :
 	case setsync::config::Configuration::StorageConfig::BERKELEY_DB:
 		this->storage_ = "BERKELEY_DB";
 		break;
+	case setsync::config::Configuration::StorageConfig::IN_MEMORY:
+		this->storage_ = "MEM_DB";
+		break;
 	}
 
 }
@@ -34,27 +37,22 @@ SetTest::~SetTest() {
 void SetTest::insert() {
 
 	cout << "running Set insertion test (" << storage_ << ")" << endl;
-	cout
-			<< "noinserts,CPUinterval,realtimeInterval,CPUduration,realtimeDuration,foldersize,"
-			<< endl;
+	cout << "noinserts,realtimeInterval,realtimeDuration" << endl;
 	StopWatch watch;
-	double CPUinterval;
 	double RTinterval;
-	for (uint64_t i = 0; i < ITERATIONS; i++) {
+	for (uint64_t i = 0; i < set_.getMaximumSize(); i++) {
 		watch.start();
 		set_.insert((void *) &i, sizeof(uint64_t));
 		watch.stop();
-		CPUinterval += watch.getLastCPUDuration();
 		RTinterval += watch.getLastDuration();
 		if (((i + 1) % ITEMS_PER_LOOPS) == 0) {
-			std::cout << i + 1 << "," << CPUinterval << "," << RTinterval
-					<< "," << watch.getCPUDuration() << ","
-					<< watch.getDuration() << ","
-					<< setsync::utils::FileSystem::dirSize(set_.getPath()) << std::endl;
-			CPUinterval = 0;
+			std::cout << i + 1 << "," << RTinterval << ","
+					<< watch.getDuration() << std::endl;
 			RTinterval = 0;
 		}
 	}
+	cout << "########################" << endl;
+	cout << "DirectorySize=" << setsync::utils::FileSystem::dirSize(set_.getPath()) << endl;
 }
 
 void SetTest::run() {

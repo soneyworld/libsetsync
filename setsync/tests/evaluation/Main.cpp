@@ -171,24 +171,71 @@ int main(int ac, char **av) {
 	}
 #endif
 	if (settest || all) {
+		size_t elements = 100000;
+		float fpr = float(5) / elements;
+		size_t cachesize = 128 * 1024 * 1024;
 #ifdef HAVE_DB_CXX_H
+		cout << "Berkeley DB default cache" << endl;
+		{
+			setsync::utils::FileSystem::TemporaryDirectory
+					tempdir("berkeleydb");
+			SET_CONFIG cc = set_create_config();
+			cc.bf_max_elements = elements;
+			cc.false_positive_rate = fpr;
+			cc.storage = BERKELEY_DB;
+			setsync::config::Configuration c(cc);
+			c.setPath(tempdir.getPath());
+			evaluation::SetTest settest(c);
+			settest.run();
+		}
+		cout << "Berkeley DB 128 MB cache" << endl;
+		{
+			setsync::utils::FileSystem::TemporaryDirectory
+					tempdir("berkeleydb");
+			SET_CONFIG cc = set_create_config();
+			cc.bf_max_elements = elements;
+			cc.false_positive_rate = fpr;
+			cc.storage = BERKELEY_DB;
+			cc.storage_cache_bytes = cachesize;
+			setsync::config::Configuration c(cc);
+			c.setPath(tempdir.getPath());
+			evaluation::SetTest settest(c);
+			settest.run();
+		}
+		cout << "MemDB" << endl;
 		{
 			SET_CONFIG cc = set_create_config();
-			cc.bf_max_elements = ITERATIONS;
-			cc.false_positive_rate = 0.001;
-			cc.storage = BERKELEY_DB;
+			cc.bf_max_elements = elements;
+			cc.false_positive_rate = fpr;
+			cc.storage = IN_MEMORY_DB;
 			setsync::config::Configuration c(cc);
 			evaluation::SetTest settest(c);
 			settest.run();
 		}
 #endif
 #ifdef HAVE_LEVELDB
+		cout << "LevelDB default cache" << endl;
 		{
+			setsync::utils::FileSystem::TemporaryDirectory tempdir("leveldb");
 			SET_CONFIG cc = set_create_config();
-			cc.bf_max_elements = ITERATIONS;
-			cc.false_positive_rate = 0.001;
+			cc.bf_max_elements = elements;
+			cc.false_positive_rate = fpr;
 			cc.storage = LEVELDB;
 			setsync::config::Configuration c(cc);
+			c.setPath(tempdir.getPath());
+			evaluation::SetTest settest(c);
+			settest.run();
+		}
+		cout << "LevelDB 128 MB cache" << endl;
+		{
+			setsync::utils::FileSystem::TemporaryDirectory tempdir("leveldb");
+			SET_CONFIG cc = set_create_config();
+			cc.bf_max_elements = elements;
+			cc.false_positive_rate = fpr;
+			cc.storage = LEVELDB;
+			cc.storage_cache_bytes = cachesize;
+			setsync::config::Configuration c(cc);
+			c.setPath(tempdir.getPath());
 			evaluation::SetTest settest(c);
 			settest.run();
 		}
@@ -251,7 +298,8 @@ int main(int ac, char **av) {
 			std::size_t cachesize = 128 * 1024 * 1024;
 			setsync::utils::FileSystem::TemporaryDirectory tempdir(
 					"leveldbspeed");
-			setsync::storage::LevelDbStorage storage(tempdir.getPath(), cachesize);
+			setsync::storage::LevelDbStorage storage(tempdir.getPath(),
+					cachesize);
 			evaluation::SpeedTest bdb(storage);
 			bdb.run();
 			cout << "######################################" << endl;
