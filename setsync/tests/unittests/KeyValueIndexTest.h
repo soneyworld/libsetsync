@@ -6,6 +6,7 @@
 
 #ifndef KEYVALUEINDEXTEST_H_
 #define KEYVALUEINDEXTEST_H_
+#include "config.h"
 #include <cppunit/extensions/HelperMacros.h>
 #include <setsync/crypto/CryptoHash.h>
 #include <setsync/index/KeyValueIndex.h>

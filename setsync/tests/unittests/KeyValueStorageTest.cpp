@@ -6,6 +6,7 @@
 
 #include "KeyValueStorageTest.h"
 #include <setsync/utils/FileSystem.h>
+#include <setsync/storage/MemStorage.h>
 #include <stdlib.h>
 #include <string.h>
 

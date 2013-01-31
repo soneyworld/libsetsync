@@ -7,6 +7,7 @@
 #ifndef SET_HPP_
 #define SET_HPP_
 #include "set.h"
+#include "config.h"
 #include <stdint.h>
 #include <setsync/sync/Synchronization.h>
 #include <setsync/storage/KeyValueStorage.h>
