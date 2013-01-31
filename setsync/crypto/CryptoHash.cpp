@@ -2,10 +2,18 @@
  *      Author: Till Lorentzen
  */
 #include "CryptoHash.h"
+#include "config.h"
 #include <string.h>
 #ifdef HAVE_OPENSSL
 #include <openssl/sha.h>
 #endif
+#ifdef HAVE_OPENSSL
+#include <openssl/evp.h>
+#else
+#include "md.h"
+
+#endif
+
 namespace setsync {
 namespace crypto {
 
@@ -24,9 +32,11 @@ void CryptoHash::init() {
 #endif
 
 #ifdef HAVE_OPENSSL
-	size_ = this->digit->md_size;
+	const EVP_MD *digit = (EVP_MD *) this->digit;
+	size_ = digit->md_size;
 #else
-	size_ = this->digit->size;
+	const md_info_t * digit = (const md_info_t *) this->digit;
+	size_ = digit->size;
 #endif
 
 }
@@ -56,13 +66,14 @@ int CryptoHash::hash(unsigned char * target_md, const char *str) const {
 	unsigned int md_len;
 	EVP_MD_CTX mdctx;
 	EVP_MD_CTX_init(&mdctx);
-	result = EVP_DigestInit_ex(&mdctx, digit, NULL);
+	result = EVP_DigestInit_ex(&mdctx, (EVP_MD *)digit, NULL);
 	result = EVP_DigestUpdate(&mdctx, str, strlen(str));
 	result = EVP_DigestFinal_ex(&mdctx, target_md, &md_len);
 	result = EVP_MD_CTX_cleanup(&mdctx);
 	return result == 1;
 #else
-	return md(this->digit, (const unsigned char*) str, strlen(str), target_md);
+	return md((const md_info_t *) this->digit, (const unsigned char*) str,
+			strlen(str), target_md);
 #endif
 }
 
@@ -73,13 +84,13 @@ int CryptoHash::hash(unsigned char * target_md, const unsigned char *data,
 	unsigned int md_len;
 	EVP_MD_CTX mdctx;
 	EVP_MD_CTX_init(&mdctx);
-	result = EVP_DigestInit_ex(&mdctx, digit, NULL);
+	result = EVP_DigestInit_ex(&mdctx, (EVP_MD *)digit, NULL);
 	result = EVP_DigestUpdate(&mdctx, data, length);
 	result = EVP_DigestFinal_ex(&mdctx, target_md, &md_len);
 	result = EVP_MD_CTX_cleanup(&mdctx);
 	return result == 1;
 #else
-	return md(this->digit, data, length, target_md);
+	return md((const md_info_t *) this->digit, data, length, target_md);
 #endif
 }
 
@@ -89,14 +100,14 @@ int CryptoHash::hash(unsigned char * target_md, const std::string& str) const {
 	unsigned int md_len;
 	EVP_MD_CTX mdctx;
 	EVP_MD_CTX_init(&mdctx);
-	result = EVP_DigestInit_ex(&mdctx, digit, NULL);
+	result = EVP_DigestInit_ex(&mdctx, (EVP_MD *)digit, NULL);
 	result = EVP_DigestUpdate(&mdctx, str.c_str(), str.size());
 	result = EVP_DigestFinal_ex(&mdctx, target_md, &md_len);
 	result = EVP_MD_CTX_cleanup(&mdctx);
 	return result == 1;
 #else
-	return md(this->digit, (const unsigned char*) str.c_str(), str.size(),
-			target_md);
+	return md((const md_info_t *) this->digit,
+			(const unsigned char*) str.c_str(), str.size(), target_md);
 #endif
 }
 
@@ -106,7 +117,7 @@ int CryptoHash::hash(unsigned char * target_md, std::istream& in) const {
 	unsigned int md_len;
 	EVP_MD_CTX mdctx;
 	EVP_MD_CTX_init(&mdctx);
-	result = EVP_DigestInit_ex(&mdctx, digit, NULL);
+	result = EVP_DigestInit_ex(&mdctx, (EVP_MD *)digit, NULL);
 	char ch;
 	while (in.get(ch) && result == 1) {
 		result = EVP_DigestUpdate(&mdctx, &ch, 1);
@@ -116,7 +127,7 @@ int CryptoHash::hash(unsigned char * target_md, std::istream& in) const {
 	return result == 1;
 #else
 	md_context_t mdctx;
-	result = md_init_ctx(&mdctx, digit);
+	result = md_init_ctx(&mdctx, (const md_info_t *) digit);
 	result = md_starts(&mdctx);
 	char ch;
 	while (in.get(ch) && result == 1) {

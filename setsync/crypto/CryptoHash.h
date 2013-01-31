@@ -7,14 +7,9 @@
 #define CRYPTOHASH_H_
 
 #define DEFAULT_DIGIT_ALGORITHM "sha1"
-#include "config.h"
+
 #include <string>
 #include <istream>
-#ifdef HAVE_OPENSSL
-#include <openssl/evp.h>
-#else
-#include "md.h"
-#endif
 namespace setsync {
 /**
  * All cryptographic hash functions are at this namespace
@@ -27,13 +22,7 @@ class CryptoHash {
 private:
 	std::string name_;
 	std::size_t size_;
-#ifdef HAVE_OPENSSL
-	/// Hash algorithm properties of OPENSSL
-	const EVP_MD *digit;
-#else
-	/// Hash algorithm properties of polarssl
-	const md_info_t *digit;
-#endif
+	const void * digit;
 	/**
 	 * Hashes the given input string into the given target_md
 	 * buffer

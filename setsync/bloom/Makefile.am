@@ -5,7 +5,7 @@ if OPENSSL
 AM_CPPFLAGS += @OPENSSL_CFLAGS@
 AM_LDFLAGS += @OPENSSL_LIBS@
 endif
-h_sources = BloomFilter.h \
+include_h_sources = BloomFilter.h \
 			CountingBloomFilter.h \
 			HashFunction.h \
 			FSBloomFilter.h \
@@ -19,5 +19,8 @@ cpp_sources = BloomFilter.cpp \
 			DoubleHashingScheme.cpp \
 			KeyValueCountingBloomFilter.cpp
 
+library_includedir=$(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/$(GENERIC_LIBRARY_NAME)/bloom
+library_include_HEADERS = $(include_h_sources)
+
 noinst_LTLIBRARIES = libbloom.la
-libbloom_la_SOURCES= $(h_sources) $(cpp_sources)
+libbloom_la_SOURCES= $(include_h_sources) $(cpp_sources)

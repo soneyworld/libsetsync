@@ -1,6 +1,7 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 
-h_sources = CryptoHash.h
+include_h_sources = CryptoHash.h
+h_sources = $(include_h_sources)
 cpp_sources = CryptoHash.cpp
 
 if OPENSSL
@@ -13,5 +14,7 @@ cpp_sources += $(polarssl_c_sources)
 h_sources += $(polarssl_h_sources)
 endif
 
+library_includedir=$(includedir)/$(GENERIC_LIBRARY_NAME)-$(GENERIC_API_VERSION)/$(GENERIC_LIBRARY_NAME)/crypto
+library_include_HEADERS = $(include_h_sources)
 noinst_LTLIBRARIES = libcrypto.la
 libcrypto_la_SOURCES= $(h_sources) $(cpp_sources)

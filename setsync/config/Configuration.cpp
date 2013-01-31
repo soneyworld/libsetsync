@@ -5,7 +5,7 @@
  */
 
 #include "Configuration.h"
-
+#include "config.h"
 namespace setsync {
 
 namespace config {

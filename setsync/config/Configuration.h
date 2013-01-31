@@ -6,15 +6,11 @@
 
 #ifndef CONFIG_H_
 #define CONFIG_H_
-#include "config.h"
 #include <cstddef>
 #include <stdint.h>
 #include <string>
 #include <setsync/crypto/CryptoHash.h>
 #include <setsync/set.h>
-#ifdef HAVE_IBRCOMMON
-#include <ibrcommon/data/ConfigFile.h>
-#endif
 
 namespace setsync {
 
@@ -71,27 +67,11 @@ public:
 		std::size_t cacheInGBytes_;
 
 	public:
-
-#ifdef HAVE_LEVELDB
-		StorageConfig(const StorageType type = LEVELDB,
-				const std::size_t cacheInBytes = 0,
-				const std::size_t cacheInGBytes = 0) :
-			type_(type), cacheInBytes_(cacheInBytes),
-					cacheInGBytes_(cacheInGBytes_) {
-#else
-#ifdef HAVE_DB_CXX_H
-			StorageConfig(const StorageType type = BERKELEY_DB,
+		StorageConfig(const StorageType type = BERKELEY_DB,
 					const std::size_t cacheInBytes = 0,
 					const std::size_t cacheInGBytes = 0) :
 			type_(type), cacheInBytes_(cacheInBytes),
 			cacheInGBytes_(cacheInGBytes_) {
-#endif
-#endif
-#ifndef HAVE_LEVELDB
-			if (type_ == LEVELDB) {
-				throw "Leveldb is not supported!";
-			}
-#endif
 			if (cacheInGBytes == 0) {
 				if (cacheInBytes == 0) {
 					this->cacheSizeGiven_ = false;
