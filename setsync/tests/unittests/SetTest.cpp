@@ -450,6 +450,46 @@ void SetTest::testCAPI() {
 	CPPUNIT_ASSERT(set_free(&remoteset)==0);
 }
 
+void SetTest::testIterator() {
+	setsync::Set set(config);
+	for (unsigned int i = 1; i <= 100; i++) {
+		stringstream ss;
+		ss << "bla" << i;
+		set.insert(ss.str());
+	}
+
+	Set::iterator begin = set.begin();
+	Set::iterator end = set.end();
+	Set::iterator iter = begin;
+	size_t i = 1;
+	while (iter != end) {
+		i++;
+		iter++;
+	}
+	CPPUNIT_ASSERT( i == set.getSize());
+	i = 1;
+	iter = begin;
+	while (iter != end) {
+		i++;
+		++iter;
+	}
+	CPPUNIT_ASSERT( i == set.getSize());
+	i = 1;
+	iter = end;
+	while (iter != begin) {
+		i++;
+		iter--;
+	}
+	CPPUNIT_ASSERT( i == set.getSize());
+	i = 1;
+	iter = end;
+	while (iter != begin) {
+		i++;
+		--iter;
+	}
+	CPPUNIT_ASSERT( i == set.getSize());
+}
+
 void SetTest::setUp() {
 	this->dir = new utils::FileSystem::TemporaryDirectory("temp_");
 	this->config.setPath(dir->getPath());

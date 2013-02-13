@@ -324,7 +324,7 @@ Set::Set(const config::Configuration& config) :
 		indexpath.append("index");
 		indexStorage_ = new storage::LevelDbStorage(indexpath);
 	}
-		break;
+	break;
 #endif
 #ifdef HAVE_DB_CXX_H
 	case config::Configuration::StorageConfig::BERKELEY_DB: {
@@ -611,6 +611,58 @@ std::string Set::getTrieToDot() const {
 }
 std::string Set::getTrieToDot(const std::string prefix) const {
 	return this->trie_->toDotString(prefix);
+}
+
+Set::iterator Set::begin() {
+	Set::iterator iter(this, true);
+	return iter;
+}
+
+Set::iterator Set::end() {
+	Set::iterator iter(this, false);
+	return iter;
+}
+
+Set::iterator::iterator(Set* x, const bool begin) {
+	if (begin)
+		iter_ = x->trie_->begin();
+	else
+		iter_ = x->trie_->end();
+}
+
+Set::iterator::iterator(const iterator& it) :
+	iter_(it.iter_) {
+}
+Set::iterator::iterator() {
+}
+Set::iterator& Set::iterator::operator++() {
+	iter_++;
+	return *this;
+}
+Set::iterator& Set::iterator::operator--() {
+	iter_--;
+	return *this;
+}
+bool Set::iterator::operator==(const Set::iterator& rhs) {
+	return iter_ == rhs.iter_;
+}
+bool Set::iterator::operator!=(const Set::iterator& rhs) {
+	return iter_ != rhs.iter_;
+}
+setsync::crypto::CryptoHashContainer Set::iterator::operator*() {
+	return iter_.operator *();
+}
+
+Set::iterator Set::iterator::operator--(int) {
+	iterator temp = *this;
+	--*this;
+	return temp;
+}
+
+Set::iterator Set::iterator::operator++(int) {
+	iterator temp = *this;
+	++*this;
+	return temp;
 }
 
 } // end of namespace setsync

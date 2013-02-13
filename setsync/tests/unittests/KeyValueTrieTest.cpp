@@ -424,5 +424,53 @@ void KeyValueTrieTest::testDiff() {
 		trie2.clear();
 	}
 }
+
+void KeyValueTrieTest::testIterator() {
+	trie::KeyValueTrie trie(hash, *storage1);
+	for (unsigned int i = 1; i <= 100; i++) {
+		stringstream ss;
+		ss << "bla" << i;
+		trie.Trie::add(ss.str());
+	}
+
+	trie::KeyValueTrie::iterator begin = trie.begin();
+	trie::KeyValueTrie::iterator end = trie.end();
+	trie::KeyValueTrie::iterator iter = begin;
+	size_t i = 1;
+	while (iter != end) {
+		i++;
+		iter++;
+	}
+	CPPUNIT_ASSERT( i == trie.getSize());
+	i = 1;
+	iter = begin;
+	while (iter != end) {
+		i++;
+		++iter;
+	}
+	CPPUNIT_ASSERT( i == trie.getSize());
+	i = 1;
+	iter = end;
+	while (iter != begin) {
+		i++;
+		iter--;
+	}
+	CPPUNIT_ASSERT( i == trie.getSize());
+	i = 1;
+	iter = end;
+	while (iter != begin) {
+		i++;
+		--iter;
+	}
+	CPPUNIT_ASSERT( i == trie.getSize());
+
+	iter = begin;
+	iter++;
+	trie::KeyValueTrie::iterator next = iter;
+	iter--;
+	CPPUNIT_ASSERT(iter == begin);
+	iter++;
+	CPPUNIT_ASSERT(iter == next);
+}
 }
 }

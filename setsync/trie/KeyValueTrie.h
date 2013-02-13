@@ -340,10 +340,98 @@ public:
 	virtual std::string toString(const std::string nodePrefix) const;
 };
 
+/**
+ * The key value storage based implementation of a hash trie.
+ * It uses the given key value storage to save and load trie nodes
+ * with it.
+ */
 class KeyValueTrie: public trie::Trie {
+public:
+	/**
+	 * Iterator to iterate over all elements of a KeyValueTrie instance
+	 */
+	class iterator: public std::iterator<std::bidirectional_iterator_tag,
+			setsync::crypto::CryptoHashContainer> {
+		friend class KeyValueTrie;
+	private:
+		/**
+		 *  Constructor for a KeyValueTrie instance. If the begin parameter
+		 *  is true, the smallest trie node will be used as initialization.
+		 *  Otherwise, the largest trie node will be used.
+		 *
+		 *  \param trie to be iterated
+		 *  \param begin
+		 */
+		iterator(KeyValueTrie* trie, const bool begin = true);
+		/// Pointer to the trie to iterate over
+		setsync::trie::KeyValueTrie* trie_;
+		/// Hash function to be used, if no one has been given
+		const setsync::crypto::CryptoHash *hash_;
+		/// Storage to save the actual position of the iterator
+		setsync::crypto::CryptoHashContainer container;
+
+	public:
+		/**
+		 * Copy constructor
+		 */
+		iterator(const iterator& it);
+		/**
+		 * Default constructor
+		 *
+		 * It creates a CryptoHash Instance, which should be used for
+		 * the container
+		 */
+		iterator();
+		/**
+		 * Goes to the next larger trie leaf node
+		 */
+		iterator& operator++();
+		/**
+		 * Goes to the next smaller trie leaf node
+		 */
+		iterator& operator--();
+		/**
+		 * Goes to the next larger trie leaf node
+		 */
+		iterator operator++(int);
+		/**
+		 * Goes to the next smaller trie leaf node
+		 */
+		iterator operator--(int);
+		/**
+		 * Compares the hashes of the iterator leaf nodes
+		 *
+		 * \param rhs to be compared
+		 * \return true, if both hashes are equal, otherwise false
+		 */
+		bool operator==(const iterator& rhs);
+		/**
+		 * Compares the hashes of the iterator leaf nodes
+		 *
+		 * \param rhs to be compared
+		 * \return false, if both hashes are equal, otherwise true
+		 */
+		bool operator!=(const iterator& rhs);
+		/**
+		 * Overrides the actual iterator position with the given iterator.
+		 * Updates also the trie pointer.
+		 *
+		 * \param other to by copied
+		 */
+		iterator& operator= (const iterator& other);
+		/**
+		 * \return the hash of the iterator in a container
+		 */
+		setsync::crypto::CryptoHashContainer operator*();
+		/**
+		 * Destructor destroys the CryptoHash function, if it has been created
+		 */
+		virtual ~iterator();
+	};
+	private:
 	friend class TrieNode;
+	friend class KeyValueTrie::iterator;
 	friend class KeyValueTrieTest;
-private:
 	/// Instance of root node methods
 	KeyValueRootNode * root_;
 	/// Reference to the used key value storage
@@ -444,6 +532,14 @@ public:
 	virtual void diff(const void * subtrie, const std::size_t length,
 			setsync::AbstractDiffHandler& handler) const;
 
+	/**
+	 *
+	 */
+	virtual iterator begin();
+	/**
+	 *
+	 */
+	virtual iterator end();
 };
 }
 }

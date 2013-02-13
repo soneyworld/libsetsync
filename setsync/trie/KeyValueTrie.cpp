@@ -889,5 +889,139 @@ void KeyValueTrie::diff(const void * subtrie, const std::size_t length,
 		}
 	}
 }
+
+KeyValueTrie::iterator KeyValueTrie::begin() {
+	KeyValueTrie::iterator iter(this, true);
+	return iter;
+}
+
+KeyValueTrie::iterator KeyValueTrie::end() {
+	KeyValueTrie::iterator iter(this, false);
+	return iter;
+}
+
+KeyValueTrie::iterator& KeyValueTrie::iterator::operator++() {
+	TrieNode
+			node(*trie_, trie_->hash_, trie_->storage_, container.get(), false);
+	while (node.hasParent_) {
+		TrieNode parent = node.getParent();
+		if (parent.isEqualToLarger(node)) {
+			node = parent;
+		} else {
+			node = parent.getLarger();
+			while (node.hasChildren_) {
+				node = node.getSmaller();
+			}
+			container.set(node.hash);
+			return *this;
+		}
+	}
+	TrieNode actnode(*trie_, trie_->hash_, trie_->storage_, container.get(),
+			false);
+	if (node > actnode) {
+		node = node.getLarger();
+		while (node.hasChildren_) {
+			node = node.getSmaller();
+		}
+		container.set(node.hash);
+		return *this;
+	}
+	return *this;
+}
+
+KeyValueTrie::iterator& KeyValueTrie::iterator::operator--() {
+	TrieNode
+			node(*trie_, trie_->hash_, trie_->storage_, container.get(), false);
+	while (node.hasParent_) {
+		TrieNode parent = node.getParent();
+		if (parent.isEqualToSmaller(node)) {
+			node = parent;
+		} else {
+			node = parent.getSmaller();
+			while (node.hasChildren_) {
+				node = node.getLarger();
+			}
+			container.set(node.hash);
+			return *this;
+		}
+	}
+	TrieNode actnode(*trie_, trie_->hash_, trie_->storage_, container.get(),
+			false);
+	if (node < actnode) {
+		node = node.getSmaller();
+		while (node.hasChildren_) {
+			node = node.getLarger();
+		}
+		container.set(node.hash);
+		return *this;
+	}
+	return *this;
+}
+
+bool KeyValueTrie::iterator::operator==(const KeyValueTrie::iterator& rhs) {
+	return container == rhs.container;
+}
+
+bool KeyValueTrie::iterator::operator!=(const KeyValueTrie::iterator& rhs) {
+	return container != rhs.container;
+}
+
+setsync::crypto::CryptoHashContainer KeyValueTrie::iterator::operator*() {
+	return container;
+}
+
+KeyValueTrie::iterator::iterator(const KeyValueTrie::iterator& it) :
+	trie_(it.trie_), hash_(NULL), container(it.container) {
+}
+
+KeyValueTrie::iterator::iterator(KeyValueTrie* trie, const bool begin) :
+	trie_(trie), hash_(NULL), container(trie->hash_) {
+	unsigned char root[trie->hash_.getHashSize()];
+	if (!trie_->getRoot(root)) {
+		return;
+	}
+	TrieNode node(*trie_, trie_->hash_, trie_->storage_, root, false);
+	while (node.hasChildren_) {
+		if (begin)
+			node = node.getSmaller();
+		else
+			node = node.getLarger();
+	}
+	container.set(node.hash);
+}
+
+KeyValueTrie::iterator::iterator() :
+	trie_(NULL), hash_(new setsync::crypto::CryptoHash), container(*hash_) {
+}
+
+KeyValueTrie::iterator::~iterator() {
+	if (hash_ != NULL) {
+		delete hash_;
+	}
+}
+
+KeyValueTrie::iterator& KeyValueTrie::iterator::operator=(
+		const KeyValueTrie::iterator& other) {
+	if (other.trie_ != NULL) {
+		trie_ = other.trie_;
+	}
+	if (this->container.getHash().getName()
+			== other.container.getHash().getName())
+		this->container.set(other.container.get());
+	return *this;
+}
+
+KeyValueTrie::iterator KeyValueTrie::iterator::operator--(int) {
+	iterator temp = *this;
+	--*this;
+	return temp;
+}
+
+KeyValueTrie::iterator KeyValueTrie::iterator::operator++(int) {
+	iterator temp = *this;
+	++*this;
+	return temp;
+}
+
 }
 }

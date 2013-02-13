@@ -216,16 +216,22 @@ public:
 	 * Compares the given message digits with the internal message
 	 *
 	 * \param other message digit, which should be compared
-	 * \returns true if both are equal, otherwise false
+	 * \return true if both are equal, otherwise false
 	 */
 	bool operator ==(const unsigned char * other) const;
 	/**
 	 * Compares the given message digits with the internal message
 	 *
 	 * \param other message digit, which should be compared
-	 * \returns true if both are different, otherwise false
+	 * \return true if both are different, otherwise false
 	 */
 	bool operator !=(const unsigned char * other) const;
+	/**
+	 * Returns the used cryptographic hash function
+	 *
+	 * \return const reference of the used hash function
+	 */
+	const CryptoHash& getHash() const;
 };
 
 }

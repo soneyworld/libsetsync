@@ -18,6 +18,7 @@
 #include <setsync/utils/FileSystem.h>
 #include <queue>
 #include <stack>
+#include <iterator>
 
 #ifdef HAVE_DB_CXX_H
 #include <db_cxx.h>
@@ -165,6 +166,30 @@ public:
 class Set {
 	friend class SynchronizationProcess;
 	friend class SetTest;
+public:
+	class iterator: public std::iterator<std::bidirectional_iterator_tag,
+			setsync::crypto::CryptoHashContainer> {
+		friend class Set;
+		setsync::trie::KeyValueTrie::iterator iter_;
+	private:
+		iterator(Set* x, const bool begin = true);
+	public:
+		iterator(const iterator& it);
+		iterator();
+		iterator& operator++();
+		iterator& operator--();
+		/**
+		 * Go to the next larger entry
+		 */
+		iterator operator++(int);
+		/**
+		 * Go to the next smaller entry
+		 */
+		iterator operator--(int);
+		bool operator==(const iterator& rhs);
+		bool operator!=(const iterator& rhs);
+		setsync::crypto::CryptoHashContainer operator*();
+	};
 private:
 	/// maximum number of allowed set elements
 	size_t maxSize_;
@@ -418,6 +443,14 @@ public:
 	 * \return dot string
 	 */
 	virtual std::string getTrieToDot(const std::string prefix) const;
+	/**
+	 *
+	 */
+	virtual iterator begin();
+	/**
+	 *
+	 */
+	virtual iterator end();
 };
 }
 

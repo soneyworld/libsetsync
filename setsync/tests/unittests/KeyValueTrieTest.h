@@ -26,6 +26,7 @@ CPPUNIT_TEST_SUITE( KeyValueTrieTest);
 		CPPUNIT_TEST( testToString);
 		CPPUNIT_TEST( testSubTrie);
 		CPPUNIT_TEST( testDiff);
+		CPPUNIT_TEST( testIterator);
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -50,6 +51,7 @@ protected:
 	void testToString();
 	void testSubTrie();
 	void testDiff();
+	void testIterator();
 
 };
 CPPUNIT_TEST_SUITE_REGISTRATION(KeyValueTrieTest);

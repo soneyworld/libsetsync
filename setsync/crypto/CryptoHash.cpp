@@ -203,5 +203,9 @@ bool CryptoHashContainer::operator ==(const unsigned char * other) const {
 bool CryptoHashContainer::operator !=(const unsigned char * other) const {
 	return memcmp(md_, other, hashFunction_.getHashSize()) != 0;
 }
+
+const CryptoHash& CryptoHashContainer::getHash() const{
+	return this->hashFunction_;
+}
 }
 }
