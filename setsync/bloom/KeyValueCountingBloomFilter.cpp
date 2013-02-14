@@ -219,6 +219,8 @@ bool KeyValueCountingBloomFilter::remove(const unsigned char * key) {
 			result = true;
 		}
 	}
+	if(result)
+		this->itemCount_--;
 	return result;
 }
 
