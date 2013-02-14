@@ -36,7 +36,7 @@ public:
 	public:
 		BloomFilterConfig(const uint64_t maxNumberOfElements = 10000,
 				const bool hardMaximum = false,
-				const float falsePositiveRate = 0.001) :
+				const float falsePositiveRate = 0.0) :
 			maxElements_(maxNumberOfElements), hardMaximum_(hardMaximum),
 					falsePositiveRate(falsePositiveRate) {
 		}
@@ -72,34 +72,9 @@ public:
 
 	public:
 
-#ifdef HAVE_LEVELDB
-		StorageConfig(const StorageType type = LEVELDB,
+		StorageConfig(const StorageType type = BERKELEY_DB,
 				const std::size_t cacheInBytes = 0,
-				const std::size_t cacheInGBytes = 0) :
-			type_(type), cacheInBytes_(cacheInBytes),
-					cacheInGBytes_(cacheInGBytes_) {
-#else
-#ifdef HAVE_DB_CXX_H
-			StorageConfig(const StorageType type = BERKELEY_DB,
-					const std::size_t cacheInBytes = 0,
-					const std::size_t cacheInGBytes = 0) :
-			type_(type), cacheInBytes_(cacheInBytes),
-			cacheInGBytes_(cacheInGBytes_) {
-#endif
-#endif
-#ifndef HAVE_LEVELDB
-			if (type_ == LEVELDB) {
-				throw "Leveldb is not supported!";
-			}
-#endif
-			if (cacheInGBytes == 0) {
-				if (cacheInBytes == 0) {
-					this->cacheSizeGiven_ = false;
-				} else {
-					this->cacheSizeGiven_ = true;
-				}
-			}
-		}
+				const std::size_t cacheInGBytes = 0);
 		virtual ~StorageConfig() {
 		}
 		StorageType getType(void) const {

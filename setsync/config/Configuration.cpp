@@ -5,6 +5,7 @@
  */
 
 #include "Configuration.h"
+#include "config.h"
 
 namespace setsync {
 
@@ -85,20 +86,17 @@ Configuration::Configuration(const SET_CONFIG config) {
 		this->storageConfig_.cacheSizeGiven_ = true;
 	}
 	switch (config.storage) {
-#ifdef HAVE_LEVELDB
 	case LEVELDB:
 		this->storageConfig_.type_ = Configuration::StorageConfig::LEVELDB;
 		break;
-#endif
-#ifdef HAVE_DB_CXX_H
 	case BERKELEY_DB:
 		this->storageConfig_.type_ = Configuration::StorageConfig::BERKELEY_DB;
 		break;
 	case IN_MEMORY_DB:
 		this->storageConfig_.type_ = Configuration::StorageConfig::IN_MEMORY;
 		break;
-#endif
 	default:
+		this->storageConfig_.type_ = Configuration::StorageConfig::BERKELEY_DB;
 		break;
 	}
 }
@@ -116,7 +114,7 @@ void Configuration::setPath(const char * path) {
 	this->path_ = path;
 }
 void Configuration::setPath(const std::string& path) {
-	setPath(path.c_str());
+	this->path_ = path;
 }
 
 Configuration::~Configuration() {
@@ -135,6 +133,21 @@ const Configuration::StorageConfig& Configuration::getStorage() const {
 
 const std::string Configuration::getPath() const {
 	return this->path_;
+}
+
+Configuration::StorageConfig::StorageConfig(const StorageType type,
+		const std::size_t cacheInBytes, const std::size_t cacheInGBytes) :
+	type_(type), cacheInBytes_(cacheInBytes), cacheInGBytes_(cacheInGBytes_) {
+#ifndef HAVE_LEVELDB
+	if (type_ == LEVELDB) {
+		throw "Leveldb is not supported!";
+	}
+#endif
+	if (cacheInGBytes == 0 && cacheInBytes == 0) {
+		this->cacheSizeGiven_ = false;
+	} else {
+		this->cacheSizeGiven_ = true;
+	}
 }
 }
 

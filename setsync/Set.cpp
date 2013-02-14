@@ -3,7 +3,7 @@
  *
  *      Author: Till Lorentzen
  */
-
+#include "config.h"
 #include "Set.hpp"
 #include <setsync/bloom/CountingBloomFilter.h>
 #include <typeinfo>
@@ -19,6 +19,8 @@
 #endif
 #include <setsync/utils/bitset.h>
 #include <stdlib.h>
+#include <math.h>
+
 
 namespace setsync {
 
@@ -285,16 +287,11 @@ std::size_t Set::getBFFunctionCount() const {
 
 Set::Set(const config::Configuration& config) :
 	hash_(config.getHashFunction()), config_(config), tempDir(NULL),
-			indexInUse_(false) {
+			indexInUse_(false), env_(NULL), bfdb(NULL), triedb(NULL),
+			indexdb(NULL) {
 	if (config_.getPath().size() == 0) {
 		tempDir = new utils::FileSystem::TemporaryDirectory("set_");
 	}
-#ifdef HAVE_DB_CXX_H
-	this->bfdb = NULL;
-	this->triedb = NULL;
-	this->indexdb = NULL;
-	this->env_ = NULL;
-#endif
 	switch (config_.getStorage().getType()) {
 #ifdef HAVE_LEVELDB
 	case config::Configuration::StorageConfig::LEVELDB: {
@@ -324,7 +321,7 @@ Set::Set(const config::Configuration& config) :
 		indexpath.append("index");
 		indexStorage_ = new storage::LevelDbStorage(indexpath);
 	}
-	break;
+		break;
 #endif
 #ifdef HAVE_DB_CXX_H
 	case config::Configuration::StorageConfig::BERKELEY_DB: {
@@ -410,9 +407,38 @@ Set::Set(const config::Configuration& config) :
 	}
 	std::string bffile(path);
 	bffile.append("bloom.filter");
+	float falsePositiveRate = config_.getBloomFilter().falsePositiveRate;
+	if (falsePositiveRate == 0.0) {
+		std::size_t x = 1;
+		double fx = 0.001;
+		switch (hash_.getHashSize()) {
+		case 16:
+			fx = 0.000577333;
+			break;
+		case 20:
+			fx = 0.000444595;
+			break;
+		case 28:
+			fx = 0.000300623;
+			break;
+		case 32:
+			fx = 0.000247520;
+			break;
+		case 48:
+			fx = 0.000161579;
+			break;
+		case 64:
+			fx = 0.000116317;
+			break;
+		default:
+			break;
+		}
+		x = ceil(fx * bfconfig.getMaxElements());
+		falsePositiveRate = ((float) x) / bfconfig.getMaxElements();
+	}
 	bf_ = new bloom::KeyValueCountingBloomFilter(hash_, *bfStorage_, bffile,
 			bfconfig.getMaxElements(), bfconfig.isHardMaximum(),
-			bfconfig.falsePositiveRate);
+			falsePositiveRate);
 	index_ = new setsync::index::KeyValueIndex(hash_, *indexStorage_);
 	this->maxSize_ = bfconfig.getMaxElements();
 	this->hardMaximum_ = bfconfig.isHardMaximum();
@@ -437,7 +463,6 @@ Set::~Set() {
 	if (this->trieStorage_ != NULL) {
 		delete trieStorage_;
 	}
-#ifdef HAVE_DB_CXX_H
 	if (this->triedb != NULL) {
 		this->triedb->close(0);
 		delete this->triedb;
@@ -454,7 +479,6 @@ Set::~Set() {
 		this->env_->close(0);
 		delete this->env_;
 	}
-#endif
 	if (this->tempDir != NULL) {
 		delete this->tempDir;
 	}
@@ -673,7 +697,7 @@ SET_CONFIG set_create_config() {
 	SET_CONFIG c;
 	c.bf_hard_max = false;
 	c.bf_max_elements = 10000;
-	c.false_positive_rate = 0.001;
+	c.false_positive_rate = 0.0;
 	c.function = SHA_1;
 #ifdef HAVE_LEVELDB
 	c.storage = LEVELDB;

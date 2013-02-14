@@ -98,10 +98,13 @@ void SetTest::testSync() {
 	std::size_t sending;
 	while (localprocess->isBloomFilterOutputAvail()) {
 		sending = localprocess->readNextBloomFilterChunk(buffer, buffersize);
-		remoteprocess->processBloomFilterChunk(buffer, sending, remoteDiffHandler);
+		remoteprocess->processBloomFilterChunk(buffer, sending,
+				remoteDiffHandler);
 		if (remoteprocess->isBloomFilterOutputAvail()) {
-			sending = remoteprocess->readNextBloomFilterChunk(buffer, buffersize);
-			localprocess->processBloomFilterChunk(buffer, sending, localDiffHandler);
+			sending = remoteprocess->readNextBloomFilterChunk(buffer,
+					buffersize);
+			localprocess->processBloomFilterChunk(buffer, sending,
+					localDiffHandler);
 		}
 	}
 	while (remoteprocess->isBloomFilterOutputAvail()) {
@@ -217,10 +220,13 @@ void SetTest::testLooseSync() {
 	std::size_t sending;
 	while (localprocess->isBloomFilterOutputAvail()) {
 		sending = localprocess->readNextBloomFilterChunk(buffer, buffersize);
-		remoteprocess->processBloomFilterChunk(buffer, sending, remoteDiffHandler);
+		remoteprocess->processBloomFilterChunk(buffer, sending,
+				remoteDiffHandler);
 		if (remoteprocess->isBloomFilterOutputAvail()) {
-			sending = remoteprocess->readNextBloomFilterChunk(buffer, buffersize);
-			localprocess->processBloomFilterChunk(buffer, sending, localDiffHandler);
+			sending = remoteprocess->readNextBloomFilterChunk(buffer,
+					buffersize);
+			localprocess->processBloomFilterChunk(buffer, sending,
+					localDiffHandler);
 		}
 	}
 	while (remoteprocess->isBloomFilterOutputAvail()) {
@@ -367,7 +373,6 @@ void SetTest::testCAPI() {
 	CPPUNIT_ASSERT(!set_sync_done(&localprocess));
 	CPPUNIT_ASSERT(!set_sync_done(&remoteprocess));
 
-
 	CPPUNIT_ASSERT(set_sync_min_bf_buffer(&localprocess)==1);
 	CPPUNIT_ASSERT(set_sync_min_trie_buffer(&localprocess)==20*2);
 	CPPUNIT_ASSERT(set_sync_min_trie_buffer(&localprocess)<=set_sync_min_buffer(&localprocess));
@@ -378,12 +383,16 @@ void SetTest::testCAPI() {
 	std::size_t sending;
 	diff_callback * callback = &localset_callback;
 	while (set_sync_bf_output_avail(&localprocess) == 1) {
-		sending = set_sync_bf_read_next_chunk(&localprocess, buffer, buffersize);
-		set_sync_bf_process_chunk(&remoteprocess, buffer, sending, callback, &localset);
+		sending
+				= set_sync_bf_read_next_chunk(&localprocess, buffer, buffersize);
+		set_sync_bf_process_chunk(&remoteprocess, buffer, sending, callback,
+				&localset);
 	}
 	while (set_sync_bf_output_avail(&remoteprocess) == 1) {
-		sending = set_sync_bf_read_next_chunk(&remoteprocess, buffer, buffersize);
-		set_sync_bf_process_chunk(&localprocess, buffer, sending, callback, &remoteset);
+		sending = set_sync_bf_read_next_chunk(&remoteprocess, buffer,
+				buffersize);
+		set_sync_bf_process_chunk(&localprocess, buffer, sending, callback,
+				&remoteset);
 	}
 
 	// BF SYNC DONE AND SET SHOULD BE EQUAL, SO ADDING A DIFF
@@ -488,6 +497,41 @@ void SetTest::testIterator() {
 		--iter;
 	}
 	CPPUNIT_ASSERT( i == set.getSize());
+}
+
+void SetTest::testSize() {
+	setsync::Set set(config);
+	CPPUNIT_ASSERT(set.getSize() == 0);
+	CPPUNIT_ASSERT(!set.erase("hallo"));
+	CPPUNIT_ASSERT(set.getSize() == 0);
+	CPPUNIT_ASSERT(set.insert("hallo"));
+	CPPUNIT_ASSERT(set.getSize() == 1);
+	CPPUNIT_ASSERT(set.erase("hallo"));
+	CPPUNIT_ASSERT(set.getSize() == 0);
+	CPPUNIT_ASSERT(!set.erase("hallo"));
+	for (unsigned int i = 1; i <= 100; i++) {
+		stringstream ss;
+		ss << "bla" << i;
+		CPPUNIT_ASSERT(set.getSize() == i - 1);
+		CPPUNIT_ASSERT(set.insert(ss.str()));
+		CPPUNIT_ASSERT(set.getSize() == i);
+	}
+
+	for (unsigned int i = 100; i >= 1; i--) {
+		stringstream ss;
+		ss << "bla" << i;
+		CPPUNIT_ASSERT(set.getSize() == i);
+		CPPUNIT_ASSERT(set.erase(ss.str()));
+		CPPUNIT_ASSERT(set.getSize() == i - 1);
+	}
+
+	for (unsigned int i = 1; i <= 100; i++) {
+		stringstream ss;
+		ss << "bla" << i;
+		CPPUNIT_ASSERT(set.getSize() == i - 1);
+		CPPUNIT_ASSERT(set.insert(ss.str()));
+		CPPUNIT_ASSERT(set.getSize() == i);
+	}
 }
 
 void SetTest::setUp() {

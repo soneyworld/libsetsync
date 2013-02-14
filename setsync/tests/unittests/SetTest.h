@@ -26,6 +26,7 @@ CPPUNIT_TEST_SUITE( SetTest);
 	CPPUNIT_TEST( testSync);
 	CPPUNIT_TEST( testCAPI);
 	CPPUNIT_TEST( testIterator);
+	CPPUNIT_TEST( testSize);
 CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -48,6 +49,7 @@ protected:
 	void testSync();
 	void testCAPI();
 	void testIterator();
+	void testSize();
 };
 CPPUNIT_TEST_SUITE_REGISTRATION( SetTest);
 };

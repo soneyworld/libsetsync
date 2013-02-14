@@ -215,7 +215,6 @@ private:
 	utils::FileSystem::TemporaryDirectory * tempDir;
 	/// true if more than one binary element is available
 	bool indexInUse_;
-#ifdef HAVE_DB_CXX_H
 	/// The Berkeley DB environment used by bloom filter and trie
 	DbEnv * env_;
 	/// DB pointer for the bloom filter
@@ -224,7 +223,6 @@ private:
 	Db * triedb;
 	/// DB pointer for the index
 	Db * indexdb;
-#endif
 protected:
 	/**
 	 * Sets the number of elements, added to this set

@@ -30,7 +30,7 @@ typedef enum {
 } SET_HASH_FUNCTION;
 
 typedef enum {
-	LEVELDB, BERKELEY_DB, IN_MEMORY_DB
+	BERKELEY_DB, LEVELDB, IN_MEMORY_DB
 } SET_STORAGE_TYPE;
 
 typedef struct {
