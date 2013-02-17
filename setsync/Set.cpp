@@ -736,6 +736,7 @@ int set_init(SET *set, SET_CONFIG config) {
 }
 
 int set_init_with_path(SET *set, SET_CONFIG config, const char * path) {
+	set->error = NULL;
 	try {
 		setsync::config::Configuration c(config);
 		c.setPath(path);
